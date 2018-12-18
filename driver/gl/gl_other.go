@@ -1,5 +1,6 @@
 // +build !ci,gl
 // +build !darwin arm arm64
+// +build !windows
 
 package gl
 
