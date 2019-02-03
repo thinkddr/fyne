@@ -2,8 +2,14 @@
 
 package app
 
-import "os/exec"
+import (
+	"net/url"
+	"os"
+	"os/exec"
+)
 
-func (app *fyneApp) OpenURL(url string) {
-	exec.Command("open", url).Run()
+func (app *fyneApp) OpenURL(url *url.URL) error {
+	cmd := exec.Command("open", url.String())
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+	return cmd.Run()
 }
