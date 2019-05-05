@@ -3,8 +3,9 @@
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px"
 	 height="24px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve">
 	<g>
-		<path d="M12,5.99L19.53,19H4.47L12,5.99 M12,2L1,21h22L12,2L12,2z"/>
-		<polygon points="13,16 11,16 11,18 13,18 13,16 		"/>
-		<polygon points="13,10 11,10 11,14 13,14 13,10 		"/>
+		<rect fill="#ffffff" x="11" y="7" width="2" height="2"/>
+		<rect fill="#ffffff" x="11" y="11" width="2" height="6"/>
+		<path fill="#ffffff" d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,20c-4.41,0-8-3.59-8-8
+			c0-4.41,3.59-8,8-8s8,3.59,8,8C20,16.41,16.41,20,12,20z"/>
 	</g>
 </svg>
