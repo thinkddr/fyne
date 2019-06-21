@@ -1,3 +1,5 @@
+// **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //
+
 package theme
 
 import "fyne.io/fyne"
