@@ -85,6 +85,20 @@ func TestMenu_ItemHovered(t *testing.T) {
 	assert.False(t, sub2subWidget.Child.Visible(), "2nd level submenu is hidden when re-entering its parent")
 }
 
+func TestMenu_ItemWithChildTapped(t *testing.T) {
+	sub := fyne.NewMenuItem("sub1", nil)
+	sub.ChildMenu = fyne.NewMenu("", fyne.NewMenuItem("sub A", nil))
+	m := widget.NewMenu(fyne.NewMenu("", sub))
+	size := m.MinSize()
+	m.Resize(size)
+
+	subWidget := m.Items[0].(*widget.MenuItem)
+	assert.Equal(t, sub, subWidget.Item)
+	assert.False(t, subWidget.Child.Visible(), "submenu is invisible")
+	test.Tap(subWidget)
+	assert.False(t, subWidget.Child.Visible(), "submenu does not show up")
+}
+
 func TestMenu_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
