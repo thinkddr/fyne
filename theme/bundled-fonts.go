@@ -3,7 +3,7 @@
 
 package theme
 
-import "fyne.io/fyne"
+import "fyne.io/fyne/v2"
 
 var regular = &fyne.StaticResource{
 	StaticName: "NotoSans-Regular.ttf",
