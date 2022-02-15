@@ -12,8 +12,11 @@ import (
 )
 
 type indexData struct {
-	Name       string
-	IsReleased bool
+	WasmFile     string
+	GopherJSFile string
+	IsReleased   bool
+	HasWasm      bool
+	HasGopherJS  bool
 }
 
 func (p *Packager) packageWasm() error {
@@ -25,7 +28,7 @@ func (p *Packager) packageWasm() error {
 		return err
 	}
 
-	tplData := indexData{Name: p.name, IsReleased: p.release}
+	tplData := indexData{WasmFile: p.name, IsReleased: p.release, HasWasm: true}
 	err = templates.IndexHTML.Execute(indexFile, tplData)
 	if err != nil {
 		return err
