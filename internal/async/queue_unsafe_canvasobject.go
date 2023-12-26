@@ -15,7 +15,7 @@ import (
 type CanvasObjectQueue struct {
 	head unsafe.Pointer
 	tail unsafe.Pointer
-	len  uint64
+	len  atomic.Uint64
 }
 
 // NewCanvasObjectQueue returns a queue for caching values.
