@@ -37,21 +37,17 @@ func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 }
 
 // FocusNext focuses the next focusable on the canvas.
+//
+// Deprecated: Use fyne.Canvas#FocusNext() instead.
 func FocusNext(c fyne.Canvas) {
-	if tc, ok := c.(*softwareCanvas); ok {
-		tc.focusManager().FocusNext()
-	} else {
-		fyne.LogError("FocusNext can only be called with a test canvas", nil)
-	}
+	c.FocusNext()
 }
 
 // FocusPrevious focuses the previous focusable on the canvas.
+//
+// Deprecated: Use fyne.Canvas#FocusPrevious() instead.
 func FocusPrevious(c fyne.Canvas) {
-	if tc, ok := c.(*softwareCanvas); ok {
-		tc.focusManager().FocusPrevious()
-	} else {
-		fyne.LogError("FocusPrevious can only be called with a test canvas", nil)
-	}
+	c.FocusPrevious()
 }
 
 // LaidOutObjects returns all fyne.CanvasObject starting at the given fyne.CanvasObject which is laid out previously.
