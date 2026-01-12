@@ -50,7 +50,7 @@ type List struct {
 	// in the list has been selected.
 	OnSelected func(id ListItemID) `json:"-"`
 
-	// OnSelected is a callback to be notified when a given item
+	// OnUnselected is a callback to be notified when a given item
 	// in the list has been unselected.
 	OnUnselected func(id ListItemID) `json:"-"`
 
