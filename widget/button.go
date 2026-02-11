@@ -93,6 +93,8 @@ func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button 
 }
 
 // AccessibilityLabel for a button is the text, if there is some, otherwise the name of the icon.
+//
+// Since: 2.8
 func (b *Button) AccessibilityLabel() string {
 	if b.Text != "" {
 		return b.Text
@@ -102,6 +104,8 @@ func (b *Button) AccessibilityLabel() string {
 }
 
 // AccessibilityRole for a button is fyne.AccessibleRoleButton.
+//
+// Since: 2.8
 func (b *Button) AccessibilityRole() fyne.AccessibleRole {
 	return fyne.AccessibleRoleButton
 }

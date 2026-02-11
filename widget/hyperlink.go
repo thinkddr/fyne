@@ -65,11 +65,15 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 }
 
 // AccessibilityLabel for a hyperlink is the text for the link.
+//
+// Since: 2.8
 func (hl *Hyperlink) AccessibilityLabel() string {
 	return hl.Text
 }
 
 // AccessibilityRole for a hyperlink is fyne.AccessibleRoleLink.
+//
+// Since: 2.8
 func (hl *Hyperlink) AccessibilityRole() fyne.AccessibleRole {
 	return fyne.AccessibleRoleLink
 }

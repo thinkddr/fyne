@@ -72,11 +72,15 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 }
 
 // AccessibilityLabel for a label is just the text for that label.
+//
+// Since: 2.8
 func (l *Label) AccessibilityLabel() string {
 	return l.Text
 }
 
 // AccessibilityRole for a label is fyne.AccessibleRoleText.
+//
+// Since: 2.8
 func (l *Label) AccessibilityRole() fyne.AccessibleRole {
 	return fyne.AccessibleRoleText
 }

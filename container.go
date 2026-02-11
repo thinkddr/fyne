@@ -54,11 +54,15 @@ func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 }
 
 // AccessibilityLabel for a container just returns "Container".
+//
+// Since: 2.8
 func (c *Container) AccessibilityLabel() string {
 	return "Container"
 }
 
 // AccessibilityRole for a container is AccessibleRoleContainer.
+//
+// Since: 2.8
 func (c *Container) AccessibilityRole() AccessibleRole {
 	return AccessibleRoleContainer
 }
