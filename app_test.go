@@ -13,11 +13,11 @@ func (dummyApp) CloudProvider() CloudProvider {
 	return nil
 }
 
-func (dummyApp) NewWindow(title string) Window {
+func (dummyApp) NewWindow(_ string) Window {
 	return nil
 }
 
-func (dummyApp) OpenURL(url *url.URL) error {
+func (dummyApp) OpenURL(_ *url.URL) error {
 	return nil
 }
 
