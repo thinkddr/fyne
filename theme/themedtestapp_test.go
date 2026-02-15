@@ -110,6 +110,10 @@ func (t *themedApp) AddChangeListener(chan fyne.Settings) {
 func (t *themedApp) AddListener(func(fyne.Settings)) {
 }
 
+func (t *themedApp) Cache() fyne.Cache {
+	return nil
+}
+
 func (t *themedApp) Clipboard() fyne.Clipboard {
 	return nil
 }

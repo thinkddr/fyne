@@ -68,6 +68,10 @@ func (dummyApp) Metadata() AppMetadata {
 	return AppMetadata{}
 }
 
+func (dummyApp) Cache() Cache {
+	return nil
+}
+
 func (dummyApp) Clipboard() Clipboard {
 	return nil
 }

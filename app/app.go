@@ -24,6 +24,7 @@ type fyneApp struct {
 	icon      fyne.Resource
 	uniqueID  string
 
+	cache     fyne.Cache
 	cloud     fyne.CloudProvider
 	lifecycle app.Lifecycle
 	settings  *settings
@@ -118,6 +119,10 @@ func (a *fyneApp) newDefaultPreferences() *preferences {
 	return p
 }
 
+func (a *fyneApp) Cache() fyne.Cache {
+	return a.cache
+}
+
 func (a *fyneApp) Clipboard() fyne.Clipboard {
 	return a.clipboard
 }
@@ -171,6 +176,7 @@ func newAppWithDriver(d fyne.Driver, clipboard fyne.Clipboard, id string) fyne.A
 	})
 
 	newApp.registerRepositories() // for web this may provide docs / settings
+	newApp.cache = makeCache(newApp)
 	newApp.settings = loadSettings()
 	store := &store{a: newApp}
 	store.Docs = makeStoreDocs(id, store)
