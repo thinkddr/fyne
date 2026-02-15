@@ -89,8 +89,14 @@ func LoadResourceFromURLString(urlStr string) (Resource, error) {
 // Since: 2.8
 func CacheResourceFromURLString(urlStr string) (Resource, error) {
 	cache := CurrentApp().Cache()
-	if data, err := cache.Get(urlStr); err == nil {
+	if read, err := cache.Read(urlStr); err == nil {
 		name := filepath.Base(urlStr)
+
+		data, err := io.ReadAll(read)
+		_ = read.Close()
+		if err != nil {
+			return nil, err
+		}
 		return NewStaticResource(name, data), nil
 	}
 
@@ -99,6 +105,19 @@ func CacheResourceFromURLString(urlStr string) (Resource, error) {
 		return nil, err
 	}
 
-	_ = cache.Set(urlStr, res.Content())
+	write, _ := cache.Write(urlStr)
+	defer write.Close()
+	data := res.Content()
+
+	n, err := write.Write(data)
+	for n < len(data) {
+		if err != nil {
+			return res, err
+		}
+
+		data = data[n:]
+		n, err = write.Write(data)
+	}
+
 	return res, nil
 }

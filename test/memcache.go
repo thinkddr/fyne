@@ -1,7 +1,9 @@
 package test
 
 import (
+	"bytes"
 	"errors"
+	"io"
 	"os"
 
 	"fyne.io/fyne/v2"
@@ -25,21 +27,35 @@ func (c *memCache) Exists(name string) bool {
 	return ok
 }
 
-func (c *memCache) Get(name string) ([]byte, error) {
+func (c *memCache) Read(name string) (io.ReadCloser, error) {
 	data, ok := c.memStore[name]
 	if !ok {
 		return nil, errors.New("not found")
 	}
 
-	return data, nil
+	return io.NopCloser(bytes.NewReader(data)), nil
 }
 
-func (c *memCache) Set(name string, data []byte) error {
-	c.memStore[name] = data
-	return nil
+func (c *memCache) Write(name string) (io.WriteCloser, error) {
+	write := &bytes.Buffer{}
+
+	return writeCloser{write, func() {
+		c.memStore[name] = write.Bytes()
+	}}, nil
 }
 
 func (c *memCache) Remove(name string) error {
 	delete(c.memStore, name)
+	return nil
+}
+
+type writeCloser struct {
+	io.Writer
+
+	onClose func()
+}
+
+func (c writeCloser) Close() error {
+	c.onClose()
 	return nil
 }

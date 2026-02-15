@@ -49,36 +49,16 @@ func (c *cache) Exists(name string) bool {
 	return ok && err == nil
 }
 
-func (c *cache) Get(name string) ([]byte, error) {
+func (c *cache) Read(name string) (io.ReadCloser, error) {
 	path := c.encodePath(name)
 
-	read, err := storage.Reader(path)
-	if err != nil {
-		return nil, err
-	}
-
-	return io.ReadAll(read)
+	return storage.Reader(path)
 }
 
-func (c *cache) Set(name string, data []byte) error {
+func (c *cache) Write(name string) (io.WriteCloser, error) {
 	path := c.encodePath(name)
 
-	write, err := storage.Writer(path)
-	if err != nil {
-		return err
-	}
-
-	n, err := write.Write(data)
-	for n < len(data) {
-		if err != nil {
-			return err
-		}
-
-		data = data[n:]
-		n, err = write.Write(data)
-	}
-
-	return err
+	return storage.Writer(path)
 }
 
 func (c *cache) Remove(name string) error {

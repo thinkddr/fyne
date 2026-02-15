@@ -1,6 +1,7 @@
 package app
 
 import (
+	"io"
 	"testing"
 
 	"fyne.io/fyne/v2/test"
@@ -14,8 +15,11 @@ func TestCache_Exists(t *testing.T) {
 
 	assert.False(t, c.Exists(testName))
 
-	err := c.Set(testName, []byte("data"))
+	w, err := c.Write(testName)
 	assert.NoError(t, err)
+	n, _ := w.Write([]byte("data"))
+	assert.Equal(t, 4, n)
+	_ = w.Close()
 
 	assert.True(t, c.Exists(testName))
 
@@ -32,8 +36,11 @@ func TestCache_ExistsTest(t *testing.T) {
 
 	assert.False(t, c.Exists(testName))
 
-	err := c.Set(testName, []byte("data"))
+	w, err := c.Write(testName)
 	assert.NoError(t, err)
+	n, _ := w.Write([]byte("data"))
+	assert.Equal(t, 4, n)
+	_ = w.Close()
 
 	assert.True(t, c.Exists(testName))
 	// no need to remove a test cache, it resets
@@ -43,17 +50,26 @@ func TestCache_Set(t *testing.T) {
 	c := NewWithID("io.fyne.test").Cache()
 	testName := "entry2"
 
-	err := c.Set(testName, []byte("data"))
+	w, err := c.Write(testName)
 	assert.NoError(t, err)
+	n, _ := w.Write([]byte("data"))
+	assert.Equal(t, 4, n)
+	_ = w.Close()
 
-	data, err := c.Get(testName)
+	read, err := c.Read(testName)
+	data, err := io.ReadAll(read)
+	assert.NoError(t, err)
+	_ = read.Close()
 	assert.NoError(t, err)
 	assert.Equal(t, []byte("data"), data)
 
 	// and verify it was stored
 	c = NewWithID("io.fyne.test").Cache()
 
-	data, err = c.Get(testName)
+	read, err = c.Read(testName)
+	data, err = io.ReadAll(read)
+	assert.NoError(t, err)
+	_ = read.Close()
 	assert.NoError(t, err)
 	assert.Equal(t, []byte("data"), data)
 
@@ -64,10 +80,16 @@ func TestCache_SetTest(t *testing.T) {
 	c := test.NewApp().Cache()
 	testName := "entry2"
 
-	err := c.Set(testName, []byte("data"))
+	w, err := c.Write(testName)
 	assert.NoError(t, err)
+	n, _ := w.Write([]byte("data"))
+	assert.Equal(t, 4, n)
+	_ = w.Close()
 
-	data, err := c.Get(testName)
+	read, err := c.Read(testName)
+	data, err := io.ReadAll(read)
+	assert.NoError(t, err)
+	_ = read.Close()
 	assert.NoError(t, err)
 	assert.Equal(t, []byte("data"), data)
 }

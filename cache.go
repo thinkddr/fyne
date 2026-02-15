@@ -1,5 +1,7 @@
 package fyne
 
+import "io"
+
 // Cache is used to manage cache storage inside an application sandbox.
 // The files managed by this interface are unique to the current application
 // and may be deleted by the operating system to clear space
@@ -9,7 +11,7 @@ type Cache interface {
 	RootURI() URI
 
 	Exists(name string) bool
-	Get(name string) ([]byte, error)
-	Set(name string, data []byte) error
+	Read(name string) (io.ReadCloser, error)
+	Write(name string) (io.WriteCloser, error)
 	Remove(name string) error
 }
