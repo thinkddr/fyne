@@ -5,9 +5,11 @@ package app
 import (
 	"os"
 	"path/filepath"
+
+	"fyne.io/fyne/v2"
 )
 
-func rootCacheDir() string {
+func rootCacheDir(a fyne.App) string {
 	desktopCache, _ := os.UserCacheDir()
-	return filepath.Join(desktopCache, "fyne")
+	return filepath.Join(desktopCache, "fyne", a.UniqueID())
 }
