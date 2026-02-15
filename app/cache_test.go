@@ -57,6 +57,7 @@ func TestCache_Set(t *testing.T) {
 	_ = w.Close()
 
 	read, err := c.Read(testName)
+	assert.NoError(t, err)
 	data, err := io.ReadAll(read)
 	assert.NoError(t, err)
 	_ = read.Close()
@@ -67,6 +68,7 @@ func TestCache_Set(t *testing.T) {
 	c = NewWithID("io.fyne.test").Cache()
 
 	read, err = c.Read(testName)
+	assert.NoError(t, err)
 	data, err = io.ReadAll(read)
 	assert.NoError(t, err)
 	_ = read.Close()
@@ -87,6 +89,7 @@ func TestCache_SetTest(t *testing.T) {
 	_ = w.Close()
 
 	read, err := c.Read(testName)
+	assert.NoError(t, err)
 	data, err := io.ReadAll(read)
 	assert.NoError(t, err)
 	_ = read.Close()
