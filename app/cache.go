@@ -20,6 +20,15 @@ func makeCache(a fyne.App) fyne.Cache {
 	root := c.RootURI()
 	exists, err := storage.Exists(root)
 	if !exists || err != nil {
+		parent, _ := storage.Parent(root)
+		exists, err = storage.Exists(parent)
+		if !exists || err != nil {
+			err = storage.CreateListable(parent)
+			if err != nil {
+				fyne.LogError("Failed to create fyne cache space", err)
+			}
+		}
+
 		err = storage.CreateListable(root)
 		if err != nil {
 			fyne.LogError("Failed to create app cache space", err)
