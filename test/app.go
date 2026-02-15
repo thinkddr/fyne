@@ -162,8 +162,10 @@ func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0, theme: Theme()}
 	prefs := internal.NewInMemoryPreferences()
 	store := &testStorage{}
-	testApp := &app{settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*driver), clip: NewClipboard(),
-		cache: makeCache()}
+	testApp := &app{
+		settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*driver), clip: NewClipboard(),
+		cache: makeCache(),
+	}
 	settings.app = testApp
 	root, _ := store.docRootURI()
 	store.Docs = &internal.Docs{RootDocURI: root}
