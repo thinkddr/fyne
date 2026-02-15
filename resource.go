@@ -82,3 +82,23 @@ func LoadResourceFromURLString(urlStr string) (Resource, error) {
 	name := filepath.Base(urlStr)
 	return NewStaticResource(name, bytes), nil
 }
+
+// CacheResourceFromURLString creates a new [StaticResource] in memory using the body of the specified URL.
+// It also adds the bytes to our cache so that future requests for this icon will ready locally instead of the web server.
+//
+// Since: 2.8
+func CacheResourceFromURLString(urlStr string) (Resource, error) {
+	cache := CurrentApp().Cache()
+	if data, err := cache.Get(urlStr); err == nil {
+		name := filepath.Base(urlStr)
+		return NewStaticResource(name, data), nil
+	}
+
+	res, err := LoadResourceFromURLString(urlStr)
+	if err != nil {
+		return nil, err
+	}
+
+	_ = cache.Set(urlStr, res.Content())
+	return res, nil
+}
