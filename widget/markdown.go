@@ -102,6 +102,10 @@ func renderNode(source []byte, n ast.Node, blockquote bool, listDepth int) ([]Ri
 		link, _ := url.Parse(string(t.Destination))
 		text := forceIntoText(source, n)
 		return []RichTextSegment{&HyperlinkSegment{Alignment: fyne.TextAlignLeading, Text: decodeText(text), URL: link}}, nil
+	case *ast.AutoLink:
+		link, _ := url.Parse(string(t.URL(source)))
+		text := string(t.Label(source))
+		return []RichTextSegment{&HyperlinkSegment{Alignment: fyne.TextAlignLeading, Text: decodeText(text), URL: link}}, nil
 	case *ast.CodeSpan:
 		text := forceIntoText(source, n)
 		return []RichTextSegment{&TextSegment{Style: RichTextStyleCodeInline, Text: text}}, nil
