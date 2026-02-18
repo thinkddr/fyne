@@ -140,6 +140,18 @@ func TestRichTextMarkdown_Hyperlink(t *testing.T) {
 	}
 }
 
+func TestRichTextMarkdown_HyperlinkInAngleBrackets(t *testing.T) {
+	r := NewRichTextFromMarkdown("<https://fyne.io/>")
+
+	assert.Len(t, r.Segments, 2)
+	if link, ok := r.Segments[0].(*HyperlinkSegment); ok {
+		assert.Equal(t, "https://fyne.io/", link.Text)
+		assert.Equal(t, "fyne.io", link.URL.Host)
+	} else {
+		t.Error("Segment should be a Hyperlink")
+	}
+}
+
 func TestRichTextMarkdown_Image(t *testing.T) {
 	r := NewRichTextFromMarkdown("![title](../../theme/icons/fyne.png)")
 
