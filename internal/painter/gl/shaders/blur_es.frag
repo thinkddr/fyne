@@ -20,14 +20,19 @@ uniform vec2 size;
 uniform float kernel[401];
 
 void main() {
+    const int MAX_LENGTH = 101;
     vec2 inverseSize = vec2(1.0/size.x, 1.0/size.y);
     int length = 2 * int(radius) + 1;
     vec4 sum = vec4(0.0);
 
-	for (int i = 0; i < length; ++i)
+	for (int i = 0; i < MAX_LENGTH; ++i)
 	{
-		for (int j = 0; j < length; ++j)
+	    if (i >= length) break;
+
+		for (int j = 0; j < MAX_LENGTH; ++j)
 		{
+		    if (j >= length) break;
+
 			vec2 tc = fragTexCoord + inverseSize * vec2(float(i) - radius, float(j) - radius);
 			sum += kernel[i] * kernel[j] * texture2D(tex, tc);
 		}
