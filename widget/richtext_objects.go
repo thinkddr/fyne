@@ -115,6 +115,9 @@ type HyperlinkSegment struct {
 	//
 	// Since: 2.4
 	OnTapped func() `json:"-"`
+
+	// Since 2.8
+	Style RichTextStyle
 }
 
 // Inline returns true as hyperlinks are inside other elements.
@@ -141,6 +144,7 @@ func (h *HyperlinkSegment) Update(o fyne.CanvasObject) {
 	link.Text = h.Text
 	link.URL = h.URL
 	link.Alignment = h.Alignment
+	link.TextStyle = h.Style.TextStyle
 	link.OnTapped = h.OnTapped
 	link.Refresh()
 }

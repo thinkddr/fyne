@@ -124,13 +124,20 @@ func renderNode(source []byte, n ast.Node, blockquote bool, listDepth int) ([]Ri
 		}
 		return []RichTextSegment{&TextSegment{Style: RichTextStyleCodeBlock, Text: string(data)}}, nil
 	case *ast.Emphasis:
-		text := forceIntoText(source, n)
-		switch t.Level {
-		case 2:
-			return []RichTextSegment{&TextSegment{Style: RichTextStyleStrong, Text: decodeText(text)}}, nil
-		default:
-			return []RichTextSegment{&TextSegment{Style: RichTextStyleEmphasis, Text: decodeText(text)}}, nil
+		style := RichTextStyleEmphasis
+		if t.Level == 2 {
+			style = RichTextStyleStrong
 		}
+		children, err := renderChildren(source, n, blockquote, listDepth)
+		for _, child := range children {
+			switch t2 := child.(type) {
+			case *TextSegment:
+				t2.Style = style
+			case *HyperlinkSegment:
+				t2.Style = style
+			}
+		}
+		return children, err
 	case *ast.Text:
 		text := string(t.Value(source))
 		if text == "" {
