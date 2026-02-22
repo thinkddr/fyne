@@ -179,6 +179,9 @@ uintptr_t processFn(struct fnargs* args, char* parg) {
 	case glfnViewport:
 		glViewport((GLint)args->a0, (GLint)args->a1, (GLint)args->a2, (GLint)args->a3);
 		break;
+	case glfnCopyTexSubImage2D:
+		glCopyTexSubImage2D((GLenum)args->a0, (GLint)args->a1, (GLint)args->a2, (GLint)args->a3, (GLint)args->a4, (GLint)args->a5, (GLsizei)args->a6, (GLsizei)args->a7);
+		break;
 	}
 	return ret;
 }

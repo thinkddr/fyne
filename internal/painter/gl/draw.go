@@ -1,7 +1,6 @@
 package gl
 
 import (
-	"image"
 	"image/color"
 	"math"
 
@@ -29,55 +28,56 @@ func (p *painter) defineVertexArray(prog Program, name string, size, stride, off
 	p.logError()
 }
 
-var blurPixbuf []uint8
-
 func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	if b.Radius == 0 {
 		return
 	}
 	radius := b.Radius * p.pixScale
 
-	w := roundToPixel(frame.Width*p.pixScale, 1.0)
-	h := roundToPixel(frame.Height*p.pixScale, 1.0)
-
-	if pixSize := int(w*h) * 4; cap(blurPixbuf) < pixSize {
-		blurPixbuf = make([]uint8, pixSize)
-	} else {
-		blurPixbuf = blurPixbuf[:pixSize]
-	}
-
-	p.ctx.ReadPixels(0, 0, int(w), int(h), colorFormatRGBA, unsignedByte, blurPixbuf)
-	p.logError()
-
-	img := &captureImage{
-		pix:    blurPixbuf,
-		width:  int(w),
-		height: int(h),
-	}
-
 	x := roundToPixel(pos.X*p.pixScale, 1.0)
 	y := roundToPixel(pos.Y*p.pixScale, 1.0)
-	w = roundToPixel(b.Size().Width*p.pixScale, 1.0)
-	h = roundToPixel(b.Size().Height*p.pixScale, 1.0)
-	bounds := image.Rect(int(x), int(y), int(x+w), int(y+h))
-	crop := img.SubImage(bounds)
-	texture := p.imgToTexture(crop, canvas.ImageScaleFastest)
+	bw := int(roundToPixel(b.Size().Width*p.pixScale, 1.0))
+	bh := int(roundToPixel(b.Size().Height*p.pixScale, 1.0))
+	if bw <= 0 || bh <= 0 {
+		return
+	}
 
+	// Ensure blurSnapTex exists at the correct size; reallocate only when dimensions change.
+	if !p.blurSnapTexValid || p.blurSnapW != bw || p.blurSnapH != bh {
+		if p.blurSnapTexValid {
+			p.ctx.DeleteTexture(p.blurSnapTex)
+		}
+		p.blurSnapTex = p.newTexture(canvas.ImageScaleFastest)
+		p.ctx.TexImage2D(texture2D, 0, bw, bh, colorFormatRGBA, unsignedByte, nil)
+		p.blurSnapTexValid = true
+		p.blurSnapW = bw
+		p.blurSnapH = bh
+	}
+
+	// Copy the blur region from the framebuffer directly to the texture on the GPU.
+	// glCopyTexSubImage2D uses GL coordinates (y=0 at bottom), so convert the canvas-top y.
+	fbY := p.fbHeight - int(y) - bh
 	p.ctx.ActiveTexture(texture0)
-	p.ctx.BindTexture(texture2D, texture)
+	p.ctx.BindTexture(texture2D, p.blurSnapTex)
+	p.ctx.CopyTexSubImage2D(texture2D, 0, 0, 0, int(x), fbY, bw, bh)
 	p.logError()
 
+	// Build quad vertices. CopyTexSubImage2D places the framebuffer bottom at texture v=0,
+	// but rectCoords maps v=0 to the canvas top. Swap the v coordinates to correct orientation.
 	points, _ := p.rectCoords(b.Size(), pos, frame, canvas.ImageFillStretch, 1.0, 0)
+	points[4], points[9] = points[9], points[4]
+	points[14], points[19] = points[19], points[14]
+
 	p.ctx.UseProgram(p.blurProgram.ref)
 	p.updateBuffer(p.blurProgram.buff, points)
 	p.defineVertexArray(p.blurProgram.ref, "vert", 3, 5, 0)
 	p.defineVertexArray(p.blurProgram.ref, "vertTexCoord", 2, 5, 3)
 
-	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
 	p.logError()
 
 	p.SetUniform1f(p.blurProgram, "radius", radius)
-	p.SetUniform2f(p.blurProgram, "size", w, h)
+	p.SetUniform2f(p.blurProgram, "size", float32(bw), float32(bh))
 
 	values, ok := p.blurKernels[radius]
 	if !ok {
@@ -87,13 +87,6 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 
 	kernel := p.ctx.GetUniformLocation(p.blurProgram.ref, "kernel")
 	p.ctx.Uniform1fv(kernel, values)
-
-	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
-	p.logError()
-
-	p.ctx.ActiveTexture(texture0)
-	p.ctx.BindTexture(texture2D, texture)
-	p.logError()
 
 	p.ctx.DrawArrays(triangleStrip, 0, 4)
 	p.logError()

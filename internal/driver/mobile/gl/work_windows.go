@@ -280,6 +280,10 @@ var glfnFuncs = [...]func(c call) (ret uintptr){
 		syscall.SyscallN(glViewport.Addr(), c.args.a0, c.args.a1, c.args.a2, c.args.a3)
 		return ret
 	},
+	glfnCopyTexSubImage2D: func(c call) (ret uintptr) {
+		syscall.SyscallN(glCopyTexSubImage2D.Addr(), c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, c.args.a6, c.args.a7)
+		return ret
+	},
 }
 
 func (ctx *context) doWork(c call) (ret uintptr) {
@@ -351,4 +355,5 @@ var (
 	glUseProgram              = libGLESv2.NewProc("glUseProgram")
 	glVertexAttribPointer     = libGLESv2.NewProc("glVertexAttribPointer")
 	glViewport                = libGLESv2.NewProc("glViewport")
+	glCopyTexSubImage2D       = libGLESv2.NewProc("glCopyTexSubImage2D")
 )

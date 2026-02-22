@@ -30,6 +30,7 @@ type context interface {
 	GetShaderInfoLog(shader Shader) string
 	GetUniformLocation(program Program, name string) Uniform
 	LinkProgram(program Program)
+	CopyTexSubImage2D(target uint32, level, xoffset, yoffset, x, y, width, height int)
 	ReadBuffer(src uint32)
 	ReadPixels(x, y, width, height int, colorFormat, typ uint32, pixels []uint8)
 	Scissor(x, y, w, h int32)

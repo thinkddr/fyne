@@ -4,6 +4,7 @@ package gl
 
 import (
 	"strings"
+	"unsafe"
 
 	"github.com/go-gl/gl/v2.1/gl"
 
@@ -322,6 +323,10 @@ func (c *coreContext) LinkProgram(program Program) {
 	gl.LinkProgram(uint32(program))
 }
 
+func (c *coreContext) CopyTexSubImage2D(target uint32, level, xoffset, yoffset, x, y, width, height int) {
+	gl.CopyTexSubImage2D(target, int32(level), int32(xoffset), int32(yoffset), int32(x), int32(y), int32(width), int32(height))
+}
+
 func (c *coreContext) ReadBuffer(src uint32) {
 	gl.ReadBuffer(src)
 }
@@ -341,6 +346,10 @@ func (c *coreContext) ShaderSource(shader Shader, source string) {
 }
 
 func (c *coreContext) TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8) {
+	var ptr unsafe.Pointer
+	if len(data) > 0 {
+		ptr = gl.Ptr(data)
+	}
 	gl.TexImage2D(
 		target,
 		int32(level),
@@ -350,7 +359,7 @@ func (c *coreContext) TexImage2D(target uint32, level, width, height int, colorF
 		0,
 		colorFormat,
 		typ,
-		gl.Ptr(data),
+		ptr,
 	)
 }
 

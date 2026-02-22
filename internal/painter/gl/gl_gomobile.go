@@ -79,7 +79,7 @@ func (p *painter) Init() {
 
 		p.blurProgram = ProgramState{
 			ref:        p.createProgram("blur_es"),
-			buff:       p.createBuffer(16),
+			buff:       p.createBuffer(20),
 			uniforms:   make(map[string]*UniformState),
 			attributes: make(map[string]Attribute),
 		}
@@ -323,6 +323,10 @@ func (c *mobileContext) GetUniformLocation(program Program, name string) Uniform
 
 func (c *mobileContext) LinkProgram(program Program) {
 	c.glContext.LinkProgram(gl.Program(program))
+}
+
+func (c *mobileContext) CopyTexSubImage2D(target uint32, level, xoffset, yoffset, x, y, width, height int) {
+	c.glContext.CopyTexSubImage2D(gl.Enum(target), level, xoffset, yoffset, x, y, width, height)
 }
 
 func (c *mobileContext) ReadBuffer(_ uint32) {

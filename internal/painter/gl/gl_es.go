@@ -4,6 +4,7 @@ package gl
 
 import (
 	"strings"
+	"unsafe"
 
 	gl "github.com/go-gl/gl/v3.1/gles2"
 
@@ -83,7 +84,7 @@ func (p *painter) Init() {
 
 	p.blurProgram = ProgramState{
 		ref:        p.createProgram("blur_es"),
-		buff:       p.createBuffer(16),
+		buff:       p.createBuffer(20),
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
@@ -322,6 +323,10 @@ func (c *esContext) LinkProgram(program Program) {
 	gl.LinkProgram(uint32(program))
 }
 
+func (c *esContext) CopyTexSubImage2D(target uint32, level, xoffset, yoffset, x, y, width, height int) {
+	gl.CopyTexSubImage2D(target, int32(level), int32(xoffset), int32(yoffset), int32(x), int32(y), int32(width), int32(height))
+}
+
 func (c *esContext) ReadBuffer(src uint32) {
 	gl.ReadBuffer(src)
 }
@@ -341,6 +346,10 @@ func (c *esContext) ShaderSource(shader Shader, source string) {
 }
 
 func (c *esContext) TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8) {
+	var ptr unsafe.Pointer
+	if len(data) > 0 {
+		ptr = gl.Ptr(data)
+	}
 	gl.TexImage2D(
 		target,
 		int32(level),
@@ -350,7 +359,7 @@ func (c *esContext) TexImage2D(target uint32, level, width, height int, colorFor
 		0,
 		colorFormat,
 		typ,
-		gl.Ptr(data),
+		ptr,
 	)
 }
 
@@ -362,7 +371,7 @@ func (c *esContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(int32(uniform), v)
 }
 
-func (c *cesContext) Uniform1fv(uniform Uniform, v []float32) {
+func (c *esContext) Uniform1fv(uniform Uniform, v []float32) {
 	gl.Uniform1fv(int32(uniform), int32(len(v)), &v[0])
 }
 
