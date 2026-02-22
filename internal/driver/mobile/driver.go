@@ -372,6 +372,8 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 	clips := &internal.ClipStack{}
 	c := window.Canvas().(*canvas)
 
+	c.Painter().SetOutputSize(d.currentSize.WidthPx, d.currentSize.HeightPx)
+
 	r, g, b, a := theme.Color(theme.ColorNameBackground).RGBA()
 	max16bit := float32(255 * 255)
 	d.glctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)

@@ -65,6 +65,7 @@ func (p *painter) glctx() gl.Context {
 
 func (p *painter) Init() {
 	p.ctx = &mobileContext{glContext: p.contextProvider.Context().(gl.Context)}
+	p.blurSnapTexValid = false // reset on context recreation; old texture IDs are no longer valid
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
 	if compiled == nil {
