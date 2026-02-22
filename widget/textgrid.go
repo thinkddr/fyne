@@ -116,7 +116,7 @@ func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
 
 	row = int(y / t.content.cellSize.Height)
 	col = int(x / t.content.cellSize.Width)
-	return
+	return row, col
 }
 
 // ScrollToTop will scroll content to container top
@@ -512,11 +512,12 @@ func (t *textGridContent) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (t *textGridContent) refreshCell(row, col int) {
-	if row >= len(t.visible)-1 {
-		return
+	for _, v := range t.visible {
+		if tr := v.(*textGridRow); tr.row == row {
+			tr.refreshCell(col)
+			return
+		}
 	}
-	wid := t.visible[row].(*textGridRow)
-	wid.refreshCell(col)
 }
 
 type textGridContentRenderer struct {
@@ -640,6 +641,9 @@ type textGridRow struct {
 	objects []fyne.CanvasObject
 	row     int
 	cols    int
+
+	cachedFGColor  color.Color
+	cachedTextSize float32
 }
 
 func newTextGridRow(t *textGridContent, row int) *textGridRow {
@@ -698,10 +702,8 @@ func (t *textGridRow) setCellRune(str rune, pos int, style, rowStyle TextGridSty
 	text := t.objects[pos*3+1].(*canvas.Text)
 	underline := t.objects[pos*3+2].(*canvas.Line)
 
-	th := t.text.text.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	fg := th.Color(theme.ColorNameForeground, v)
-	text.TextSize = th.Size(theme.SizeNameText)
+	fg := t.cachedFGColor
+	text.TextSize = t.cachedTextSize
 
 	var underlineStrokeWidth float32 = 1
 	var underlineStrokeColor color.Color = color.Transparent
@@ -899,6 +901,8 @@ func (t *textGridRowRenderer) MinSize() fyne.Size {
 func (t *textGridRowRenderer) Refresh() {
 	th := t.obj.text.text.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
+	t.obj.cachedFGColor = th.Color(theme.ColorNameForeground, v)
+	t.obj.cachedTextSize = th.Size(theme.SizeNameText)
 	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: th.Color(theme.ColorNameDisabled, v)}
 	t.obj.updateGridSize(t.obj.text.text.Size())
 	t.obj.refreshCells()

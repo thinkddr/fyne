@@ -15,7 +15,7 @@ func (a *fyneApp) cachedIconPath() string {
 		return ""
 	}
 
-	dirPath := filepath.Join(rootCacheDir(), a.UniqueID())
+	dirPath := rootCacheDir(a)
 	filePath := filepath.Join(dirPath, "icon.png")
 	once.Do(func() {
 		err := a.saveIconToCache(dirPath, filePath)
@@ -25,11 +25,6 @@ func (a *fyneApp) cachedIconPath() string {
 	})
 
 	return filePath
-}
-
-func rootCacheDir() string {
-	desktopCache, _ := os.UserCacheDir()
-	return filepath.Join(desktopCache, "fyne")
 }
 
 func (a *fyneApp) saveIconToCache(dirPath, filePath string) error {

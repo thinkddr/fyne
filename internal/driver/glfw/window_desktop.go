@@ -86,18 +86,20 @@ type window struct {
 	centered   bool
 	visible    bool
 
-	mousePos             fyne.Position
-	mouseDragged         fyne.Draggable
-	mouseDraggedObjStart fyne.Position
-	mouseDraggedOffset   fyne.Position
-	mouseDragPos         fyne.Position
-	mouseDragStarted     bool
-	mouseButton          desktop.MouseButton
-	mouseOver            desktop.Hoverable
-	mouseLastClick       fyne.CanvasObject
-	mousePressed         fyne.CanvasObject
-	mouseClickCount      int
-	mouseCancelFunc      context.CancelFunc
+	mousePosUpdateProcessed    bool
+	newMousePosX, newMousePosY float64
+	mousePos                   fyne.Position
+	mouseDragged               fyne.Draggable
+	mouseDraggedObjStart       fyne.Position
+	mouseDraggedOffset         fyne.Position
+	mouseDragPos               fyne.Position
+	mouseDragStarted           bool
+	mouseButton                desktop.MouseButton
+	mouseOver                  desktop.Hoverable
+	mouseLastClick             fyne.CanvasObject
+	mousePressed               fyne.CanvasObject
+	mouseClickCount            int
+	mouseCancelFunc            context.CancelFunc
 
 	onClosed           func()
 	onCloseIntercepted func()
@@ -259,6 +261,26 @@ func (w *window) fitContent() {
 	}
 }
 
+// getMonitorScale returns the scale factor for a given monitor, handling platform-specific cases
+func getMonitorScale(monitor *glfw.Monitor) float32 {
+	widthMm, heightMm := monitor.GetPhysicalSize()
+	if runtime.GOOS == "linux" && widthMm == 60 && heightMm == 60 { // Steam Deck incorrectly reports 6cm square!
+		return 1.0
+	}
+	widthPx := monitor.GetVideoMode().Width
+	return calculateDetectedScale(widthMm, widthPx)
+}
+
+// getScaledMonitorSize returns the monitor dimensions adjusted for scaling
+func getScaledMonitorSize(monitor *glfw.Monitor) fyne.Size {
+	videoMode := monitor.GetVideoMode()
+	scale := getMonitorScale(monitor)
+
+	scaledWidth := float32(videoMode.Width) / scale
+	scaledHeight := float32(videoMode.Height) / scale
+	return fyne.NewSize(scaledWidth, scaledHeight)
+}
+
 func (w *window) getMonitorForWindow() *glfw.Monitor {
 	if !build.IsWayland {
 		x, y := w.xpos, w.ypos
@@ -274,7 +296,9 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 			if x > xOff || y > yOff {
 				continue
 			}
-			if videoMode := monitor.GetVideoMode(); x+videoMode.Width <= xOff || y+videoMode.Height <= yOff {
+
+			scaledSize := getScaledMonitorSize(monitor)
+			if x+int(scaledSize.Width) <= xOff || y+int(scaledSize.Height) <= yOff {
 				continue
 			}
 
@@ -307,13 +331,7 @@ func (w *window) detectScale() float32 {
 		return 1
 	}
 
-	widthMm, heightMm := monitor.GetPhysicalSize()
-	if runtime.GOOS == "linux" && widthMm == 60 && heightMm == 60 { // Steam Deck incorrectly reports 6cm square!
-		return 1
-	}
-	widthPx := monitor.GetVideoMode().Width
-
-	return calculateDetectedScale(widthMm, widthPx)
+	return getMonitorScale(monitor)
 }
 
 func (w *window) moved(_ *glfw.Window, x, y int) {
@@ -383,7 +401,9 @@ func (w *window) setCustomCursor(rawCursor *glfw.Cursor, isCustomCursor bool) {
 }
 
 func (w *window) mouseMoved(_ *glfw.Window, xpos, ypos float64) {
-	w.processMouseMoved(xpos, ypos)
+	w.newMousePosX = xpos
+	w.newMousePosY = ypos
+	w.mousePosUpdateProcessed = false
 }
 
 func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {

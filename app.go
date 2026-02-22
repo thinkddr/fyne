@@ -86,6 +86,11 @@ type App interface {
 	//
 	// Since: 2.6
 	Clipboard() Clipboard
+
+	// Cache returns a cache handler specific to this application.
+	//
+	// Since: 2.8
+	Cache() Cache
 }
 
 var app atomic.Pointer[App]
