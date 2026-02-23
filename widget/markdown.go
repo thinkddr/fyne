@@ -176,7 +176,7 @@ func renderEmphasis(source []byte, n ast.Node, blockquote bool, listDepth int) (
 		case *TextSegment:
 			t.Style = style
 		case *HyperlinkSegment:
-			t.Style = style
+			t.TextStyle = style.TextStyle
 		}
 	}
 	return children, err
