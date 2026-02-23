@@ -1,4 +1,4 @@
-//go:build !noos && !tinygo
+//go:build !noos && !tinygo && !android && !ios && !mobile
 
 package app
 
