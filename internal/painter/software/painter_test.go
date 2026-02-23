@@ -3,6 +3,7 @@ package software_test
 import (
 	"image"
 	"image/color"
+	"runtime"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -84,7 +85,11 @@ func TestPainter_paintBlur(t *testing.T) {
 	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
 	p := software.NewPainter()
 
-	test.AssertImageMatches(t, "draw_blur.png", p.Paint(c))
+	if runtime.GOOS == "darwin" {
+		test.AssertImageMatches(t, "draw_blur_darwin.png", p.Paint(c))
+	} else {
+		test.AssertImageMatches(t, "draw_blur.png", p.Paint(c))
+	}
 }
 
 func TestPainter_paintCircle(t *testing.T) {
