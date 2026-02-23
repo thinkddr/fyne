@@ -36,8 +36,6 @@ type Painter interface {
 // If it is a master painter it will also initialise OpenGL
 func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 	p := &painter{canvas: c, contextProvider: ctx}
-	p.blurKernels = make(map[float32][]float32)
-
 	p.SetFrameBufferScale(1.0)
 	return p
 }
@@ -56,7 +54,6 @@ type painter struct {
 	bezierCurveProgram    ProgramState
 	texScale              float32
 	pixScale              float32 // pre-calculate scale*texScale for each draw
-	blurKernels           map[float32][]float32
 	blurSnapTex           Texture // cached texture for GPU-side blur snapshot
 	blurSnapTexValid      bool    // whether blurSnapTex has been allocated
 	blurSnapW, blurSnapH  int     // size of blurSnapTex in pixels

@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	paint "fyne.io/fyne/v2/internal/painter"
 )
 
@@ -79,10 +80,10 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	p.SetUniform1f(p.blurProgram, "radius", radius)
 	p.SetUniform2f(p.blurProgram, "size", float32(bw), float32(bh))
 
-	values, ok := p.blurKernels[radius]
+	values, ok := cache.GetBlurKernel(radius)
 	if !ok {
 		values = createKernel(radius)
-		p.blurKernels[radius] = values
+		cache.SetBlurKernel(radius, values)
 	}
 
 	kernel := p.ctx.GetUniformLocation(p.blurProgram.ref, "kernel")
