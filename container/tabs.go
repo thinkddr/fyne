@@ -338,13 +338,14 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 
 	th := theme.CurrentForWidget(t)
 	padding := th.Size(theme.SizeNamePadding)
+	dividerWidth := th.Size(theme.SizeNameSeparatorThickness)
 	switch t.tabLocation() {
 	case TabLocationTop:
 		barHeight := barMin.Height
 		barPos = fyne.NewPos(0, 0)
 		barSize = fyne.NewSize(size.Width, barHeight)
 		dividerPos = fyne.NewPos(0, barHeight)
-		dividerSize = fyne.NewSize(size.Width, padding)
+		dividerSize = fyne.NewSize(size.Width, dividerWidth)
 		contentPos = fyne.NewPos(0, barHeight+padding)
 		contentSize = fyne.NewSize(size.Width, size.Height-barHeight-padding)
 	case TabLocationLeading:
@@ -352,7 +353,7 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 		barPos = fyne.NewPos(0, 0)
 		barSize = fyne.NewSize(barWidth, size.Height)
 		dividerPos = fyne.NewPos(barWidth, 0)
-		dividerSize = fyne.NewSize(padding, size.Height)
+		dividerSize = fyne.NewSize(dividerWidth, size.Height)
 		contentPos = fyne.NewPos(barWidth+padding, 0)
 		contentSize = fyne.NewSize(size.Width-barWidth-padding, size.Height)
 	case TabLocationBottom:
@@ -360,7 +361,7 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 		barPos = fyne.NewPos(0, size.Height-barHeight)
 		barSize = fyne.NewSize(size.Width, barHeight)
 		dividerPos = fyne.NewPos(0, size.Height-barHeight-padding)
-		dividerSize = fyne.NewSize(size.Width, padding)
+		dividerSize = fyne.NewSize(size.Width, dividerWidth)
 		contentPos = fyne.NewPos(0, 0)
 		contentSize = fyne.NewSize(size.Width, size.Height-barHeight-padding)
 	case TabLocationTrailing:
@@ -368,7 +369,7 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 		barPos = fyne.NewPos(size.Width-barWidth, 0)
 		barSize = fyne.NewSize(barWidth, size.Height)
 		dividerPos = fyne.NewPos(size.Width-barWidth-padding, 0)
-		dividerSize = fyne.NewSize(padding, size.Height)
+		dividerSize = fyne.NewSize(dividerWidth, size.Height)
 		contentPos = fyne.NewPos(0, 0)
 		contentSize = fyne.NewSize(size.Width-barWidth-padding, size.Height)
 	}

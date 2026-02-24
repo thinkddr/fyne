@@ -401,7 +401,12 @@ func dividerTheme(d *divider) fyne.Theme {
 
 func dividerThickness(d *divider) float32 {
 	th := dividerTheme(d)
-	return th.Size(theme.SizeNamePadding) * 2
+	pad := th.Size(theme.SizeNamePadding)
+	div := th.Size(theme.SizeNameSeparatorThickness)
+	if int(pad)%2 != int(div)%2 {
+		pad++
+	}
+	return pad
 }
 
 func dividerLength(d *divider) float32 {
@@ -411,7 +416,7 @@ func dividerLength(d *divider) float32 {
 
 func handleThickness(d *divider) float32 {
 	th := dividerTheme(d)
-	return th.Size(theme.SizeNamePadding) / 2
+	return th.Size(theme.SizeNameSeparatorThickness)
 }
 
 func handleLength(d *divider) float32 {
