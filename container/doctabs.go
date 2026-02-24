@@ -422,6 +422,9 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 	var indicatorSize fyne.Size
 	pad := th.Size(theme.SizeNamePadding)
 	dividerWidth := th.Size(theme.SizeNameSeparatorThickness)
+	if !isMobile(r.tabs) {
+		dividerWidth = pad
+	}
 
 	switch r.docTabs.location {
 	case TabLocationTop:

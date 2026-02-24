@@ -609,16 +609,18 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 	innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
 	labelShift := float32(0)
 	if r.icon.Visible() {
+		shiftPad := pad
 		iconSize := r.iconSize()
 		var iconOffset fyne.Position
 		if r.button.iconPosition == buttonIconTop {
 			iconOffset = fyne.NewPos((innerSize.Width-iconSize)/2, 0)
+			shiftPad = -pad
 		} else {
 			iconOffset = fyne.NewPos(0, (innerSize.Height-iconSize)/2)
 		}
 		r.icon.Resize(fyne.NewSquareSize(iconSize))
 		r.icon.Move(innerOffset.Add(iconOffset))
-		labelShift = iconSize + pad
+		labelShift = iconSize + shiftPad
 	}
 	if r.label.Text != "" {
 		var labelOffset fyne.Position
@@ -647,7 +649,7 @@ func (r *tabButtonRenderer) MinSize() fyne.Size {
 	if r.button.iconPosition == buttonIconTop {
 		contentWidth = fyne.Max(textSize.Width, iconSize)
 		if r.icon.Visible() {
-			contentHeight += iconSize
+			contentHeight += iconSize - padding*2
 		}
 		if r.label.Text != "" {
 			if r.icon.Visible() {
@@ -704,6 +706,9 @@ func (r *tabButtonRenderer) Refresh() {
 		r.label.Color = th.Color(theme.ColorNameDisabled, v)
 	}
 	r.label.TextSize = th.Size(theme.SizeNameText)
+	if isMobile(r.button.tabs) {
+		r.label.TextSize = th.Size(theme.SizeNameCaptionText)
+	}
 	if r.button.text == "" {
 		r.label.Hide()
 	} else {
@@ -741,7 +746,7 @@ func (r *tabButtonRenderer) Refresh() {
 func (r *tabButtonRenderer) iconSize() float32 {
 	iconSize := r.button.Theme().Size(theme.SizeNameInlineIcon)
 	if r.button.iconPosition == buttonIconTop {
-		return 2 * iconSize
+		return 1.5 * iconSize
 	}
 
 	return iconSize
@@ -752,7 +757,7 @@ func (r *tabButtonRenderer) padding() fyne.Size {
 	if r.label.Text != "" && r.button.iconPosition == buttonIconInline {
 		return fyne.NewSquareSize(padding * 2)
 	}
-	return fyne.NewSize(padding, padding*2)
+	return fyne.NewSize(padding, padding)
 }
 
 var (
