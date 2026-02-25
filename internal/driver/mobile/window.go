@@ -123,6 +123,7 @@ func (w *window) Show() {
 		w.canvas.setWindowHead(container.NewHBox(menuButton))
 	}
 	w.visible = true
+	w.initAccessibilityForWindow()
 
 	if w.Content() != nil {
 		w.Content().Refresh()
