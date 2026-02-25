@@ -447,6 +447,16 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	size.Height = roundToPixel(size.Height, p.pixScale)
 	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale)
 	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
+
+	if text.TextStyle.Underline {
+		line := canvas.NewLine(text.Color)
+		if text.TextStyle.Bold {
+			line.StrokeWidth = 2
+		}
+		line.Resize(fyne.NewSize(size.Width, 0))
+		underlinePos := fyne.NewPos(pos.X, pos.Y+size.Height*0.9)
+		p.drawLine(line, underlinePos, frame)
+	}
 }
 
 func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
