@@ -457,6 +457,15 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 		underlinePos := fyne.NewPos(pos.X, pos.Y+size.Height*0.9)
 		p.drawLine(line, underlinePos, frame)
 	}
+	if text.TextStyle.Strikethrough {
+		line := canvas.NewLine(text.Color)
+		if text.TextStyle.Bold {
+			line.StrokeWidth = 2
+		}
+		line.Resize(fyne.NewSize(size.Width, 0))
+		strikePos := fyne.NewPos(pos.X, pos.Y+size.Height*0.6)
+		p.drawLine(line, strikePos, frame)
+	}
 }
 
 func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
