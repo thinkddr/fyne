@@ -243,6 +243,25 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	clippedBounds := clip.Intersect(imgBounds)
 	srcPt := image.Point{X: clippedBounds.Min.X - imgBounds.Min.X, Y: clippedBounds.Min.Y - imgBounds.Min.Y}
 	draw.Draw(base, clippedBounds, txtImg, srcPt, draw.Over)
+
+	if text.TextStyle.Underline {
+		line := canvas.NewLine(color)
+		if text.TextStyle.Bold {
+			line.StrokeWidth = 2
+		}
+		line.Resize(fyne.NewSize(bounds.Width, 0))
+		underlinePos := fyne.NewPos(pos.X, pos.Y+bounds.Height*0.9)
+		drawLine(c, line, underlinePos, base, clip)
+	}
+	if text.TextStyle.Strikethrough {
+		line := canvas.NewLine(color)
+		if text.TextStyle.Bold {
+			line.StrokeWidth = 2
+		}
+		line.Resize(fyne.NewSize(bounds.Width, 0))
+		strikePos := fyne.NewPos(pos.X, pos.Y+bounds.Height*0.6)
+		drawLine(c, line, strikePos, base, clip)
+	}
 }
 
 func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
