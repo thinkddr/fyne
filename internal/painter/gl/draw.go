@@ -413,7 +413,11 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 }
 
 func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
-	if text.Text == "" || text.Text == " " {
+	if text.Text == "" {
+		return
+	}
+	decorated := text.TextStyle.Underline || text.TextStyle.Strikethrough
+	if text.Text == " " && !decorated {
 		return
 	}
 
@@ -448,23 +452,20 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale)
 	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
 
-	if text.TextStyle.Underline {
+	if decorated {
 		line := canvas.NewLine(text.Color)
 		if text.TextStyle.Bold {
 			line.StrokeWidth = 2
 		}
 		line.Resize(fyne.NewSize(size.Width, 0))
-		underlinePos := fyne.NewPos(pos.X, pos.Y+size.Height*0.9)
-		p.drawLine(line, underlinePos, frame)
-	}
-	if text.TextStyle.Strikethrough {
-		line := canvas.NewLine(text.Color)
-		if text.TextStyle.Bold {
-			line.StrokeWidth = 2
+		if text.TextStyle.Underline {
+			underlinePos := fyne.NewPos(pos.X, pos.Y+size.Height*0.9)
+			p.drawLine(line, underlinePos, frame)
 		}
-		line.Resize(fyne.NewSize(size.Width, 0))
-		strikePos := fyne.NewPos(pos.X, pos.Y+size.Height*0.6)
-		p.drawLine(line, strikePos, frame)
+		if text.TextStyle.Strikethrough {
+			strikePos := fyne.NewPos(pos.X, pos.Y+size.Height*0.6)
+			p.drawLine(line, strikePos, frame)
+		}
 	}
 }
 
