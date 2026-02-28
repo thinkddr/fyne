@@ -568,6 +568,10 @@ func (b *tabButton) MinSize() fyne.Size {
 }
 
 func (b *tabButton) MouseIn(*desktop.MouseEvent) {
+	if isMobile(b.tabs) { // mobile simulation still has desktop events
+		return
+	}
+
 	b.hovered = true
 	b.Refresh()
 }
@@ -576,6 +580,10 @@ func (b *tabButton) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (b *tabButton) MouseOut() {
+	if isMobile(b.tabs) { // mobile simulation still has desktop events
+		return
+	}
+
 	b.hovered = false
 	b.Refresh()
 }
