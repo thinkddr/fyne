@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
@@ -245,17 +246,15 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	draw.Draw(base, clippedBounds, txtImg, srcPt, draw.Over)
 
 	if text.TextStyle.Underline || text.TextStyle.Strikethrough {
+		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
 		line := canvas.NewLine(color)
-		if text.TextStyle.Bold {
-			line.StrokeWidth = 2
-		}
 		line.Resize(fyne.NewSize(bounds.Width, 0))
 		if text.TextStyle.Underline {
-			underlinePos := fyne.NewPos(pos.X, pos.Y+bounds.Height*0.9)
+			underlinePos := fyne.NewPos(pos.X, pos.Y+baseline+painter.UnderlineOffsetFromBaseline)
 			drawLine(c, line, underlinePos, base, clip)
 		}
 		if text.TextStyle.Strikethrough {
-			strikePos := fyne.NewPos(pos.X, pos.Y+bounds.Height*0.6)
+			strikePos := fyne.NewPos(pos.X, pos.Y+baseline*painter.StrikethroughToBaselineFactor)
 			drawLine(c, line, strikePos, base, clip)
 		}
 	}
