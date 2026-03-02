@@ -81,10 +81,9 @@ type window struct {
 	icon         fyne.Resource
 	mainmenu     *fyne.MainMenu
 
-	master     bool
-	fullScreen bool
-	centered   bool
-	visible    bool
+	master                          bool
+	fullScreen, fullScreenSecondary bool
+	centered, visible               bool
 
 	mousePosUpdateProcessed    bool
 	newMousePosX, newMousePosY float64
@@ -120,10 +119,22 @@ type window struct {
 
 func (w *window) SetFullScreen(full bool) {
 	w.fullScreen = full
+	w.fullScreenSecondary = false
 
 	if w.view() != nil {
 		async.EnsureMain(func() {
 			w.doSetFullScreen(full)
+		})
+	}
+}
+
+func (w *window) RequestFullScreenSecondary() {
+	w.fullScreenSecondary = true
+	w.fullScreen = true
+
+	if w.view() != nil {
+		async.EnsureMain(func() {
+			w.doSetFullScreen2(true)
 		})
 	}
 }

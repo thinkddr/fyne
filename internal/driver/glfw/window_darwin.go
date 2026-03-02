@@ -37,3 +37,8 @@ func (w *window) doSetFullScreen(full bool) {
 		return
 	}
 }
+
+func (w *window) doSetFullScreen2(full bool) {
+	// TODO implement
+	w.doSetFullScreen(full)
+}
