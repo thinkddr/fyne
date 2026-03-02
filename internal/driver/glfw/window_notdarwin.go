@@ -2,11 +2,7 @@
 
 package glfw
 
-import (
-	"time"
-
-	"github.com/go-gl/glfw/v3.3/glfw"
-)
+import "time"
 
 const desktopDefaultDoubleTapDelay = 300 * time.Millisecond
 
@@ -17,19 +13,12 @@ func (w *window) doSetFullScreen(full bool) {
 }
 
 func (w *window) doSetFullScreen2(full bool) {
-	primary := glfw.GetPrimaryMonitor()
-	monitor := primary
-	for _, m := range glfw.GetMonitors() {
-		if m.GetName() != primary.GetName() {
-			monitor = m
-			break
-		}
-	}
+	monitor := w.getSecondaryMonitor()
 
 	w.doApplyFullScreen(monitor, full)
 }
 
-func (w *window) doApplyFullScreen(monitor *glfw.Monitor, full bool) {
+func (w *window) doApplyFullScreen(monitor *monitor, full bool) {
 	mode := monitor.GetVideoMode()
 	if full {
 		w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
