@@ -22,7 +22,7 @@ uniform vec4 fill_color;
 uniform vec4 stroke_color;
 /* shadow params*/
 uniform float add_shadow;
-uniform float shadow_softness;
+uniform float shadow_blur_radius;
 uniform vec2 shadow_offset;
 uniform vec4 shadow_color;
 uniform float shadow_type;
@@ -118,11 +118,11 @@ void main()
         float distance_shadow;
         if (calc_all_quadrants)
         {
-            distance_shadow = smoothstep(0.0, shadow_softness, calc_distance_all_quadrants(vec_centered_pos + shadow_offset, rect_size_half + stroke_width_half, radius));
+            distance_shadow = smoothstep(0.0, shadow_blur_radius, calc_distance_all_quadrants(vec_centered_pos + shadow_offset, rect_size_half + stroke_width_half, radius));
         }
         else
         {
-            distance_shadow = smoothstep(0.0, shadow_softness, calc_distance(vec_centered_pos + shadow_offset, rect_size_half + stroke_width_half, radius));
+            distance_shadow = smoothstep(0.0, shadow_blur_radius, calc_distance(vec_centered_pos + shadow_offset, rect_size_half + stroke_width_half, radius));
         }
         float shadow_alpha = shadow_color.a * (1.0 - distance_shadow);
 

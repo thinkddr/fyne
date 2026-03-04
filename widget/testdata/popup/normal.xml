@@ -4,7 +4,7 @@
 	</content>
 	<overlay>
 		<widget size="200x200" type="*widget.PopUp">
-			<rectangle fillColor="overlayBackground" shadowColor="shadow" shadowOffset="-3,1" shadowSoftness="6" size="37x43"/>
+			<rectangle fillColor="overlayBackground" shadowColor="shadow" shadowOffset="-3,1" shadowBlurRadius="6" size="37x43"/>
 			<widget pos="4,4" size="29x35" type="*widget.Label">
 				<widget size="29x35" type="*widget.RichText">
 					<text pos="8,8" size="13x19">Hi</text>

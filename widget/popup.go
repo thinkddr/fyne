@@ -107,7 +107,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
 	background.Shadow.ShadowColor = th.Color(theme.ColorNameShadow, v)
 	// TODO update initial shadow offset and softness to match ShadowingRenderer
-	background.Shadow.ShadowSoftness = 6
+	background.Shadow.ShadowBlurRadius = 6
 	if p.modal {
 		underlay := canvas.NewRectangle(th.Color(theme.ColorNameShadow, v))
 		objects := []fyne.CanvasObject{underlay, background, p.Content}

@@ -756,7 +756,7 @@ func NormalizeBezierCurvePoints(startPoint, endPoint fyne.Position, controlPoint
 func GetShadowPaddings(shadow canvas.Shadow) [4]float32 {
 	offsetX := shadow.ShadowOffset.X
 	offsetY := shadow.ShadowOffset.Y
-	softness := shadow.ShadowSoftness
+	softness := shadow.ShadowBlurRadius
 
 	rightReach := -offsetX + softness
 	leftReach := offsetX + softness

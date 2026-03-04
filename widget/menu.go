@@ -108,7 +108,7 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
 	background.Shadow.ShadowColor = th.Color(theme.ColorNameShadow, v)
 	// TODO update initial shadow offset and softness to match ShadowingRenderer
-	background.Shadow.ShadowSoftness = 1
+	background.Shadow.ShadowBlurRadius = 1
 	background.Shadow.ShadowOffset = fyne.NewPos(-float32(widget.MenuLevel)*0.4, float32(widget.MenuLevel)*0.4)
 	objects := []fyne.CanvasObject{background, scroll}
 	for _, i := range m.Items {

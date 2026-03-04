@@ -19,7 +19,7 @@ uniform vec4 fill_color;
 uniform vec4 stroke_color;
 /* shadow params*/
 uniform float add_shadow;
-uniform float shadow_softness;
+uniform float shadow_blur_radius;
 uniform vec2 shadow_offset;
 uniform vec4 shadow_color;
 uniform float shadow_type;
@@ -45,7 +45,7 @@ void main()
             clamp(frag_pos.y, frame_size.y - rect_coords[3], frame_size.y - rect_coords[2])
         );
 
-        float distance_shadow = smoothstep(0.0, shadow_softness, length(frag_pos - p));
+        float distance_shadow = smoothstep(0.0, shadow_blur_radius, length(frag_pos - p));
         float shadow_alpha = shadow_color.a * (1.0 - distance_shadow);
 
         if (shadow_type == 0.0)

@@ -29,20 +29,20 @@ const (
 //
 // Since: 2.8
 type Shadow struct {
-	ShadowColor    color.Color   // Color of the shadow.
-	ShadowSoftness float32       // Softness (blur radius) of the shadow.
-	ShadowOffset   fyne.Position // Offset of the shadow relative to the content.
-	ShadowType     ShadowType    // Type of shadow (DropShadow or BoxShadow).
+	ShadowColor      color.Color   // Color of the shadow.
+	ShadowBlurRadius float32       // A value of 0 produces no blur, while larger values produce bigger and lighter shadow.
+	ShadowOffset     fyne.Position // Offset of the shadow relative to the content.
+	ShadowType       ShadowType    // Type of shadow (DropShadow or BoxShadow).
 }
 
 // NewShadow creates a new Shadow with the specified properties.
 //
 // Since: 2.8
-func NewShadow(color color.Color, softness float32, offet fyne.Position, shadowType ShadowType) Shadow {
+func NewShadow(color color.Color, blurRadius float32, offset fyne.Position, shadowType ShadowType) Shadow {
 	return Shadow{
-		ShadowColor:    color,
-		ShadowSoftness: softness,
-		ShadowOffset:   offet,
-		ShadowType:     shadowType,
+		ShadowColor:      color,
+		ShadowBlurRadius: blurRadius,
+		ShadowOffset:     offset,
+		ShadowType:       shadowType,
 	}
 }

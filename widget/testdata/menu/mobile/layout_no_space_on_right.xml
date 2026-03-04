@@ -5,7 +5,7 @@
 	<overlay>
 		<widget pos="2,3" size="496x295" type="*widget.OverlayContainer">
 			<widget pos="410,10" size="66x118" type="*widget.Menu">
-				<rectangle fillColor="overlayBackground" shadowColor="shadow" shadowOffset="-1,1" shadowSoftness="1" size="66x118"/>
+				<rectangle fillColor="overlayBackground" shadowColor="shadow" shadowOffset="-1,1" shadowBlurRadius="1" size="66x118"/>
 				<widget size="66x118" type="*widget.Scroll">
 					<widget size="66x118" type="*widget.menuBox">
 						<rectangle fillColor="menuBackground" size="66x118"/>
@@ -27,7 +27,7 @@
 					</widget>
 				</widget>
 				<widget pos="-199,83" size="199x113" type="*widget.Menu">
-					<rectangle fillColor="overlayBackground" shadowColor="shadow" shadowOffset="-1,1" shadowSoftness="1" size="199x113"/>
+					<rectangle fillColor="overlayBackground" shadowColor="shadow" shadowOffset="-1,1" shadowBlurRadius="1" size="199x113"/>
 					<widget size="199x113" type="*widget.Scroll">
 						<widget size="199x113" type="*widget.menuBox">
 							<rectangle fillColor="menuBackground" size="199x113"/>
