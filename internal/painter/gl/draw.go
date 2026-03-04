@@ -458,7 +458,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 	radiusYScaled := roundToPixel(radiusY*p.pixScale, 1.0)
 	p.SetUniform2f(program, "radius", radiusXScaled, radiusYScaled)
 
-	p.SetUniform1f(program, "angle", ellipse.Angle)
+	p.SetUniform1f(program, "angle", 0) // angle of ellipse, in degrees (positive means clockwise, negative means counter-clockwise direction), not yet supported in public API but reserved for future use
 
 	r, g, b, a := getFragmentColor(ellipse.FillColor)
 	p.SetUniform4f(program, "fill_color", r, g, b, a)

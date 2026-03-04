@@ -383,7 +383,6 @@ func (r *markupRenderer) writeEllipse(e *fynecanvas.Ellipse, attrs map[string]*s
 	r.setColorAttr(attrs, "fillColor", e.FillColor)
 	r.setColorAttr(attrs, "strokeColor", e.StrokeColor)
 	r.setFloatAttr(attrs, "strokeWidth", float64(e.StrokeWidth))
-	r.setFloatAttr(attrs, "angle", float64(e.Angle))
 	r.writeTag("ellipse", true, attrs)
 }
 

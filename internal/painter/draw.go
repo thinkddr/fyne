@@ -348,14 +348,14 @@ func DrawEllipse(ellipse *canvas.Ellipse, vectorPad float32, scale func(float32)
 	if ellipse.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(ellipse.FillColor)
-		rasterx.AddEllipse(float64(width/2), float64(height/2), float64(scale(radiusX)), float64(scale(radiusY)), float64(ellipse.Angle), filler)
+		rasterx.AddEllipse(float64(width/2), float64(height/2), float64(scale(radiusX)), float64(scale(radiusY)), 0, filler)
 		filler.Draw()
 	}
 
 	dasher := rasterx.NewDasher(width, height, scanner)
 	dasher.SetColor(ellipse.StrokeColor)
 	dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
-	rasterx.AddEllipse(float64(width/2), float64(height/2), float64(scale(radiusX)), float64(scale(radiusY)), float64(ellipse.Angle), dasher)
+	rasterx.AddEllipse(float64(width/2), float64(height/2), float64(scale(radiusX)), float64(scale(radiusY)), 0, dasher)
 	dasher.Draw()
 
 	return raw

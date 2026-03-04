@@ -641,14 +641,13 @@ func Test_snapshot(t *testing.T) {
 				r := fynecanvas.NewEllipse(color.NRGBA{R: 200, G: 100, B: 0, A: 50})
 				r.StrokeWidth = 6.375
 				r.StrokeColor = theme.Color(theme.ColorNamePlaceHolder)
-				r.Angle = 18.25
 				return r
 			}(),
 			size: fyne.NewSize(42, 42),
 			pos:  fyne.NewPos(17, 17),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<ellipse angle=\"18.25\" fillColor=\"rgba(200,100,0,50)\" pos=\"17,17\" size=\"42x42\" strokeColor=\"placeholder\" strokeWidth=\"6.375\"/>\n" +
+				"\t\t<ellipse fillColor=\"rgba(200,100,0,50)\" pos=\"17,17\" size=\"42x42\" strokeColor=\"placeholder\" strokeWidth=\"6.375\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
