@@ -287,17 +287,20 @@ func (*driver) SetDisableScreenBlanking(disable bool) {
 
 func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 	c := w.Canvas().(*canvas)
+	switch e.Crosses(lifecycle.StageAlive) {
+	case lifecycle.CrossOn:
+		d.onStart()
+	case lifecycle.CrossOff:
+		d.onStop()
+	}
 	switch e.Crosses(lifecycle.StageVisible) {
 	case lifecycle.CrossOn:
 		d.glctx, _ = e.DrawContext.(gl.Context)
-		d.onStart()
-
 		// this is a fix for some android phone to prevent the app from being drawn as a blank screen after being pushed in the background
 		c.Content().Refresh()
 
 		d.sendPaintEvent()
 	case lifecycle.CrossOff:
-		d.onStop()
 		d.glctx = nil
 	}
 	switch e.Crosses(lifecycle.StageFocused) {
@@ -384,7 +387,7 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 		if size.Width <= 0 || size.Height <= 0 { // iconifying on Windows can do bad things
 			return
 		}
-		c.Painter().Paint(obj, pos, size)
+		c.Painter().Paint(obj, pos, size, clips.Top())
 	}
 	afterDraw := func(node *common.RenderCacheNode, pos fyne.Position) {
 		if intdriver.IsClip(node.Obj()) {
@@ -396,7 +399,7 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 		}
 
 		if build.Mode == fyne.BuildDebug {
-			c.DrawDebugOverlay(node.Obj(), pos, size)
+			c.DrawDebugOverlay(node.Obj(), pos, size, clips.Top())
 		}
 	}
 

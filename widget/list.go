@@ -50,7 +50,7 @@ type List struct {
 	// in the list has been selected.
 	OnSelected func(id ListItemID) `json:"-"`
 
-	// OnSelected is a callback to be notified when a given item
+	// OnUnselected is a callback to be notified when a given item
 	// in the list has been unselected.
 	OnUnselected func(id ListItemID) `json:"-"`
 
@@ -59,14 +59,21 @@ type List struct {
 	// Since: 2.5
 	HideSeparators bool
 
-	currentFocus  ListItemID
-	focused       bool
-	scroller      *widget.Scroll
-	selected      []ListItemID
-	itemMin       fyne.Size
-	itemHeights   map[ListItemID]float32
-	offsetY       float32
-	offsetUpdated func(fyne.Position)
+	// OnHighlighted is a callback to be notified when a given item
+	// in the list has been highlighted by keyboard navigation and mouse hover
+	//
+	// Since: 2.8
+	OnHighlighted func(id ListItemID) `json:"-"`
+
+	currentHighlight ListItemID
+	focused          bool
+	scroller         *widget.Scroll
+	selected         []ListItemID
+	itemMin          fyne.Size
+	itemHeights      map[ListItemID]float32
+	offsetY          float32
+	offsetUpdated    func(fyne.Position)
+	minSizeCache     fyne.Size
 }
 
 // NewList creates and returns a list widget for displaying items in
@@ -119,13 +126,16 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 // FocusGained is called after this List has gained focus.
 func (l *List) FocusGained() {
 	l.focused = true
-	l.RefreshItem(l.currentFocus)
+	l.RefreshItem(l.currentHighlight)
+	if f := l.OnHighlighted; f != nil {
+		f(l.currentHighlight)
+	}
 }
 
 // FocusLost is called after this List has lost focus.
 func (l *List) FocusLost() {
 	l.focused = false
-	l.RefreshItem(l.currentFocus)
+	l.RefreshItem(l.currentHighlight)
 }
 
 // MinSize returns the size that this widget should not shrink below.
@@ -138,6 +148,7 @@ func (l *List) MinSize() fyne.Size {
 //
 // Since: 2.4
 func (l *List) RefreshItem(id ListItemID) {
+	l.minSizeCache = fyne.Size{}
 	if l.scroller == nil {
 		return
 	}
@@ -145,7 +156,7 @@ func (l *List) RefreshItem(id ListItemID) {
 	lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
 	item, ok := lo.searchVisible(lo.visible, id)
 	if ok {
-		lo.setupListItem(item, id, l.focused && l.currentFocus == id)
+		lo.setupListItem(item, id, l.focused && l.currentHighlight == id)
 	}
 }
 
@@ -299,25 +310,33 @@ func (l *List) GetScrollOffset() float32 {
 
 // TypedKey is called if a key event happens while this List is focused.
 func (l *List) TypedKey(event *fyne.KeyEvent) {
+	oldFocus := l.currentHighlight
+
 	switch event.Name {
 	case fyne.KeySpace:
-		l.Select(l.currentFocus)
+		l.Select(l.currentHighlight)
 	case fyne.KeyDown:
-		if f := l.Length; f != nil && l.currentFocus >= f()-1 {
+		if f := l.Length; f != nil && l.currentHighlight >= f()-1 {
 			return
 		}
-		l.RefreshItem(l.currentFocus)
-		l.currentFocus++
-		l.scrollTo(l.currentFocus)
-		l.RefreshItem(l.currentFocus)
+		l.RefreshItem(l.currentHighlight)
+		l.currentHighlight++
+		l.scrollTo(l.currentHighlight)
+		l.RefreshItem(l.currentHighlight)
 	case fyne.KeyUp:
-		if l.currentFocus <= 0 {
+		if l.currentHighlight <= 0 {
 			return
 		}
-		l.RefreshItem(l.currentFocus)
-		l.currentFocus--
-		l.scrollTo(l.currentFocus)
-		l.RefreshItem(l.currentFocus)
+		l.RefreshItem(l.currentHighlight)
+		l.currentHighlight--
+		l.scrollTo(l.currentHighlight)
+		l.RefreshItem(l.currentHighlight)
+	}
+
+	if oldFocus != l.currentHighlight {
+		if f := l.OnHighlighted; f != nil {
+			f(l.currentHighlight)
+		}
 	}
 }
 
@@ -357,7 +376,17 @@ func (l *List) UnselectAll() {
 	}
 }
 
+// Refresh causes this List to be redrawn in its current state
+func (l *List) Refresh() {
+	l.minSizeCache = fyne.Size{}
+	l.BaseWidget.Refresh()
+}
+
 func (l *List) contentMinSize() fyne.Size {
+	if !l.minSizeCache.IsZero() {
+		return l.minSizeCache
+	}
+
 	separatorThickness := l.Theme().Size(theme.SizeNamePadding)
 	if l.Length == nil {
 		return fyne.NewSize(0, 0)
@@ -380,7 +409,9 @@ func (l *List) contentMinSize() fyne.Size {
 	}
 	height += float32(items-totalCustom) * templateHeight
 
-	return fyne.NewSize(l.itemMin.Width, height+separatorThickness*float32(items-1))
+	size := fyne.NewSize(l.itemMin.Width, height+separatorThickness*float32(items-1))
+	l.minSizeCache = size
+	return size
 }
 
 // fills l.visibleRowHeights and also returns offY and minRow
@@ -471,6 +502,7 @@ func (l *listRenderer) MinSize() fyne.Size {
 }
 
 func (l *listRenderer) Refresh() {
+	l.list.minSizeCache = fyne.Size{}
 	if f := l.list.CreateItem; f != nil {
 		item := createItemAndApplyThemeScope(f, l.list)
 		l.list.itemMin = item.MinSize()
@@ -497,6 +529,7 @@ type listItem struct {
 	BaseWidget
 
 	onTapped          func()
+	onHovered         func()
 	background        *canvas.Rectangle
 	child             fyne.CanvasObject
 	hovered, selected bool
@@ -535,6 +568,9 @@ func (li *listItem) MinSize() fyne.Size {
 
 // MouseIn is called when a desktop pointer enters the widget.
 func (li *listItem) MouseIn(*desktop.MouseEvent) {
+	if li.onHovered != nil {
+		li.onHovered()
+	}
 	li.hovered = true
 	li.Refresh()
 }
@@ -669,14 +705,19 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 	if f := l.list.UpdateItem; f != nil {
 		f(id, li.child)
 	}
+	li.onHovered = func() {
+		if f := l.list.OnHighlighted; f != nil {
+			f(id)
+		}
+	}
 	li.onTapped = func() {
 		if !fyne.CurrentDevice().IsMobile() {
-			canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
+			canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list.super())
 			if canvas != nil {
-				canvas.Focus(l.list.impl.(fyne.Focusable))
+				canvas.Focus(l.list.super().(fyne.Focusable))
 			}
 
-			l.list.currentFocus = id
+			l.list.currentHighlight = id
 		}
 
 		l.list.Select(id)
@@ -749,12 +790,12 @@ func (l *listLayout) updateList(newOnly bool) {
 	if newOnly {
 		for _, vis := range l.visible {
 			if _, ok := l.searchVisible(l.wasVisible, vis.id); !ok {
-				l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
+				l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentHighlight == vis.id)
 			}
 		}
 	} else {
 		for _, vis := range l.visible {
-			l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
+			l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentHighlight == vis.id)
 		}
 
 		// a full refresh may change theme, we should drain the pool of unused items instead of refreshing them.

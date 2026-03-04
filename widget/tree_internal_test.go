@@ -176,25 +176,25 @@ func TestTree_Focus(t *testing.T) {
 
 	canvas.FocusNext()
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, "foo", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "foo", canvas.Focused().(*Tree).currentHighlight)
 
 	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
-	assert.Equal(t, "bar", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "bar", canvas.Focused().(*Tree).currentHighlight)
 
 	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
-	assert.Equal(t, "foo", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "foo", canvas.Focused().(*Tree).currentHighlight)
 
 	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
-	assert.Equal(t, "foobar", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "foobar", canvas.Focused().(*Tree).currentHighlight)
 
 	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
-	assert.Equal(t, "foo", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "foo", canvas.Focused().(*Tree).currentHighlight)
 
 	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.Equal(t, "foo", tree.selected[0])
 
 	tree.Select("foobar")
-	assert.Equal(t, "foobar", tree.currentFocus)
+	assert.Equal(t, "foobar", tree.currentHighlight)
 	assert.Equal(t, "foobar", tree.selected[0])
 }
 
@@ -232,7 +232,7 @@ func TestTree_Keyboard(t *testing.T) {
 	canvas.FocusNext()
 	// Validate the state
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, "item_1", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "item_1", canvas.Focused().(*Tree).currentHighlight)
 	assert.False(t, tree.IsBranchOpen("item_1"))
 	assert.False(t, tree.IsBranchOpen("item_2"))
 	assert.False(t, tree.IsBranchOpen("item_1_1"))
@@ -242,7 +242,7 @@ func TestTree_Keyboard(t *testing.T) {
 	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 	// Validate the state
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, "item_1_1", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "item_1_1", canvas.Focused().(*Tree).currentHighlight)
 	assert.True(t, tree.IsBranchOpen("item_1"))
 	assert.False(t, tree.IsBranchOpen("item_2"))
 	assert.False(t, tree.IsBranchOpen("item_1_1"))
@@ -252,7 +252,7 @@ func TestTree_Keyboard(t *testing.T) {
 	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
 	// Validate the state
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, "item_1_2", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "item_1_2", canvas.Focused().(*Tree).currentHighlight)
 	assert.True(t, tree.IsBranchOpen("item_1"))
 	assert.False(t, tree.IsBranchOpen("item_2"))
 	assert.False(t, tree.IsBranchOpen("item_1_1"))
@@ -262,7 +262,7 @@ func TestTree_Keyboard(t *testing.T) {
 	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 	// Validate the state
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, "item_1_2_1", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "item_1_2_1", canvas.Focused().(*Tree).currentHighlight)
 	assert.True(t, tree.IsBranchOpen("item_1"))
 	assert.False(t, tree.IsBranchOpen("item_2"))
 	assert.False(t, tree.IsBranchOpen("item_1_1"))
@@ -272,7 +272,7 @@ func TestTree_Keyboard(t *testing.T) {
 	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
 	// Validate the state
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, "item_1_2_2", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "item_1_2_2", canvas.Focused().(*Tree).currentHighlight)
 	assert.True(t, tree.IsBranchOpen("item_1"))
 	assert.False(t, tree.IsBranchOpen("item_2"))
 	assert.False(t, tree.IsBranchOpen("item_1_1"))
@@ -282,7 +282,7 @@ func TestTree_Keyboard(t *testing.T) {
 	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 	// Validate the state
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, "item_1_2", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "item_1_2", canvas.Focused().(*Tree).currentHighlight)
 	assert.True(t, tree.IsBranchOpen("item_1"))
 	assert.False(t, tree.IsBranchOpen("item_2"))
 	assert.False(t, tree.IsBranchOpen("item_1_1"))
@@ -292,7 +292,7 @@ func TestTree_Keyboard(t *testing.T) {
 	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 	// Validate the state
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, "item_1_2", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "item_1_2", canvas.Focused().(*Tree).currentHighlight)
 	assert.True(t, tree.IsBranchOpen("item_1"))
 	assert.False(t, tree.IsBranchOpen("item_2"))
 	assert.False(t, tree.IsBranchOpen("item_1_1"))
@@ -302,7 +302,7 @@ func TestTree_Keyboard(t *testing.T) {
 	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 	// Validate the state
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, "item_1", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "item_1", canvas.Focused().(*Tree).currentHighlight)
 	assert.True(t, tree.IsBranchOpen("item_1"))
 	assert.False(t, tree.IsBranchOpen("item_2"))
 	assert.False(t, tree.IsBranchOpen("item_1_1"))
@@ -312,7 +312,7 @@ func TestTree_Keyboard(t *testing.T) {
 	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
 	// Validate the state
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, "item_1", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, "item_1", canvas.Focused().(*Tree).currentHighlight)
 	assert.False(t, tree.IsBranchOpen("item_1"))
 	assert.False(t, tree.IsBranchOpen("item_2"))
 	assert.False(t, tree.IsBranchOpen("item_1_1"))
@@ -732,7 +732,7 @@ func TestTree_Tap(t *testing.T) {
 
 		test.Tap(getBranch(t, tree, "A"))
 		assert.True(t, selected, "Branch should have been selected")
-		assert.Equal(t, "A", tree.currentFocus)
+		assert.Equal(t, "A", tree.currentHighlight)
 	})
 	t.Run("BranchIcon", func(t *testing.T) {
 		data := make(map[string][]string)
@@ -761,7 +761,7 @@ func TestTree_Tap(t *testing.T) {
 		}
 		test.Tap(getLeaf(t, tree, "A"))
 		assert.True(t, selected, "Leaf should have been selected")
-		assert.Equal(t, "A", tree.currentFocus)
+		assert.Equal(t, "A", tree.currentHighlight)
 	})
 }
 
@@ -973,4 +973,93 @@ func addTreePath(data map[string][]string, path ...string) {
 		}
 		parent = p
 	}
+}
+
+func TestTree_FindPath(t *testing.T) {
+	test.NewTempApp(t)
+	test.ApplyTheme(t, test.NewTheme())
+
+	treeData := map[string][]string{
+		"":         {"item_1", "item_2"},
+		"item_1":   {"item_1_1", "item_1_2"},
+		"item_2":   {"item_2_1", "item_2_2"},
+		"item_1_1": {"item_1_1_1", "item_1_1_2"},
+		"item_1_2": {"item_1_2_1", "item_1_2_2"},
+	}
+	tree := NewTreeWithStrings(treeData)
+	w := test.NewWindow(tree)
+	defer w.Close()
+
+	t.Run("non existing node", func(t *testing.T) {
+		found, parents := tree.findPath("", "item_4")
+		assert.False(t, found)
+		assert.Nil(t, parents)
+	})
+
+	t.Run("no parents", func(t *testing.T) {
+		found, parents := tree.findPath("", "item_2")
+		assert.True(t, found)
+		assert.Equal(t, parents, []string{""})
+	})
+
+	t.Run("deeply nested node", func(t *testing.T) {
+		want := []string{"", "item_1", "item_1_2"}
+		found, parents := tree.findPath("", "item_1_2_2")
+		assert.True(t, found)
+		// Also make sure slice is ordered
+		for i, n := range parents {
+			assert.Equal(t, want[i], n)
+		}
+	})
+
+	t.Run("from node instead of root", func(t *testing.T) {
+		found, parents := tree.findPath("item_2", "item_1_2_2")
+		assert.False(t, found)
+		assert.Nil(t, parents)
+	})
+}
+
+func TestTree_OpenBranches(t *testing.T) {
+	test.NewTempApp(t)
+	test.ApplyTheme(t, test.NewTheme())
+
+	treeData := map[string][]string{
+		"":         {"item_1", "item_2"},
+		"item_1":   {"item_1_1", "item_1_2"},
+		"item_2":   {"item_2_1", "item_2_2"},
+		"item_1_1": {"item_1_1_1", "item_1_1_2"},
+		"item_1_2": {"item_1_2_1", "item_1_2_2"},
+	}
+	tree := NewTreeWithStrings(treeData)
+	w := test.NewWindow(tree)
+	defer w.Close()
+
+	t.Run("expand to nested node", func(t *testing.T) {
+		tree.CloseAllBranches()
+		tree.openBranches("item_1_1_1")
+
+		assert.True(t, tree.IsBranchOpen("item_1"))
+		assert.True(t, tree.IsBranchOpen("item_1_1"))
+		assert.False(t, tree.IsBranchOpen("item_1_2"))
+		assert.False(t, tree.IsBranchOpen("item_2"))
+	})
+
+	t.Run("expand to non-existent node", func(t *testing.T) {
+		tree.CloseAllBranches()
+		tree.openBranches("non_existent")
+
+		assert.False(t, tree.IsBranchOpen("item_1"))
+		assert.False(t, tree.IsBranchOpen("item_1_1"))
+		assert.False(t, tree.IsBranchOpen("item_1_2"))
+	})
+
+	t.Run("expand when parents already open", func(t *testing.T) {
+		tree.CloseAllBranches()
+		tree.OpenBranch("item_1")
+		tree.OpenBranch("item_1_1")
+
+		tree.openBranches("item_1_1_1")
+		assert.True(t, tree.IsBranchOpen("item_1"))
+		assert.True(t, tree.IsBranchOpen("item_1_1"))
+	})
 }

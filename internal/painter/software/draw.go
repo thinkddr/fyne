@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
@@ -155,6 +156,28 @@ func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRG
 	drawTex(x, y, width, height, base, scaledImg, clip, alpha)
 }
 
+func drawBezierCurve(c fyne.Canvas, bezierCurve *canvas.BezierCurve, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	pad := painter.VectorPad(bezierCurve)
+	scaledWidth := scale.ToScreenCoordinate(c, bezierCurve.Size().Width+pad*2)
+	scaledHeight := scale.ToScreenCoordinate(c, bezierCurve.Size().Height+pad*2)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
+	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
+
+	raw := painter.DrawBezierCurve(bezierCurve, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
+	})
+
+	// the clip intersect above cannot be negative, so we may need to compensate
+	offX, offY := 0, 0
+	if scaledX < 0 {
+		offX = -scaledX
+	}
+	if scaledY < 0 {
+		offY = -scaledY
+	}
+	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
+}
+
 func drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	pad := painter.VectorPad(line)
 	scaledWidth := scale.ToScreenCoordinate(c, line.Size().Width+pad*2)
@@ -221,6 +244,20 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	clippedBounds := clip.Intersect(imgBounds)
 	srcPt := image.Point{X: clippedBounds.Min.X - imgBounds.Min.X, Y: clippedBounds.Min.Y - imgBounds.Min.Y}
 	draw.Draw(base, clippedBounds, txtImg, srcPt, draw.Over)
+
+	if text.TextStyle.Underline || text.TextStyle.Strikethrough {
+		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
+		line := canvas.NewLine(color)
+		line.Resize(fyne.NewSize(bounds.Width, 0))
+		if text.TextStyle.Underline {
+			underlinePos := fyne.NewPos(pos.X, pos.Y+baseline+painter.UnderlineOffsetFromBaseline)
+			drawLine(c, line, underlinePos, base, clip)
+		}
+		if text.TextStyle.Strikethrough {
+			strikePos := fyne.NewPos(pos.X, pos.Y+baseline*painter.StrikethroughToBaselineFactor)
+			drawLine(c, line, strikePos, base, clip)
+		}
+	}
 }
 
 func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {

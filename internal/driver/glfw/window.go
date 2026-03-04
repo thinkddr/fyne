@@ -347,11 +347,13 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 		rawCursor, isCustomCursor := fyneToNativeCursor(cursor)
 		w.cursor = cursor
 
-		if rawCursor == nil {
-			w.view().SetInputMode(CursorMode, CursorHidden)
-		} else {
-			w.view().SetInputMode(CursorMode, CursorNormal)
-			w.SetCursor(rawCursor)
+		if view := w.view(); view != nil { // not yet visible? linux weirdness
+			if rawCursor == nil {
+				view.SetInputMode(CursorMode, CursorHidden)
+			} else {
+				view.SetInputMode(CursorMode, CursorNormal)
+				w.SetCursor(rawCursor)
+			}
 		}
 		w.setCustomCursor(rawCursor, isCustomCursor)
 	}
@@ -743,6 +745,10 @@ func (w *window) processFocused(focus bool) {
 	} else {
 		w.canvas.FocusLost()
 		w.mousePos = fyne.Position{}
+		// Avoid triggering menu on Alt+Tab: glfw sends a fake "alt key released" event immediately after
+		// unfocusing the window, and it should be ignored.
+		w.menuTogglePending = desktop.KeyNone
+		w.menuDeactivationPending = desktop.KeyNone
 
 		// check whether another window was focused or not
 		if curWindow != w {
@@ -782,9 +788,14 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 			shortcut = &fyne.ShortcutPaste{
 				Clipboard: NewClipboard(),
 			}
-		case fyne.KeyC, fyne.KeyInsert: // detect copy shortcut
+		case fyne.KeyC: // detect copy shortcut
 			shortcut = &fyne.ShortcutCopy{
 				Clipboard: NewClipboard(),
+			}
+		case fyne.KeyInsert: // detect copy shortcut (alternative
+			shortcut = &fyne.ShortcutCopy{
+				Clipboard: NewClipboard(),
+				Secondary: true,
 			}
 		case fyne.KeyX: // detect cut shortcut
 			shortcut = &fyne.ShortcutCut{
@@ -797,13 +808,15 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 
 	if modifier == fyne.KeyModifierShift {
 		switch keyName {
-		case fyne.KeyInsert: // detect paste shortcut
+		case fyne.KeyInsert: // detect paste shortcut (alternative)
 			shortcut = &fyne.ShortcutPaste{
 				Clipboard: NewClipboard(),
+				Secondary: true,
 			}
-		case fyne.KeyDelete: // detect cut shortcut
+		case fyne.KeyDelete: // detect cut shortcut (alternative)
 			shortcut = &fyne.ShortcutCut{
 				Clipboard: NewClipboard(),
+				Secondary: true,
 			}
 		}
 	}

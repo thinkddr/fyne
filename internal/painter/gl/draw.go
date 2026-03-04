@@ -6,6 +6,8 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/cache"
 	paint "fyne.io/fyne/v2/internal/painter"
 )
 
@@ -19,13 +21,6 @@ func (p *painter) createBuffer(size int) Buffer {
 	p.ctx.BufferData(arrayBuffer, make([]float32, size), staticDraw)
 	p.logError()
 	return vbo
-}
-
-func (p *painter) updateBuffer(vbo Buffer, points []float32) {
-	p.ctx.BindBuffer(arrayBuffer, vbo)
-	p.logError()
-	p.ctx.BufferSubData(arrayBuffer, points)
-	p.logError()
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
@@ -111,7 +106,72 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 	p.logError()
 }
 
-func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
+func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Position, frame fyne.Size) {
+	if bezierCurve.StrokeColor == color.Transparent || bezierCurve.StrokeColor == nil || bezierCurve.StrokeWidth == 0 {
+		return
+	}
+
+	// Vertex: BEG
+	bounds, points := p.vecRectCoords(pos, bezierCurve, frame, 0.0)
+	program := p.bezierCurveProgram
+	p.ctx.UseProgram(program.ref)
+	p.updateBuffer(program.buff, points)
+	p.UpdateVertexArray(program, "vert", 2, 4, 0)
+	p.UpdateVertexArray(program, "normal", 2, 4, 2)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.logError()
+	// Vertex: END
+
+	// Fragment: BEG
+	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+
+	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
+	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+
+	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
+	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+
+	// ensure stroke width is not larger than the size of the object
+	strokeWidth := fyne.Min(bezierCurve.StrokeWidth, fyne.Min(bezierCurve.Size().Width, bezierCurve.Size().Height))
+	if strokeWidth < 1 {
+		strokeWidth = 1
+	}
+	p1, p2, cp := paint.NormalizeBezierCurvePoints(bezierCurve.StartPoint, bezierCurve.EndPoint, bezierCurve.ControlPoints, bezierCurve.Size(), strokeWidth/2.0)
+
+	p1XScaled, p1YScaled := roundToPixel(p1.X*p.pixScale, 1.0), roundToPixel(p1.Y*p.pixScale, 1.0)
+	p.SetUniform2f(program, "start_point", p1XScaled, p1YScaled)
+
+	p2XScaled, p2YScaled := roundToPixel(p2.X*p.pixScale, 1.0), roundToPixel(p2.Y*p.pixScale, 1.0)
+	p.SetUniform2f(program, "end_point", p2XScaled, p2YScaled)
+
+	if len(cp) == 1 {
+		cpXScaled, cpYScaled := roundToPixel(cp[0].X*p.pixScale, 1.0), roundToPixel(cp[0].Y*p.pixScale, 1.0)
+		p.SetUniform2f(program, "control_point1", cpXScaled, cpYScaled)
+	} else if len(cp) == 2 {
+		cp1XScaled, cp1YScaled := roundToPixel(cp[0].X*p.pixScale, 1.0), roundToPixel(cp[0].Y*p.pixScale, 1.0)
+		p.SetUniform2f(program, "control_point1", cp1XScaled, cp1YScaled)
+
+		cp2XScaled, cp2YScaled := roundToPixel(cp[1].X*p.pixScale, 1.0), roundToPixel(cp[1].Y*p.pixScale, 1.0)
+		p.SetUniform2f(program, "control_point2", cp2XScaled, cp2YScaled)
+	}
+	p.SetUniform1f(program, "num_control_points", fyne.Min(float32(len(cp)), 2))
+
+	strokeWidthScaled := roundToPixel(strokeWidth*p.pixScale, 1.0)
+	p.SetUniform1f(program, "stroke_width_half", strokeWidthScaled*0.5)
+
+	r, g, b, a := getFragmentColor(bezierCurve.StrokeColor)
+	p.SetUniform4f(program, "stroke_color", r, g, b, a)
+
+	p.logError()
+	// Fragment: END
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
+}
+
+func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
 	switch obj := o.(type) {
 	case *canvas.Circle:
 		p.drawCircle(obj, pos, frame)
@@ -124,7 +184,7 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 	case *canvas.Rectangle:
 		p.drawRectangle(obj, pos, frame)
 	case *canvas.Text:
-		p.drawText(obj, pos, frame)
+		p.drawText(obj, pos, frame, clip)
 	case *canvas.LinearGradient:
 		p.drawGradient(obj, p.newGlLinearGradientTexture, pos, frame)
 	case *canvas.RadialGradient:
@@ -133,6 +193,8 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 		p.drawPolygon(obj, pos, frame)
 	case *canvas.Arc:
 		p.drawArc(obj, pos, frame)
+	case *canvas.BezierCurve:
+		p.drawBezierCurve(obj, pos, frame)
 	case *canvas.Ellipse:
 		p.drawEllipse(obj, pos, frame)
 	}
@@ -189,33 +251,25 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
 		p.SetUniform2f(program, "rect_size_half", rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
-		// the maximum possible corner radius for a circular shape, calculated taking into account the rect coords with aspect ratio
-		maxCornerRadius := paint.GetMaximumRadius(fyne.NewSize(
-			bounds[2]-bounds[0], bounds[3]-bounds[1],
-		))
-
-		if topRightRadius == canvas.RadiusMaximum {
-			topRightRadius = maxCornerRadius
-		}
-
-		if topLeftRadius == canvas.RadiusMaximum {
-			topLeftRadius = maxCornerRadius
-		}
-
-		if bottomRightRadius == canvas.RadiusMaximum {
-			bottomRightRadius = maxCornerRadius
-		}
-
-		if bottomLeftRadius == canvas.RadiusMaximum {
-			bottomLeftRadius = maxCornerRadius
-		}
-
-		p.SetUniform4f(program, "radius",
-			roundToPixel(topRightRadius*p.pixScale, 1.0),
-			roundToPixel(bottomRightRadius*p.pixScale, 1.0),
-			roundToPixel(topLeftRadius*p.pixScale, 1.0),
-			roundToPixel(bottomLeftRadius*p.pixScale, 1.0),
+		// the maximum possible corner radii for a circular shape, calculated taking into account the rect coords with aspect ratio
+		size := fyne.NewSize(bounds[2]-bounds[0], bounds[3]-bounds[1])
+		topRightRadiusScaled := roundToPixel(
+			paint.GetMaximumCornerRadius(topRightRadius, topLeftRadius, bottomRightRadius, size)*p.pixScale,
+			1.0,
 		)
+		topLeftRadiusScaled := roundToPixel(
+			paint.GetMaximumCornerRadius(topLeftRadius, topRightRadius, bottomLeftRadius, size)*p.pixScale,
+			1.0,
+		)
+		bottomRightRadiusScaled := roundToPixel(
+			paint.GetMaximumCornerRadius(bottomRightRadius, bottomLeftRadius, topRightRadius, size)*p.pixScale,
+			1.0,
+		)
+		bottomLeftRadiusScaled := roundToPixel(
+			paint.GetMaximumCornerRadius(bottomLeftRadius, bottomRightRadius, topLeftRadius, size)*p.pixScale,
+			1.0,
+		)
+		p.SetUniform4f(program, "radius", topRightRadiusScaled, bottomRightRadiusScaled, topLeftRadiusScaled, bottomLeftRadiusScaled)
 
 		edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 		p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
@@ -243,6 +297,7 @@ func (p *painter) drawPolygon(polygon *canvas.Polygon, pos fyne.Position, frame 
 	if ((polygon.FillColor == color.Transparent || polygon.FillColor == nil) && (polygon.StrokeColor == color.Transparent || polygon.StrokeColor == nil || polygon.StrokeWidth == 0)) || polygon.Sides < 3 {
 		return
 	}
+	size := polygon.Size()
 
 	// Vertex: BEG
 	bounds, points := p.vecRectCoords(pos, polygon, frame, 0.0)
@@ -266,14 +321,15 @@ func (p *painter) drawPolygon(polygon *canvas.Polygon, pos fyne.Position, frame 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
 
-	outerRadius := fyne.Min(polygon.Size().Width, polygon.Size().Height) / 2
+	outerRadius := fyne.Min(size.Width, size.Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
-	p.SetUniform1f(program, "shape_radius", outerRadiusScaled)
+	p.SetUniform1f(program, "outer_radius", outerRadiusScaled)
 
 	p.SetUniform1f(program, "angle", polygon.Angle)
 	p.SetUniform1f(program, "sides", float32(polygon.Sides))
 
-	cornerRadiusScaled := roundToPixel(polygon.CornerRadius*p.pixScale, 1.0)
+	cornerRadius := fyne.Min(paint.GetMaximumRadius(size), polygon.CornerRadius)
+	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
 
 	strokeWidthScaled := roundToPixel(polygon.StrokeWidth*p.pixScale, 1.0)
@@ -335,10 +391,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	p.SetUniform1f(program, "start_angle", startAngle)
 	p.SetUniform1f(program, "end_angle", endAngle)
 
-	cornerRadius := arc.CornerRadius
-	if arc.CornerRadius == canvas.RadiusMaximum {
-		cornerRadius = paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle)
-	}
+	cornerRadius := fyne.Min(paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
 
@@ -426,8 +479,12 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 	p.logError()
 }
 
-func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
-	if text.Text == "" || text.Text == " " {
+func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
+	if text.Text == "" {
+		return
+	}
+	decorated := text.TextStyle.Underline || text.TextStyle.Strikethrough
+	if text.Text == " " && !decorated {
 		return
 	}
 
@@ -444,10 +501,37 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 		pos = fyne.NewPos(pos.X, pos.Y+(containerSize.Height-size.Height)/2)
 	}
 
+	var clipPos fyne.Position
+	var clipSize fyne.Size
+	if clip != nil {
+		clipPos, clipSize = clip.Rect()
+	} else {
+		clipSize = frame
+	}
+	if pos.Y > clipPos.Y+clipSize.Height || pos.Y+size.Height < clipPos.Y ||
+		pos.X > clipPos.X+clipSize.Width || pos.X+size.Width < clipPos.X {
+		return
+	}
+
 	// text size is sensitive to position on screen
-	size, _ = roundToPixelCoords(size, text.Position(), p.pixScale)
+	size.Width = roundToPixel(size.Width, p.pixScale)
+	size.Height = roundToPixel(size.Height, p.pixScale)
 	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale)
 	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
+
+	if decorated {
+		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
+		line := canvas.NewLine(text.Color)
+		line.Resize(fyne.NewSize(size.Width, 0))
+		if text.TextStyle.Underline {
+			underlinePos := fyne.NewPos(pos.X, pos.Y+baseline+paint.UnderlineOffsetFromBaseline)
+			p.drawLine(line, underlinePos, frame)
+		}
+		if text.TextStyle.Strikethrough {
+			strikePos := fyne.NewPos(pos.X, pos.Y+baseline*paint.StrikethroughToBaselineFactor)
+			p.drawLine(line, strikePos, frame)
+		}
+	}
 }
 
 func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
@@ -469,7 +553,7 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 			cornerRadius = img.CornerRadius
 		}
 	}
-	points := p.rectCoords(size, pos, frame, fill, aspect, pad)
+	points, insets := p.rectCoords(size, pos, frame, fill, aspect, pad)
 	inner, _ := rectInnerCoords(size, pos, fill, aspect)
 
 	p.ctx.UseProgram(p.program.ref)
@@ -481,6 +565,7 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 	cornerRadius = fyne.Min(paint.GetMaximumRadius(size), cornerRadius)
 	p.SetUniform1f(p.program, "cornerRadius", cornerRadius*p.pixScale)
 	p.SetUniform2f(p.program, "size", inner.Width*p.pixScale, inner.Height*p.pixScale)
+	p.SetUniform4f(p.program, "inset", insets[0], insets[1], insets[2], insets[3]) // texture coordinate insets (minX, minY, maxX, maxY)
 
 	p.SetUniform1f(p.program, "alpha", alpha)
 
@@ -554,7 +639,7 @@ func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather f
 // rectCoords calculates the openGL coordinate space of a rectangle
 func (p *painter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
 	fill canvas.ImageFill, aspect float32, pad float32,
-) []float32 {
+) ([]float32, [4]float32) {
 	size, pos = rectInnerCoords(size, pos, fill, aspect)
 	size, pos = roundToPixelCoords(size, pos, p.pixScale)
 
@@ -585,13 +670,15 @@ func (p *painter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
 		}
 	}
 
+	insets := [4]float32{xInset, yInset, 1.0 - xInset, 1.0 - yInset}
+
 	return []float32{
 		// coord x, y, z texture x, y
-		x1, y2, 0, xInset, 1.0 - yInset, // top left
-		x1, y1, 0, xInset, yInset, // bottom left
-		x2, y2, 0, 1.0 - xInset, 1.0 - yInset, // top right
-		x2, y1, 0, 1.0 - xInset, yInset, // bottom right
-	}
+		x1, y2, 0, insets[0], insets[3], // top left
+		x1, y1, 0, insets[0], insets[1], // bottom left
+		x2, y2, 0, insets[2], insets[3], // top right
+		x2, y1, 0, insets[2], insets[1], // bottom right
+	}, insets
 }
 
 func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, aspect float32) (fyne.Size, fyne.Position) {

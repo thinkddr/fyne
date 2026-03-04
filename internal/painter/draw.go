@@ -33,6 +33,7 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 
 	outerRadius := fyne.Min(size.Width, size.Height) / 2
 	innerRadius := float32(float64(outerRadius) * math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio))))
+	cornerRadius := fyne.Min(GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
 	startAngle, endAngle := NormalizeArcAngles(arc.StartAngle, arc.EndAngle)
 
 	// convert to radians
@@ -48,11 +49,6 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 		sweep = 2 * math.Pi
 	} else if sweep < -2*math.Pi {
 		sweep = -2 * math.Pi
-	}
-
-	cornerRadius := arc.CornerRadius
-	if arc.CornerRadius == canvas.RadiusMaximum {
-		cornerRadius = GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle)
 	}
 
 	cornerRadius = scale(cornerRadius)
@@ -156,11 +152,13 @@ func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32)
 // The scale function is used to understand how many pixels are required per unit of size.
 func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	size := polygon.Size()
-	cornerRadius := scale(polygon.CornerRadius)
 
 	width := int(scale(size.Width + vectorPad*2))
 	height := int(scale(size.Height + vectorPad*2))
-	shapeRadius := fyne.Min(size.Width, size.Height) / 2
+	outerRadius := scale(fyne.Min(size.Width, size.Height) / 2)
+	cornerRadius := scale(fyne.Min(GetMaximumRadius(size), polygon.CornerRadius))
+	sides := int(polygon.Sides)
+	angle := polygon.Angle
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
@@ -168,15 +166,15 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 	if polygon.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(polygon.FillColor)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(shapeRadius), float64(cornerRadius), float64(polygon.Angle), int(polygon.Sides), filler)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), int(sides), filler)
 		filler.Draw()
 	}
 
 	if polygon.StrokeColor != nil && polygon.StrokeWidth > 0 {
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(polygon.StrokeColor)
-		dasher.SetStroke(fixed.Int26_6(float64(polygon.StrokeWidth)*64), 0, nil, nil, nil, 0, nil, 0)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(shapeRadius), float64(cornerRadius), float64(polygon.Angle), int(polygon.Sides), dasher)
+		dasher.SetStroke(fixed.Int26_6(float64(scale(polygon.StrokeWidth))*64), 0, nil, nil, nil, 0, nil, 0)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), int(sides), dasher)
 		dasher.Draw()
 	}
 
@@ -195,24 +193,12 @@ func DrawRectangle(rect *canvas.Rectangle, rWidth, rHeight, vectorPad float32, s
 }
 
 func drawOblong(fill, strokeCol color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
-	// The maximum possible corner radius for a circular shape
-	maxCornerRadius := GetMaximumRadius(fyne.NewSize(rWidth, rHeight))
-
-	if topRightRadius == canvas.RadiusMaximum {
-		topRightRadius = maxCornerRadius
-	}
-
-	if topLeftRadius == canvas.RadiusMaximum {
-		topLeftRadius = maxCornerRadius
-	}
-
-	if bottomRightRadius == canvas.RadiusMaximum {
-		bottomRightRadius = maxCornerRadius
-	}
-
-	if bottomLeftRadius == canvas.RadiusMaximum {
-		bottomLeftRadius = maxCornerRadius
-	}
+	// The maximum possible corner radii for a circular shape
+	size := fyne.NewSize(rWidth, rHeight)
+	topRightRadius = GetMaximumCornerRadius(topRightRadius, topLeftRadius, bottomRightRadius, size)
+	topLeftRadius = GetMaximumCornerRadius(topLeftRadius, topRightRadius, bottomLeftRadius, size)
+	bottomRightRadius = GetMaximumCornerRadius(bottomRightRadius, bottomLeftRadius, topRightRadius, size)
+	bottomLeftRadius = GetMaximumCornerRadius(bottomLeftRadius, bottomRightRadius, topLeftRadius, size)
 
 	width := int(scale(rWidth + vectorPad*2))
 	height := int(scale(rHeight + vectorPad*2))
@@ -308,6 +294,42 @@ func drawOblong(fill, strokeCol color.Color, strokeWidth, topRightRadius, topLef
 	return raw
 }
 
+// DrawBezierCurve rasterizes the given bezier curve object into an image.
+// The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
+// The scale function is used to understand how many pixels are required per unit of size.
+func DrawBezierCurve(bezierCurve *canvas.BezierCurve, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	col := bezierCurve.StrokeColor
+	size := bezierCurve.Size()
+	width := int(scale(size.Width + vectorPad*2))
+	height := int(scale(size.Height + vectorPad*2))
+	stroke := scale(bezierCurve.StrokeWidth)
+	if stroke < 1 { // software painter doesn't fade bezier curve to compensate
+		stroke = 1
+	}
+
+	raw := image.NewRGBA(image.Rect(0, 0, width, height))
+	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
+	dasher := rasterx.NewDasher(width, height, scanner)
+	dasher.SetColor(col)
+	dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
+
+	p1, p2, cp := NormalizeBezierCurvePoints(bezierCurve.StartPoint, bezierCurve.EndPoint, bezierCurve.ControlPoints, size, 0)
+	dasher.Start(rasterx.ToFixedP(float64(scale(p1.X+vectorPad)), float64(scale(p1.Y+vectorPad))))
+	if len(cp) == 1 {
+		dasher.QuadBezier(rasterx.ToFixedP(float64(scale(cp[0].X+vectorPad)), float64(scale(cp[0].Y+vectorPad))), rasterx.ToFixedP(float64(scale(p2.X+vectorPad)), float64(scale(p2.Y+vectorPad))))
+	} else if len(cp) == 2 {
+		dasher.CubeBezier(rasterx.ToFixedP(float64(scale(cp[0].X+vectorPad)), float64(scale(cp[0].Y+vectorPad))), rasterx.ToFixedP(float64(scale(cp[1].X+vectorPad)), float64(scale(cp[1].Y+vectorPad))), rasterx.ToFixedP(float64(scale(p2.X+vectorPad)), float64(scale(p2.Y+vectorPad))))
+	} else {
+		// no control points, draw a line
+		dasher.Line(rasterx.ToFixedP(float64(scale(p2.X+vectorPad)), float64(scale(p2.Y+vectorPad))))
+	}
+
+	dasher.Stop(false)
+	dasher.Draw()
+
+	return raw
+}
+
 // DrawEllipse rasterizes the given ellipse object into an image.
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
 // The scale function is used to understand how many pixels are required per unit of size.
@@ -346,11 +368,17 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 		return
 	}
 	gf := rasterx.RoundGap
+	angleStep := 2 * math.Pi / float64(sides)
+	rotRads := rot*math.Pi/180 - math.Pi/2
+
+	// fully rounded, draw circle
+	if math.Min(cornerRadius, radius) == radius {
+		rasterx.AddCircle(cx, cy, radius, p)
+		return
+	}
 
 	// sharp polygon fast path
 	if cornerRadius <= 0 {
-		angleStep := 2 * math.Pi / float64(sides)
-		rotRads := rot*math.Pi/180 - math.Pi/2
 		x0 := cx + radius*math.Cos(rotRads)
 		y0 := cy + radius*math.Sin(rotRads)
 		p.Start(rasterx.ToFixedP(x0, y0))
@@ -371,8 +399,6 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 	}
 
 	// regular polygon vertices
-	angleStep := 2 * math.Pi / float64(sides)
-	rotRads := -rot*math.Pi/180 - math.Pi/2
 	xs := make([]float64, sides)
 	ys := make([]float64, sides)
 	for i := 0; i < sides; i++ {
@@ -660,11 +686,34 @@ func GetCornerRadius(perCornerRadius, baseCornerRadius float32) float32 {
 	return perCornerRadius
 }
 
-// GetMaximumRadius returns the maximum possible radius that fits within the given size.
+// GetMaximumRadius returns the maximum possible corner radius that fits within the given size.
 // It calculates half of the smaller dimension (width or height) of the provided fyne.Size.
-// This is typically used for drawing circular corners in rectangles, circles or squares.
+//
+// This is typically used for drawing circular corners in rectangles, circles or squares with the same radius for all corners.
 func GetMaximumRadius(size fyne.Size) float32 {
 	return fyne.Min(size.Height, size.Width) / 2
+}
+
+// GetMaximumCornerRadius returns the maximum possible corner radius for an individual corner,
+// considering the specified corner radius, the radii of adjacent corners, and the maximum radii
+// allowed for the width and height of the shape. Corner radius may utilize unused capacity from adjacent corners with radius smaller than maximum value
+// so this corner can grow up to double the maximum radius of the smaller dimension (width or height) without causing overlaps.
+//
+// This is typically used for drawing circular corners in rectangles or squares with different corner radii.
+func GetMaximumCornerRadius(radius, adjacentWidthRadius, adjacentHeightRadius float32, size fyne.Size) float32 {
+	maxWidthRadius := size.Width / 2
+	maxHeightRadius := size.Height / 2
+	// fast path: corner radius fits within both per-axis maxima
+	if radius <= fyne.Min(maxWidthRadius, maxHeightRadius) {
+		return radius
+	}
+	// expand per-axis limits by borrowing any unused capacity from adjacent corners
+	expandedMaxWidthRadius := 2*maxWidthRadius - fyne.Min(maxWidthRadius, adjacentWidthRadius)
+	expandedMaxHeightRadius := 2*maxHeightRadius - fyne.Min(maxHeightRadius, adjacentHeightRadius)
+
+	// respect the smaller axis and never exceed the requested radius
+	expandedMaxRadius := fyne.Min(expandedMaxWidthRadius, expandedMaxHeightRadius)
+	return fyne.Min(expandedMaxRadius, radius)
 }
 
 // GetMaximumRadiusArc returns the maximum possible corner radius for an arc segment based on the outer radius,
@@ -673,6 +722,7 @@ func GetMaximumRadius(size fyne.Size) float32 {
 func GetMaximumRadiusArc(outerRadius, innerRadius, sweepAngle float32) float32 {
 	// height (thickness), width (length)
 	thickness := outerRadius - innerRadius
+	// TODO: length formula can be improved to get a fully rounded (pill shape) outer edge for thin (small sweep) arc segments
 	span := math.Sin(0.5 * math.Min(math.Abs(float64(sweepAngle))*math.Pi/180.0, math.Pi)) // span in (0,1)
 	length := 1.5 * float64(outerRadius) * span / (1 + span)                               // no division-by-zero risk
 
@@ -687,4 +737,48 @@ func GetMaximumRadiusArc(outerRadius, innerRadius, sweepAngle float32) float32 {
 // The function also reverses the direction: positive is clockwise, negative is counter-clockwise
 func NormalizeArcAngles(startAngle, endAngle float32) (float32, float32) {
 	return -(startAngle - 90), -(endAngle - 90)
+}
+
+// NormalizeBezierCurvePoints clamps the start, end, and control points of a Bezier curve
+// to ensure they remain within the bounds of the given size, considering the offset e.g. stroke width.
+// It returns the normalized start and end positions, and a filtered slice of control points
+// that are not coincident with the start or end points. If two control points are provided
+// and they are identical, only one is added if it is not coincident with the start or end.
+func NormalizeBezierCurvePoints(startPoint, endPoint fyne.Position, controlPoints []fyne.Position, size fyne.Size, offset float32) (fyne.Position, fyne.Position, []fyne.Position) {
+	clampPoint := func(p fyne.Position) (float32, float32) {
+		return fyne.Min(fyne.Max(p.X, offset), fyne.Max(size.Width-offset, 0)), fyne.Min(fyne.Max(p.Y, offset), fyne.Max(size.Height-offset, 0))
+	}
+	p1x, p1y := clampPoint(startPoint)
+	p2x, p2y := clampPoint(endPoint)
+	cp := make([]fyne.Position, 0, 2)
+
+	if len(controlPoints) == 1 {
+		cpX, cpY := clampPoint(controlPoints[0])
+		if (cpX != p1x || cpY != p1y) && (cpX != p2x || cpY != p2y) {
+			// only add the control point if it is not the same as start and end point
+			cp = append(cp, fyne.NewPos(cpX, cpY))
+		}
+	} else if len(controlPoints) >= 2 {
+		cp1x, cp1y := clampPoint(controlPoints[0])
+		cp2x, cp2y := clampPoint(controlPoints[1])
+
+		if cp1x == cp2x && cp1y == cp2y {
+			// if both control points are the same, only add one if it is not the same as start and end point
+			if (cp1x != p1x || cp1y != p1y) && (cp1x != p2x || cp1y != p2y) {
+				// only add the control point if it is not the same as start and end point
+				cp = append(cp, fyne.NewPos(cp1x, cp1y))
+			}
+		} else {
+			if cp1x != p1x || cp1y != p1y {
+				// only add the control point if it is not the same as start point
+				cp = append(cp, fyne.NewPos(cp1x, cp1y))
+			}
+			if cp2x != p2x || cp2y != p2y {
+				// only add the control point if it is not the same as end point
+				cp = append(cp, fyne.NewPos(cp2x, cp2y))
+			}
+		}
+	}
+
+	return fyne.NewPos(p1x, p1y), fyne.NewPos(p2x, p2y), cp
 }

@@ -56,7 +56,7 @@ var (
 	compiled          []ProgramState // avoid multiple compilations with the re-used mobile GUI context
 	noBuffer          = Buffer{}
 	noShader          = Shader{}
-	textureFilterToGL = [...]int32{gl.Linear, gl.Nearest}
+	textureFilterToGL = [...]int32{gl.Linear, gl.Nearest, gl.Linear}
 )
 
 func (p *painter) glctx() gl.Context {
@@ -74,7 +74,7 @@ func (p *painter) Init() {
 			uniforms:   make(map[string]*UniformState),
 			attributes: make(map[string]Attribute),
 		}
-		p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size")
+		p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size", "inset")
 		p.enableAttribArrays(p.program, "vert", "vertTexCoord")
 
 		p.lineProgram = ProgramState{
@@ -120,7 +120,7 @@ func (p *painter) Init() {
 		}
 		p.getUniformLocations(p.polygonProgram,
 			"frame_size", "rect_coords", "edge_softness",
-			"shape_radius", "angle", "sides",
+			"outer_radius", "angle", "sides",
 			"fill_color", "corner_radius",
 			"stroke_width", "stroke_color",
 		)
@@ -142,6 +142,20 @@ func (p *painter) Init() {
 		)
 		p.enableAttribArrays(p.arcProgram, "vert", "normal")
 
+		p.bezierCurveProgram = ProgramState{
+			ref:        p.createProgram("bezier_curve_es"),
+			buff:       p.createBuffer(16),
+			uniforms:   make(map[string]*UniformState),
+			attributes: make(map[string]Attribute),
+		}
+		p.getUniformLocations(p.bezierCurveProgram,
+			"frame_size", "rect_coords", "edge_softness",
+			"start_point", "end_point", "num_control_points",
+			"control_point1", "control_point2",
+			"stroke_width_half", "stroke_color",
+		)
+		p.enableAttribArrays(p.bezierCurveProgram, "vert", "normal")
+
 		p.ellipseProgram = ProgramState{
 			ref:        p.createProgram("ellipse_es"),
 			buff:       p.createBuffer(16),
@@ -162,6 +176,7 @@ func (p *painter) Init() {
 			p.roundRectangleProgram,
 			p.polygonProgram,
 			p.arcProgram,
+			p.bezierCurveProgram,
 			p.ellipseProgram,
 		}
 	}
@@ -172,7 +187,8 @@ func (p *painter) Init() {
 	p.roundRectangleProgram = compiled[3]
 	p.polygonProgram = compiled[4]
 	p.arcProgram = compiled[5]
-	p.ellipseProgram = compiled[6]
+	p.bezierCurveProgram = compiled[6]
+	p.ellipseProgram = compiled[7]
 }
 
 func (p *painter) getUniformLocations(pState ProgramState, names ...string) {
