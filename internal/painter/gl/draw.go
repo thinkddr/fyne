@@ -24,7 +24,6 @@ func (p *painter) createBuffer(size int) Buffer {
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	shadow := circle.Shadow.ShadowColor != color.Transparent && circle.Shadow.ShadowColor != nil && (!circle.Shadow.ShadowOffset.IsZero() || circle.Shadow.ShadowBlurRadius > 0.0)
 	radius := paint.GetMaximumRadius(circle.Size())
 	program := p.roundRectangleProgram
 
@@ -70,11 +69,12 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
 
 	var addShadow float32
-	if shadow {
+	if paint.IsShadowVisible(circle.Shadow) {
 		r, g, b, a = getFragmentColor(circle.Shadow.ShadowColor)
 		p.SetUniform4f(program, "shadow_color", r, g, b, a)
 		p.SetUniform2f(program, "shadow_offset", roundToPixel(circle.Shadow.ShadowOffset.X*p.pixScale, 1.0), roundToPixel(circle.Shadow.ShadowOffset.Y*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadow_blur_radius", roundToPixel(circle.Shadow.ShadowBlurRadius*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_spread", roundToPixel(circle.Shadow.ShadowSpread*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadow_type", float32(circle.Shadow.ShadowType))
 		addShadow = 1.0
 	}
@@ -224,7 +224,7 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 }
 
 func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, aspect float32, shadow canvas.Shadow, pos fyne.Position, frame fyne.Size) {
-	if (shadow.ShadowColor == color.Transparent || shadow.ShadowColor == nil || (shadow.ShadowOffset.IsZero() && shadow.ShadowBlurRadius == 0.0)) && (fill == color.Transparent || fill == nil) && (stroke == color.Transparent || stroke == nil || strokeWidth == 0) {
+	if !paint.IsShadowVisible(shadow) && (fill == color.Transparent || fill == nil) && (stroke == color.Transparent || stroke == nil || strokeWidth == 0) {
 		return
 	}
 
@@ -299,11 +299,12 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	p.SetUniform4f(program, "stroke_color", r, g, b, a)
 
 	var addShadow float32
-	if shadow.ShadowColor != color.Transparent && shadow.ShadowColor != nil && (!shadow.ShadowOffset.IsZero() || shadow.ShadowBlurRadius > 0.0) {
+	if paint.IsShadowVisible(shadow) {
 		r, g, b, a = getFragmentColor(shadow.ShadowColor)
 		p.SetUniform4f(program, "shadow_color", r, g, b, a)
 		p.SetUniform2f(program, "shadow_offset", roundToPixel(shadow.ShadowOffset.X*p.pixScale, 1.0), roundToPixel(shadow.ShadowOffset.Y*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadow_blur_radius", roundToPixel(shadow.ShadowBlurRadius*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_spread", roundToPixel(shadow.ShadowSpread*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadow_type", float32(shadow.ShadowType))
 		addShadow = 1.0
 	}

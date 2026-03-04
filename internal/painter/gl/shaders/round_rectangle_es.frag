@@ -23,6 +23,7 @@ uniform vec4 stroke_color;
 /* shadow params*/
 uniform float add_shadow;
 uniform float shadow_blur_radius;
+uniform float shadow_spread;
 uniform vec2 shadow_offset;
 uniform vec4 shadow_color;
 uniform float shadow_type;
@@ -114,15 +115,30 @@ void main()
 
     if (add_shadow == 1.0)
     {
+        // use rectangle size by default
+        vec2 shadow_size = rect_size_half + stroke_width_half;
+        vec4 shadow_radius = radius;
+
+        if (shadow_spread != 0.0)
+        {
+            // expand/contract by spread, adjust radii to match
+            vec2 original_size = shadow_size;
+            shadow_size = max(original_size + shadow_spread, 0.0);
+            float ratio_x = (original_size.x > 0.0) ? (shadow_size.x / original_size.x) : 1.0;
+            float ratio_y = (original_size.y > 0.0) ? (shadow_size.y / original_size.y) : 1.0;
+            // scale all corner radii proportionally, use minimum ratio so radius never exceeds the shorter adjacent edge
+            shadow_radius = max(radius * min(ratio_x, ratio_y), 0.0);
+        }
+
         // Apply shadow effect
         float distance_shadow;
         if (calc_all_quadrants)
         {
-            distance_shadow = smoothstep(0.0, shadow_blur_radius, calc_distance_all_quadrants(vec_centered_pos + shadow_offset, rect_size_half + stroke_width_half, radius));
+            distance_shadow = smoothstep(-edge_softness, shadow_blur_radius + edge_softness, calc_distance_all_quadrants(vec_centered_pos + shadow_offset, shadow_size, shadow_radius));
         }
         else
         {
-            distance_shadow = smoothstep(0.0, shadow_blur_radius, calc_distance(vec_centered_pos + shadow_offset, rect_size_half + stroke_width_half, radius));
+            distance_shadow = smoothstep(-edge_softness, shadow_blur_radius + edge_softness, calc_distance(vec_centered_pos + shadow_offset, shadow_size, shadow_radius));
         }
         float shadow_alpha = shadow_color.a * (1.0 - distance_shadow);
 

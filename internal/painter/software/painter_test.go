@@ -682,6 +682,9 @@ func TestPainter_paintRectangle_stroke_shadow(t *testing.T) {
 	test.AssertImageMatches(t, "draw_rectangle_stroke_wide_box_shadow.png", p.Paint(c))
 	obj.Aspect = 0.5
 	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow_box_shadow.png", p.Paint(c))
+
+	obj.Shadow.ShadowSpread = 3
+	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow_box_shadow_spread.png", p.Paint(c))
 }
 
 func TestPainter_paintText_clipped(t *testing.T) {

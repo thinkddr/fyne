@@ -33,15 +33,17 @@ type Shadow struct {
 	ShadowBlurRadius float32       // A value of 0 produces no blur, while larger values produce bigger and lighter shadow.
 	ShadowOffset     fyne.Position // Offset of the shadow relative to the content.
 	ShadowType       ShadowType    // Type of shadow (DropShadow or BoxShadow).
+	ShadowSpread     float32       // Spread of the shadow (positive values make the shadow larger, negative values make it smaller).
 }
 
 // NewShadow creates a new Shadow with the specified properties.
 //
 // Since: 2.8
-func NewShadow(color color.Color, blurRadius float32, offset fyne.Position, shadowType ShadowType) Shadow {
+func NewShadow(color color.Color, blurRadius, spread float32, offset fyne.Position, shadowType ShadowType) Shadow {
 	return Shadow{
 		ShadowColor:      color,
 		ShadowBlurRadius: blurRadius,
+		ShadowSpread:     spread,
 		ShadowOffset:     offset,
 		ShadowType:       shadowType,
 	}

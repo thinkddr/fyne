@@ -20,6 +20,7 @@ uniform vec4 stroke_color;
 /* shadow params*/
 uniform float add_shadow;
 uniform float shadow_blur_radius;
+uniform float shadow_spread;
 uniform vec2 shadow_offset;
 uniform vec4 shadow_color;
 uniform float shadow_type;
@@ -40,9 +41,10 @@ void main()
     if (add_shadow == 1.0)
     {
         vec2 frag_pos = gl_FragCoord.xy + shadow_offset;
+        // expand/contract rectangle bounds by spread on all sides
         vec2 p = vec2(
-            clamp(frag_pos.x, rect_coords[0], rect_coords[1]),
-            clamp(frag_pos.y, frame_size.y - rect_coords[3], frame_size.y - rect_coords[2])
+            clamp(frag_pos.x, rect_coords[0] - shadow_spread, rect_coords[1] + shadow_spread),
+            clamp(frag_pos.y, frame_size.y - rect_coords[3] - shadow_spread, frame_size.y - rect_coords[2] + shadow_spread)
         );
 
         float distance_shadow = smoothstep(0.0, shadow_blur_radius, length(frag_pos - p));
@@ -50,7 +52,7 @@ void main()
 
         if (shadow_type == 0.0)
         {
-            // remove shadow inside rectangle
+            // remove shadow inside rectangle (uses original rect, not spread rect)
             vec2 frag_pos = gl_FragCoord.xy;
             float d_h = min(frag_pos.x - rect_coords[0], rect_coords[1] - frag_pos.x);
             float d_v = min(frag_pos.y - frame_size.y + rect_coords[3], frame_size.y - rect_coords[2] - frag_pos.y);

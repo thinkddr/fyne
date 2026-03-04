@@ -382,6 +382,7 @@ func (r *markupRenderer) writeRectangle(rct *fynecanvas.Rectangle, attrs map[str
 func (r *markupRenderer) setShadowAttrs(s fynecanvas.Shadow, attrs map[string]*string) {
 	r.setColorAttr(attrs, "shadowColor", s.ShadowColor)
 	r.setFloatAttr(attrs, "shadowBlurRadius", float64(s.ShadowBlurRadius))
+	r.setFloatAttr(attrs, "shadowSpread", float64(s.ShadowSpread))
 	r.setPosAttr(attrs, "shadowOffset", s.ShadowOffset)
 	r.setFloatAttr(attrs, "shadowType", float64(s.ShadowType))
 }

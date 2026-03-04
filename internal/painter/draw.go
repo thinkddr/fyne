@@ -752,16 +752,17 @@ func NormalizeBezierCurvePoints(startPoint, endPoint fyne.Position, controlPoint
 	return fyne.NewPos(p1x, p1y), fyne.NewPos(p2x, p2y), cp
 }
 
-// GetShadowPaddings calculates the shadow paddings (left, top, right, bottom) based on offset and softness.
+// GetShadowPaddings calculates the shadow paddings (left, top, right, bottom) based on offset, blur radius and spread
 func GetShadowPaddings(shadow canvas.Shadow) [4]float32 {
 	offsetX := shadow.ShadowOffset.X
 	offsetY := shadow.ShadowOffset.Y
 	softness := shadow.ShadowBlurRadius
+	spread := shadow.ShadowSpread
 
-	rightReach := -offsetX + softness
-	leftReach := offsetX + softness
-	topReach := -offsetY + softness
-	bottomReach := offsetY + softness
+	rightReach := -offsetX + softness + spread
+	leftReach := offsetX + softness + spread
+	topReach := -offsetY + softness + spread
+	bottomReach := offsetY + softness + spread
 
 	var padLeft, padRight, padTop, padBottom float32
 
@@ -780,4 +781,9 @@ func GetShadowPaddings(shadow canvas.Shadow) [4]float32 {
 
 	// Returns paddings in order: left, top, right, bottom.
 	return [4]float32{padLeft, padTop, padRight, padBottom}
+}
+
+// IsShadowVisible determines if a shadow should be rendered based on its properties
+func IsShadowVisible(shadow canvas.Shadow) bool {
+	return shadow.ShadowColor != color.Transparent && shadow.ShadowColor != nil && (!shadow.ShadowOffset.IsZero() || shadow.ShadowBlurRadius > 0.0 || shadow.ShadowType != canvas.DropShadow || shadow.ShadowSpread > 0.0)
 }
