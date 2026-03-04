@@ -56,7 +56,7 @@ func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *i
 		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
 
-	if circle.ShadowColor != color.Transparent && circle.ShadowColor != nil && (!circle.ShadowOffset.IsZero() || circle.ShadowSoftness > 0.0) {
+	if circle.Shadow.ShadowColor != color.Transparent && circle.Shadow.ShadowColor != nil && (!circle.Shadow.ShadowOffset.IsZero() || circle.Shadow.ShadowSoftness > 0.0) {
 		bounds = drawShadow(c, circle, circle.Size(), circle.Shadow, pad, bounds, base, clip)
 	}
 

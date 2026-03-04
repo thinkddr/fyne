@@ -106,10 +106,10 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	scroll := widget.NewVScroll(box)
 	scroll.SetMinSize(box.MinSize())
 	background := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
-	background.ShadowColor = th.Color(theme.ColorNameShadow, v)
+	background.Shadow.ShadowColor = th.Color(theme.ColorNameShadow, v)
 	// TODO update initial shadow offset and softness to match ShadowingRenderer
-	background.ShadowSoftness = 1
-	background.ShadowOffset = fyne.NewPos(-float32(widget.MenuLevel)*0.4, float32(widget.MenuLevel)*0.4)
+	background.Shadow.ShadowSoftness = 1
+	background.Shadow.ShadowOffset = fyne.NewPos(-float32(widget.MenuLevel)*0.4, float32(widget.MenuLevel)*0.4)
 	objects := []fyne.CanvasObject{background, scroll}
 	for _, i := range m.Items {
 		if item, ok := i.(*menuItem); ok && item.Child() != nil {
@@ -274,7 +274,7 @@ func (r *menuRenderer) Refresh() {
 	th := r.m.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	r.b.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
-	r.b.ShadowColor = th.Color(theme.ColorNameShadow, v)
+	r.b.Shadow.ShadowColor = th.Color(theme.ColorNameShadow, v)
 
 	for _, i := range r.m.Items {
 		if txt, ok := i.(*menuItem); ok {

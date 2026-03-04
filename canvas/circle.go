@@ -23,7 +23,7 @@ type Circle struct {
 	// Support shadow configuration
 	//
 	// Since: 2.8
-	Shadow
+	Shadow Shadow
 }
 
 // NewCircle returns a new Circle instance

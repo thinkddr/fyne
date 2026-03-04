@@ -24,7 +24,7 @@ func (p *painter) createBuffer(size int) Buffer {
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	shadow := circle.ShadowColor != color.Transparent && circle.ShadowColor != nil && (!circle.ShadowOffset.IsZero() || circle.ShadowSoftness > 0.0)
+	shadow := circle.Shadow.ShadowColor != color.Transparent && circle.Shadow.ShadowColor != nil && (!circle.Shadow.ShadowOffset.IsZero() || circle.Shadow.ShadowSoftness > 0.0)
 	radius := paint.GetMaximumRadius(circle.Size())
 	program := p.roundRectangleProgram
 
@@ -71,12 +71,12 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 
 	var addShadow float32
 	if shadow {
-		r, g, b, a = getFragmentColor(circle.ShadowColor)
+		r, g, b, a = getFragmentColor(circle.Shadow.ShadowColor)
 		p.SetUniform4f(program, "shadow_color", r, g, b, a)
 
-		p.SetUniform2f(program, "shadow_offset", roundToPixel(circle.ShadowOffset.X*p.pixScale, 1.0), roundToPixel(circle.ShadowOffset.Y*p.pixScale, 1.0))
-		p.SetUniform1f(program, "shadow_softness", roundToPixel(circle.ShadowSoftness*p.pixScale, 1.0))
-		p.SetUniform1f(program, "shadow_type", float32(circle.ShadowType))
+		p.SetUniform2f(program, "shadow_offset", roundToPixel(circle.Shadow.ShadowOffset.X*p.pixScale, 1.0), roundToPixel(circle.Shadow.ShadowOffset.Y*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_softness", roundToPixel(circle.Shadow.ShadowSoftness*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_type", float32(circle.Shadow.ShadowType))
 
 		addShadow = 1.0
 	}

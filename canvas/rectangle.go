@@ -50,7 +50,7 @@ type Rectangle struct {
 	// Support shadow configuration
 	//
 	// Since: 2.8
-	Shadow
+	Shadow Shadow
 }
 
 // Hide will set this rectangle to not be visible
