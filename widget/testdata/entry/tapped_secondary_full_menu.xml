@@ -17,7 +17,7 @@
 	<overlay>
 		<widget pos="2,3" size="146x195" type="*widget.OverlayContainer">
 			<widget pos="28,17" size="73x152" type="*widget.PopUpMenu">
-				<rectangle fillColor="overlayBackground" shadowColor="shadow" shadowOffset="-1,1" shadowBlurRadius="1" size="73x152"/>
+				<rectangle fillColor="overlayBackground" shadowBlurRadius="1" shadowColor="shadow" shadowOffset="-1,1" size="73x152"/>
 				<widget size="73x152" type="*widget.Scroll">
 					<widget size="73x152" type="*widget.menuBox">
 						<rectangle fillColor="menuBackground" size="73x152"/>

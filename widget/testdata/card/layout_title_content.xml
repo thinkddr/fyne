@@ -1,7 +1,7 @@
 <canvas padded size="90x78">
 	<content>
 		<widget pos="4,4" size="82x70" type="*widget.Card">
-			<rectangle fillColor="background" pos="2,2" shadowColor="shadow" shadowBlurRadius="2" size="78x66"/>
+			<rectangle fillColor="background" pos="2,2" shadowBlurRadius="2" shadowColor="shadow" size="78x66"/>
 			<text bold pos="10,10" size="62x32" textSize="23">Hello</text>
 			<text size="0x0"></text>
 			<rectangle fillColor="inputBackground" pos="6,54" size="70x10" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>

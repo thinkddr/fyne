@@ -5,7 +5,7 @@
 	<overlay>
 		<widget size="200x300" type="*widget.PopUp">
 			<rectangle fillColor="shadow" size="200x300"/>
-			<rectangle fillColor="overlayBackground" pos="19,74" shadowColor="shadow" shadowOffset="-9,4" shadowBlurRadius="6" size="161x150"/>
+			<rectangle fillColor="overlayBackground" pos="19,74" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="-9,4" size="161x150"/>
 			<container pos="23,78" size="153x142">
 				<spacer pos="59,-4" size="98x98"/>
 				<widget size="153x142" type="*dialog.themedBackground">

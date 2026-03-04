@@ -1,7 +1,7 @@
 <canvas padded size="88x47">
 	<content>
 		<widget pos="4,4" size="80x39" type="*widget.Card">
-			<rectangle fillColor="background" pos="2,2" shadowColor="shadow" shadowBlurRadius="2" size="76x35"/>
+			<rectangle fillColor="background" pos="2,2" shadowBlurRadius="2" shadowColor="shadow" size="76x35"/>
 			<text bold size="0x0" textSize="23"></text>
 			<text pos="10,10" size="60x19">Subtitle</text>
 		</widget>
