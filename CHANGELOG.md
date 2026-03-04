@@ -3,6 +3,49 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.7.3 - 21 Feb 2026
+
+### Fixed
+
+* systray not functional within snap sandbox (systray#64)
+* A dialog with a table. Selecting a cell and closing the dialog produces a Fyne error (#5166)
+* Fix JNI crash due to invalid global reference when accessing Android file streams (#6067)
+* Low frame rate with animated rectangles on 2.7.x (#6040)
+* Random panic when launching the app (#5981)
+* Tree Widget constantly calls IsBranch and ChildrenUIs (#4339)
+* Font scanning fails in Flatpak due to broken symlinks
+* Correct system tray icon on Linux when using SVG
+* Button press animation sometimes leaks outside the bounds of the button (#6096)
+* SVG cannot be loaded if it has currentColor at root element (#6102)
+* Wrapped text is rendered poorly (blurred) (#4390)
+* Blurry text in mobile Linux (#2280)
+* On 2.3.0 text is fuzzy (#3464)
+* Correct presentation of HTML entities when using markdown in RichText
+* Accordion kills CPU by inefficient MinSize implementation (#6108)
+* Tree with no data (with Accordion?) - triggers endless layout loop (#6094)
+* NewRichTextFromMarkdown can't handle nested lists (#6113)
+
+
+## 2.7.2 - 6 Jan 2026
+
+### Changed
+
+* Added Japanese translation
+
+### Fixed
+
+* Crash in accordion (#3966)
+* Extended list does not focus correctly when tapped (#5997)
+* TextGrid: Ensure we are refreshing the correct row (#6023)
+* Entry doesn't lose focus when clicking on button elsewhere (#5107)
+* Mouse clicks missed (#4672)
+* Possible crash when form is truncated when an Entry is focused
+* Alt-Tab'ing should not open MainMenu (#2998)
+* Wayland: ALT key steals focus to the menubar if it exists (#5960)
+* Extending the build-In theme only works fully when theme is set after app has started (#6056)
+* Multi-segment RichText not right aligning correctly (#6060)
+
+
 ## 2.7.1 - 14 Nov 2025
 
 ### Fixed

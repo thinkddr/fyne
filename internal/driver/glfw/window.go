@@ -347,11 +347,13 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 		rawCursor, isCustomCursor := fyneToNativeCursor(cursor)
 		w.cursor = cursor
 
-		if rawCursor == nil {
-			w.view().SetInputMode(CursorMode, CursorHidden)
-		} else {
-			w.view().SetInputMode(CursorMode, CursorNormal)
-			w.SetCursor(rawCursor)
+		if view := w.view(); view != nil { // not yet visible? linux weirdness
+			if rawCursor == nil {
+				view.SetInputMode(CursorMode, CursorHidden)
+			} else {
+				view.SetInputMode(CursorMode, CursorNormal)
+				w.SetCursor(rawCursor)
+			}
 		}
 		w.setCustomCursor(rawCursor, isCustomCursor)
 	}
@@ -743,6 +745,10 @@ func (w *window) processFocused(focus bool) {
 	} else {
 		w.canvas.FocusLost()
 		w.mousePos = fyne.Position{}
+		// Avoid triggering menu on Alt+Tab: glfw sends a fake "alt key released" event immediately after
+		// unfocusing the window, and it should be ignored.
+		w.menuTogglePending = desktop.KeyNone
+		w.menuDeactivationPending = desktop.KeyNone
 
 		// check whether another window was focused or not
 		if curWindow != w {

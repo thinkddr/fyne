@@ -3,7 +3,7 @@ module fyne.io/fyne/v2
 go 1.19
 
 require (
-	fyne.io/systray v1.11.1-0.20250603113521-ca66a66d8b58
+	fyne.io/systray v1.12.0
 	github.com/BurntSushi/toml v1.5.0
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/FyshOS/fancyfs v0.0.0-20251025194026-1f03098ff624
@@ -17,8 +17,8 @@ require (
 	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
 	github.com/go-ole/go-ole v1.2.6
-	github.com/go-text/render v0.2.0
-	github.com/go-text/typesetting v0.2.1
+	github.com/go-text/render v0.2.1
+	github.com/go-text/typesetting v0.3.4
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/hack-pad/go-indexeddb v0.3.2
 	github.com/jackmordaunt/icns/v2 v2.2.6

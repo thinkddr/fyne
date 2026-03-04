@@ -95,7 +95,7 @@ type Table struct {
 	HideSeparators bool
 
 	// OnHighlighted is a callback to be notified when a given item
-	// in the GridWrap has been highlighted by keyboard navigation and mouse hover
+	// in the table has been highlighted by keyboard navigation and mouse hover
 	//
 	// Since: 2.8
 	OnHighlighted func(id TableCellID) `json:"-"`
@@ -604,7 +604,6 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 	if row == noCellMatch || row < 0 {
 		return // out of row range
 	}
-	t.Select(TableCellID{row, col})
 
 	if !fyne.CurrentDevice().IsMobile() {
 		t.RefreshItem(t.currentHighlight)
@@ -614,6 +613,7 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 		}
 		t.RefreshItem(t.currentHighlight)
 	}
+	t.Select(TableCellID{row, col})
 }
 
 // columnAt returns a positive integer (or 0) for the column that is found at the `pos` X position.

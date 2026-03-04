@@ -63,6 +63,7 @@ type Button struct {
 
 	hovered, focused bool
 	tapAnim          *fyne.Animation
+	isAnimating      bool
 }
 
 // NewButton creates a new button widget with the set label and tap handler
@@ -177,6 +178,11 @@ func (b *Button) SetText(text string) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
+	impl := b.super()
+	if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {
+		c.Focus(nil) // the focus manager won't get this Tap and we are not focusable
+	}
+
 	if b.Disabled() {
 		return
 	}
@@ -204,8 +210,10 @@ func (b *Button) tapAnimation() {
 		return
 	}
 	b.tapAnim.Stop()
+	b.isAnimating = false
 
 	if fyne.CurrentApp().Settings().ShowAnimations() {
+		b.isAnimating = true
 		b.tapAnim.Start()
 	}
 }
@@ -224,7 +232,10 @@ type buttonRenderer struct {
 // Layout the components of the button widget
 func (r *buttonRenderer) Layout(size fyne.Size) {
 	r.background.Resize(size)
-	r.tapBG.Resize(size)
+	if !r.button.isAnimating {
+		// if we are animating let the animation control the tapBG size
+		r.tapBG.Resize(size)
+	}
 
 	th := r.button.Theme()
 	padding := r.padding(th)
@@ -451,5 +462,10 @@ func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget, th fyne.Theme) *
 			bg.FillColor = color.Transparent
 		}
 		canvas.Refresh(bg)
+		if done == 1.0 {
+			if btn, ok := w.(*Button); ok {
+				btn.isAnimating = false
+			}
+		}
 	})
 }

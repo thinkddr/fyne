@@ -21,11 +21,11 @@ func (t *themedApp) BuildType() fyne.BuildType {
 	return fyne.BuildStandard
 }
 
-func (t *themedApp) NewWindow(title string) fyne.Window {
+func (t *themedApp) NewWindow(_ string) fyne.Window {
 	return nil
 }
 
-func (t *themedApp) OpenURL(url *url.URL) error {
+func (t *themedApp) OpenURL(_ *url.URL) error {
 	return nil
 }
 
@@ -50,7 +50,7 @@ func (t *themedApp) UniqueID() string {
 	return ""
 }
 
-func (t *themedApp) SendNotification(notification *fyne.Notification) {
+func (t *themedApp) SendNotification(_ *fyne.Notification) {
 }
 
 func (t *themedApp) Settings() fyne.Settings {
@@ -108,6 +108,10 @@ func (t *themedApp) AddChangeListener(chan fyne.Settings) {
 }
 
 func (t *themedApp) AddListener(func(fyne.Settings)) {
+}
+
+func (t *themedApp) Cache() fyne.Cache {
+	return nil
 }
 
 func (t *themedApp) Clipboard() fyne.Clipboard {

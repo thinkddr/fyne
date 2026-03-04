@@ -6,6 +6,8 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/cache"
 	paint "fyne.io/fyne/v2/internal/painter"
 )
 
@@ -184,7 +186,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	p.logError()
 }
 
-func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
+func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
 	switch obj := o.(type) {
 	case *canvas.Circle:
 		p.drawCircle(obj, pos, frame)
@@ -197,7 +199,7 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 	case *canvas.Rectangle:
 		p.drawRectangle(obj, pos, frame)
 	case *canvas.Text:
-		p.drawText(obj, pos, frame)
+		p.drawText(obj, pos, frame, clip)
 	case *canvas.LinearGradient:
 		p.drawGradient(obj, p.newGlLinearGradientTexture, pos, frame)
 	case *canvas.RadialGradient:
@@ -440,8 +442,12 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	p.logError()
 }
 
-func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
-	if text.Text == "" || text.Text == " " {
+func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
+	if text.Text == "" {
+		return
+	}
+	decorated := text.TextStyle.Underline || text.TextStyle.Strikethrough
+	if text.Text == " " && !decorated {
 		return
 	}
 
@@ -458,10 +464,37 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 		pos = fyne.NewPos(pos.X, pos.Y+(containerSize.Height-size.Height)/2)
 	}
 
+	var clipPos fyne.Position
+	var clipSize fyne.Size
+	if clip != nil {
+		clipPos, clipSize = clip.Rect()
+	} else {
+		clipSize = frame
+	}
+	if pos.Y > clipPos.Y+clipSize.Height || pos.Y+size.Height < clipPos.Y ||
+		pos.X > clipPos.X+clipSize.Width || pos.X+size.Width < clipPos.X {
+		return
+	}
+
 	// text size is sensitive to position on screen
-	size, _ = roundToPixelCoords(size, text.Position(), p.pixScale)
+	size.Width = roundToPixel(size.Width, p.pixScale)
+	size.Height = roundToPixel(size.Height, p.pixScale)
 	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale)
 	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
+
+	if decorated {
+		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
+		line := canvas.NewLine(text.Color)
+		line.Resize(fyne.NewSize(size.Width, 0))
+		if text.TextStyle.Underline {
+			underlinePos := fyne.NewPos(pos.X, pos.Y+baseline+paint.UnderlineOffsetFromBaseline)
+			p.drawLine(line, underlinePos, frame)
+		}
+		if text.TextStyle.Strikethrough {
+			strikePos := fyne.NewPos(pos.X, pos.Y+baseline*paint.StrikethroughToBaselineFactor)
+			p.drawLine(line, strikePos, frame)
+		}
+	}
 }
 
 func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
