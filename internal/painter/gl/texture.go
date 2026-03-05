@@ -51,6 +51,9 @@ func (p *painter) getTexture(object fyne.CanvasObject, creator func(canvasObject
 			texture = cache.TextureType(tex)
 			cache.SetTextTexture(ent, texture, p.canvas, func() {
 				p.ctx.DeleteTexture(tex)
+				if glErr := p.ctx.GetError(); glErr != 0 {
+					panic(fmt.Sprintf("failed to delete the text texture; error code: %x", glErr))
+				}
 			})
 		}
 
