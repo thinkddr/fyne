@@ -41,19 +41,28 @@ float arbitrary_polygon_distance(vec2 p, int num)
     float arc_dist = INF;
     float sign_val = 1.0;
 
+    // Pre-extract points and radii for the first iteration (k=0)
+    // where i = num-2 and j = num-1.
+    // workaround to avoid: 'Index expression can only contain const or loop symbols' error
+    vec2 p_prev2, p_prev1;
+    float r_prev;
+    for (int m = 0; m < MAX_VERTICES; m++)
+    {
+        if (m == num - 2) p_prev2 = vertices[m];
+        if (m == num - 1) {
+            p_prev1 = vertices[m];
+            r_prev = radii[m];
+        }
+    }
+
     for (int k = 0; k < MAX_VERTICES; k++)
     {
         if (k >= num) break;
 
-        int i = k - 2;
-        if (i < 0) i += num;
-        int j = k - 1;
-        if (j < 0) j += num;
-
-        vec2 point1 = vertices[i];
-        vec2 point2 = vertices[j];
+        vec2 point1 = p_prev2;
+        vec2 point2 = p_prev1;
         vec2 point3 = vertices[k];
-        float radius = radii[j];
+        float radius = r_prev;
 
         vec2 pos = p - point2;
         vec2 a = normalize(point1 - point2);
@@ -65,59 +74,70 @@ float arbitrary_polygon_distance(vec2 p, int num)
         {
             start_pts[k] = point2;
             end_pts[k] = point2;
-            continue;
         }
-
-        vec2 center = (a + b) * radius / cross_ab;
-        vec2 pos_shifted = pos - center;
-
-        // Even-odd rule for arc region
-        float c = radius * radius - pos_shifted.y * pos_shifted.y;
-        if (c > 0.0)
+        else
         {
-            c = sqrt(c);
-            vec2 p1 = vec2(-c, pos_shifted.y);
-            vec2 p2_arc = vec2(c, pos_shifted.y);
-            float s1 = dot(p1, a);
-            float s2 = dot(p1, b);
-            float s3 = dot(p2_arc, a);
-            float s4 = dot(p2_arc, b);
-            if (pos_shifted.x < p1.x && s1 < 0.0 && s2 < 0.0)
+            vec2 center = (a + b) * radius / cross_ab;
+            vec2 pos_shifted = pos - center;
+
+            // Even-odd rule for arc region
+            float c = radius * radius - pos_shifted.y * pos_shifted.y;
+            if (c > 0.0)
             {
-                sign_val = -sign_val;
+                c = sqrt(c);
+                vec2 p1 = vec2(-c, pos_shifted.y);
+                vec2 p2_arc = vec2(c, pos_shifted.y);
+                float s1 = dot(p1, a);
+                float s2 = dot(p1, b);
+                float s3 = dot(p2_arc, a);
+                float s4 = dot(p2_arc, b);
+                if (pos_shifted.x < p1.x && s1 < 0.0 && s2 < 0.0)
+                {
+                    sign_val = -sign_val;
+                }
+                if (pos_shifted.x < p2_arc.x && s4 < 0.0 && s3 < 0.0)
+                {
+                    sign_val = -sign_val;
+                }
             }
-            if (pos_shifted.x < p2_arc.x && s4 < 0.0 && s3 < 0.0)
+
+            // Distance to arc at this corner
+            float s1_dot = dot(pos_shifted, a);
+            float s2_dot = dot(pos_shifted, b);
+            if (s1_dot < 0.0 && s2_dot < 0.0)
             {
-                sign_val = -sign_val;
+                float d = abs(length(pos_shifted) - radius);
+                arc_dist = min(arc_dist, d);
             }
+
+            // Tangent points on the edges
+            vec2 start = point2 + a * dot(center, a);
+            vec2 end_pt = point2 + b * dot(center, b);
+            start_pts[k] = start;
+            end_pts[k] = end_pt;
         }
 
-        // Distance to arc at this corner
-        float s1_dot = dot(pos_shifted, a);
-        float s2_dot = dot(pos_shifted, b);
-        if (s1_dot < 0.0 && s2_dot < 0.0)
-        {
-            float d = abs(length(pos_shifted) - radius);
-            arc_dist = min(arc_dist, d);
-        }
-
-        // Tangent points on the edges
-        vec2 start = point2 + a * dot(center, a);
-        vec2 end_pt = point2 + b * dot(center, b);
-        start_pts[k] = start;
-        end_pts[k] = end_pt;
+        // Shift values for the next iteration
+        p_prev2 = point2;
+        p_prev1 = point3;
+        r_prev = radii[k];
     }
 
     // Phase 2: Distance to straight edge segments between tangent points
     float edge_dist = INF;
+
+    // workaround to avoid: 'Index expression can only contain const or loop symbols' error
+    vec2 e_prev;
+    for (int m = 0; m < MAX_VERTICES; m++)
+    {
+        if (m == num - 1) e_prev = end_pts[m];
+    }
+
     for (int j2 = 0; j2 < MAX_VERTICES; j2++)
     {
         if (j2 >= num) break;
 
-        int i2 = j2 - 1;
-        if (i2 < 0) i2 += num;
-
-        vec2 start = end_pts[i2];
+        vec2 start = e_prev;
         vec2 end_seg = start_pts[j2];
         vec2 e = end_seg - start;
         vec2 w = p - start;
@@ -133,6 +153,8 @@ float arbitrary_polygon_distance(vec2 p, int num)
                 sign_val = -sign_val;
             }
         }
+
+        e_prev = end_pts[j2];
     }
 
     return min(arc_dist, sqrt(edge_dist)) * sign_val;
