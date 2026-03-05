@@ -6,6 +6,7 @@ import (
 	"image"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/theme"
@@ -115,10 +116,10 @@ func arbitraryPolygonUniforms() []string {
 		"vertex_count",
 		"fill_color", "stroke_width", "stroke_color",
 	}
-	for i := 0; i < 16; i++ {
+	for i := 0; i < canvas.ArbitraryPolygonVerticesMaximum; i++ {
 		names = append(names, fmt.Sprintf("vertices[%d]", i))
 	}
-	for i := 0; i < 16; i++ {
+	for i := 0; i < canvas.ArbitraryPolygonVerticesMaximum; i++ {
 		names = append(names, fmt.Sprintf("radii[%d]", i))
 	}
 	return names
