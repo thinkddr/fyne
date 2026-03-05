@@ -181,6 +181,76 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 	return raw
 }
 
+// DrawArbitraryPolygon rasterizes the given arbitrary polygon object into an image.
+// The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
+// The scale function is used to understand how many pixels are required per unit of size.
+func DrawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	size := polygon.Size()
+
+	width := int(scale(size.Width + vectorPad*2))
+	height := int(scale(size.Height + vectorPad*2))
+	vertices := polygon.Points
+	radii := polygon.CornerRadii
+	num := int(fyne.Min(canvas.ArbitraryPolygonVerticesMaximum, float32(len(vertices))))
+
+	raw := image.NewRGBA(image.Rect(0, 0, width, height))
+	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
+
+	if num < 3 {
+		return raw
+	}
+
+	clampPoint := func(p fyne.Position) (float32, float32) {
+		return fyne.Min(fyne.Max(p.X, 0), fyne.Max(size.Width, 0)), fyne.Min(fyne.Max(p.Y, 0), fyne.Max(size.Height, 0))
+	}
+
+	xScaled := make([]float64, num)
+	yScaled := make([]float64, num)
+	radius := make([]float32, num)
+
+	fixedPoints := make([]fyne.Position, num)
+	for i := 0; i < num; i++ {
+		px, py := vertices[i].X, vertices[i].Y
+		if polygon.NormalizedPoints {
+			px, py = px*size.Width, py*size.Height
+		}
+		px, py = clampPoint(fyne.NewPos(px, py))
+		fixedPoints[i] = fyne.NewPos(px, py)
+		xScaled[i] = float64(scale(px + vectorPad))
+		yScaled[i] = float64(scale(py + vectorPad))
+
+		var r float32
+		if i < len(radii) {
+			r = radii[i]
+		}
+		radius[i] = r
+	}
+
+	radius = GetMaximumCornerRadiusPolygon(fixedPoints, radius)
+
+	radiiScaled := make([]float64, num)
+	for i := 0; i < num; i++ {
+		radiiScaled[i] = float64(scale(radius[i]))
+	}
+
+	if polygon.FillColor != nil {
+		filler := rasterx.NewFiller(width, height, scanner)
+		filler.SetColor(polygon.FillColor)
+		drawArbitraryPolygon(xScaled, yScaled, radiiScaled, filler)
+		filler.Draw()
+	}
+
+	if polygon.StrokeColor != nil && polygon.StrokeWidth > 0 {
+		dasher := rasterx.NewDasher(width, height, scanner)
+		dasher.SetColor(polygon.StrokeColor)
+		dasher.SetStroke(fixed.Int26_6(float64(scale(polygon.StrokeWidth))*64), 0, nil, nil, nil, 0, nil, 0)
+		drawArbitraryPolygon(xScaled, yScaled, radiiScaled, dasher)
+		dasher.Draw()
+	}
+
+	return raw
+}
+
 // DrawRectangle rasterizes the given rectangle object with stroke border into an image.
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
 // The scale function is used to understand how many pixels are required per unit of size.
@@ -436,6 +506,97 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 		)
 	}
 	p.Line(rasterx.ToFixedP(sPts[0].x, sPts[0].y))
+	p.Stop(true)
+}
+
+func drawArbitraryPolygon(xs, ys, radii []float64, p rasterx.Adder) {
+	num := len(xs)
+	if num < 3 {
+		return
+	}
+
+	type pt struct{ x, y float64 }
+
+	// helper for unit vectors
+	norm := func(x, y float64) (nx, ny float64) {
+		l := math.Hypot(x, y)
+		if l == 0 {
+			return 0, 0
+		}
+		return x / l, y / l
+	}
+
+	startPoints := make([]pt, num) // where the arc starts
+	endPoints := make([]pt, num)   // where the arc ends
+	centers := make([]pt, num)     // center of the rounding circle
+
+	for i := 0; i < num; i++ {
+		curr := pt{xs[i], ys[i]}
+		prev := pt{xs[(i-1+num)%num], ys[(i-1+num)%num]}
+		next := pt{xs[(i+1)%num], ys[(i+1)%num]}
+		r := radii[i]
+
+		// vector IN and vector OUT
+		vInX, vInY := norm(curr.x-prev.x, curr.y-prev.y)
+		vOutX, vOutY := norm(next.x-curr.x, next.y-curr.y)
+
+		// the angle between the two vectors
+		// we use the dot product of the normalized vectors
+		dot := vInX*vOutX + vInY*vOutY
+		// Clamp dot for safety
+		if dot < -1 {
+			dot = -1
+		} else if dot > 1 {
+			dot = 1
+		}
+
+		theta := math.Acos(dot) // this is the exterior angle
+
+		// distance from vertex to tangent point
+		// t = r * tan((pi - theta) / 2) -> which simplifies to r / tan(theta/2)
+		// but specifically for the interior angle:
+		halfAngle := (math.Pi - theta) / 2
+		dist := r / math.Tan(halfAngle)
+
+		// tangent points
+		startX, startY := curr.x-vInX*dist, curr.y-vInY*dist
+		endX, endY := curr.x+vOutX*dist, curr.y+vOutY*dist
+
+		// calculate center by rotating the In-vector 90 degrees and scaling by r
+		// we need to know if the turn is left or right (cross product)
+		cross := vInX*vOutY - vInY*vOutX
+		sign := 1.0
+		if cross < 0 {
+			sign = -1.0
+		}
+
+		// center is perpendicular to the tangent line at distance r
+		// rotate vIn by 90 degrees: (-y, x)
+		centerX := startX + (-vInY * r * sign)
+		centerY := startY + (vInX * r * sign)
+
+		startPoints[i] = pt{startX, startY}
+		endPoints[i] = pt{endX, endY}
+		centers[i] = pt{centerX, centerY}
+	}
+
+	// execution: draw the path
+	p.Start(rasterx.ToFixedP(startPoints[0].x, startPoints[0].y))
+
+	for i := 0; i < num; i++ {
+		nxtIdx := (i + 1) % num
+
+		// draw the arc at the current vertex
+		rasterx.RoundGap(p,
+			rasterx.ToFixedP(centers[i].x, centers[i].y),
+			rasterx.ToFixedP(startPoints[i].x-centers[i].x, startPoints[i].y-centers[i].y),
+			rasterx.ToFixedP(endPoints[i].x-centers[i].x, endPoints[i].y-centers[i].y),
+		)
+
+		// line to the start of the next vertex's arc
+		p.Line(rasterx.ToFixedP(startPoints[nxtIdx].x, startPoints[nxtIdx].y))
+	}
+
 	p.Stop(true)
 }
 
@@ -750,4 +911,73 @@ func NormalizeBezierCurvePoints(startPoint, endPoint fyne.Position, controlPoint
 	}
 
 	return fyne.NewPos(p1x, p1y), fyne.NewPos(p2x, p2y), cp
+}
+
+// GetMaximumCornerRadiusPolygon computes the maximum possible corner radius for an individual corner,
+// considering the specified corner radius, the radii of adjacent corners, and the maximum radii
+// allowed for the width and height of the shape. Corner radius may utilize unused capacity from adjacent corners with radius smaller than maximum value.
+//
+// This is typically used for drawing circular corners in arbitrary polygons with different corner radii.
+func GetMaximumCornerRadiusPolygon(points []fyne.Position, radii []float32) []float32 {
+	n := len(points)
+	if n < 3 || len(radii) != n {
+		return radii
+	}
+
+	calculateInteriorAngle := func(p1, p2, p3 fyne.Position) float64 {
+		v1 := fyne.Position{X: p1.X - p2.X, Y: p1.Y - p2.Y}
+		v2 := fyne.Position{X: p3.X - p2.X, Y: p3.Y - p2.Y}
+
+		angle1 := math.Atan2(float64(v1.Y), float64(v1.X))
+		angle2 := math.Atan2(float64(v2.Y), float64(v2.X))
+
+		diff := angle2 - angle1
+		for diff < -math.Pi {
+			diff += 2 * math.Pi
+		}
+		for diff > math.Pi {
+			diff -= 2 * math.Pi
+		}
+
+		return math.Abs(diff)
+	}
+
+	// calculate the interior angles and required segment lengths
+	segments := make([]float64, n)
+	for i := 0; i < n; i++ {
+		prev := points[(i+n-1)%n]
+		curr := points[i]
+		next := points[(i+1)%n]
+
+		angle := calculateInteriorAngle(prev, curr, next)
+		// distance from vertex to the tangent point of the arc
+		segments[i] = float64(radii[i]) / math.Tan(angle/2.0)
+	}
+
+	// calculate scaling factor for each edge
+	// use a global scale factor to maintain the relative proportions of the design
+	globalScale := 1.0
+
+	for i := 0; i < n; i++ {
+		p1 := points[i]
+		p2 := points[(i+1)%n]
+
+		edgeLen := math.Hypot(float64(p2.X-p1.X), float64(p2.Y-p1.Y))
+		combinedSegments := segments[i] + segments[(i+1)%n]
+
+		if combinedSegments > edgeLen {
+			edgeScale := edgeLen / combinedSegments
+			if edgeScale < globalScale {
+				globalScale = edgeScale
+			}
+		}
+	}
+
+	// apply the scale to the original radii
+	finalRadii := make([]float32, n)
+	for i := range radii {
+		finalRadii[i] = float32(float64(radii[i]) * globalScale)
+	}
+
+	return finalRadii
 }

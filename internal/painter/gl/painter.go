@@ -42,18 +42,19 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 }
 
 type painter struct {
-	canvas                fyne.Canvas
-	ctx                   context
-	contextProvider       driver.WithContext
-	program               ProgramState
-	lineProgram           ProgramState
-	rectangleProgram      ProgramState
-	roundRectangleProgram ProgramState
-	polygonProgram        ProgramState
-	arcProgram            ProgramState
-	bezierCurveProgram    ProgramState
-	texScale              float32
-	pixScale              float32 // pre-calculate scale*texScale for each draw
+	canvas                  fyne.Canvas
+	ctx                     context
+	contextProvider         driver.WithContext
+	program                 ProgramState
+	lineProgram             ProgramState
+	rectangleProgram        ProgramState
+	roundRectangleProgram   ProgramState
+	polygonProgram          ProgramState
+	arcProgram              ProgramState
+	bezierCurveProgram      ProgramState
+	arbitraryPolygonProgram ProgramState
+	texScale                float32
+	pixScale                float32 // pre-calculate scale*texScale for each draw
 }
 
 type ProgramState struct {
@@ -104,6 +105,23 @@ func (p *painter) UpdateVertexArray(pState ProgramState, name string, size, stri
 
 	p.ctx.VertexAttribPointerWithOffset(a, size, float, false, stride*floatSize, offset*floatSize)
 	p.logError()
+}
+
+// arbitraryPolygonUniforms returns all uniform names needed for the arbitrary polygon shader,
+// including the array element names for vertices[0..15] and radii[0..15].
+func arbitraryPolygonUniforms() []string {
+	names := []string{
+		"frame_size", "rect_coords", "edge_softness",
+		"vertex_count",
+		"fill_color", "stroke_width", "stroke_color",
+	}
+	for i := 0; i < 16; i++ {
+		names = append(names, fmt.Sprintf("vertices[%d]", i))
+	}
+	for i := 0; i < 16; i++ {
+		names = append(names, fmt.Sprintf("radii[%d]", i))
+	}
+	return names
 }
 
 // Declare conformity to Painter interface
