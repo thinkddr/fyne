@@ -52,6 +52,7 @@ float arbitrary_polygon_distance(vec2 p, int num)
         if (m == num - 1) {
             p_prev1 = vertices[m];
             r_prev = radii[m];
+            break;
         }
     }
 
@@ -130,7 +131,11 @@ float arbitrary_polygon_distance(vec2 p, int num)
     vec2 e_prev;
     for (int m = 0; m < MAX_VERTICES; m++)
     {
-        if (m == num - 1) e_prev = end_pts[m];
+        if (m == num - 1)
+        {
+            e_prev = end_pts[m];
+            break;
+        }
     }
 
     for (int j2 = 0; j2 < MAX_VERTICES; j2++)
