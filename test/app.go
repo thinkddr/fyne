@@ -26,6 +26,7 @@ type app struct {
 	propertyLock sync.RWMutex
 	storage      fyne.Storage
 	lifecycle    intapp.Lifecycle
+	cache        fyne.Cache
 	clip         fyne.Clipboard
 	cloud        fyne.CloudProvider
 
@@ -50,7 +51,7 @@ func (a *app) NewWindow(title string) fyne.Window {
 	return a.driver.CreateWindow(title)
 }
 
-func (a *app) OpenURL(url *url.URL) error {
+func (a *app) OpenURL(_ *url.URL) error {
 	// no-op
 	return nil
 }
@@ -61,6 +62,10 @@ func (a *app) Run() {
 
 func (a *app) Quit() {
 	// no-op
+}
+
+func (a *app) Cache() fyne.Cache {
+	return a.cache
 }
 
 func (a *app) Clipboard() fyne.Clipboard {
@@ -157,15 +162,18 @@ func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0, theme: Theme()}
 	prefs := internal.NewInMemoryPreferences()
 	store := &testStorage{}
-	test := &app{settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*driver), clip: NewClipboard()}
-	settings.app = test
+	testApp := &app{
+		settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*driver), clip: NewClipboard(),
+		cache: makeCache(),
+	}
+	settings.app = testApp
 	root, _ := store.docRootURI()
 	store.Docs = &internal.Docs{RootDocURI: root}
 	painter.ClearFontCache()
 	cache.ResetThemeCaches()
-	fyne.SetCurrentApp(test)
+	fyne.SetCurrentApp(testApp)
 
-	return test
+	return testApp
 }
 
 type testSettings struct {

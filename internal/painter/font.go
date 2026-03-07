@@ -25,7 +25,9 @@ import (
 
 const (
 	// DefaultTabWidth is the default width in spaces
-	DefaultTabWidth = 4
+	DefaultTabWidth               = 4
+	UnderlineOffsetFromBaseline   = 2
+	StrikethroughToBaselineFactor = 0.75
 
 	fontTabSpaceSize = 10
 )
@@ -58,7 +60,7 @@ func lookupLangFont(family string, aspect font.Aspect) *font.Face {
 	}
 
 	fm.SetQuery(fontscan.Query{Families: []string{family}, Aspect: aspect})
-	l, _ := language.NewLangID(language.Language(lang.SystemLocale().LanguageString()))
+	l, _ := language.NewLangID(language.NewLanguage(lang.SystemLocale().LanguageString()))
 	return fm.ResolveFaceForLang(l)
 }
 

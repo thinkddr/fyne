@@ -4,7 +4,6 @@
 #include <windows.h>
 #include <ole2.h>
 #include <oleacc.h>
-#include <stdio.h>
 
 // ============================================================
 // UIA type definitions (manual, for MinGW/CGo compatibility)
@@ -12,7 +11,6 @@
 
 typedef struct FyneUIAElement FyneUIAElement;
 
-// Forward-declared interface structs
 typedef struct IRawSimple { struct IRawSimpleVtbl* lpVtbl; } IRawSimple;
 typedef struct IRawFragment { struct IRawFragmentVtbl* lpVtbl; } IRawFragment;
 typedef struct IRawFragRoot { struct IRawFragRootVtbl* lpVtbl; } IRawFragRoot;
@@ -23,6 +21,7 @@ typedef int EVENTID;
 
 enum UIAProviderOptions {
     UIAProviderOptions_ServerSideProvider = 0x2,
+    UIAProviderOptions_UseComThreading = 0x20,
 };
 
 enum UIANavigateDirection {
@@ -34,17 +33,11 @@ enum UIANavigateDirection {
 };
 
 enum UIAStructureChangeType {
-    UIAStructureChangeType_ChildAdded = 0,
-    UIAStructureChangeType_ChildRemoved = 1,
     UIAStructureChangeType_ChildrenInvalidated = 2,
-    UIAStructureChangeType_ChildrenBulkAdded = 3,
-    UIAStructureChangeType_ChildrenBulkRemoved = 4,
-    UIAStructureChangeType_ChildrenReordered = 5,
 };
 
 typedef struct { double left, top, width, height; } UIARect;
 
-// Vtables
 struct IRawSimpleVtbl {
     HRESULT (STDMETHODCALLTYPE *QueryInterface)(IRawSimple*, REFIID, void**);
     ULONG   (STDMETHODCALLTYPE *AddRef)(IRawSimple*);
@@ -76,7 +69,7 @@ struct IRawFragRootVtbl {
 };
 
 // ============================================================
-// Element struct (used for both root and children)
+// Element struct
 // ============================================================
 
 struct FyneUIAElement {
@@ -89,20 +82,17 @@ struct FyneUIAElement {
     HWND hwnd;
     int  uniqueId;
 
-    // Child fields
     FyneUIAElement* parent;
     WCHAR* name;
     int    controlType;
     double x, y, width, height;
     int    childIndex;
 
-    // Root fields
     FyneUIAElement** children;
     int childCount;
     int childCapacity;
 };
 
-// Pointer adjustment macros
 #define ELEM_FROM_SIMPLE(p)   ((FyneUIAElement*)(p))
 #define ELEM_FROM_FRAGMENT(p) ((FyneUIAElement*)((char*)(p) - offsetof(FyneUIAElement, fragment)))
 #define ELEM_FROM_FRAGROOT(p) ((FyneUIAElement*)((char*)(p) - offsetof(FyneUIAElement, fragRoot)))
@@ -120,11 +110,8 @@ static const IID IID_IRawFragment =
 static const IID IID_IRawFragRoot =
     {0x620ce2a5,0xab8f,0x40a9,{0x86,0xcb,0xde,0x3c,0x75,0x59,0x9b,0x58}};
 
-// UIA property/control IDs
-#define UIA_RuntimeIdPropertyId            30000
-#define UIA_BoundingRectanglePropertyId    30001
+// UIA property IDs
 #define UIA_ControlTypePropertyId          30003
-#define UIA_LocalizedControlTypePropertyId 30004
 #define UIA_NamePropertyId                 30005
 #define UIA_HasKeyboardFocusPropertyId     30008
 #define UIA_IsKeyboardFocusablePropertyId  30009
@@ -132,24 +119,19 @@ static const IID IID_IRawFragRoot =
 #define UIA_AutomationIdPropertyId         30011
 #define UIA_IsControlElementPropertyId     30016
 #define UIA_IsContentElementPropertyId     30017
-#define UIA_NativeWindowHandlePropertyId   30020
 #define UIA_ProviderDescriptionPropertyId  30107
 
-#define UIA_WindowControlTypeId      50032
-#define UIA_ButtonControlTypeId      50000
-#define UIA_HyperlinkControlTypeId   50005
-#define UIA_TextControlTypeId        50020
-#define UIA_GroupControlTypeId        50026
-#define UIA_PaneControlTypeId        50033
-#define UIA_CustomControlTypeId      50025
+// UIA control type IDs
+#define UIA_ButtonControlTypeId    50000
+#define UIA_HyperlinkControlTypeId 50005
+#define UIA_TextControlTypeId      50020
+#define UIA_GroupControlTypeId     50026
+#define UIA_PaneControlTypeId      50033
 
 #define UiaAppendRuntimeId  3
 #define UiaRootObjectId    (-25)
 
-// UIA Event IDs
-#define UIA_AutomationFocusChangedEventId      20005
-#define UIA_StructureChangedEventId            20002
-#define UIA_Window_WindowOpenedEventId         20016
+#define UIA_AutomationFocusChangedEventId 20005
 
 #define WM_FYNE_RAISE_FOCUS (WM_APP + 100)
 #define WM_FYNE_FOCUS_CHILD (WM_APP + 101)
@@ -174,18 +156,12 @@ static HMODULE hUiaCore = NULL;
 static void loadUiaFunctions(void) {
     if (hUiaCore) return;
     hUiaCore = LoadLibraryW(L"uiautomationcore.dll");
-    fprintf(stderr, "[a11y] LoadLibrary uiautomationcore.dll => %p\n", (void*)hUiaCore);
     if (!hUiaCore) return;
     pfnUiaReturn = (PFN_UiaReturnRawElementProvider)GetProcAddress(hUiaCore, "UiaReturnRawElementProvider");
     pfnUiaHost   = (PFN_UiaHostProviderFromHwnd)GetProcAddress(hUiaCore, "UiaHostProviderFromHwnd");
     pfnUiaRaiseEvent = (PFN_UiaRaiseAutomationEvent)GetProcAddress(hUiaCore, "UiaRaiseAutomationEvent");
     pfnUiaRaiseStructure = (PFN_UiaRaiseStructureChangedEvent)GetProcAddress(hUiaCore, "UiaRaiseStructureChangedEvent");
     pfnUiaDisconnect = (PFN_UiaDisconnectProvider)GetProcAddress(hUiaCore, "UiaDisconnectProvider");
-    fprintf(stderr, "[a11y] UiaReturnRawElementProvider => %p\n", (void*)pfnUiaReturn);
-    fprintf(stderr, "[a11y] UiaHostProviderFromHwnd => %p\n", (void*)pfnUiaHost);
-    fprintf(stderr, "[a11y] UiaRaiseAutomationEvent => %p\n", (void*)pfnUiaRaiseEvent);
-    fprintf(stderr, "[a11y] UiaRaiseStructureChangedEvent => %p\n", (void*)pfnUiaRaiseStructure);
-    fprintf(stderr, "[a11y] UiaDisconnectProvider => %p\n", (void*)pfnUiaDisconnect);
 }
 
 // ============================================================
@@ -200,7 +176,11 @@ static struct IRawFragmentVtbl g_fragmentVtbl;
 static struct IRawFragRootVtbl g_fragRootVtbl;
 static int g_vtblInit = 0;
 static int g_nextId = 1;
-static int g_focusedIndex = -1; // index of focused child, -1 = none
+static int g_focusedIndex = -1;
+
+static FyneUIAElement** g_staging = NULL;
+static int g_stagingCount = 0;
+static int g_stagingCapacity = 0;
 
 // ============================================================
 // Helpers
@@ -228,7 +208,6 @@ static int roleToUIA(WinAccessibilityRole role) {
     }
 }
 
-// Core QueryInterface shared by all interfaces
 static HRESULT elemQI(FyneUIAElement* elem, REFIID riid, void** ppv) {
     if (!ppv) return E_POINTER;
     if (IsEqualIID(riid, &LOCAL_IID_IUnknown) || IsEqualIID(riid, &IID_IRawSimple)) {
@@ -246,14 +225,12 @@ static HRESULT elemQI(FyneUIAElement* elem, REFIID riid, void** ppv) {
         InterlockedIncrement(&elem->refCount);
         return S_OK;
     }
-    fprintf(stderr, "[a11y] QI unknown IID {%08lx-%04x-%04x-...} isRoot=%d\n",
-        riid->Data1, riid->Data2, riid->Data3, elem->isRoot);
     *ppv = NULL;
     return E_NOINTERFACE;
 }
 
 // ============================================================
-// IRawElementProviderSimple implementation
+// IRawElementProviderSimple
 // ============================================================
 
 static HRESULT STDMETHODCALLTYPE S_QI(IRawSimple* This, REFIID riid, void** ppv) {
@@ -271,7 +248,7 @@ static ULONG STDMETHODCALLTYPE S_Release(IRawSimple* This) {
 
 static HRESULT STDMETHODCALLTYPE S_get_ProviderOptions(IRawSimple* This, int* pRetVal) {
     if (!pRetVal) return E_POINTER;
-    *pRetVal = UIAProviderOptions_ServerSideProvider | 0x20 /*UseComThreading*/;
+    *pRetVal = UIAProviderOptions_ServerSideProvider | UIAProviderOptions_UseComThreading;
     return S_OK;
 }
 
@@ -286,20 +263,17 @@ static HRESULT STDMETHODCALLTYPE S_GetPropertyValue(IRawSimple* This, PROPERTYID
     VariantInit(pRetVal);
     FyneUIAElement* e = ELEM_FROM_SIMPLE(This);
 
-    // For root element, let host provider handle most properties
-    // but override focus-related ones (host returns IsKeyboardFocusable=False)
+    // Root element: let host provider handle most properties,
+    // override focus-related ones (host returns IsKeyboardFocusable=False)
     if (e->isRoot) {
         switch (pid) {
         case UIA_IsKeyboardFocusablePropertyId:
             pRetVal->vt = VT_BOOL;
             pRetVal->boolVal = VARIANT_TRUE;
-            fprintf(stderr, "[a11y] Root: IsKeyboardFocusable => TRUE\n");
             break;
         case UIA_HasKeyboardFocusPropertyId:
             pRetVal->vt = VT_BOOL;
             pRetVal->boolVal = (GetForegroundWindow() == e->hwnd) ? VARIANT_TRUE : VARIANT_FALSE;
-            fprintf(stderr, "[a11y] Root: HasKeyboardFocus => %s\n",
-                pRetVal->boolVal == VARIANT_TRUE ? "TRUE" : "FALSE");
             break;
         case UIA_IsControlElementPropertyId:
         case UIA_IsContentElementPropertyId:
@@ -311,9 +285,6 @@ static HRESULT STDMETHODCALLTYPE S_GetPropertyValue(IRawSimple* This, PROPERTYID
             pRetVal->vt = VT_BSTR;
             pRetVal->bstrVal = SysAllocString(L"Fyne Accessibility Provider");
             break;
-        default:
-            // Return VT_EMPTY - UIA will fall back to host provider
-            break;
         }
         return S_OK;
     }
@@ -323,12 +294,10 @@ static HRESULT STDMETHODCALLTYPE S_GetPropertyValue(IRawSimple* This, PROPERTYID
     case UIA_ControlTypePropertyId:
         pRetVal->vt = VT_I4;
         pRetVal->lVal = e->controlType;
-        fprintf(stderr, "[a11y] GetPropertyValue ControlType=%ld child[%d]\n", pRetVal->lVal, e->childIndex);
         break;
     case UIA_NamePropertyId:
         pRetVal->vt = VT_BSTR;
         pRetVal->bstrVal = SysAllocString(e->name);
-        fprintf(stderr, "[a11y] GetPropertyValue Name child[%d]\n", e->childIndex);
         break;
     case UIA_AutomationIdPropertyId: {
         WCHAR buf[32];
@@ -340,9 +309,6 @@ static HRESULT STDMETHODCALLTYPE S_GetPropertyValue(IRawSimple* This, PROPERTYID
     case UIA_IsControlElementPropertyId:
     case UIA_IsContentElementPropertyId:
     case UIA_IsEnabledPropertyId:
-        pRetVal->vt = VT_BOOL;
-        pRetVal->boolVal = VARIANT_TRUE;
-        break;
     case UIA_IsKeyboardFocusablePropertyId:
         pRetVal->vt = VT_BOOL;
         pRetVal->boolVal = VARIANT_TRUE;
@@ -364,16 +330,13 @@ static HRESULT STDMETHODCALLTYPE S_get_HostRawElementProvider(IRawSimple* This, 
     *pRetVal = NULL;
     FyneUIAElement* e = ELEM_FROM_SIMPLE(This);
     if (e->isRoot && pfnUiaHost) {
-        HRESULT hr = pfnUiaHost(e->hwnd, (void**)pRetVal);
-        fprintf(stderr, "[a11y] get_HostRawElementProvider hr=0x%lx result=%p\n", hr, (void*)*pRetVal);
-    } else {
-        fprintf(stderr, "[a11y] get_HostRawElementProvider (child) => NULL\n");
+        pfnUiaHost(e->hwnd, (void**)pRetVal);
     }
     return S_OK;
 }
 
 // ============================================================
-// IRawElementProviderFragment implementation
+// IRawElementProviderFragment
 // ============================================================
 
 static HRESULT STDMETHODCALLTYPE F_QI(IRawFragment* This, REFIID riid, void** ppv) {
@@ -399,18 +362,9 @@ static HRESULT STDMETHODCALLTYPE F_Navigate(IRawFragment* This, int direction, I
         switch (direction) {
         case UIANavigateDirection_FirstChild:
             if (e->childCount > 0) target = e->children[0];
-            fprintf(stderr, "[a11y] Navigate FirstChild from root => %p (children=%d)\n",
-                (void*)target, e->childCount);
             break;
         case UIANavigateDirection_LastChild:
             if (e->childCount > 0) target = e->children[e->childCount - 1];
-            fprintf(stderr, "[a11y] Navigate LastChild from root => %p\n", (void*)target);
-            break;
-        case UIANavigateDirection_Parent:
-            fprintf(stderr, "[a11y] Navigate Parent from root => NULL\n");
-            break;
-        default:
-            fprintf(stderr, "[a11y] Navigate dir=%d from root => NULL\n", direction);
             break;
         }
     } else {
@@ -418,24 +372,14 @@ static HRESULT STDMETHODCALLTYPE F_Navigate(IRawFragment* This, int direction, I
         switch (direction) {
         case UIANavigateDirection_Parent:
             target = p;
-            fprintf(stderr, "[a11y] Navigate Parent from child[%d] => root\n", e->childIndex);
             break;
         case UIANavigateDirection_NextSibling:
             if (p && e->childIndex + 1 < p->childCount)
                 target = p->children[e->childIndex + 1];
-            fprintf(stderr, "[a11y] Navigate NextSibling from child[%d] => %p\n",
-                e->childIndex, (void*)target);
             break;
         case UIANavigateDirection_PreviousSibling:
             if (p && e->childIndex > 0)
                 target = p->children[e->childIndex - 1];
-            fprintf(stderr, "[a11y] Navigate PrevSibling from child[%d] => %p\n",
-                e->childIndex, (void*)target);
-            break;
-        case UIANavigateDirection_FirstChild:
-        case UIANavigateDirection_LastChild:
-            // Leaf elements have no children
-            fprintf(stderr, "[a11y] Navigate child from leaf[%d] => NULL\n", e->childIndex);
             break;
         }
     }
@@ -499,7 +443,6 @@ static HRESULT STDMETHODCALLTYPE F_SetFocus(IRawFragment* This) {
     FyneUIAElement* e = ELEM_FROM_FRAGMENT(This);
     if (!e->isRoot) {
         g_focusedIndex = e->childIndex;
-        fprintf(stderr, "[a11y] SetFocus on child[%d]\n", e->childIndex);
         if (pfnUiaRaiseEvent) {
             pfnUiaRaiseEvent(&e->simple, UIA_AutomationFocusChangedEventId);
         }
@@ -520,7 +463,7 @@ static HRESULT STDMETHODCALLTYPE F_get_FragmentRoot(IRawFragment* This, IRawFrag
 }
 
 // ============================================================
-// IRawElementProviderFragmentRoot implementation
+// IRawElementProviderFragmentRoot
 // ============================================================
 
 static HRESULT STDMETHODCALLTYPE FR_QI(IRawFragRoot* This, REFIID riid, void** ppv) {
@@ -548,11 +491,9 @@ static HRESULT STDMETHODCALLTYPE FR_ElementProviderFromPoint(IRawFragRoot* This,
             pt.y >= c->y && pt.y < c->y + c->height) {
             *pRetVal = &c->simple;
             InterlockedIncrement(&c->refCount);
-            fprintf(stderr, "[a11y] ElementProviderFromPoint (%g,%g) => child[%d]\n", x, y, i);
             return S_OK;
         }
     }
-    fprintf(stderr, "[a11y] ElementProviderFromPoint (%g,%g) => none\n", x, y);
     return S_OK;
 }
 
@@ -564,7 +505,6 @@ static HRESULT STDMETHODCALLTYPE FR_GetFocus(IRawFragRoot* This, IRawFragment** 
         FyneUIAElement* child = e->children[g_focusedIndex];
         *pRetVal = &child->fragment;
         InterlockedIncrement(&child->refCount);
-        fprintf(stderr, "[a11y] GetFocus => child[%d]\n", g_focusedIndex);
     }
     return S_OK;
 }
@@ -623,7 +563,6 @@ static FyneUIAElement* createElement(int isRoot, HWND hwnd) {
 static void focusChild(int index) {
     if (!g_root || index < 0 || index >= g_root->childCount) return;
     if (index == g_focusedIndex) return;
-    // Defer the focus event via PostMessage to avoid re-entrancy delays
     PostMessageW(g_hwnd, WM_FYNE_FOCUS_CHILD, (WPARAM)index, 0);
 }
 
@@ -641,35 +580,17 @@ static int hitTestChild(int clientX, int clientY) {
 
 static LRESULT CALLBACK AccessibilityWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     if (msg == WM_GETOBJECT) {
-        fprintf(stderr, "[a11y] WM_GETOBJECT lParam=%lld wParam=0x%llx\n",
-            (long long)lParam, (unsigned long long)wParam);
-        if (lParam == (LPARAM)UiaRootObjectId) {
-            if (g_root && pfnUiaReturn) {
-                fprintf(stderr, "[a11y] Calling UiaReturnRawElementProvider root=%p children=%d\n",
-                    (void*)g_root, g_root->childCount);
-                LRESULT lr = pfnUiaReturn(hwnd, wParam, lParam, &g_root->simple);
-                fprintf(stderr, "[a11y] UiaReturnRawElementProvider returned %lld\n", (long long)lr);
-                return lr;
-            }
+        if (lParam == (LPARAM)UiaRootObjectId && g_root && pfnUiaReturn) {
+            return pfnUiaReturn(hwnd, wParam, lParam, &g_root->simple);
         }
-        // For OBJID_CLIENT and other object IDs, pass to DefWindowProc
-        // to allow UIA to also use the host provider
         return DefWindowProcW(hwnd, msg, wParam, lParam);
     }
 
-    if (msg == WM_SETFOCUS || msg == WM_ACTIVATE) {
-        fprintf(stderr, "[a11y] %s wParam=0x%llx\n",
-            msg == WM_SETFOCUS ? "WM_SETFOCUS" : "WM_ACTIVATE",
-            (unsigned long long)wParam);
-        // Raise UIA focus event when window gains focus
-        if (msg == WM_SETFOCUS || (msg == WM_ACTIVATE && LOWORD(wParam) != 0 /*WA_INACTIVE*/)) {
-            // Defer so UIA has time to integrate provider
-            PostMessageW(hwnd, WM_FYNE_RAISE_FOCUS, 0, 0);
-        }
+    if (msg == WM_SETFOCUS || (msg == WM_ACTIVATE && LOWORD(wParam) != 0)) {
+        PostMessageW(hwnd, WM_FYNE_RAISE_FOCUS, 0, 0);
     }
 
     if (msg == WM_FYNE_RAISE_FOCUS) {
-        fprintf(stderr, "[a11y] WM_FYNE_RAISE_FOCUS: raising focus event\n");
         if (g_root && pfnUiaRaiseEvent) {
             pfnUiaRaiseEvent(&g_root->simple, UIA_AutomationFocusChangedEventId);
         }
@@ -680,34 +601,26 @@ static LRESULT CALLBACK AccessibilityWndProc(HWND hwnd, UINT msg, WPARAM wParam,
         int index = (int)wParam;
         if (g_root && index >= 0 && index < g_root->childCount) {
             g_focusedIndex = index;
-            FyneUIAElement* child = g_root->children[index];
-            fprintf(stderr, "[a11y] FocusChild => child[%d] '%ls'\n", index, child->name);
             if (pfnUiaRaiseEvent) {
-                pfnUiaRaiseEvent(&child->simple, UIA_AutomationFocusChangedEventId);
+                pfnUiaRaiseEvent(&g_root->children[index]->simple, UIA_AutomationFocusChangedEventId);
             }
         }
         return 0;
     }
 
-    // Handle mouse clicks - focus the child under cursor
     if (msg == WM_LBUTTONDOWN) {
-        int x = (int)(short)LOWORD(lParam);
-        int y = (int)(short)HIWORD(lParam);
-        int hit = hitTestChild(x, y);
+        int hit = hitTestChild((int)(short)LOWORD(lParam), (int)(short)HIWORD(lParam));
         if (hit >= 0) {
             focusChild(hit);
         }
     }
 
-    // Handle Tab key - cycle focus between children
     if (msg == WM_KEYDOWN && wParam == VK_TAB) {
         if (g_root && g_root->childCount > 0) {
             int next;
             if (GetKeyState(VK_SHIFT) & 0x8000) {
-                // Shift+Tab: previous
                 next = (g_focusedIndex <= 0) ? g_root->childCount - 1 : g_focusedIndex - 1;
             } else {
-                // Tab: next
                 next = (g_focusedIndex + 1) % g_root->childCount;
             }
             focusChild(next);
@@ -742,19 +655,18 @@ void WinAccessibilitySetWindow(void* hwnd) {
     g_root->hwnd = h;
 
     g_origWndProc = (WNDPROC)SetWindowLongPtrW(h, GWLP_WNDPROC, (LONG_PTR)AccessibilityWndProc);
-    fprintf(stderr, "[a11y] Window subclassed: hwnd=%p origProc=%p\n", (void*)h, (void*)g_origWndProc);
 }
 
 void WinAccessibilityAddElement(const char* name, WinAccessibilityRole role,
     double x, double y, double width, double height) {
     if (!g_root) return;
 
-    if (g_root->childCount >= g_root->childCapacity) {
-        int newCap = g_root->childCapacity == 0 ? 16 : g_root->childCapacity * 2;
-        FyneUIAElement** a = (FyneUIAElement**)realloc(g_root->children, newCap * sizeof(FyneUIAElement*));
+    if (g_stagingCount >= g_stagingCapacity) {
+        int newCap = g_stagingCapacity == 0 ? 16 : g_stagingCapacity * 2;
+        FyneUIAElement** a = (FyneUIAElement**)realloc(g_staging, newCap * sizeof(FyneUIAElement*));
         if (!a) return;
-        g_root->children = a;
-        g_root->childCapacity = newCap;
+        g_staging = a;
+        g_stagingCapacity = newCap;
     }
 
     FyneUIAElement* child = createElement(0, g_root->hwnd);
@@ -766,39 +678,72 @@ void WinAccessibilityAddElement(const char* name, WinAccessibilityRole role,
     child->y = y;
     child->width = width;
     child->height = height;
-    child->childIndex = g_root->childCount;
+    child->childIndex = g_stagingCount;
 
-    g_root->children[g_root->childCount] = child;
-    g_root->childCount++;
-    fprintf(stderr, "[a11y] AddElement '%s' role=%d at (%.0f,%.0f,%.0f,%.0f) => child[%d]\n",
-        name, role, x, y, width, height, child->childIndex);
+    g_staging[g_stagingCount] = child;
+    g_stagingCount++;
 }
 
 void WinAccessibilityClearElements(void) {
-    if (!g_root) return;
-    for (int i = 0; i < g_root->childCount; i++) {
-        FyneUIAElement* c = g_root->children[i];
-        c->parent = NULL;
-        c->simple.lpVtbl->Release(&c->simple);
-    }
-    g_root->childCount = 0;
-    g_focusedIndex = -1;
+    g_stagingCount = 0;
 }
 
 void WinAccessibilityUpdate(void) {
     if (!g_root || !g_hwnd) return;
-    fprintf(stderr, "[a11y] Update: %d children\n", g_root->childCount);
 
-    // Raise UIA structure changed event
-    if (pfnUiaRaiseStructure) {
-        int runtimeId[2] = { UiaAppendRuntimeId, g_root->uniqueId };
-        HRESULT hr = pfnUiaRaiseStructure(&g_root->simple,
-            UIAStructureChangeType_ChildrenInvalidated, runtimeId, 2);
-        fprintf(stderr, "[a11y] UiaRaiseStructureChangedEvent => 0x%lx\n", hr);
+    // Check if tree structure changed (count or names/roles differ)
+    int structureChanged = 0;
+    if (g_stagingCount != g_root->childCount) {
+        structureChanged = 1;
+    } else {
+        for (int i = 0; i < g_stagingCount; i++) {
+            FyneUIAElement* old = g_root->children[i];
+            FyneUIAElement* neu = g_staging[i];
+            if (old->controlType != neu->controlType ||
+                wcscmp(old->name, neu->name) != 0) {
+                structureChanged = 1;
+                break;
+            }
+        }
     }
 
-    // Defer focus event so UIA has time to process the tree
-    PostMessageW(g_hwnd, WM_FYNE_RAISE_FOCUS, 0, 0);
+    if (structureChanged) {
+        // Free old children
+        for (int i = 0; i < g_root->childCount; i++) {
+            free(g_root->children[i]->name);
+            free(g_root->children[i]);
+        }
+        // Swap in staging
+        FyneUIAElement** oldArr = g_root->children;
+        int oldCap = g_root->childCapacity;
+        g_root->children = g_staging;
+        g_root->childCount = g_stagingCount;
+        g_root->childCapacity = g_stagingCapacity;
+        g_staging = oldArr;
+        g_stagingCapacity = oldCap;
+        g_stagingCount = 0;
+        g_focusedIndex = -1;
+
+        if (pfnUiaRaiseStructure) {
+            int runtimeId[2] = { UiaAppendRuntimeId, g_root->uniqueId };
+            pfnUiaRaiseStructure(&g_root->simple,
+                UIAStructureChangeType_ChildrenInvalidated, runtimeId, 2);
+        }
+        PostMessageW(g_hwnd, WM_FYNE_RAISE_FOCUS, 0, 0);
+    } else {
+        // Update positions in-place
+        for (int i = 0; i < g_stagingCount; i++) {
+            FyneUIAElement* old = g_root->children[i];
+            FyneUIAElement* neu = g_staging[i];
+            old->x = neu->x;
+            old->y = neu->y;
+            old->width = neu->width;
+            old->height = neu->height;
+            free(neu->name);
+            free(neu);
+        }
+        g_stagingCount = 0;
+    }
 }
 
 void WinAccessibilityCleanup(void) {
@@ -810,10 +755,21 @@ void WinAccessibilityCleanup(void) {
         if (pfnUiaDisconnect) {
             pfnUiaDisconnect(&g_root->simple);
         }
-        WinAccessibilityClearElements();
+        for (int i = 0; i < g_root->childCount; i++) {
+            free(g_root->children[i]->name);
+            free(g_root->children[i]);
+        }
         free(g_root->children);
         free(g_root);
         g_root = NULL;
     }
+    for (int i = 0; i < g_stagingCount; i++) {
+        free(g_staging[i]->name);
+        free(g_staging[i]);
+    }
+    free(g_staging);
+    g_staging = NULL;
+    g_stagingCount = 0;
+    g_stagingCapacity = 0;
     g_hwnd = NULL;
 }

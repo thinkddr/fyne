@@ -93,6 +93,7 @@ func (d *gLDriver) drawSingleFrame() {
 				refreshed = true
 			}
 		})
+		w.updateAccessibility()
 	}
 	cache.Clean(refreshed)
 }
