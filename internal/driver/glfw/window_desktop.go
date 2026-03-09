@@ -85,7 +85,7 @@ type window struct {
 
 	master                          bool
 	fullScreen, fullScreenSecondary bool
-	centered, visible               bool
+	centered, visible, onTop        bool
 
 	mousePosUpdateProcessed    bool
 	newMousePosX, newMousePosY float64
@@ -128,6 +128,10 @@ func (w *window) SetFullScreen(full bool) {
 			w.doSetFullScreen(full)
 		})
 	}
+}
+
+func (w *window) RequestAlwaysOnTop() {
+	w.onTop = true
 }
 
 func (w *window) RequestFullScreenSecondary() {
@@ -771,6 +775,11 @@ func (w *window) create() {
 		glfw.WindowHint(glfw.Resizable, glfw.False)
 	} else {
 		glfw.WindowHint(glfw.Resizable, glfw.True)
+	}
+	if w.onTop {
+		glfw.WindowHint(glfw.Floating, glfw.True)
+	} else {
+		glfw.WindowHint(glfw.Floating, glfw.False)
 	}
 	glfw.WindowHint(glfw.AutoIconify, glfw.False)
 	initWindowHints()
