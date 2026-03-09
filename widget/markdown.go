@@ -8,6 +8,8 @@ import (
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/extension"
+	ast2 "github.com/yuin/goldmark/extension/ast"
 	"github.com/yuin/goldmark/renderer"
 
 	"fyne.io/fyne/v2"
@@ -124,7 +126,9 @@ func renderNode(source []byte, n ast.Node, blockquote bool, listDepth int) ([]Ri
 		}
 		return []RichTextSegment{&TextSegment{Style: RichTextStyleCodeBlock, Text: string(data)}}, nil
 	case *ast.Emphasis:
-		return renderEmphasis(source, n, blockquote, listDepth)
+		return renderEmphasis(source, n, blockquote, n.(*ast.Emphasis).Level, listDepth)
+	case *ast2.Strikethrough:
+		return renderEmphasis(source, n, blockquote, 3, listDepth)
 	case *ast.Text:
 		text := string(t.Value(source))
 		if text == "" {
@@ -165,10 +169,14 @@ func renderChildren(source []byte, n ast.Node, blockquote bool, listDepth int) (
 	return children, nil
 }
 
-func renderEmphasis(source []byte, n ast.Node, blockquote bool, listDepth int) ([]RichTextSegment, error) {
+func renderEmphasis(source []byte, n ast.Node, blockquote bool, strength, listDepth int) ([]RichTextSegment, error) {
 	style := RichTextStyleEmphasis
-	if n.(*ast.Emphasis).Level == 2 {
+	switch strength {
+	case 2:
 		style = RichTextStyleStrong
+	case 3:
+		style = RichTextStyleInline
+		style.TextStyle.Strikethrough = true
 	}
 	children, err := renderChildren(source, n, blockquote, listDepth)
 	for _, child := range children {
@@ -213,7 +221,7 @@ func forceIntoHeadingText(source []byte, n ast.Node) string {
 
 func parseMarkdown(content string) []RichTextSegment {
 	r := markdownRenderer{}
-	md := goldmark.New(goldmark.WithRenderer(&r))
+	md := goldmark.New(goldmark.WithRenderer(&r), goldmark.WithExtensions(extension.Strikethrough))
 	err := md.Convert([]byte(content), nil)
 	if err != nil {
 		fyne.LogError("Failed to parse markdown", err)

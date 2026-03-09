@@ -79,6 +79,28 @@ func TestRichTextMarkdown_Emphasis(t *testing.T) {
 	} else {
 		t.Error("Segment should be text")
 	}
+
+	r.ParseMarkdown("~c~.")
+
+	assert.Len(t, r.Segments, 3)
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "c", text.Text)
+		assert.False(t, text.Style.TextStyle.Bold)
+		assert.True(t, text.Style.TextStyle.Strikethrough)
+	} else {
+		t.Error("Segment should be text")
+	}
+
+	r.ParseMarkdown("~~d~~.")
+
+	assert.Len(t, r.Segments, 3)
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "d", text.Text)
+		assert.False(t, text.Style.TextStyle.Bold)
+		assert.True(t, text.Style.TextStyle.Strikethrough)
+	} else {
+		t.Error("Segment should be text")
+	}
 }
 
 func TestRichTextMarkdown_Heading(t *testing.T) {
