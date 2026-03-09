@@ -145,6 +145,15 @@ func (w *window) RequestFullScreenSecondary() {
 	}
 }
 
+func (w *window) RequestPosition(x, y int) {
+	w.xpos = x
+	w.ypos = y
+
+	if w.view() != nil {
+		w.view().SetPos(x, y)
+	}
+}
+
 func (w *window) CenterOnScreen() {
 	if build.IsWayland {
 		return
@@ -803,6 +812,10 @@ func (w *window) create() {
 	w.viewport = win
 	if w.view() == nil { // something went wrong above, it will have been logged
 		return
+	}
+
+	if (w.xpos != 0 || w.ypos != 0) && !build.IsWayland {
+		win.SetPos(w.xpos, w.ypos)
 	}
 
 	// run the GL init on the draw thread
