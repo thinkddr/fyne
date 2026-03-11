@@ -759,9 +759,6 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	realign := false
 	baselines := make([]float32, len(texts))
 
-	// Access to theme is slow, so we cache the text size
-	textSize := theme.SizeForWidget(theme.SizeNameText, r.obj)
-
 	driver := fyne.CurrentApp().Driver()
 	for i, text := range texts {
 		var size fyne.Size
@@ -778,6 +775,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 		} else if c, ok := text.(*fyne.Container); ok {
 			wid := c.Objects[0]
 			if link, ok := wid.(*Hyperlink); ok {
+				textSize := theme.SizeForWidget(link.SizeName, r.obj)
 				s, base := driver.RenderedTextSize(link.Text, textSize, link.TextStyle, nil)
 				if base > tallestBaseline {
 					if tallestBaseline > 0 {
