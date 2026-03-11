@@ -1,8 +1,8 @@
-//go:build !android
+//go:build !android && !ios
 
 package mobile
 
-// Stub implementations for non-Android mobile platforms.
+// Stub implementations for platforms without accessibility bridges.
 
 func (w *window) updateAccessibility() {
 }
