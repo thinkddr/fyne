@@ -170,21 +170,41 @@ func renderChildren(source []byte, n ast.Node, blockquote bool, listDepth int) (
 }
 
 func renderEmphasis(source []byte, n ast.Node, blockquote bool, strength, listDepth int) ([]RichTextSegment, error) {
-	style := RichTextStyleEmphasis
+	style := RichTextStyleInline
 	switch strength {
+	case 1:
+		style = RichTextStyleEmphasis
+		if _, ok := n.Parent().(*ast2.Strikethrough); ok {
+			style.TextStyle.Strikethrough = true
+		}
 	case 2:
 		style = RichTextStyleStrong
+		if _, ok := n.Parent().(*ast2.Strikethrough); ok {
+			style.TextStyle.Strikethrough = true
+		}
 	case 3:
 		style = RichTextStyleInline
 		style.TextStyle.Strikethrough = true
+		if emp, ok := n.Parent().(*ast.Emphasis); ok {
+			if emp.Level == 1 {
+				style.TextStyle.Italic = true
+			} else if emp.Level == 2 {
+				style.TextStyle.Bold = true
+			}
+		}
 	}
+
 	children, err := renderChildren(source, n, blockquote, listDepth)
 	for _, child := range children {
 		switch t := child.(type) {
 		case *TextSegment:
-			t.Style = style
+			t.Style.TextStyle.Bold = t.Style.TextStyle.Bold || style.TextStyle.Bold
+			t.Style.TextStyle.Italic = t.Style.TextStyle.Italic || style.TextStyle.Italic
+			t.Style.TextStyle.Strikethrough = t.Style.TextStyle.Strikethrough || style.TextStyle.Strikethrough
 		case *HyperlinkSegment:
-			t.TextStyle = style.TextStyle
+			t.TextStyle.Bold = t.TextStyle.Bold || style.TextStyle.Bold
+			t.TextStyle.Italic = t.TextStyle.Italic || style.TextStyle.Italic
+			t.TextStyle.Strikethrough = t.TextStyle.Strikethrough || style.TextStyle.Strikethrough
 		}
 	}
 	return children, err
