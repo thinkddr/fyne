@@ -168,6 +168,7 @@ func (w *window) Close() {
 		}
 	})
 	cache.CleanCanvas(w.canvas)
+	w.cleanupAccessibilityForWindow()
 
 	if w.onClosed != nil {
 		w.onClosed()
