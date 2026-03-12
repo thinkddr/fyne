@@ -1894,6 +1894,20 @@ func TestWindow_Shortcut(t *testing.T) {
 	assert.Equal(t, "obj", called)
 }
 
+func TestWindow_RescaleContext(t *testing.T) {
+	w := createWindow("Test")
+	// Use a size that produces a float after scaling
+	w.Resize(fyne.NewSize(51, 51))
+	runOnMain(func() {
+		w.canvas.scale = 1.3
+		w.RescaleContext()
+		initialWidth := w.width
+
+		w.RescaleContext()
+		assert.Equal(t, initialWidth, w.width)
+	})
+}
+
 func createWindow(title string) *safeWindow {
 	var w *window
 	runOnMain(func() { // tests launch in a different context
