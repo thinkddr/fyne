@@ -100,7 +100,12 @@ func (c *glCanvas) Resize(size fyne.Size) {
 	// This might not be the ideal solution, but it effectively avoid the first frame to be blurry due to the
 	// rounding of the size to the loower integer when scale == 1. It does not affect the other cases as far as we tested.
 	// This can easily be seen with fyne/cmd/hello and a scale == 1 as the text will happear blurry without the following line.
-	nearestSize := fyne.NewSize(float32(math.Ceil(float64(size.Width))), float32(math.Ceil(float64(size.Height))))
+	var nearestSize fyne.Size
+	if c.scale == 1 {
+		nearestSize = fyne.NewSize(float32(math.Ceil(float64(size.Width))), float32(math.Ceil(float64(size.Height))))
+	} else {
+		nearestSize = size
+	}
 
 	c.size = nearestSize
 
