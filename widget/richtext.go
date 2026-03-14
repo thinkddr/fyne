@@ -415,7 +415,9 @@ func (t *RichText) updateRowBounds() {
 				}
 				continue
 			}
-			if _, ok := seg.(*TextSegment); !ok {
+			_, isText := seg.(*TextSegment)
+			_, isHyperlink := seg.(*HyperlinkSegment)
+			if !isText && !isHyperlink {
 				if currentBound == nil {
 					bound := rowBoundary{segments: []RichTextSegment{seg}}
 					bounds = append(bounds, bound)
@@ -434,15 +436,20 @@ func (t *RichText) updateRowBounds() {
 				}
 				continue
 			}
-			textSeg := seg.(*TextSegment)
-			textStyle := textSeg.Style.TextStyle
-			textSize := textSeg.size()
-
+			var textStyle fyne.TextStyle
+			var textSize float32
 			leftPad := float32(0)
-			if textSeg.Style == RichTextStyleBlockquote {
-				leftPad = innerPadding * 2
+			if textSeg, ok := seg.(*TextSegment); ok {
+				textStyle = textSeg.Style.TextStyle
+				textSize = textSeg.size()
+				if textSeg.Style == RichTextStyleBlockquote {
+					leftPad = innerPadding * 2
+				}
+			} else if linkSeg, ok := seg.(*HyperlinkSegment); ok {
+				textStyle = linkSeg.TextStyle
+				textSize = theme.SizeForWidget(theme.SizeNameText, t)
 			}
-			retBounds, height := lineBounds(textSeg, t.Wrapping, t.Truncation, wrapWidth-leftPad, fyne.NewSize(maxWidth, fitSize.Height), func(text []rune) fyne.Size {
+			retBounds, height := lineBounds(seg, t.Wrapping, t.Truncation, wrapWidth-leftPad, fyne.NewSize(maxWidth, fitSize.Height), func(text []rune) fyne.Size {
 				return fyne.MeasureText(string(text), textSize, textStyle)
 			})
 			if currentBound != nil {
@@ -465,7 +472,7 @@ func (t *RichText) updateRowBounds() {
 				if len(last.segments) == 1 {
 					begin = last.begin
 				}
-				runes := []rune(textSeg.Text)
+				runes := []rune(seg.Textual())
 				// check ranges - as we resize it can be wrong?
 				if begin > len(runes) {
 					begin = len(runes)
@@ -475,7 +482,7 @@ func (t *RichText) updateRowBounds() {
 					end = len(runes)
 				}
 				text := string(runes[begin:end])
-				measured := fyne.MeasureText(text, textSeg.size(), textSeg.Style.TextStyle)
+				measured := fyne.MeasureText(text, textSize, textStyle)
 				lastWidth := measured.Width
 				if len(retBounds) == 1 {
 					wrapWidth -= lastWidth
@@ -946,7 +953,7 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 // measure text size.
 // It will return a slice containing the boundary metadata of each line with the given wrapping applied and the
 // total height required to render the boundaries at the given width/height constraints
-func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation, firstWidth float32, max fyne.Size, measurer func([]rune) fyne.Size) ([]rowBoundary, float32) {
+func lineBounds(seg RichTextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation, firstWidth float32, max fyne.Size, measurer func([]rune) fyne.Size) ([]rowBoundary, float32) {
 	lines := splitLines(seg)
 
 	if wrap == fyne.TextWrap(fyne.TextTruncateClip) {
@@ -961,7 +968,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 	}
 
 	measureWidth := float32(math.Min(float64(firstWidth), float64(max.Width)))
-	text := []rune(seg.Text)
+	text := []rune(seg.Textual())
 	widthChecker := func(low int, high int) float32 {
 		return measurer(text[low:high]).Width / measureWidth
 	}
@@ -1079,7 +1086,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 			}
 		default:
 			if trunc == fyne.TextTruncateEllipsis {
-				txt := []rune(seg.Text)[low:high]
+				txt := []rune(seg.Textual())[low:high]
 				end, full := truncateLimit(string(txt), seg.Visual().(*canvas.Text), int(measureWidth), []rune{'…'})
 				high = low + end
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full})
@@ -1110,10 +1117,10 @@ func setAlign(obj fyne.CanvasObject, align fyne.TextAlign) {
 
 // splitLines accepts a text segment and returns a slice of boundary metadata denoting the
 // start and end indices of each line delimited by the newline character.
-func splitLines(seg *TextSegment) []rowBoundary {
+func splitLines(seg RichTextSegment) []rowBoundary {
 	var low, high int
 	var lines []rowBoundary
-	text := []rune(seg.Text)
+	text := []rune(seg.Textual())
 	length := len(text)
 	for i := 0; i < length; i++ {
 		if text[i] == '\n' {
