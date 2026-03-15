@@ -80,8 +80,7 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 	secondary := widget.NewButton("Fullscreen Secondary", func() {
 		if win.FullScreen() {
 			win.SetFullScreen(false)
-		}
-		if ok {
+		} else if ok {
 			deskWin.RequestFullScreenSecondary()
 		}
 	})
