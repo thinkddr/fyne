@@ -10,7 +10,7 @@ require (
 	github.com/fogleman/gg v1.3.0
 	github.com/fredbi/uri v1.1.1
 	github.com/fsnotify/fsnotify v1.9.0
-	github.com/fyne-io/gl-js v0.2.0
+	github.com/fyne-io/gl-js v0.2.1-0.20260315212741-029c47fd27e8
 	github.com/fyne-io/glfw-js v0.3.0
 	github.com/fyne-io/image v0.1.1
 	github.com/fyne-io/oksvg v0.2.0
