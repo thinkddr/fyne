@@ -87,17 +87,7 @@ func renderNode(source []byte, n ast.Node, blockquote bool, listDepth int) ([]Ri
 	case *ast.TextBlock:
 		return renderChildren(source, n, blockquote, listDepth)
 	case *ast.Heading:
-		switch t.Level {
-		case 1:
-			return parseHeadingText(source, n, RichTextStyleHeading), nil
-		case 2:
-			return parseHeadingText(source, n, RichTextStyleSubHeading), nil
-		default:
-			// TODO support these more styled too
-			textSegment := TextSegment{Style: RichTextStyleParagraph, Text: decodeText(string(n.Text(source)))}
-			textSegment.Style.TextStyle.Bold = true
-			return []RichTextSegment{&textSegment}, nil
-		}
+		return renderHeading(source, n, blockquote, listDepth)
 	case *ast.ThematicBreak:
 		return []RichTextSegment{&SeparatorSegment{}}, nil
 	case *ast.Link:
@@ -210,6 +200,54 @@ func renderEmphasis(source []byte, n ast.Node, blockquote bool, strength, listDe
 	return children, err
 }
 
+func renderHeading(source []byte, n ast.Node, blockquote bool, listDepth int) ([]RichTextSegment, error) {
+	var style RichTextStyle
+	switch n.(*ast.Heading).Level {
+	case 1:
+		style = RichTextStyleHeading
+	case 2:
+		style = RichTextStyleSubHeading
+	default:
+		style = RichTextStyleStrong
+	}
+
+	children := make([]RichTextSegment, 0, n.ChildCount())
+	for childCount, child := n.ChildCount(), n.FirstChild(); childCount > 0; childCount-- {
+		switch t := child.(type) {
+		case *ast.Text:
+			text := string(t.Value(source))
+			children = append(children, &TextSegment{Style: style, Text: decodeText(text)})
+		default:
+			segs, err := renderNode(source, child, blockquote, listDepth)
+			if err != nil {
+				return children, err
+			}
+			for _, seg := range segs {
+				if t, ok := seg.(*TextSegment); ok { // apply heading to other text
+					t.Style.SizeName = style.SizeName
+					t.Style.TextStyle.Bold = true
+				}
+			}
+			children = append(children, segs...)
+		}
+		child = child.NextSibling()
+	}
+	if len(children) == 0 {
+		children = append(children, &TextSegment{Style: style, Text: ""})
+	}
+
+	for _, child := range children {
+		switch t := child.(type) {
+		case *HyperlinkSegment:
+			t.TextStyle = style.TextStyle
+			t.SizeName = style.SizeName
+		}
+	}
+	linebreak := &TextSegment{Style: RichTextStyleParagraph}
+	children = append(children, linebreak)
+	return children, nil
+}
+
 func forceIntoText(source []byte, n ast.Node) string {
 	text := strings.Builder{}
 	ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
@@ -223,46 +261,6 @@ func forceIntoText(source []byte, n ast.Node) string {
 		return ast.WalkContinue, nil
 	})
 	return strings.TrimSuffix(text.String(), " ")
-}
-
-func parseHeadingText(source []byte, n ast.Node, headType RichTextStyle) []RichTextSegment {
-	ret := make([]RichTextSegment, 0)
-	italic, strike := false, false
-	ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
-		if entering {
-			switch t := n2.(type) {
-			case *ast.Emphasis:
-				if t.Level == 1 {
-					italic = true
-				} // no level 2 - headings always bold
-			case *ast2.Strikethrough:
-				strike = true
-			case *ast.Text:
-				seg := &TextSegment{Style: headType, Text: decodeText(string(t.Value(source)))}
-				seg.Style.TextStyle.Italic = italic
-				seg.Style.TextStyle.Strikethrough = strike
-				seg.Style.Inline = true
-				ret = append(ret, seg)
-			}
-		} else {
-			switch t := n2.(type) {
-			case *ast.Emphasis:
-				if t.Level == 1 {
-					italic = false
-				} // no level 2 - headings always bold
-			case *ast2.Strikethrough:
-				strike = false
-			}
-		}
-		return ast.WalkContinue, nil
-	})
-
-	if len(ret) == 0 {
-		return []RichTextSegment{&TextSegment{Style: headType, Text: ""}}
-	}
-
-	ret[len(ret)-1].(*TextSegment).Style.Inline = true
-	return ret
 }
 
 func parseMarkdown(content string) []RichTextSegment {
