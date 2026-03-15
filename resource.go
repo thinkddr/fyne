@@ -106,7 +106,10 @@ func CacheResourceFromURLString(urlStr string) (Resource, error) {
 		return nil, err
 	}
 
-	write, _ := cache.Write(urlStr)
+	write, err := cache.Write(urlStr)
+	if err != nil {
+		return res, err
+	}
 	defer write.Close()
 	data := res.Content()
 
