@@ -87,14 +87,14 @@ func renderNode(source []byte, n ast.Node, blockquote bool, listDepth int) ([]Ri
 	case *ast.TextBlock:
 		return renderChildren(source, n, blockquote, listDepth)
 	case *ast.Heading:
-		text := forceIntoHeadingText(source, n)
 		switch t.Level {
 		case 1:
-			return []RichTextSegment{&TextSegment{Style: RichTextStyleHeading, Text: decodeText(text)}}, nil
+			return parseHeadingText(source, n, RichTextStyleHeading), nil
 		case 2:
-			return []RichTextSegment{&TextSegment{Style: RichTextStyleSubHeading, Text: decodeText(text)}}, nil
+			return parseHeadingText(source, n, RichTextStyleSubHeading), nil
 		default:
-			textSegment := TextSegment{Style: RichTextStyleParagraph, Text: decodeText(text)}
+			// TODO support these more styled too
+			textSegment := TextSegment{Style: RichTextStyleParagraph, Text: decodeText(string(n.Text(source)))}
 			textSegment.Style.TextStyle.Bold = true
 			return []RichTextSegment{&textSegment}, nil
 		}
@@ -225,18 +225,44 @@ func forceIntoText(source []byte, n ast.Node) string {
 	return strings.TrimSuffix(text.String(), " ")
 }
 
-func forceIntoHeadingText(source []byte, n ast.Node) string {
-	text := strings.Builder{}
+func parseHeadingText(source []byte, n ast.Node, headType RichTextStyle) []RichTextSegment {
+	ret := make([]RichTextSegment, 0)
+	italic, strike := false, false
 	ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			switch t := n2.(type) {
+			case *ast.Emphasis:
+				if t.Level == 1 {
+					italic = true
+				} // no level 2 - headings always bold
+			case *ast2.Strikethrough:
+				strike = true
 			case *ast.Text:
-				text.Write(t.Value(source))
+				seg := &TextSegment{Style: headType, Text: decodeText(string(t.Value(source)))}
+				seg.Style.TextStyle.Italic = italic
+				seg.Style.TextStyle.Strikethrough = strike
+				seg.Style.Inline = true
+				ret = append(ret, seg)
+			}
+		} else {
+			switch t := n2.(type) {
+			case *ast.Emphasis:
+				if t.Level == 1 {
+					italic = false
+				} // no level 2 - headings always bold
+			case *ast2.Strikethrough:
+				strike = false
 			}
 		}
 		return ast.WalkContinue, nil
 	})
-	return text.String()
+
+	if len(ret) == 0 {
+		return []RichTextSegment{&TextSegment{Style: headType, Text: ""}}
+	}
+
+	ret[len(ret)-1].(*TextSegment).Style.Inline = true
+	return ret
 }
 
 func parseMarkdown(content string) []RichTextSegment {
