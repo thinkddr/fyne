@@ -12,7 +12,7 @@ var _ fyne.CanvasObject = (*Blur)(nil)
 type Blur struct {
 	baseObject
 
-	// Radius refers to how far from a pixel should be used to calculate the blur.
+	// Radius refers to how far from a point should be used to calculate the blur.
 	// It must be greater than 0 but no more than 50.
 	Radius float32
 }
