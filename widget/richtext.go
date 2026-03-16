@@ -737,6 +737,7 @@ func (r *textRenderer) Refresh() {
 				obj.(*canvas.Text).Text = txt
 			} else if isHyperlink {
 				obj.(*fyne.Container).Objects[0].(*Hyperlink).Text = txt
+				obj.(*fyne.Container).Objects[0].(*Hyperlink).Refresh()
 			}
 			objs = append(objs, obj)
 		}
