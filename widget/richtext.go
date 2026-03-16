@@ -696,7 +696,9 @@ func (r *textRenderer) Refresh() {
 	var objs []fyne.CanvasObject
 	for _, bound := range bounds {
 		for i, seg := range bound.segments {
-			if _, ok := seg.(*TextSegment); !ok {
+			_, isText := seg.(*TextSegment)
+			_, isHyperlink := seg.(*HyperlinkSegment)
+			if !isText && !isHyperlink {
 				obj := r.obj.cachedSegmentVisual(seg, 0)
 				seg.Update(obj)
 				objs = append(objs, obj)
@@ -709,28 +711,34 @@ func (r *textRenderer) Refresh() {
 			}
 			obj := r.obj.cachedSegmentVisual(seg, reuse)
 			seg.Update(obj)
-			txt := obj.(*canvas.Text)
-			textSeg := seg.(*TextSegment)
-			runes := []rune(textSeg.Text)
+			var txt string
+			runes := []rune(seg.Textual())
 
 			if i == 0 {
 				if len(bound.segments) == 1 {
-					txt.Text = string(runes[bound.begin:bound.end])
+					txt = string(runes[bound.begin:bound.end])
 				} else {
-					txt.Text = string(runes[bound.begin:])
+					txt = string(runes[bound.begin:])
 				}
 			} else if i == len(bound.segments)-1 && len(bound.segments) > 1 {
-				txt.Text = string(runes[:bound.end])
+				txt = string(runes[:bound.end])
+			} else {
+				txt = string(runes)
 			}
 			if bound.ellipsis && i == len(bound.segments)-1 {
-				txt.Text = txt.Text + "…"
+				txt = txt + "…"
 			}
 
 			if concealed(seg) {
-				txt.Text = strings.Repeat(passwordChar, len(runes))
+				txt = strings.Repeat(passwordChar, len(runes))
 			}
 
-			objs = append(objs, txt)
+			if isText {
+				obj.(*canvas.Text).Text = txt
+			} else if isHyperlink {
+				obj.(*fyne.Container).Objects[0].(*Hyperlink).Text = txt
+			}
+			objs = append(objs, obj)
 		}
 	}
 
