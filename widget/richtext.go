@@ -989,7 +989,6 @@ func lineBounds(seg RichTextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncati
 }
 
 func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth float32, max fyne.Size, measurer func([]rune) fyne.Size, lines []rowBoundary) ([]rowBoundary, float32) {
-
 	text := []rune(seg.Textual())
 	widthChecker := func(low int, high int) float32 {
 		return measurer(text[low:high]).Width / measureWidth
