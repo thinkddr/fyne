@@ -1096,7 +1096,14 @@ func lineBounds(seg RichTextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncati
 		default:
 			if trunc == fyne.TextTruncateEllipsis {
 				txt := []rune(seg.Textual())[low:high]
-				end, full := truncateLimit(string(txt), seg.Visual().(*canvas.Text), int(measureWidth), []rune{'…'})
+				var textObj *canvas.Text
+				switch seg.(type) {
+				case *TextSegment:
+					textObj = seg.Visual().(*canvas.Text)
+				case *HyperlinkSegment:
+					textObj = canvas.NewText(string(txt), color.Black)
+				}
+				end, full := truncateLimit(string(txt), textObj, int(measureWidth), []rune{'…'})
 				high = low + end
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full})
 				reuse++
