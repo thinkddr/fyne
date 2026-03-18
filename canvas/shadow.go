@@ -6,17 +6,17 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-// ShadowType defines the type of shadow to render.
+// ShadowVariant indicates a variation of a shadow.
 //
 // Since: 2.8
-type ShadowType int
+type ShadowVariant int
 
 const (
 	// DropShadow represents a shadow effect that is rendered exclusively outside the boundaries of the object,
 	// following the object's shape and not appearing beneath its filled area.
 	//
 	// Since: 2.8
-	DropShadow ShadowType = iota
+	DropShadow ShadowVariant = iota
 	// BoxShadow represents a shadow effect that is rendered both behind and outside the object,
 	// appearing as a blurred rectangle that extends beneath the object's filled area as well as beyond its edges.
 	//
@@ -29,22 +29,22 @@ const (
 //
 // Since: 2.8
 type Shadow struct {
-	ShadowColor      color.Color   // Color of the shadow.
-	ShadowBlurRadius float32       // A value of 0 produces no blur, while larger values produce bigger and lighter shadow.
-	ShadowOffset     fyne.Position // Offset of the shadow relative to the content.
-	ShadowType       ShadowType    // Type of shadow (DropShadow or BoxShadow).
-	ShadowSpread     float32       // Spread of the shadow (positive values make the shadow larger, negative values make it smaller).
+	FillColor  color.Color   // Color of the shadow.
+	BlurRadius float32       // A value of 0 produces no blur, while larger values produce bigger and lighter shadow.
+	Spread     float32       // Spread of the shadow (positive values make the shadow larger, negative values make it smaller).
+	Offset     fyne.Position // Offset of the shadow relative to the content.
+	Variant    ShadowVariant // Variation of shadow (DropShadow or BoxShadow).
 }
 
 // NewShadow creates a new Shadow with the specified properties.
 //
 // Since: 2.8
-func NewShadow(color color.Color, blurRadius, spread float32, offset fyne.Position, shadowType ShadowType) Shadow {
+func NewShadow(color color.Color, blurRadius, spread float32, offset fyne.Position, variant ShadowVariant) Shadow {
 	return Shadow{
-		ShadowColor:      color,
-		ShadowBlurRadius: blurRadius,
-		ShadowSpread:     spread,
-		ShadowOffset:     offset,
-		ShadowType:       shadowType,
+		FillColor:  color,
+		BlurRadius: blurRadius,
+		Spread:     spread,
+		Offset:     offset,
+		Variant:    variant,
 	}
 }

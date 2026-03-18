@@ -105,14 +105,14 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 
 	p.ExtendBaseWidget(p)
 	background := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
-	background.Shadow.ShadowColor = th.Color(theme.ColorNameShadow, v)
+	background.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
 	// TODO update initial shadow offset and softness to match ShadowingRenderer
-	background.Shadow.ShadowBlurRadius = 6
+	background.Shadow.BlurRadius = 6
 	if p.modal {
 		blur := canvas.NewBlur(th.Size(theme.SizeNameModalBlurRadius))
 		underlay := canvas.NewRectangle(th.Color(theme.ColorNameShadow, v))
 		objects := []fyne.CanvasObject{blur, underlay, background, p.Content}
-		background.Shadow.ShadowOffset = fyne.NewPos(-float32(widget.DialogLevel)*0.4, float32(widget.DialogLevel)*0.2)
+		background.Shadow.Offset = fyne.NewPos(-float32(widget.DialogLevel)*0.4, float32(widget.DialogLevel)*0.2)
 		return &modalPopUpRenderer{
 			widget.NewBaseRenderer(objects),
 			popUpBaseRenderer{popUp: p, background: background},
@@ -120,7 +120,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 		}
 	}
 	objects := []fyne.CanvasObject{background, p.Content}
-	background.Shadow.ShadowOffset = fyne.NewPos(-float32(widget.PopUpLevel)*0.4, float32(widget.PopUpLevel)*0.2)
+	background.Shadow.Offset = fyne.NewPos(-float32(widget.PopUpLevel)*0.4, float32(widget.PopUpLevel)*0.2)
 	return &popUpRenderer{
 		widget.NewBaseRenderer(objects),
 		popUpBaseRenderer{popUp: p, background: background},
@@ -235,7 +235,7 @@ func (r *popUpRenderer) Refresh() {
 	th := r.popUp.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	r.background.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
-	r.background.Shadow.ShadowColor = th.Color(theme.ColorNameShadow, v)
+	r.background.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
 	expectedContentSize := r.popUp.innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
 	shouldRelayout := r.popUp.Content.Size() != expectedContentSize
 
@@ -288,7 +288,7 @@ func (r *modalPopUpRenderer) Refresh() {
 	r.blur.Refresh()
 
 	r.background.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
-	r.background.Shadow.ShadowColor = th.Color(theme.ColorNameShadow, v)
+	r.background.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
 	expectedContentSize := r.popUp.innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
 	shouldLayout := r.popUp.Content.Size() != expectedContentSize
 

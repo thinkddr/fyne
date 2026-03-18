@@ -124,10 +124,10 @@ func TestPainter_paintCircleShadow(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	r, g, b, _ := color.Black.RGBA()
 	obj := canvas.NewCircle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
-	obj.Shadow.ShadowColor = color.White
-	obj.Shadow.ShadowOffset = fyne.NewPos(10, -5)
-	obj.Shadow.ShadowBlurRadius = 3
-	obj.Shadow.ShadowType = canvas.DropShadow
+	obj.Shadow.FillColor = color.White
+	obj.Shadow.Offset = fyne.NewPos(10, -5)
+	obj.Shadow.BlurRadius = 3
+	obj.Shadow.Variant = canvas.DropShadow
 
 	c := test.NewCanvas()
 	c.SetPadded(true)
@@ -138,7 +138,7 @@ func TestPainter_paintCircleShadow(t *testing.T) {
 
 	test.AssertImageMatches(t, "draw_circle_drop_shadow.png", p.Paint(c))
 
-	obj.Shadow.ShadowType = canvas.BoxShadow
+	obj.Shadow.Variant = canvas.BoxShadow
 
 	test.AssertImageMatches(t, "draw_circle_box_shadow.png", p.Paint(c))
 }
@@ -644,10 +644,10 @@ func TestPainter_paintRectangle_shadow(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	r, g, b, _ := color.Black.RGBA()
 	obj := canvas.NewRectangle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
-	obj.Shadow.ShadowColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
-	obj.Shadow.ShadowOffset = fyne.NewPos(-3, -4)
-	obj.Shadow.ShadowBlurRadius = 8
-	obj.Shadow.ShadowType = canvas.BoxShadow
+	obj.Shadow.FillColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
+	obj.Shadow.Offset = fyne.NewPos(-3, -4)
+	obj.Shadow.BlurRadius = 8
+	obj.Shadow.Variant = canvas.BoxShadow
 
 	c := test.NewCanvas()
 	c.SetPadded(true)
@@ -663,7 +663,7 @@ func TestPainter_paintRectangle_shadow(t *testing.T) {
 	test.AssertImageMatches(t, "draw_rectangle_narrow_box_shadow.png", p.Paint(c))
 
 	obj.Aspect = 0
-	obj.Shadow.ShadowType = canvas.DropShadow
+	obj.Shadow.Variant = canvas.DropShadow
 	test.AssertImageMatches(t, "draw_rectangle_drop_shadow.png", p.Paint(c))
 	obj.Aspect = 2
 	test.AssertImageMatches(t, "draw_rectangle_wide_drop_shadow.png", p.Paint(c))
@@ -677,9 +677,9 @@ func TestPainter_paintRectangle_stroke_shadow(t *testing.T) {
 	obj := canvas.NewRectangle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
 	obj.StrokeWidth = 2
 	obj.StrokeColor = color.White
-	obj.Shadow.ShadowColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
-	obj.Shadow.ShadowOffset = fyne.NewPos(0, 0)
-	obj.Shadow.ShadowBlurRadius = 10
+	obj.Shadow.FillColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
+	obj.Shadow.Offset = fyne.NewPos(0, 0)
+	obj.Shadow.BlurRadius = 10
 
 	c := test.NewCanvas()
 	c.SetPadded(true)
@@ -696,14 +696,14 @@ func TestPainter_paintRectangle_stroke_shadow(t *testing.T) {
 	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow_drop_shadow.png", p.Paint(c))
 
 	obj.Aspect = 0
-	obj.Shadow.ShadowType = canvas.BoxShadow
+	obj.Shadow.Variant = canvas.BoxShadow
 	test.AssertImageMatches(t, "draw_rectangle_stroke_box_shadow.png", p.Paint(c))
 	obj.Aspect = 2
 	test.AssertImageMatches(t, "draw_rectangle_stroke_wide_box_shadow.png", p.Paint(c))
 	obj.Aspect = 0.5
 	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow_box_shadow.png", p.Paint(c))
 
-	obj.Shadow.ShadowSpread = 3
+	obj.Shadow.Spread = 3
 	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow_box_shadow_spread.png", p.Paint(c))
 }
 

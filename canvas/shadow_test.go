@@ -13,9 +13,9 @@ import (
 func TestShadow_New(t *testing.T) {
 	s := canvas.NewShadow(color.Black, 3, 2, fyne.NewPos(4, 5), canvas.DropShadow)
 
-	assert.Equal(t, color.Black, s.ShadowColor)
-	assert.Equal(t, float32(3), s.ShadowBlurRadius)
-	assert.Equal(t, float32(2), s.ShadowSpread)
-	assert.Equal(t, fyne.NewPos(4, 5), s.ShadowOffset)
-	assert.Equal(t, canvas.DropShadow, s.ShadowType)
+	assert.Equal(t, color.Black, s.FillColor)
+	assert.Equal(t, float32(3), s.BlurRadius)
+	assert.Equal(t, float32(2), s.Spread)
+	assert.Equal(t, fyne.NewPos(4, 5), s.Offset)
+	assert.Equal(t, canvas.DropShadow, s.Variant)
 }

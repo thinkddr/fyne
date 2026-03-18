@@ -402,11 +402,11 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 	shadowPadTop := scale.ToScreenCoordinate(c, pads[1])
 	shadowPadBottom := scale.ToScreenCoordinate(c, pads[3])
 
-	shadowColor := shadow.ShadowColor
-	shadowBlurRadius := shadow.ShadowBlurRadius
-	shadowOffset := shadow.ShadowOffset
-	shadowType := shadow.ShadowType
-	shadowSpread := shadow.ShadowSpread
+	shadowColor := shadow.FillColor
+	shadowBlurRadius := shadow.BlurRadius
+	shadowOffset := shadow.Offset
+	shadowVariant := shadow.Variant
+	shadowSpread := shadow.Spread
 
 	var shadowRaw *image.RGBA
 
@@ -454,7 +454,7 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 	blurred := blur.Gaussian(shadowRaw, float64(scale.ToScreenCoordinate(c, shadowBlurRadius)))
 
 	// If DropShadow, subtract object from shadow
-	if shadowType == canvas.DropShadow {
+	if shadowVariant == canvas.DropShadow {
 		blurPx := scale.ToScreenCoordinate(c, shadowBlurRadius)
 		spreadPx := scale.ToScreenCoordinate(c, shadowSpread)
 

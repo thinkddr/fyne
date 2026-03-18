@@ -122,10 +122,10 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
-	bg.Shadow.ShadowColor = th.Color(theme.ColorNameShadow, v)
+	bg.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
 	// TODO update initial shadow offset and softness to match ShadowingRenderer
-	bg.Shadow.ShadowBlurRadius = 8
-	bg.Shadow.ShadowOffset = fyne.NewPos(-float32(intWidget.DialogLevel)*0.1, float32(intWidget.DialogLevel)*0.05)
+	bg.Shadow.BlurRadius = 8
+	bg.Shadow.Offset = fyne.NewPos(-float32(intWidget.DialogLevel)*0.1, float32(intWidget.DialogLevel)*0.05)
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
 	bar := New(&titleBarLayout{buttons: buttons, icon: borderIcon, title: barMid, win: w},
@@ -235,7 +235,7 @@ func (i *innerWindowRenderer) Refresh() {
 	th := i.win.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	i.bg.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
-	i.bg.Shadow.ShadowColor = th.Color(theme.ColorNameShadow, v)
+	i.bg.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
 	i.bg.Refresh()
 	i.contentBG.FillColor = th.Color(theme.ColorNameBackground, v)
 	i.contentBG.Refresh()

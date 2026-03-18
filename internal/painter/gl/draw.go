@@ -141,12 +141,12 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 
 	var addShadow float32
 	if paint.IsShadowVisible(circle.Shadow) {
-		r, g, b, a = getFragmentColor(circle.Shadow.ShadowColor)
+		r, g, b, a = getFragmentColor(circle.Shadow.FillColor)
 		p.SetUniform4f(program, "shadow_color", r, g, b, a)
-		p.SetUniform2f(program, "shadow_offset", roundToPixel(circle.Shadow.ShadowOffset.X*p.pixScale, 1.0), roundToPixel(circle.Shadow.ShadowOffset.Y*p.pixScale, 1.0))
-		p.SetUniform1f(program, "shadow_blur_radius", roundToPixel(circle.Shadow.ShadowBlurRadius*p.pixScale, 1.0))
-		p.SetUniform1f(program, "shadow_spread", roundToPixel(circle.Shadow.ShadowSpread*p.pixScale, 1.0))
-		p.SetUniform1f(program, "shadow_type", float32(circle.Shadow.ShadowType))
+		p.SetUniform2f(program, "shadow_offset", roundToPixel(circle.Shadow.Offset.X*p.pixScale, 1.0), roundToPixel(circle.Shadow.Offset.Y*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_blur_radius", roundToPixel(circle.Shadow.BlurRadius*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_spread", roundToPixel(circle.Shadow.Spread*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_type", float32(circle.Shadow.Variant))
 		addShadow = 1.0
 	}
 	p.SetUniform1f(program, "add_shadow", addShadow)
@@ -373,12 +373,12 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 
 	var addShadow float32
 	if paint.IsShadowVisible(shadow) {
-		r, g, b, a = getFragmentColor(shadow.ShadowColor)
+		r, g, b, a = getFragmentColor(shadow.FillColor)
 		p.SetUniform4f(program, "shadow_color", r, g, b, a)
-		p.SetUniform2f(program, "shadow_offset", roundToPixel(shadow.ShadowOffset.X*p.pixScale, 1.0), roundToPixel(shadow.ShadowOffset.Y*p.pixScale, 1.0))
-		p.SetUniform1f(program, "shadow_blur_radius", roundToPixel(shadow.ShadowBlurRadius*p.pixScale, 1.0))
-		p.SetUniform1f(program, "shadow_spread", roundToPixel(shadow.ShadowSpread*p.pixScale, 1.0))
-		p.SetUniform1f(program, "shadow_type", float32(shadow.ShadowType))
+		p.SetUniform2f(program, "shadow_offset", roundToPixel(shadow.Offset.X*p.pixScale, 1.0), roundToPixel(shadow.Offset.Y*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_blur_radius", roundToPixel(shadow.BlurRadius*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_spread", roundToPixel(shadow.Spread*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_type", float32(shadow.Variant))
 		addShadow = 1.0
 	}
 	p.SetUniform1f(program, "add_shadow", addShadow)

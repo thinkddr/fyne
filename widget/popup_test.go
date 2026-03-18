@@ -315,8 +315,8 @@ func TestPopUp_Layout(t *testing.T) {
 		assert.Equal(t, size, bg.Size())
 		assert.Equal(t, pos, bg.Position())
 		assert.Equal(t, theme.Color(theme.ColorNameOverlayBackground), bg.FillColor)
-		assert.Equal(t, theme.Color(theme.ColorNameShadow), bg.Shadow.ShadowColor)
-		assert.Equal(t, float32(6), bg.Shadow.ShadowBlurRadius)
+		assert.Equal(t, theme.Color(theme.ColorNameShadow), bg.Shadow.FillColor)
+		assert.Equal(t, float32(6), bg.Shadow.BlurRadius)
 	}
 	assert.Equal(t, r.Objects()[1], content)
 }
