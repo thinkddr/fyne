@@ -85,17 +85,7 @@ func renderNode(source []byte, n ast.Node, blockquote bool, listDepth int) ([]Ri
 	case *ast.TextBlock:
 		return renderChildren(source, n, blockquote, listDepth)
 	case *ast.Heading:
-		text := forceIntoHeadingText(source, n)
-		switch t.Level {
-		case 1:
-			return []RichTextSegment{&TextSegment{Style: RichTextStyleHeading, Text: decodeText(text)}}, nil
-		case 2:
-			return []RichTextSegment{&TextSegment{Style: RichTextStyleSubHeading, Text: decodeText(text)}}, nil
-		default:
-			textSegment := TextSegment{Style: RichTextStyleParagraph, Text: decodeText(text)}
-			textSegment.Style.TextStyle.Bold = true
-			return []RichTextSegment{&textSegment}, nil
-		}
+		return renderHeading(source, n, blockquote, listDepth)
 	case *ast.ThematicBreak:
 		return []RichTextSegment{&SeparatorSegment{}}, nil
 	case *ast.Link:
@@ -165,6 +155,56 @@ func renderChildren(source []byte, n ast.Node, blockquote bool, listDepth int) (
 	return children, nil
 }
 
+func renderHeading(source []byte, n ast.Node, blockquote bool, listDepth int) ([]RichTextSegment, error) {
+	var style RichTextStyle
+	switch n.(*ast.Heading).Level {
+	case 1:
+		style = RichTextStyleHeading
+	case 2:
+		style = RichTextStyleSubHeading
+	default:
+		style = RichTextStyleStrong
+	}
+
+	children := make([]RichTextSegment, 0, n.ChildCount())
+	lastIsText := false
+	for childCount, child := n.ChildCount(), n.FirstChild(); childCount > 0; childCount-- {
+		switch t := child.(type) {
+		case *ast.Text:
+			text := string(t.Value(source))
+			if lastIsText {
+				children[len(children)-1].(*TextSegment).Text += decodeText(text)
+				lastIsText = true
+				continue
+			}
+			children = append(children, &TextSegment{Style: style, Text: decodeText(text)})
+			lastIsText = true
+		default:
+			segs, err := renderNode(source, child, blockquote, listDepth)
+			if err != nil {
+				return children, err
+			}
+			children = append(children, segs...)
+			lastIsText = false
+		}
+		child = child.NextSibling()
+	}
+	if len(children) == 0 {
+		children = append(children, &TextSegment{Style: style, Text: ""})
+	}
+
+	for _, child := range children {
+		switch t := child.(type) {
+		case *HyperlinkSegment:
+			t.TextStyle = style.TextStyle
+			t.SizeName = style.SizeName
+		}
+	}
+	linebreak := &TextSegment{Style: RichTextStyleParagraph}
+	children = append(children, linebreak)
+	return children, nil
+}
+
 func renderEmphasis(source []byte, n ast.Node, blockquote bool, listDepth int) ([]RichTextSegment, error) {
 	style := RichTextStyleEmphasis
 	if n.(*ast.Emphasis).Level == 2 {
@@ -195,20 +235,6 @@ func forceIntoText(source []byte, n ast.Node) string {
 		return ast.WalkContinue, nil
 	})
 	return strings.TrimSuffix(text.String(), " ")
-}
-
-func forceIntoHeadingText(source []byte, n ast.Node) string {
-	text := strings.Builder{}
-	ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
-		if entering {
-			switch t := n2.(type) {
-			case *ast.Text:
-				text.Write(t.Value(source))
-			}
-		}
-		return ast.WalkContinue, nil
-	})
-	return text.String()
 }
 
 func parseMarkdown(content string) []RichTextSegment {

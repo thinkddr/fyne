@@ -47,6 +47,7 @@ type painter struct {
 	ctx                     context
 	contextProvider         driver.WithContext
 	program                 ProgramState
+	blurProgram           ProgramState
 	lineProgram             ProgramState
 	rectangleProgram        ProgramState
 	roundRectangleProgram   ProgramState
@@ -56,6 +57,10 @@ type painter struct {
 	arbitraryPolygonProgram ProgramState
 	texScale                float32
 	pixScale                float32 // pre-calculate scale*texScale for each draw
+	blurSnapTex           Texture // cached texture for GPU-side blur snapshot
+	blurSnapTexValid      bool    // whether blurSnapTex has been allocated
+	blurSnapW, blurSnapH  int     // size of blurSnapTex in pixels
+	fbHeight              int     // current framebuffer height in pixels
 }
 
 type ProgramState struct {
@@ -152,6 +157,7 @@ func (p *painter) SetFrameBufferScale(scale float32) {
 
 func (p *painter) SetOutputSize(width, height int) {
 	p.ctx.Viewport(0, 0, width, height)
+	p.fbHeight = height
 	p.logError()
 }
 
