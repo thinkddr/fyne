@@ -28,6 +28,8 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
+type monitor = glfw.Monitor
+
 const (
 	defaultTitle              = "Fyne Application"
 	disableDPIDetectionEnvKey = "FYNE_DISABLE_DPI_DETECTION"
@@ -81,10 +83,9 @@ type window struct {
 	icon         fyne.Resource
 	mainmenu     *fyne.MainMenu
 
-	master     bool
-	fullScreen bool
-	centered   bool
-	visible    bool
+	master                          bool
+	fullScreen, fullScreenSecondary bool
+	centered, visible               bool
 
 	mousePosUpdateProcessed    bool
 	newMousePosX, newMousePosY float64
@@ -120,10 +121,22 @@ type window struct {
 
 func (w *window) SetFullScreen(full bool) {
 	w.fullScreen = full
+	w.fullScreenSecondary = false
 
 	if w.view() != nil {
 		async.EnsureMain(func() {
 			w.doSetFullScreen(full)
+		})
+	}
+}
+
+func (w *window) RequestFullScreenSecondary() {
+	w.fullScreenSecondary = true
+	w.fullScreen = true
+
+	if w.view() != nil {
+		async.EnsureMain(func() {
+			w.doSetFullScreen2(true)
 		})
 	}
 }
@@ -313,6 +326,17 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 		monitor = glfw.GetPrimaryMonitor()
 	}
 	return monitor
+}
+
+func (w *window) getSecondaryMonitor() *monitor {
+	primary := glfw.GetPrimaryMonitor()
+	for _, m := range glfw.GetMonitors() {
+		if m.GetName() != primary.GetName() {
+			return m
+		}
+	}
+
+	return primary
 }
 
 func (w *window) detectScale() float32 {
@@ -727,7 +751,9 @@ func (w *window) RescaleContext() {
 	w.viewport.SetSize(newWidth, newHeight)
 
 	// Ensure textures re-rasterize at the new scale
-	cache.DeleteTextTexturesFor(w.canvas)
+	w.RunWithContext(func() {
+		cache.DeleteTextTexturesFor(w.canvas)
+	})
 	w.canvas.content.Refresh()
 }
 
