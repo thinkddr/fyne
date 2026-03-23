@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"strings"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -61,7 +62,7 @@ func BenchmarkText_lineBounds_WrapWord(b *testing.B) {
 }
 
 func BenchmarkText_howManyRunesDoFit(b *testing.B) {
-	text := loremIpsum
+	text := strings.Split(loremIpsum, "\n")[0]
 	maxWidth := float32(200)
 	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
