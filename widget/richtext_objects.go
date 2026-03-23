@@ -143,7 +143,6 @@ func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
 // Update applies the current state of this hyperlink segment to an existing visual.
 func (h *HyperlinkSegment) Update(o fyne.CanvasObject) {
 	link := o.(*fyne.Container).Objects[0].(*Hyperlink)
-	link.Text = h.Text
 	link.URL = h.URL
 	link.Alignment = h.Alignment
 	link.SizeName = h.SizeName

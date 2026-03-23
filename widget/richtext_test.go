@@ -1081,6 +1081,81 @@ func TestText_lineBounds(t *testing.T) {
 	}
 }
 
+func TestText_lineBounds_hyperlinks(t *testing.T) {
+	measurer := func(text []rune) fyne.Size {
+		return fyne.MeasureText(string(text), 14, fyne.TextStyle{})
+	}
+	tests := []struct {
+		name     string
+		text     string
+		wrap     fyne.TextWrap
+		trunc    fyne.TextTruncation
+		want     [][2]int
+		ellipses int
+	}{
+		{
+			name: "Hyperlink_Truncate",
+			text: "this is a long link",
+			wrap: fyne.TextWrap(fyne.TextTruncateClip),
+			want: [][2]int{
+				{0, 9},
+			},
+		},
+		{
+			name:  "Hyperlink_TruncateClip",
+			text:  "this is a long link",
+			trunc: fyne.TextTruncateClip,
+			want: [][2]int{
+				{0, 9},
+			},
+		},
+		{
+			name:  "Hyperlink_TruncateEllipsis",
+			text:  "this is a long link",
+			trunc: fyne.TextTruncateEllipsis,
+			want: [][2]int{
+				{0, 8},
+			},
+			ellipses: 1,
+		},
+		{
+			name: "Hyperlink_WrapBreak",
+			text: "this is a long link",
+			wrap: fyne.TextWrapBreak,
+			want: [][2]int{
+				{0, 9},
+				{9, 17},
+			},
+		},
+		{
+			name: "Hyperlink_WrapWord",
+			text: "this is a long link",
+			wrap: fyne.TextWrapWord,
+			want: [][2]int{
+				{0, 9},
+				{10, 14},
+				{15, 19},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ellipses := 0
+			u, _ := url.Parse("https://fyne.io/")
+			got, _ := lineBounds(&HyperlinkSegment{Text: tt.text, URL: u}, tt.wrap, tt.trunc, 50, fyne.NewSize(50, 64), measurer)
+			for i, wantRow := range tt.want {
+				assert.Equal(t, wantRow[0], got[i].begin)
+				assert.Equal(t, wantRow[1], got[i].end)
+
+				if got[i].ellipsis {
+					ellipses++
+				}
+			}
+			assert.Equal(t, tt.ellipses, ellipses)
+		})
+	}
+}
+
 func TestText_lineBounds_variable_char_width(t *testing.T) {
 	tests := []struct {
 		name  string
