@@ -1145,11 +1145,15 @@ func truncateLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 		if trunc == fyne.TextTruncateEllipsis {
 			txt := []rune(seg.Textual())[low:high]
 			var textObj *canvas.Text
-			switch seg.(type) {
+			switch t := seg.(type) {
 			case *TextSegment:
 				textObj = seg.Visual().(*canvas.Text)
 			case *HyperlinkSegment:
 				textObj = canvas.NewText(string(txt), color.Black)
+				textObj.TextStyle = t.TextStyle
+				if t.SizeName != "" {
+					textObj.TextSize = theme.Current().Size(t.SizeName)
+				}
 			}
 			end, full := truncateLimit(string(txt), textObj, int(measureWidth), []rune{'…'})
 			high = low + end
