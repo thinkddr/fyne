@@ -1244,13 +1244,14 @@ func TestText_lineBounds_small_firstWidth(t *testing.T) {
 	assert.Equal(t, 6, got[1].end)
 }
 
-func TestText_ratioSearch(t *testing.T) {
+func TestText_howManyRunesDoFit(t *testing.T) {
 	maxWidth := float32(46)
 	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
-	measurer := func(text []rune) float32 {
-		return fyne.MeasureText(string(text), textSize, textStyle).Width
+	measurer := func(text []rune) fyne.Size {
+		return fyne.MeasureText(string(text), textSize, textStyle)
 	}
+	charWidth := measurer([]rune("z")).Width
 	for name, tt := range map[string]struct {
 		text string
 		want int
@@ -1288,11 +1289,8 @@ func TestText_ratioSearch(t *testing.T) {
 			want: 0,
 		},
 	} {
-		checker := func(low int, high int) float32 {
-			return measurer([]rune(tt.text[low:high])) / maxWidth
-		}
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tt.want, ratioSearch(checker, 0, len(tt.text), -1.0))
+			assert.Equal(t, tt.want, howManyRunesDoFit([]rune(tt.text), maxWidth, charWidth, measurer))
 		})
 	}
 }

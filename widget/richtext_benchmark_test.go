@@ -60,18 +60,16 @@ func BenchmarkText_lineBounds_WrapWord(b *testing.B) {
 	benchmarkTextLineBounds(fyne.TextWrapWord, b)
 }
 
-func BenchmarkText_ratioSearch(b *testing.B) {
+func BenchmarkText_howManyRunesDoFit(b *testing.B) {
 	text := loremIpsum
 	maxWidth := float32(200)
 	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
-	measurer := func(text []rune) float32 {
-		return fyne.MeasureText(string(text), textSize, textStyle).Width
+	measurer := func(text []rune) fyne.Size {
+		return fyne.MeasureText(string(text), textSize, textStyle)
 	}
-	checker := func(low int, high int) float32 {
-		return measurer([]rune(text[low:high])) / maxWidth
-	}
+	charWidth := measurer([]rune("z")).Width
 	for n := 0; n < b.N; n++ {
-		ratioSearch(checker, 0, len(text), -1.0)
+		howManyRunesDoFit([]rune(text), maxWidth, charWidth, measurer)
 	}
 }
