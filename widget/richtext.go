@@ -993,6 +993,8 @@ func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth
 	widthChecker := func(low int, high int) float32 {
 		return measurer(text[low:high]).Width / measureWidth
 	}
+	charSize := measurer([]rune("M"))
+	lineHeight := charSize.Height
 	reuse := 0
 	yPos := float32(0)
 	var bounds []rowBoundary
@@ -1006,11 +1008,11 @@ func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth
 			continue
 		}
 		for low < high {
-			measured := measurer(text[low:high])
-			if yPos+measured.Height > max.Height && trunc != fyne.TextTruncateOff {
+			if yPos+lineHeight > max.Height && trunc != fyne.TextTruncateOff {
 				return ellipsisPriorBound(bounds, trunc, measureWidth, measurer), yPos
 			}
 
+			measured := measurer(text[low:high])
 			if measured.Width <= measureWidth {
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
 				reuse++
@@ -1018,7 +1020,7 @@ func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth
 				high = l.end
 				measureWidth = max.Width
 
-				yPos += measured.Height
+				yPos += lineHeight
 			} else {
 				ratio := measured.Width / measureWidth
 				newHigh := ratioSearch(widthChecker, low, high, ratio)
@@ -1027,7 +1029,7 @@ func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth
 					reuse++
 					low++
 
-					yPos += measured.Height
+					yPos += lineHeight
 				} else {
 					high = newHigh
 				}
@@ -1042,6 +1044,8 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 	widthChecker := func(low int, high int) float32 {
 		return measurer(text[low:high]).Width / measureWidth
 	}
+	charSize := measurer([]rune("M"))
+	lineHeight := charSize.Height
 	reuse := 0
 	yPos := float32(0)
 	var bounds []rowBoundary
@@ -1055,12 +1059,12 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 			continue
 		}
 		for low < high {
-			sub := text[low:high]
-			measured := measurer(sub)
-			if yPos+measured.Height > max.Height && trunc != fyne.TextTruncateOff {
+			if yPos+lineHeight > max.Height && trunc != fyne.TextTruncateOff {
 				return ellipsisPriorBound(bounds, trunc, measureWidth, measurer), yPos
 			}
 
+			sub := text[low:high]
+			measured := measurer(sub)
 			subWidth := measured.Width
 			if subWidth <= measureWidth {
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
@@ -1072,7 +1076,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 				}
 				measureWidth = max.Width
 
-				yPos += measured.Height
+				yPos += lineHeight
 			} else {
 				oldHigh := high
 				last := low + len(sub) - 1
@@ -1084,7 +1088,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false})
 						reuse++
 						measureWidth = max.Width
-						yPos += measured.Height
+						yPos += lineHeight
 						continue
 					}
 					include := 1
@@ -1098,7 +1102,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 					high = low + 1
 					reuse++
 
-					yPos += measured.Height
+					yPos += lineHeight
 					if high > l.end {
 						return bounds, yPos
 					}
@@ -1116,7 +1120,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 					high = oldHigh
 					measureWidth = max.Width
 
-					yPos += measured.Height
+					yPos += lineHeight
 					continue
 				}
 			}
