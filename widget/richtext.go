@@ -449,7 +449,7 @@ func (t *RichText) updateRowBounds() {
 				textStyle = linkSeg.TextStyle
 				textSize = theme.SizeForWidget(theme.SizeNameText, t)
 			}
-			retBounds, height := lineBounds(seg, t.Wrapping, t.Truncation, wrapWidth-leftPad, fyne.NewSize(maxWidth, fitSize.Height), func(text []rune) fyne.Size {
+			retBounds, height := lineBounds(t, seg, wrapWidth-leftPad, fyne.NewSize(maxWidth, fitSize.Height), func(text []rune) fyne.Size {
 				return fyne.MeasureText(string(text), textSize, textStyle)
 			})
 			if currentBound != nil {
@@ -962,7 +962,9 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 // measure text size.
 // It will return a slice containing the boundary metadata of each line with the given wrapping applied and the
 // total height required to render the boundaries at the given width/height constraints
-func lineBounds(seg RichTextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation, firstWidth float32, max fyne.Size, measurer func([]rune) fyne.Size) ([]rowBoundary, float32) {
+func lineBounds(t *RichText, seg RichTextSegment, firstWidth float32, max fyne.Size, measurer func([]rune) fyne.Size) ([]rowBoundary, float32) {
+	wrap := t.Wrapping
+	trunc := t.Truncation
 	lines := splitLines(seg)
 
 	if wrap == fyne.TextWrap(fyne.TextTruncateClip) {
@@ -984,7 +986,7 @@ func lineBounds(seg RichTextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncati
 	case fyne.TextWrapWord:
 		return wrapWordLines(seg, trunc, measureWidth, max, measurer, lines)
 	default:
-		return truncateLines(seg, trunc, measureWidth, max, measurer, lines)
+		return truncateLines(t, seg, trunc, measureWidth, measurer, lines)
 	}
 }
 
@@ -1125,7 +1127,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 	return bounds, yPos
 }
 
-func truncateLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth float32, max fyne.Size, measurer func([]rune) fyne.Size, lines []rowBoundary) ([]rowBoundary, float32) {
+func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, measureWidth float32, measurer func([]rune) fyne.Size, lines []rowBoundary) ([]rowBoundary, float32) {
 	text := []rune(seg.Textual())
 	widthChecker := func(low int, high int) float32 {
 		return measurer(text[low:high]).Width / measureWidth
@@ -1145,11 +1147,17 @@ func truncateLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 		if trunc == fyne.TextTruncateEllipsis {
 			txt := []rune(seg.Textual())[low:high]
 			var textObj *canvas.Text
-			switch seg.(type) {
+			switch s := seg.(type) {
 			case *TextSegment:
 				textObj = seg.Visual().(*canvas.Text)
 			case *HyperlinkSegment:
 				textObj = canvas.NewText(string(txt), color.Black)
+				textObj.TextStyle = s.TextStyle
+				sizeName := s.SizeName
+				if sizeName == "" {
+					sizeName = theme.SizeNameText
+				}
+				textObj.TextSize = theme.SizeForWidget(sizeName, t)
 			}
 			end, full := truncateLimit(string(txt), textObj, int(measureWidth), []rune{'…'})
 			high = low + end

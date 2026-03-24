@@ -1067,7 +1067,10 @@ func TestText_lineBounds(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ellipses := 0
-			got, _ := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, tt.trunc, 76, fyne.NewSize(76, 64), measurer)
+			richText := NewRichTextWithText(tt.text)
+			richText.Wrapping = tt.wrap
+			richText.Truncation = tt.trunc
+			got, _ := lineBounds(richText, richText.Segments[0], 76, fyne.NewSize(76, 64), measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)
@@ -1142,7 +1145,10 @@ func TestText_lineBounds_hyperlinks(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ellipses := 0
 			u, _ := url.Parse("https://fyne.io/")
-			got, _ := lineBounds(&HyperlinkSegment{Text: tt.text, URL: u}, tt.wrap, tt.trunc, 50, fyne.NewSize(50, 64), measurer)
+			richText := NewRichText(&HyperlinkSegment{Text: tt.text, URL: u})
+			richText.Wrapping = tt.wrap
+			richText.Truncation = tt.trunc
+			got, _ := lineBounds(richText, richText.Segments[0], 50, fyne.NewSize(50, 64), measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)
@@ -1224,7 +1230,10 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, _ := lineBounds(&TextSegment{Text: tt.text}, tt.wrap, tt.trunc, 46, fyne.NewSize(46, 184), measurer)
+			richText := NewRichTextWithText(tt.text)
+			richText.Wrapping = tt.wrap
+			richText.Truncation = tt.trunc
+			got, _ := lineBounds(richText, richText.Segments[0], 46, fyne.NewSize(46, 184), measurer)
 			for i, wantRow := range tt.want {
 				assert.Equal(t, wantRow[0], got[i].begin)
 				assert.Equal(t, wantRow[1], got[i].end)
@@ -1237,7 +1246,10 @@ func TestText_lineBounds_small_firstWidth(t *testing.T) {
 	measurer := func(text []rune) fyne.Size {
 		return fyne.MeasureText(string(text), 14, fyne.TextStyle{})
 	}
-	got, _ := lineBounds(&TextSegment{Text: "foobar"}, fyne.TextWrapWord, fyne.TextTruncateOff, 0.1, fyne.NewSize(64, 20), measurer)
+	richText := NewRichTextWithText("foobar")
+	richText.Wrapping = fyne.TextWrapWord
+	richText.Truncation = fyne.TextTruncateOff
+	got, _ := lineBounds(richText, richText.Segments[0], 0.1, fyne.NewSize(64, 20), measurer)
 	assert.Equal(t, 0, got[0].begin)
 	assert.Equal(t, 0, got[0].end)
 	assert.Equal(t, 0, got[1].begin)
