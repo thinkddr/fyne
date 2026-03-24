@@ -984,7 +984,7 @@ func lineBounds(seg RichTextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncati
 	case fyne.TextWrapWord:
 		return wrapWordLines(seg, trunc, measureWidth, max, measurer, lines)
 	default:
-		return truncateLines(seg, trunc, measureWidth, max, measurer, lines)
+		return truncateLines(seg, trunc, measureWidth, measurer, lines)
 	}
 }
 
@@ -1125,7 +1125,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 	return bounds, yPos
 }
 
-func truncateLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth float32, max fyne.Size, measurer func([]rune) fyne.Size, lines []rowBoundary) ([]rowBoundary, float32) {
+func truncateLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth float32, measurer func([]rune) fyne.Size, lines []rowBoundary) ([]rowBoundary, float32) {
 	text := []rune(seg.Textual())
 	widthChecker := func(low int, high int) float32 {
 		return measurer(text[low:high]).Width / measureWidth
