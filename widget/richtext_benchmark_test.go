@@ -39,8 +39,11 @@ func benchmarkTextLineBounds(wrap fyne.TextWrap, b *testing.B) {
 	measurer := func(text []rune) fyne.Size {
 		return fyne.MeasureText(string(text), textSize, textStyle)
 	}
+	richText := NewRichTextWithText(loremIpsum)
+	richText.Wrapping = wrap
+	richText.Truncation = fyne.TextTruncateOff
 	for n := 0; n < b.N; n++ {
-		lineBounds(&TextSegment{Text: loremIpsum}, wrap, fyne.TextTruncateOff, 10, fyne.NewSize(10, 14), measurer)
+		lineBounds(richText, richText.Segments[0], 10, fyne.NewSize(10, 14), measurer)
 	}
 }
 
