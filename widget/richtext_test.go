@@ -1244,7 +1244,7 @@ func TestText_lineBounds_small_firstWidth(t *testing.T) {
 	assert.Equal(t, 6, got[1].end)
 }
 
-func TestText_howManyRunesDoFit(t *testing.T) {
+func TestText_howManyRunesFit(t *testing.T) {
 	maxWidth := float32(46)
 	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
@@ -1290,7 +1290,7 @@ func TestText_howManyRunesDoFit(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tt.want, howManyRunesDoFit([]rune(tt.text), maxWidth, charWidth, measurer))
+			assert.Equal(t, tt.want, howManyRunesFit([]rune(tt.text), maxWidth, charWidth, measurer))
 		})
 	}
 }
