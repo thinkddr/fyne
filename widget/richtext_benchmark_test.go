@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"strings"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -63,18 +64,30 @@ func BenchmarkText_lineBounds_WrapWord(b *testing.B) {
 	benchmarkTextLineBounds(fyne.TextWrapWord, b)
 }
 
-func BenchmarkText_ratioSearch(b *testing.B) {
-	text := loremIpsum
+func BenchmarkText_howManyRunesFit_latin(b *testing.B) {
+	text := strings.Split(loremIpsum, "\n")[0]
 	maxWidth := float32(200)
 	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
-	measurer := func(text []rune) float32 {
-		return fyne.MeasureText(string(text), textSize, textStyle).Width
+	measurer := func(text []rune) fyne.Size {
+		return fyne.MeasureText(string(text), textSize, textStyle)
 	}
-	checker := func(low int, high int) float32 {
-		return measurer([]rune(text[low:high])) / maxWidth
-	}
+	charWidth := measurer([]rune("z")).Width
 	for n := 0; n < b.N; n++ {
-		ratioSearch(checker, 0, len(text), -1.0)
+		howManyRunesFit([]rune(text), maxWidth, charWidth, measurer)
+	}
+}
+
+func BenchmarkText_howManyRunesFit_chinese(b *testing.B) {
+	text := "昔者文公出走而正天下，畢云：「正，讀如征。」王念孫云「畢讀非也，《爾雅》曰：『正，長也。』晉文為諸侯盟主，故曰『正天下』，與下『霸諸侯』對文。又《廣雅》『正，君也』。《尚賢》篇曰：『堯、舜、禹、湯、文、武之所以王天下正諸侯者』。凡墨子書言正天下正諸侯者，非訓為長，即訓為君，皆非征伐之謂。」案：王說是也。"
+	maxWidth := float32(200)
+	textSize := float32(10)
+	textStyle := fyne.TextStyle{}
+	measurer := func(text []rune) fyne.Size {
+		return fyne.MeasureText(string(text), textSize, textStyle)
+	}
+	charWidth := measurer([]rune("z")).Width
+	for n := 0; n < b.N; n++ {
+		howManyRunesFit([]rune(text), maxWidth, charWidth, measurer)
 	}
 }
