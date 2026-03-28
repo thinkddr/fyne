@@ -1305,6 +1305,12 @@ func TestText_howManyRunesFit(t *testing.T) {
 			assert.Equal(t, tt.want, howManyRunesFit([]rune(tt.text), maxWidth, charWidth, measurer))
 		})
 	}
+	t.Run("Zero width", func(t *testing.T) {
+		assert.Equal(t, 0, howManyRunesFit([]rune("foo"), 0, charWidth, measurer))
+	})
+	t.Run("Negative width", func(t *testing.T) {
+		assert.Equal(t, 0, howManyRunesFit([]rune("foo"), -1, charWidth, measurer))
+	})
 }
 
 func TestText_findSpaceIndex(t *testing.T) {
