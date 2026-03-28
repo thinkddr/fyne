@@ -878,6 +878,9 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 // rune slice.
 // howManyRunesFit returns how many runes fit into the available width.
 func howManyRunesFit(runes []rune, availableWidth float32, charWidth float32, measurer func([]rune) fyne.Size) int {
+	if availableWidth <= 0 {
+		return 0
+	}
 	length := len(runes)
 	fits := 0
 	tooLong := length + 1
