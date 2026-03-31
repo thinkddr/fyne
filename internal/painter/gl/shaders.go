@@ -40,6 +40,9 @@ var (
 
 	//go:embed shaders/bezier_curve.frag
 	shaderBezierCurveFrag []byte
+
+	//go:embed shaders/arbitrary_polygon.frag
+	shaderArbitraryPolygonFrag []byte
 )
 
 func shaderSourceNamed(name string) ([]byte, []byte) {
@@ -60,6 +63,8 @@ func shaderSourceNamed(name string) ([]byte, []byte) {
 		return shaderRectangleVert, shaderArcFrag
 	case "bezier_curve":
 		return shaderRectangleVert, shaderBezierCurveFrag
+	case "arbitrary_polygon":
+		return shaderRectangleVert, shaderArbitraryPolygonFrag
 	}
 	return nil, nil
 }

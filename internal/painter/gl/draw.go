@@ -1,6 +1,7 @@
 package gl
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 
@@ -242,6 +243,86 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	p.logError()
 }
 
+func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyne.Position, frame fyne.Size) {
+	if len(polygon.Points) < 3 || ((polygon.FillColor == color.Transparent || polygon.FillColor == nil) && (polygon.StrokeColor == color.Transparent || polygon.StrokeColor == nil || polygon.StrokeWidth == 0)) {
+		return
+	}
+
+	// Vertex: BEG
+	bounds, points := p.vecRectCoords(pos, polygon, frame, 0.0)
+	program := p.arbitraryPolygonProgram
+	p.ctx.UseProgram(program.ref)
+	p.updateBuffer(program.buff, points)
+	p.UpdateVertexArray(program, "vert", 2, 4, 0)
+	p.UpdateVertexArray(program, "normal", 2, 4, 2)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.logError()
+	// Vertex: END
+
+	// Fragment: BEG
+	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+
+	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
+	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+
+	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
+	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+
+	numPoints := int(fyne.Min(canvas.ArbitraryPolygonVerticesMaximum, float32(len(polygon.Points))))
+	p.SetUniform1f(program, "vertex_count", float32(numPoints))
+
+	size := polygon.Size()
+	clampPoint := func(p fyne.Position) (float32, float32) {
+		return fyne.Min(fyne.Max(p.X, 0), fyne.Max(size.Width, 0)), fyne.Min(fyne.Max(p.Y, 0), fyne.Max(size.Height, 0))
+	}
+
+	fixedPoints := make([]fyne.Position, numPoints)
+	radii := make([]float32, numPoints)
+
+	for i := 0; i < numPoints; i++ {
+		px, py := polygon.Points[i].X, polygon.Points[i].Y
+		if polygon.NormalizedPoints {
+			px, py = px*size.Width, py*size.Height
+		}
+		px, py = clampPoint(fyne.NewPos(px, py))
+		fixedPoints[i] = fyne.NewPos(px, py)
+
+		var radius float32
+		if i < len(polygon.CornerRadii) {
+			radius = polygon.CornerRadii[i]
+		}
+		radii[i] = radius
+	}
+
+	scaledRadii := paint.GetMaximumCornerRadiusPolygon(fixedPoints, radii)
+
+	for i := 0; i < numPoints; i++ {
+		pXScaled, pYScaled := roundToPixel(fixedPoints[i].X*p.pixScale, 1.0), roundToPixel(fixedPoints[i].Y*p.pixScale, 1.0)
+		p.SetUniform2f(program, fmt.Sprintf("vertices[%d]", i), pXScaled, pYScaled)
+
+		radiusScaled := roundToPixel(scaledRadii[i]*p.pixScale, 1.0)
+		p.SetUniform1f(program, fmt.Sprintf("radii[%d]", i), radiusScaled)
+	}
+
+	// Colors and Stroke
+	r, g, b, a := getFragmentColor(polygon.FillColor)
+	p.SetUniform4f(program, "fill_color", r, g, b, a)
+
+	r, g, b, a = getFragmentColor(polygon.StrokeColor)
+	p.SetUniform4f(program, "stroke_color", r, g, b, a)
+
+	strokeWidthScaled := roundToPixel(polygon.StrokeWidth*p.pixScale, 1.0)
+	p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
+
+	p.logError()
+	// Fragment: END
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
+}
+
 func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
 	switch obj := o.(type) {
 	case *canvas.Blur:
@@ -264,6 +345,8 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 		p.drawGradient(obj, p.newGlRadialGradientTexture, pos, frame)
 	case *canvas.Polygon:
 		p.drawPolygon(obj, pos, frame)
+	case *canvas.ArbitraryPolygon:
+		p.drawArbitraryPolygon(obj, pos, frame)
 	case *canvas.Arc:
 		p.drawArc(obj, pos, frame)
 	case *canvas.BezierCurve:
