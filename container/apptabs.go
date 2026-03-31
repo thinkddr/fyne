@@ -422,9 +422,6 @@ func (r *appTabsRenderer) updateIndicator(animate bool) {
 	th := r.appTabs.Theme()
 	pad := th.Size(theme.SizeNamePadding)
 	dividerWidth := th.Size(theme.SizeNameSeparatorThickness)
-	if !isMobile(r.tabs) {
-		dividerWidth = pad
-	}
 
 	switch r.appTabs.location {
 	case TabLocationTop:
