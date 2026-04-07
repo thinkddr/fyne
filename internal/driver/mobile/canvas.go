@@ -37,6 +37,7 @@ type canvas struct {
 	dragOffset fyne.Position
 	dragStart  fyne.Position
 	dragging   fyne.Draggable
+	dragging2  fyne.Draggable
 
 	onTypedKey  func(event *fyne.KeyEvent)
 	onTypedRune func(rune)
@@ -227,6 +228,7 @@ func (c *canvas) tapDown(pos fyne.Position, tapID int) {
 	c.lastTapDown[tapID] = time.Now()
 	c.lastTapDownPos[tapID] = pos
 	c.dragging = nil
+	c.dragging2 = nil
 
 	co, objPos, layer := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
@@ -276,6 +278,24 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 
 		return false
 	})
+	var scrollOtherDirection fyne.CanvasObject
+	if scr, ok := co.(*container.Scroll); ok {
+		var otherDirection container.ScrollDirection
+		if scr.Direction == container.ScrollHorizontalOnly {
+			otherDirection = container.ScrollVerticalOnly
+		} else if scr.Direction == container.ScrollVerticalOnly {
+			otherDirection = container.ScrollHorizontalOnly
+		}
+		if otherDirection != container.ScrollBoth {
+			scrollOtherDirection, _, _ = c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+				if scr, ok := object.(*container.Scroll); ok {
+					return scr.Direction == otherDirection
+				}
+
+				return false
+			})
+		}
+	}
 
 	if c.touched[tapID] != nil {
 		if touch, ok := co.(mobile.Touchable); !ok || c.touched[tapID] != touch {
@@ -293,6 +313,9 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 			c.dragging = drag
 			c.dragOffset = previousPos.Subtract(objPos)
 			c.dragStart = co.Position()
+			if scrollOtherDirection != nil {
+				c.dragging2 = scrollOtherDirection.(fyne.Draggable)
+			}
 		} else {
 			return
 		}
@@ -304,6 +327,9 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	ev.Dragged = offset
 
 	dragCallback(c.dragging, ev)
+	if c.dragging2 != nil {
+		dragCallback(c.dragging2, ev)
+	}
 }
 
 func (c *canvas) tapUp(pos fyne.Position, tapID int,
@@ -319,8 +345,12 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 		ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
 		ev.AbsolutePosition = pos
 		dragCallback(c.dragging, ev)
+		if c.dragging2 != nil {
+			dragCallback(c.dragging2, ev)
+		}
 
 		c.dragging = nil
+		c.dragging2 = nil
 		return
 	}
 
