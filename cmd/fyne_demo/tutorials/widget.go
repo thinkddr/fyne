@@ -241,7 +241,6 @@ This styled row should also wrap as expected, but only *when required*.
 
 > An interesting quote here, most likely sharing some very interesting wisdom.`)
 	rich.Scroll = container.ScrollBoth
-	rich.Segments[2].(*widget.ImageSegment).Alignment = fyne.TextAlignTrailing
 
 	radioAlign := widget.NewRadioGroup([]string{"Leading", "Center", "Trailing"}, func(s string) {
 		var align fyne.TextAlign
@@ -256,12 +255,14 @@ This styled row should also wrap as expected, but only *when required*.
 
 		label.Alignment = align
 		hyperlink.Alignment = align
-		for i := range rich.Segments {
-			if seg, ok := rich.Segments[i].(*widget.TextSegment); ok {
-				seg.Style.Alignment = align
-			}
-			if seg, ok := rich.Segments[i].(*widget.HyperlinkSegment); ok {
-				seg.Alignment = align
+		for _, r := range rich.Segments {
+			switch t := r.(type) {
+			case *widget.TextSegment:
+				t.Style.Alignment = align
+			case *widget.HyperlinkSegment:
+				t.Alignment = align
+			case *widget.ImageSegment:
+				t.Alignment = align
 			}
 		}
 

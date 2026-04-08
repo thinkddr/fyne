@@ -6,6 +6,7 @@ import (
 	"image"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/theme"
@@ -42,19 +43,25 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 }
 
 type painter struct {
-	canvas                fyne.Canvas
-	ctx                   context
-	contextProvider       driver.WithContext
-	program               ProgramState
-	lineProgram           ProgramState
-	rectangleProgram      ProgramState
-	roundRectangleProgram ProgramState
-	polygonProgram        ProgramState
-	arcProgram            ProgramState
-	bezierCurveProgram    ProgramState
-	ellipseProgram        ProgramState
-	texScale              float32
-	pixScale              float32 // pre-calculate scale*texScale for each draw
+	canvas                  fyne.Canvas
+	ctx                     context
+	contextProvider         driver.WithContext
+	program                 ProgramState
+	blurProgram             ProgramState
+	lineProgram             ProgramState
+	rectangleProgram        ProgramState
+	roundRectangleProgram   ProgramState
+	polygonProgram          ProgramState
+	arcProgram              ProgramState
+	bezierCurveProgram      ProgramState
+	arbitraryPolygonProgram ProgramState
+	ellipseProgram          ProgramState
+	texScale                float32
+	pixScale                float32 // pre-calculate scale*texScale for each draw
+	blurSnapTex             Texture // cached texture for GPU-side blur snapshot
+	blurSnapTexValid        bool    // whether blurSnapTex has been allocated
+	blurSnapW, blurSnapH    int     // size of blurSnapTex in pixels
+	fbHeight                int     // current framebuffer height in pixels
 }
 
 type ProgramState struct {
@@ -107,6 +114,23 @@ func (p *painter) UpdateVertexArray(pState ProgramState, name string, size, stri
 	p.logError()
 }
 
+// arbitraryPolygonUniforms returns all uniform names needed for the arbitrary polygon shader,
+// including the array element names for vertices[0..15] and radii[0..15].
+func arbitraryPolygonUniforms() []string {
+	names := []string{
+		"frame_size", "rect_coords", "edge_softness",
+		"vertex_count",
+		"fill_color", "stroke_width", "stroke_color",
+	}
+	for i := 0; i < canvas.ArbitraryPolygonVerticesMaximum; i++ {
+		names = append(names, fmt.Sprintf("vertices[%d]", i))
+	}
+	for i := 0; i < canvas.ArbitraryPolygonVerticesMaximum; i++ {
+		names = append(names, fmt.Sprintf("radii[%d]", i))
+	}
+	return names
+}
+
 // Declare conformity to Painter interface
 var _ Painter = (*painter)(nil)
 
@@ -134,6 +158,7 @@ func (p *painter) SetFrameBufferScale(scale float32) {
 
 func (p *painter) SetOutputSize(width, height int) {
 	p.ctx.Viewport(0, 0, width, height)
+	p.fbHeight = height
 	p.logError()
 }
 
