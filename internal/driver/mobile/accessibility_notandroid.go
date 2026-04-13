@@ -1,4 +1,4 @@
-//go:build !android && !ios
+//go:build !accessibility || (!android && !ios)
 
 package mobile
 
