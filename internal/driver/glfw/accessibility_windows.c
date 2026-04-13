@@ -1,3 +1,5 @@
+//go:build accessibility && windows
+
 #define CINTERFACE
 #define COBJMACROS
 #include "accessibility_windows.h"

@@ -1,3 +1,5 @@
+//go:build accessibility && windows
+
 #ifndef ACCESSIBILITY_WINDOWS_H
 #define ACCESSIBILITY_WINDOWS_H
 

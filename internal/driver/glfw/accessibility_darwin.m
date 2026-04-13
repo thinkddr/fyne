@@ -1,3 +1,5 @@
+//go:build accessibility && darwin
+
 #import "accessibility_darwin.h"
 #import <Cocoa/Cocoa.h>
 #import <objc/runtime.h>

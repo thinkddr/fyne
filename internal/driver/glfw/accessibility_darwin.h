@@ -1,3 +1,5 @@
+//go:build accessibility && darwin
+
 #ifndef ACCESSIBILITY_BRIDGE_H
 #define ACCESSIBILITY_BRIDGE_H
 
