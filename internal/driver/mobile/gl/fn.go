@@ -71,12 +71,15 @@ const (
 	glfnTexImage2D
 	glfnTexParameteri
 	glfnUniform1f
+	glfnUniform1fv
 	glfnUniform2f
+	glfnUniform2fv
 	glfnUniform4f
 	glfnUniform4fv
 	glfnUseProgram
 	glfnVertexAttribPointer
 	glfnViewport
+	glfnCopyTexSubImage2D
 )
 
 func goString(buf []byte) string {

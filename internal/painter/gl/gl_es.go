@@ -4,6 +4,7 @@ package gl
 
 import (
 	"strings"
+	"unsafe"
 
 	gl "github.com/go-gl/gl/v3.1/gles2"
 
@@ -78,8 +79,13 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size", "inset")
-	p.enableAttribArrays(p.program, "vert", "vertTexCoord")
+
+	p.blurProgram = ProgramState{
+		ref:        p.createProgram("blur_es"),
+		buff:       p.createBuffer(20),
+		uniforms:   make(map[string]*UniformState),
+		attributes: make(map[string]Attribute),
+	}
 
 	p.lineProgram = ProgramState{
 		ref:        p.createProgram("line_es"),
@@ -87,8 +93,6 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.lineProgram, "color", "feather", "lineWidth")
-	p.enableAttribArrays(p.lineProgram, "vert", "normal")
 
 	p.rectangleProgram = ProgramState{
 		ref:        p.createProgram("rectangle_es"),
@@ -96,11 +100,6 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(
-		p.rectangleProgram,
-		"frame_size", "rect_coords", "stroke_width", "fill_color", "stroke_color",
-	)
-	p.enableAttribArrays(p.rectangleProgram, "vert", "normal")
 
 	p.roundRectangleProgram = ProgramState{
 		ref:        p.createProgram("round_rectangle_es"),
@@ -108,13 +107,6 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.roundRectangleProgram,
-		"frame_size", "rect_coords",
-		"stroke_width_half", "rect_size_half",
-		"radius", "edge_softness",
-		"fill_color", "stroke_color",
-	)
-	p.enableAttribArrays(p.roundRectangleProgram, "vert", "normal")
 
 	p.polygonProgram = ProgramState{
 		ref:        p.createProgram("polygon_es"),
@@ -122,13 +114,6 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.polygonProgram,
-		"frame_size", "rect_coords", "edge_softness",
-		"outer_radius", "angle", "sides",
-		"fill_color", "corner_radius",
-		"stroke_width", "stroke_color",
-	)
-	p.enableAttribArrays(p.polygonProgram, "vert", "normal")
 
 	p.arcProgram = ProgramState{
 		ref:        p.createProgram("arc_es"),
@@ -136,15 +121,6 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.arcProgram,
-		"frame_size", "rect_coords",
-		"inner_radius", "outer_radius",
-		"start_angle", "end_angle",
-		"edge_softness", "corner_radius",
-		"stroke_width", "stroke_color",
-		"fill_color",
-	)
-	p.enableAttribArrays(p.arcProgram, "vert", "normal")
 
 	p.bezierCurveProgram = ProgramState{
 		ref:        p.createProgram("bezier_curve_es"),
@@ -152,27 +128,12 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.bezierCurveProgram,
-		"frame_size", "rect_coords", "edge_softness",
-		"start_point", "end_point", "num_control_points",
-		"control_point1", "control_point2",
-		"stroke_width_half", "stroke_color",
-	)
-	p.enableAttribArrays(p.bezierCurveProgram, "vert", "normal")
-}
 
-func (p *painter) getUniformLocations(pState ProgramState, names ...string) {
-	for _, name := range names {
-		u := p.ctx.GetUniformLocation(pState.ref, name)
-		pState.uniforms[name] = &UniformState{ref: u}
-	}
-}
-
-func (p *painter) enableAttribArrays(pState ProgramState, names ...string) {
-	for _, name := range names {
-		a := p.ctx.GetAttribLocation(pState.ref, name)
-		p.ctx.EnableVertexAttribArray(a)
-		pState.attributes[name] = a
+	p.arbitraryPolygonProgram = ProgramState{
+		ref:        p.createProgram("arbitrary_polygon_es"),
+		buff:       p.createBuffer(16),
+		uniforms:   make(map[string]*UniformState),
+		attributes: make(map[string]Attribute),
 	}
 }
 
@@ -313,6 +274,10 @@ func (c *esContext) LinkProgram(program Program) {
 	gl.LinkProgram(uint32(program))
 }
 
+func (c *esContext) CopyTexSubImage2D(target uint32, level, xoffset, yoffset, x, y, width, height int) {
+	gl.CopyTexSubImage2D(target, int32(level), int32(xoffset), int32(yoffset), int32(x), int32(y), int32(width), int32(height))
+}
+
 func (c *esContext) ReadBuffer(src uint32) {
 	gl.ReadBuffer(src)
 }
@@ -332,6 +297,10 @@ func (c *esContext) ShaderSource(shader Shader, source string) {
 }
 
 func (c *esContext) TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8) {
+	var ptr unsafe.Pointer
+	if len(data) > 0 {
+		ptr = gl.Ptr(data)
+	}
 	gl.TexImage2D(
 		target,
 		int32(level),
@@ -341,7 +310,7 @@ func (c *esContext) TexImage2D(target uint32, level, width, height int, colorFor
 		0,
 		colorFormat,
 		typ,
-		gl.Ptr(data),
+		ptr,
 	)
 }
 
@@ -353,8 +322,16 @@ func (c *esContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(int32(uniform), v)
 }
 
+func (c *esContext) Uniform1fv(uniform Uniform, v []float32) {
+	gl.Uniform1fv(int32(uniform), int32(len(v)), &v[0])
+}
+
 func (c *esContext) Uniform2f(uniform Uniform, v0, v1 float32) {
 	gl.Uniform2f(int32(uniform), v0, v1)
+}
+
+func (c *esContext) Uniform2fv(uniform Uniform, v []float32) {
+	gl.Uniform2fv(int32(uniform), int32(len(v)/2), &v[0])
 }
 
 func (c *esContext) Uniform4f(uniform Uniform, v0, v1, v2, v3 float32) {

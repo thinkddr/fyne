@@ -45,6 +45,8 @@ type Hyperlink struct {
 	textSize         fyne.Size // updated in syncSegments
 	focused, hovered bool
 	provider         RichText
+
+	siblings []*Hyperlink // other visual instances of the same HyperlinkSegment when wrapped in RichText
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
@@ -126,6 +128,9 @@ func (hl *Hyperlink) MouseMoved(e *desktop.MouseEvent) {
 	hl.hovered = hl.isPosOverText(e.Position)
 	if hl.hovered != oldHovered {
 		hl.BaseWidget.Refresh()
+		for _, s := range hl.siblings {
+			s.setHovered(hl.hovered)
+		}
 	}
 }
 
@@ -135,7 +140,19 @@ func (hl *Hyperlink) MouseOut() {
 	hl.hovered = false
 	if changed {
 		hl.BaseWidget.Refresh()
+		for _, s := range hl.siblings {
+			s.setHovered(false)
+		}
 	}
+}
+
+// setHovered updates the hovered state without propagating to siblings, to avoid recursion.
+func (hl *Hyperlink) setHovered(hovered bool) {
+	if hl.hovered == hovered {
+		return
+	}
+	hl.hovered = hovered
+	hl.BaseWidget.Refresh()
 }
 
 func (hl *Hyperlink) focusWidth() float32 {

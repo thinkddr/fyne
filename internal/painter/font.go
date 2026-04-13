@@ -38,6 +38,8 @@ var (
 	loaded       bool
 )
 
+var shaper = &shaping.HarfbuzzShaper{}
+
 func loadMap() {
 	loaded = true
 
@@ -76,6 +78,7 @@ func lookupRuneFont(r rune, family string, aspect font.Aspect) *font.Face {
 	}
 
 	fm.SetQuery(fontscan.Query{Families: []string{family}, Aspect: aspect})
+	fm.SetScript(language.LookupScript(r))
 	return fm.ResolveFace(r)
 }
 
@@ -186,11 +189,8 @@ func DrawString(dst draw.Image, s string, color color.Color, f shaping.Fontmap, 
 	}
 
 	advance := float32(0)
-	y := math.MinInt
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x float32) {
-		if y == math.MinInt {
-			y = int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * r.PixScale)))
-		}
+		y := int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * r.PixScale)))
 		if len(run.Glyphs) == 1 {
 			if run.Glyphs[0].GlyphID == 0 {
 				r.DrawStringAt(string([]rune{0xfffd}), dst, int(x), y, f.ResolveFace(0xfffd))
@@ -268,7 +268,6 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 		Face:      faces.ResolveFace(' '),
 		Size:      textSize,
 	}
-	shaper := &shaping.HarfbuzzShaper{}
 	segmenter := &shaping.Segmenter{}
 	out := shaper.Shape(in)
 
@@ -290,7 +289,7 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 			if r == '\t' {
 				if pending {
 					in.RunEnd = i
-					x = shapeCallback(shaper, in, x, scale, cb)
+					x = shapeCallback(in, x, scale, cb)
 				}
 				x = tabStop(spacew, x, style.TabWidth)
 
@@ -302,7 +301,7 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 			}
 		}
 
-		x = shapeCallback(shaper, in, x, scale, cb)
+		x = shapeCallback(in, x, scale, cb)
 	}
 
 	*advance = x
@@ -310,7 +309,7 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 		fixed266ToFloat32(out.LineBounds.Ascent)
 }
 
-func shapeCallback(shaper shaping.Shaper, in shaping.Input, x, scale float32, cb func(shaping.Output, float32)) float32 {
+func shapeCallback(in shaping.Input, x, scale float32, cb func(shaping.Output, float32)) float32 {
 	out := shaper.Shape(in)
 	glyphs := out.Glyphs
 	start := 0
