@@ -120,15 +120,18 @@ void main()
             shadow_radius = max(radius * min(ratio_x, ratio_y), 0.0);
         }
 
-        // Apply shadow effect
+        // apply shadow effect
         float distance_shadow;
+        // flip the shadow offset to get the correct shadow position
+        // negative offset-x value places the shadow to the left of the element. Negative offset-y value places the shadow above the element
+        vec2 shadow_offset_corrected = vec2(-shadow_offset.x, shadow_offset.y);
         if (calc_all_quadrants)
         {
-            distance_shadow = smoothstep(-edge_softness, shadow_blur_radius + edge_softness, calc_distance_all_quadrants(vec_centered_pos + shadow_offset, shadow_size, shadow_radius));
+            distance_shadow = smoothstep(-edge_softness, shadow_blur_radius + edge_softness, calc_distance_all_quadrants(vec_centered_pos + shadow_offset_corrected, shadow_size, shadow_radius));
         }
         else
         {
-            distance_shadow = smoothstep(-edge_softness, shadow_blur_radius + edge_softness, calc_distance(vec_centered_pos + shadow_offset, shadow_size, shadow_radius));
+            distance_shadow = smoothstep(-edge_softness, shadow_blur_radius + edge_softness, calc_distance(vec_centered_pos + shadow_offset_corrected, shadow_size, shadow_radius));
         }
         float shadow_alpha = shadow_color.a * (1.0 - distance_shadow);
 

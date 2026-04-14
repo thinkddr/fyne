@@ -32,7 +32,7 @@ type Shadow struct {
 	FillColor  color.Color   // Color of the shadow.
 	BlurRadius float32       // A value of 0 produces no blur, while larger values produce bigger and lighter shadow.
 	Spread     float32       // Spread of the shadow (positive values make the shadow larger, negative values make it smaller).
-	Offset     fyne.Position // Offset of the shadow relative to the content.
+	Offset     fyne.Position // Offset of the shadow relative to the content. Positive values move the shadow to the right (x) and down (y) of the element.
 	Variant    ShadowVariant // Variation of shadow (DropShadow or BoxShadow).
 }
 

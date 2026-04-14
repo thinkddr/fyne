@@ -125,7 +125,7 @@ func TestPainter_paintCircle_shadow(t *testing.T) {
 	r, g, b, _ := color.Black.RGBA()
 	obj := canvas.NewCircle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
 	obj.Shadow.FillColor = color.White
-	obj.Shadow.Offset = fyne.NewPos(10, -5)
+	obj.Shadow.Offset = fyne.NewPos(-10, -5)
 	obj.Shadow.BlurRadius = 3
 	obj.Shadow.Variant = canvas.DropShadow
 
@@ -646,7 +646,7 @@ func TestPainter_paintRectangle_shadow(t *testing.T) {
 	r, g, b, _ := color.Black.RGBA()
 	obj := canvas.NewRectangle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
 	obj.Shadow.FillColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
-	obj.Shadow.Offset = fyne.NewPos(-3, -4)
+	obj.Shadow.Offset = fyne.NewPos(3, -4)
 	obj.Shadow.BlurRadius = 8
 	obj.Shadow.Variant = canvas.BoxShadow
 
@@ -715,7 +715,7 @@ func TestPainter_paintRectangle_shadow_spread(t *testing.T) {
 	r, g, b, _ := color.Black.RGBA()
 	obj := canvas.NewRectangle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
 	obj.Shadow.FillColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
-	obj.Shadow.Offset = fyne.NewPos(5, 5)
+	obj.Shadow.Offset = fyne.NewPos(-5, 5)
 	obj.Shadow.BlurRadius = 5
 	obj.Shadow.Variant = canvas.DropShadow
 
@@ -735,6 +735,39 @@ func TestPainter_paintRectangle_shadow_spread(t *testing.T) {
 
 	obj.Shadow.Spread = -3
 	test.AssertImageMatches(t, "draw_rectangle_shadow_negative_spread.png", p.Paint(c))
+
+	obj.Shadow.Spread = -obj.Size().Width * 2
+	test.AssertImageMatches(t, "draw_rectangle_shadow_negative_spread_maximum.png", p.Paint(c))
+}
+
+func TestPainter_paintCircle_shadow_spread(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	r, g, b, _ := color.Black.RGBA()
+	obj := canvas.NewCircle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
+	obj.Shadow.FillColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
+	obj.Shadow.Offset = fyne.NewPos(5, -5)
+	obj.Shadow.BlurRadius = 7
+	obj.Shadow.Variant = canvas.BoxShadow
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(95+2*theme.Padding(), 95+2*theme.Padding()))
+	obj.Resize(fyne.NewSize(80, 80))
+	obj.Move(fyne.NewPos(12, 12))
+	p := software.NewPainter()
+
+	obj.Shadow.Spread = 0
+	test.AssertImageMatches(t, "draw_circle_shadow_no_spread.png", p.Paint(c))
+
+	obj.Shadow.Spread = 3
+	test.AssertImageMatches(t, "draw_circle_shadow_positive_spread.png", p.Paint(c))
+
+	obj.Shadow.Spread = -3
+	test.AssertImageMatches(t, "draw_circle_shadow_negative_spread.png", p.Paint(c))
+
+	obj.Shadow.Spread = -obj.Size().Width * 2
+	test.AssertImageMatches(t, "draw_circle_shadow_negative_spread_maximum.png", p.Paint(c))
 }
 
 func TestPainter_paintText_clipped(t *testing.T) {

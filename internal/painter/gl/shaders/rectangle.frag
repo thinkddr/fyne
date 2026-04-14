@@ -30,7 +30,7 @@ void main()
 
     if (add_shadow == 1.0)
     {
-        vec2 frag_pos = gl_FragCoord.xy + shadow_offset;
+        vec2 frag_pos = gl_FragCoord.xy + vec2(-shadow_offset.x, shadow_offset.y);
         // expand/contract rectangle bounds by spread on all sides
         vec2 p = vec2(
             clamp(frag_pos.x, rect_coords[0] - shadow_spread, rect_coords[1] + shadow_spread),

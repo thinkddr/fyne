@@ -990,8 +990,8 @@ func GetShadowPaddings(shadow canvas.Shadow) [4]float32 {
 	softness := shadow.BlurRadius
 	spread := shadow.Spread
 
-	rightReach := -offsetX + softness + spread
-	leftReach := offsetX + softness + spread
+	rightReach := offsetX + softness + spread
+	leftReach := -offsetX + softness + spread
 	topReach := -offsetY + softness + spread
 	bottomReach := offsetY + softness + spread
 

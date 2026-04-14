@@ -436,7 +436,7 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 			TopLeftCornerRadius:     o.TopLeftCornerRadius,
 			BottomRightCornerRadius: o.BottomRightCornerRadius,
 			BottomLeftCornerRadius:  o.BottomLeftCornerRadius,
-		}, objSize.Width+2*shadowSpread, objSize.Height+2*shadowSpread, vPad, func(in float32) float32 {
+		}, fyne.Max(objSize.Width+2*shadowSpread, 0), fyne.Max(objSize.Height+2*shadowSpread, 0), vPad, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
 		maskRaw = painter.DrawRectangle(&canvas.Rectangle{
@@ -462,7 +462,7 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 		})
 	}
 
-	startX := pos.X - float32(shadowOffset.X) - shadowSpread - vPad
+	startX := pos.X + float32(shadowOffset.X) - shadowSpread - vPad
 	startY := pos.Y + float32(shadowOffset.Y) - shadowSpread - vPad
 
 	screenStartX := scale.ToScreenCoordinate(c, startX)

@@ -135,7 +135,7 @@ func TestShadow_ShadowPaddings_OffsetOnlyLeft(t *testing.T) {
 	b := canvas.Shadow{
 		FillColor:  color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 3,
-		Offset:     fyne.NewPos(5, 0),
+		Offset:     fyne.NewPos(-5, 0),
 		Variant:    canvas.BoxShadow,
 	}
 	expected := [4]float32{8, 3, 0, 3}
@@ -150,7 +150,7 @@ func TestShadow_ShadowPaddings_OffsetOnlyRight(t *testing.T) {
 	b := canvas.Shadow{
 		FillColor:  color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 2,
-		Offset:     fyne.NewPos(-6, 0),
+		Offset:     fyne.NewPos(6, 0),
 		Variant:    canvas.DropShadow,
 	}
 	expected := [4]float32{0, 2, 8, 2}
@@ -195,7 +195,7 @@ func TestShadow_ShadowPaddings_OffsetLeftTop(t *testing.T) {
 	b := canvas.Shadow{
 		FillColor:  color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 4,
-		Offset:     fyne.NewPos(3, -2),
+		Offset:     fyne.NewPos(-3, -2),
 		Variant:    canvas.DropShadow,
 	}
 	expected := [4]float32{7, 6, 1, 2}
@@ -210,7 +210,7 @@ func TestShadow_ShadowPaddings_OffsetLeftBottom(t *testing.T) {
 	b := canvas.Shadow{
 		FillColor:  color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 2,
-		Offset:     fyne.NewPos(4, 5),
+		Offset:     fyne.NewPos(-4, 5),
 		Variant:    canvas.BoxShadow,
 	}
 	expected := [4]float32{6, 0, 0, 7}
@@ -225,7 +225,7 @@ func TestShadow_ShadowPaddings_OffsetRightTop(t *testing.T) {
 	b := canvas.Shadow{
 		FillColor:  color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 3,
-		Offset:     fyne.NewPos(-3, -2),
+		Offset:     fyne.NewPos(3, -2),
 	}
 	expected := [4]float32{0, 5, 6, 1}
 	pads := painter.GetShadowPaddings(b)
@@ -235,11 +235,11 @@ func TestShadow_ShadowPaddings_OffsetRightTop(t *testing.T) {
 	assert.Equal(t, expected[3], pads[3], "bottom")
 }
 
-func TestShadow_ShadowPaddings_OffsetRightBottom(t *testing.T) {
+func TestShadow_ShadowPaddings_OffsetLeftBottom2(t *testing.T) {
 	b := canvas.Shadow{
 		FillColor:  color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 4,
-		Offset:     fyne.NewPos(2, 3),
+		Offset:     fyne.NewPos(-2, 3),
 		Variant:    canvas.DropShadow,
 	}
 	expected := [4]float32{6, 1, 2, 7}
@@ -250,11 +250,11 @@ func TestShadow_ShadowPaddings_OffsetRightBottom(t *testing.T) {
 	assert.Equal(t, expected[3], pads[3], "bottom")
 }
 
-func TestShadow_ShadowPaddings_OffsetRightBottom2(t *testing.T) {
+func TestShadow_ShadowPaddings_OffsetRightBottom(t *testing.T) {
 	b := canvas.Shadow{
 		FillColor:  color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 2,
-		Offset:     fyne.NewPos(-4, 5),
+		Offset:     fyne.NewPos(4, 5),
 		Variant:    canvas.DropShadow,
 	}
 	expected := [4]float32{0, 0, 6, 7}
@@ -288,6 +288,22 @@ func TestShadow_ShadowPaddings_NoOffsetOnlyBlurRadius2(t *testing.T) {
 		Variant:    canvas.BoxShadow,
 	}
 	expected := [4]float32{9, 9, 9, 9}
+	pads := painter.GetShadowPaddings(b)
+	assert.Equal(t, expected[0], pads[0], "left")
+	assert.Equal(t, expected[1], pads[1], "top")
+	assert.Equal(t, expected[2], pads[2], "right")
+	assert.Equal(t, expected[3], pads[3], "bottom")
+}
+
+func TestShadow_ShadowPaddings_OffsetAndSpread(t *testing.T) {
+	b := canvas.Shadow{
+		FillColor:  color.NRGBA{0, 0, 0, 128},
+		BlurRadius: 9,
+		Spread:     10,
+		Offset:     fyne.NewPos(1, -1),
+		Variant:    canvas.BoxShadow,
+	}
+	expected := [4]float32{18, 20, 20, 18}
 	pads := painter.GetShadowPaddings(b)
 	assert.Equal(t, expected[0], pads[0], "left")
 	assert.Equal(t, expected[1], pads[1], "top")

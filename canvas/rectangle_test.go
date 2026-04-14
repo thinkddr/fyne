@@ -121,7 +121,7 @@ func TestRectangle_shadow(t *testing.T) {
 		CornerRadius: 12,
 		Shadow: canvas.Shadow{
 			FillColor:  color.White,
-			Offset:     fyne.NewPos(10, -5),
+			Offset:     fyne.NewPos(-10, -5),
 			BlurRadius: 3,
 			Variant:    canvas.BoxShadow,
 		},
