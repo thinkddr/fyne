@@ -132,9 +132,9 @@ func TestRectangle_shadow(t *testing.T) {
 
 	c := software.NewCanvas()
 	c.SetContent(rect)
-	c.Resize(fyne.NewSize(150, 150))
-	rect.Resize(fyne.NewSize(120, 120))
-	rect.Move(fyne.NewPos(20, 18))
+	c.Resize(fyne.NewSize(170, 170))
+	rect.Resize(fyne.NewSize(150, 150))
+	rect.Move(fyne.NewPos(16, 16))
 	test.AssertRendersToImage(t, "rounded_rect_stroke_shadow.png", c)
 
 	rect.StrokeWidth = 0

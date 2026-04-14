@@ -71,8 +71,8 @@ func TestCircle_shadow(t *testing.T) {
 
 	c := software.NewCanvas()
 	c.SetContent(circle)
-	c.Resize(fyne.NewSize(270, 270))
-	circle.Resize(fyne.NewSize(250, 250))
+	c.Resize(fyne.NewSize(170, 170))
+	circle.Resize(fyne.NewSize(150, 150))
 	circle.Move(fyne.NewPos(6, 6))
 	test.AssertRendersToImage(t, "circle_stroke_shadow.png", c)
 
