@@ -45,7 +45,10 @@ const (
 	ButtonIconTrailingText
 )
 
-var _ fyne.Focusable = (*Button)(nil)
+var (
+	_ fyne.Focusable  = (*Button)(nil)
+	_ fyne.Accessible = (*Button)(nil)
+)
 
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {
@@ -87,6 +90,24 @@ func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button 
 
 	button.ExtendBaseWidget(button)
 	return button
+}
+
+// AccessibilityLabel for a button is the text, if there is some, otherwise the name of the icon.
+//
+// Since: 2.8
+func (b *Button) AccessibilityLabel() string {
+	if b.Text != "" {
+		return b.Text
+	}
+
+	return b.Icon.Name()
+}
+
+// AccessibilityRole for a button is fyne.AccessibleRoleButton.
+//
+// Since: 2.8
+func (b *Button) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleButton
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer

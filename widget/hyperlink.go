@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	_ fyne.Focusable = (*Hyperlink)(nil)
-	_ fyne.Widget    = (*Hyperlink)(nil)
+	_ fyne.Accessible = (*Hyperlink)(nil)
+	_ fyne.Focusable  = (*Hyperlink)(nil)
+	_ fyne.Widget     = (*Hyperlink)(nil)
 )
 
 // Hyperlink widget is a text component with appropriate padding and layout.
@@ -63,6 +64,20 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 	}
 
 	return hl
+}
+
+// AccessibilityLabel for a hyperlink is the text for the link.
+//
+// Since: 2.8
+func (hl *Hyperlink) AccessibilityLabel() string {
+	return hl.Text
+}
+
+// AccessibilityRole for a hyperlink is fyne.AccessibleRoleLink.
+//
+// Since: 2.8
+func (hl *Hyperlink) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleLink
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer

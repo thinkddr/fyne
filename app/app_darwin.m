@@ -1,4 +1,4 @@
-//go:build !ci && !wasm && !test_web_driver && !mobile
+//go:build !ci && !wasm && !test_web_driver && !mobile && !tinygo
 
 #import <Foundation/Foundation.h>
 #if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400 || TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
