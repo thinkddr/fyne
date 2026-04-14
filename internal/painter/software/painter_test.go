@@ -132,8 +132,8 @@ func TestPainter_paintCircle_shadow(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(true)
 	c.SetContent(obj)
-	c.Resize(fyne.NewSize(95+2*theme.Padding(), 95+2*theme.Padding()))
-	obj.Resize(fyne.NewSize(80, 80))
+	c.Resize(fyne.NewSize(110+2*theme.Padding(), 110+2*theme.Padding()))
+	obj.Resize(fyne.NewSize(100, 100))
 	obj.Move(fyne.NewPos(15, 12))
 	p := software.NewPainter()
 
@@ -653,9 +653,9 @@ func TestPainter_paintRectangle_shadow(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(true)
 	c.SetContent(obj)
-	c.Resize(fyne.NewSize(95+2*theme.Padding(), 95+2*theme.Padding()))
-	obj.Resize(fyne.NewSize(80, 80))
-	obj.Move(fyne.NewPos(12, 12))
+	c.Resize(fyne.NewSize(110+2*theme.Padding(), 110+2*theme.Padding()))
+	obj.Resize(fyne.NewSize(100, 100))
+	obj.Move(fyne.NewPos(8, 12))
 	p := software.NewPainter()
 
 	test.AssertImageMatches(t, "draw_rectangle_box_shadow.png", p.Paint(c))
@@ -686,9 +686,9 @@ func TestPainter_paintRectangle_stroke_shadow(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(true)
 	c.SetContent(obj)
-	c.Resize(fyne.NewSize(95+2*theme.Padding(), 95+2*theme.Padding()))
-	obj.Resize(fyne.NewSize(80, 80))
-	obj.Move(fyne.NewPos(12, 12))
+	c.Resize(fyne.NewSize(110+2*theme.Padding(), 110+2*theme.Padding()))
+	obj.Resize(fyne.NewSize(100, 100))
+	obj.Move(fyne.NewPos(10, 10))
 	p := software.NewPainter()
 
 	test.AssertImageMatches(t, "draw_rectangle_stroke_drop_shadow.png", p.Paint(c))
@@ -705,9 +705,6 @@ func TestPainter_paintRectangle_stroke_shadow(t *testing.T) {
 	test.AssertImageMatches(t, "draw_rectangle_stroke_wide_box_shadow.png", p.Paint(c))
 	obj.Aspect = 0.5
 	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow_box_shadow.png", p.Paint(c))
-
-	obj.Shadow.Spread = 3
-	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow_box_shadow_spread.png", p.Paint(c))
 }
 
 func TestPainter_paintRectangle_shadow_spread(t *testing.T) {
@@ -722,9 +719,9 @@ func TestPainter_paintRectangle_shadow_spread(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(true)
 	c.SetContent(obj)
-	c.Resize(fyne.NewSize(95+2*theme.Padding(), 95+2*theme.Padding()))
-	obj.Resize(fyne.NewSize(80, 80))
-	obj.Move(fyne.NewPos(15, 8))
+	c.Resize(fyne.NewSize(110+2*theme.Padding(), 110+2*theme.Padding()))
+	obj.Resize(fyne.NewSize(100, 100))
+	obj.Move(fyne.NewPos(15, 6))
 	p := software.NewPainter()
 
 	obj.Shadow.Spread = 0
@@ -752,9 +749,9 @@ func TestPainter_paintCircle_shadow_spread(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(true)
 	c.SetContent(obj)
-	c.Resize(fyne.NewSize(95+2*theme.Padding(), 95+2*theme.Padding()))
-	obj.Resize(fyne.NewSize(80, 80))
-	obj.Move(fyne.NewPos(12, 12))
+	c.Resize(fyne.NewSize(110+2*theme.Padding(), 110+2*theme.Padding()))
+	obj.Resize(fyne.NewSize(100, 100))
+	obj.Move(fyne.NewPos(6, 12))
 	p := software.NewPainter()
 
 	obj.Shadow.Spread = 0

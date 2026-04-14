@@ -106,7 +106,7 @@ func TestVecRectCoordsWithPad_Shadow(t *testing.T) {
 
 	rect.Shadow = canvas.Shadow{
 		FillColor:  color.NRGBA{R: 0, G: 0, B: 0, A: 255},
-		Offset:     fyne.NewPos(-30, -20),
+		Offset:     fyne.NewPos(30, -20),
 		BlurRadius: 80,
 	}
 
