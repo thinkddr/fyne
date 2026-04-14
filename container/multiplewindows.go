@@ -88,6 +88,8 @@ func (m *MultipleWindows) refreshChildren() {
 		objs[i] = w
 
 		m.setupChild(w)
+		w.inactive = i < len(m.Windows)-1
+		w.Refresh()
 	}
 	m.content.Objects = objs
 	m.content.Refresh()
