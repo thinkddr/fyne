@@ -254,7 +254,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	}
 
 	// Vertex: BEG
-	bounds, points := p.vecRectCoords(pos, polygon, frame, 0.0)
+	bounds, points := p.vecRectCoords(pos, polygon, frame, 0.0, canvas.Shadow{})
 	program := p.arbitraryPolygonProgram
 	p.ctx.UseProgram(program.ref)
 	p.updateBuffer(program.buff, points)

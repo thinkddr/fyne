@@ -72,7 +72,7 @@ func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *i
 	})
 
 	if painter.IsShadowVisible(circle.Shadow) {
-		bounds = drawShadow(c, circle, circle.Size(), circle.Shadow, pad, bounds, base, clip)
+		drawShadow(c, circle, circle.Size(), circle.Shadow, pad, base, clip, pos)
 	}
 
 	// the clip intersect above cannot be negative, so we may need to compensate
@@ -310,7 +310,7 @@ func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float3
 	})
 
 	if painter.IsShadowVisible(shadow) {
-		bounds = drawShadow(c, obj, fyne.NewSize(width, height), shadow, pad, bounds, base, clip)
+		drawShadow(c, obj, fyne.NewSize(width, height), shadow, pad, base, clip, pos)
 	}
 
 	// the clip intersect above cannot be negative, so we may need to compensate
@@ -406,31 +406,26 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	if painter.IsShadowVisible(shadow) {
-		bounds = drawShadow(c, obj, fyne.NewSize(width, height), shadow, 0, bounds, base, clip)
-		// due to shadow draw rectangle with a certain width and height
-		raw := painter.DrawRectangle(canvas.NewRectangle(fill), width, height, 0, func(in float32) float32 {
-			return float32(math.Round(float64(in) * float64(c.Scale())))
-		})
-		draw.Draw(base, bounds, raw, image.Point{}, draw.Over)
-	} else {
-		draw.Draw(base, bounds, image.NewUniform(fill), image.Point{}, draw.Over)
+		drawShadow(c, obj, fyne.NewSize(width, height), shadow, 0, base, clip, pos)
 	}
+
+	draw.Draw(base, bounds, image.NewUniform(fill), image.Point{}, draw.Over)
 }
 
-func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow canvas.Shadow, pad float32, bounds image.Rectangle, base *image.NRGBA, clip image.Rectangle) image.Rectangle {
-	pads := painter.GetShadowPaddings(shadow)
-	shadowPadLeft := scale.ToScreenCoordinate(c, pads[0])
-	shadowPadRight := scale.ToScreenCoordinate(c, pads[2])
-	shadowPadTop := scale.ToScreenCoordinate(c, pads[1])
-	shadowPadBottom := scale.ToScreenCoordinate(c, pads[3])
-
-	shadowColor := shadow.FillColor
-	shadowBlurRadius := shadow.BlurRadius
+func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow canvas.Shadow, pad float32, base *image.NRGBA, clip image.Rectangle, pos fyne.Position) {
 	shadowOffset := shadow.Offset
-	shadowVariant := shadow.Variant
+	shadowBlurRadius := shadow.BlurRadius
 	shadowSpread := shadow.Spread
+	shadowVariant := shadow.Variant
+	shadowColor := shadow.FillColor
 
 	var shadowRaw *image.RGBA
+	var maskRaw *image.RGBA
+
+	vPad := pad + shadowBlurRadius
+	if shadowSpread < 0 {
+		vPad -= shadowSpread
+	}
 
 	switch o := obj.(type) {
 	case *canvas.Rectangle:
@@ -441,71 +436,59 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 			TopLeftCornerRadius:     o.TopLeftCornerRadius,
 			BottomRightCornerRadius: o.BottomRightCornerRadius,
 			BottomLeftCornerRadius:  o.BottomLeftCornerRadius,
-		}, objSize.Width+2*shadowSpread, objSize.Height+2*shadowSpread, pad+shadowBlurRadius, func(in float32) float32 {
+		}, objSize.Width+2*shadowSpread, objSize.Height+2*shadowSpread, vPad, func(in float32) float32 {
+			return float32(math.Round(float64(in) * float64(c.Scale())))
+		})
+		maskRaw = painter.DrawRectangle(o, objSize.Width, objSize.Height, vPad+shadowSpread, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
 	case *canvas.Circle:
 		shadowCircle := &canvas.Circle{FillColor: shadowColor}
 		shadowCircle.Resize(objSize.AddWidthHeight(2*shadowSpread, 2*shadowSpread))
-		shadowRaw = painter.DrawCircle(shadowCircle, pad+shadowBlurRadius, func(in float32) float32 {
+		shadowRaw = painter.DrawCircle(shadowCircle, vPad, func(in float32) float32 {
+			return float32(math.Round(float64(in) * float64(c.Scale())))
+		})
+		maskRaw = painter.DrawCircle(o, vPad+shadowSpread, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
 	}
 
-	shadowRect := image.Rect(
-		bounds.Min.X+shadowPadLeft,
-		bounds.Min.Y+shadowPadTop,
-		bounds.Max.X+shadowPadRight+shadowPadLeft,
-		bounds.Max.Y+shadowPadBottom+shadowPadTop,
-	)
+	startX := pos.X - float32(shadowOffset.X) - shadowSpread - vPad
+	startY := pos.Y + float32(shadowOffset.Y) - shadowSpread - vPad
 
-	// shadowBlurRadius is used as a vector pad so the position is affected by this value
-	// adding shadow blur radius to the offset restore initial position
-	offset := image.Point{
-		X: scale.ToScreenCoordinate(c, float32(shadowOffset.X+shadowBlurRadius+shadowSpread)),
-		Y: scale.ToScreenCoordinate(c, float32(-shadowOffset.Y+shadowBlurRadius+shadowSpread)),
-	}
+	screenStartX := scale.ToScreenCoordinate(c, startX)
+	screenStartY := scale.ToScreenCoordinate(c, startY)
 
-	shadowBounds := clip.Intersect(
-		image.Rect(
-			shadowRect.Min.X-offset.X, shadowRect.Min.Y-offset.Y,
-			shadowRect.Max.X, shadowRect.Max.Y,
-		),
-	)
+	imageStartX := scale.ToScreenCoordinate(c, pos.X-shadowSpread-vPad)
+	imageStartY := scale.ToScreenCoordinate(c, pos.Y-shadowSpread-vPad)
 
 	blurred := blur.Gaussian(shadowRaw, float64(scale.ToScreenCoordinate(c, shadowBlurRadius)))
+	destRect := image.Rect(screenStartX, screenStartY, screenStartX+blurred.Bounds().Dx(), screenStartY+blurred.Bounds().Dy())
+	shadowBounds := clip.Intersect(destRect)
+
+	if shadowBounds.Empty() {
+		return
+	}
 
 	// If DropShadow, subtract object from shadow
 	if shadowVariant == canvas.DropShadow {
-		blurPx := scale.ToScreenCoordinate(c, shadowBlurRadius)
-		spreadPx := scale.ToScreenCoordinate(c, shadowSpread)
+		dx := screenStartX - imageStartX
+		dy := screenStartY - imageStartY
 
 		for y := 0; y < blurred.Bounds().Dy(); y++ {
 			for x := 0; x < blurred.Bounds().Dx(); x++ {
-				mx := x - offset.X + blurPx + spreadPx
-				my := y - offset.Y + blurPx + spreadPx
+				mx := x + dx
+				my := y + dy
 
-				if spreadPx > 0 {
-					_, _, _, a1 := shadowRaw.At(mx-spreadPx, my).RGBA()
-					_, _, _, a2 := shadowRaw.At(mx+spreadPx, my).RGBA()
-					_, _, _, a3 := shadowRaw.At(mx, my-spreadPx).RGBA()
-					_, _, _, a4 := shadowRaw.At(mx, my+spreadPx).RGBA()
-					if a1 > 0 && a2 > 0 && a3 > 0 && a4 > 0 {
-						blurred.SetRGBA(x, y, color.RGBA{A: 0})
-					}
-				} else {
-					if _, _, _, a := shadowRaw.At(mx, my).RGBA(); a > 0 || spreadPx < 0 {
-						blurred.SetRGBA(x, y, color.RGBA{A: 0})
-					}
+				if _, _, _, a := maskRaw.At(mx, my).RGBA(); a > 0 {
+					blurred.SetRGBA(x, y, color.RGBA{A: 0})
 				}
 			}
 		}
 	}
 
-	draw.Draw(base, shadowBounds, blurred, image.Point{}, draw.Over)
-
-	// returns changed bounds of the original canvas object with added shadow
-	return clip.Intersect(shadowRect)
+	srcPt := image.Point{X: shadowBounds.Min.X - screenStartX, Y: shadowBounds.Min.Y - screenStartY}
+	draw.Draw(base, shadowBounds, blurred, srcPt, draw.Over)
 }
 
 // applyRoundedCorners rounds the corners of the image in-place
