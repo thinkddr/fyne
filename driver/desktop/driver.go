@@ -12,4 +12,10 @@ type Driver interface {
 	//
 	// Since: 2.4
 	CurrentKeyModifiers() fyne.KeyModifier
+
+	// HasSecondaryDisplay returns true if there are more than one screens available on this computer.
+	// This is commonly used alongside the desktop Window.RequestFullScreenSecondary call.
+	//
+	// Since: 2.8
+	HasSecondaryDisplay() bool
 }
