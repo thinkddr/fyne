@@ -112,3 +112,37 @@ func TestRectangle_RadiusMaximum(t *testing.T) {
 	rect.TopLeftCornerRadius = canvas.RadiusMaximum
 	test.AssertRendersToImage(t, "maximum_rounded_per_corner_rect_aspect.png", c)
 }
+
+func TestRectangle_shadow(t *testing.T) {
+	rect := &canvas.Rectangle{
+		FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
+		StrokeColor:  color.NRGBA{R: 255, G: 120, B: 0, A: 255},
+		StrokeWidth:  2.0,
+		CornerRadius: 12,
+		Shadow: canvas.Shadow{
+			FillColor:  color.White,
+			Offset:     fyne.NewPos(10, -5),
+			BlurRadius: 3,
+			Variant:    canvas.DropShadow,
+		},
+	}
+
+	rect.Resize(fyne.NewSize(50, 50))
+	test.AssertObjectRendersToMarkup(t, "rounded_rect_shadow.xml", rect)
+
+	c := software.NewCanvas()
+	c.SetContent(rect)
+	c.Resize(fyne.NewSize(70, 70))
+	rect.Resize(fyne.NewSize(55, 55))
+	rect.Move(fyne.NewPos(12, 10))
+	test.AssertRendersToImage(t, "rounded_rect_shadow_stroke.png", c)
+
+	rect.StrokeWidth = 0
+	test.AssertRendersToImage(t, "rounded_rect_shadow.png", c)
+
+	rect.Aspect = 2.0
+	rect.CornerRadius = 0
+	rect.TopLeftCornerRadius = canvas.RadiusMaximum
+	rect.Shadow.Variant = canvas.BoxShadow
+	test.AssertRendersToImage(t, "maximum_rounded_per_corner_rect_aspect_shadow.png", c)
+}
