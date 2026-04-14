@@ -123,7 +123,7 @@ func TestRectangle_shadow(t *testing.T) {
 			FillColor:  color.White,
 			Offset:     fyne.NewPos(10, -5),
 			BlurRadius: 3,
-			Variant:    canvas.DropShadow,
+			Variant:    canvas.BoxShadow,
 		},
 	}
 
@@ -135,14 +135,14 @@ func TestRectangle_shadow(t *testing.T) {
 	c.Resize(fyne.NewSize(70, 70))
 	rect.Resize(fyne.NewSize(55, 55))
 	rect.Move(fyne.NewPos(12, 10))
-	test.AssertRendersToImage(t, "rounded_rect_shadow_stroke.png", c)
+	test.AssertRendersToImage(t, "rounded_rect_stroke_shadow.png", c)
 
 	rect.StrokeWidth = 0
+	rect.Shadow.Variant = canvas.DropShadow
 	test.AssertRendersToImage(t, "rounded_rect_shadow.png", c)
 
 	rect.Aspect = 2.0
 	rect.CornerRadius = 0
 	rect.TopLeftCornerRadius = canvas.RadiusMaximum
-	rect.Shadow.Variant = canvas.BoxShadow
 	test.AssertRendersToImage(t, "maximum_rounded_per_corner_rect_aspect_shadow.png", c)
 }

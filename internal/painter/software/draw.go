@@ -439,7 +439,14 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 		}, objSize.Width+2*shadowSpread, objSize.Height+2*shadowSpread, vPad, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
-		maskRaw = painter.DrawRectangle(o, objSize.Width, objSize.Height, vPad+shadowSpread, func(in float32) float32 {
+		maskRaw = painter.DrawRectangle(&canvas.Rectangle{
+			FillColor:               color.Opaque,
+			CornerRadius:            o.CornerRadius,
+			TopRightCornerRadius:    o.TopRightCornerRadius,
+			TopLeftCornerRadius:     o.TopLeftCornerRadius,
+			BottomRightCornerRadius: o.BottomRightCornerRadius,
+			BottomLeftCornerRadius:  o.BottomLeftCornerRadius,
+		}, objSize.Width, objSize.Height, vPad+shadowSpread, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
 	case *canvas.Circle:
@@ -448,7 +455,9 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 		shadowRaw = painter.DrawCircle(shadowCircle, vPad, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
-		maskRaw = painter.DrawCircle(o, vPad+shadowSpread, func(in float32) float32 {
+		maskCircle := &canvas.Circle{FillColor: color.Opaque}
+		maskCircle.Resize(objSize)
+		maskRaw = painter.DrawCircle(maskCircle, vPad+shadowSpread, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
 	}
@@ -458,9 +467,6 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 
 	screenStartX := scale.ToScreenCoordinate(c, startX)
 	screenStartY := scale.ToScreenCoordinate(c, startY)
-
-	imageStartX := scale.ToScreenCoordinate(c, pos.X-shadowSpread-vPad)
-	imageStartY := scale.ToScreenCoordinate(c, pos.Y-shadowSpread-vPad)
 
 	blurred := blur.Gaussian(shadowRaw, float64(scale.ToScreenCoordinate(c, shadowBlurRadius)))
 	destRect := image.Rect(screenStartX, screenStartY, screenStartX+blurred.Bounds().Dx(), screenStartY+blurred.Bounds().Dy())
@@ -472,16 +478,52 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 
 	// If DropShadow, subtract object from shadow
 	if shadowVariant == canvas.DropShadow {
-		dx := screenStartX - imageStartX
-		dy := screenStartY - imageStartY
+		dx := screenStartX - scale.ToScreenCoordinate(c, pos.X-shadowSpread-vPad)
+		dy := screenStartY - scale.ToScreenCoordinate(c, pos.Y-shadowSpread-vPad)
+
+		var fill, strokeCol color.Color
+		var strokeWidth float32
+		switch o := obj.(type) {
+		case *canvas.Rectangle:
+			fill, strokeCol, strokeWidth = o.FillColor, o.StrokeColor, o.StrokeWidth
+		case *canvas.Circle:
+			fill, strokeCol, strokeWidth = o.FillColor, o.StrokeColor, o.StrokeWidth
+		}
+
+		var objAlpha float32
+		if fill != nil {
+			_, _, _, a := fill.RGBA()
+			objAlpha = float32(a) / 65535.0
+		}
+		if strokeCol != nil && strokeWidth > 0 {
+			_, _, _, a := strokeCol.RGBA()
+			sa := float32(a) / 65535.0
+			if sa > objAlpha {
+				objAlpha = sa
+			}
+		}
 
 		for y := 0; y < blurred.Bounds().Dy(); y++ {
 			for x := 0; x < blurred.Bounds().Dx(); x++ {
 				mx := x + dx
 				my := y + dy
 
-				if _, _, _, a := maskRaw.At(mx, my).RGBA(); a > 0 {
-					blurred.SetRGBA(x, y, color.RGBA{A: 0})
+				_, _, _, maskA := maskRaw.At(mx, my).RGBA()
+				if maskA > 0 {
+					pixel := blurred.RGBAAt(x, y)
+					cVal := float32(maskA) / 65535.0
+					den := 1.0 - cVal*objAlpha
+					var invMA float32
+					if den <= 0 {
+						invMA = 0
+					} else {
+						invMA = (1.0 - cVal) / den
+					}
+					pixel.R = uint8(float32(pixel.R) * invMA)
+					pixel.G = uint8(float32(pixel.G) * invMA)
+					pixel.B = uint8(float32(pixel.B) * invMA)
+					pixel.A = uint8(float32(pixel.A) * invMA)
+					blurred.SetRGBA(x, y, pixel)
 				}
 			}
 		}
