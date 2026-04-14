@@ -43,6 +43,11 @@ const (
 	// Since: 2.0
 	SizeNameSeparatorThickness fyne.ThemeSizeName = "separator"
 
+	// SizeNameSplitThickness is the name of theme lookup for the thickness of a split divider.
+	//
+	// Since: 2.8
+	SizeNameSplitThickness fyne.ThemeSizeName = "split"
+
 	// SizeNameText is the name of theme lookup for text size.
 	//
 	// Since: 2.0

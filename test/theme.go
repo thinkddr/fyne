@@ -113,6 +113,7 @@ func NewTheme() fyne.Theme {
 			theme.SizeNamePadding:            float32(10),
 			theme.SizeNameScrollBar:          float32(10),
 			theme.SizeNameScrollBarSmall:     float32(2),
+			theme.SizeNameSplitThickness:     float32(9),
 			theme.SizeNameSeparatorThickness: float32(1),
 			theme.SizeNameText:               float32(18),
 			theme.SizeNameHeadingText:        float32(30.6),
@@ -177,6 +178,7 @@ func Theme() fyne.Theme {
 				theme.SizeNamePadding:              float32(4),
 				theme.SizeNameScrollBar:            float32(16),
 				theme.SizeNameScrollBarSmall:       float32(3),
+				theme.SizeNameSplitThickness:       float32(5),
 				theme.SizeNameSeparatorThickness:   float32(1),
 				theme.SizeNameText:                 float32(14),
 				theme.SizeNameHeadingText:          float32(23.8),
@@ -215,11 +217,15 @@ func (t *configurableTheme) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) co
 }
 
 func (t *configurableTheme) Font(style fyne.TextStyle) fyne.Resource {
-	if t.fonts[style] == nil {
+	lookup := style
+	lookup.Strikethrough = false
+	lookup.Underline = false
+
+	if t.fonts[lookup] == nil {
 		fyne.LogError(fmt.Sprintf("font for style %#v not defined in theme %s", style, t.name), nil)
 	}
 
-	return t.fonts[style]
+	return t.fonts[lookup]
 }
 
 func (t *configurableTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
