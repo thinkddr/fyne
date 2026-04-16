@@ -34,10 +34,11 @@ type canvas struct {
 	touched        map[int]mobile.Touchable
 	windowHead     fyne.CanvasObject
 
-	dragOffset fyne.Position
-	dragStart  fyne.Position
-	dragging   fyne.Draggable
-	dragging2  fyne.Draggable
+	dragOffset     fyne.Position
+	dragStart      fyne.Position
+	dragging       fyne.Draggable
+	dragging2      fyne.Draggable
+	otherDirection container.ScrollDirection
 
 	onTypedKey  func(event *fyne.KeyEvent)
 	onTypedRune func(rune)
@@ -280,16 +281,15 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	})
 	var scrollOtherDirection fyne.CanvasObject
 	if scr, ok := co.(*container.Scroll); ok {
-		var otherDirection container.ScrollDirection
 		if scr.Direction == container.ScrollHorizontalOnly {
-			otherDirection = container.ScrollVerticalOnly
+			c.otherDirection = container.ScrollVerticalOnly
 		} else if scr.Direction == container.ScrollVerticalOnly {
-			otherDirection = container.ScrollHorizontalOnly
+			c.otherDirection = container.ScrollHorizontalOnly
 		}
-		if otherDirection != container.ScrollBoth {
+		if c.otherDirection != container.ScrollBoth {
 			scrollOtherDirection, _, _ = c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 				if scr, ok := object.(*container.Scroll); ok {
-					return scr.Direction == otherDirection
+					return scr.Direction == c.otherDirection || scr.Direction == container.ScrollBoth
 				}
 
 				return false
@@ -328,6 +328,11 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 
 	dragCallback(c.dragging, ev)
 	if c.dragging2 != nil {
+		if c.otherDirection == container.ScrollVerticalOnly {
+			ev.Dragged.DX = 0
+		} else {
+			ev.Dragged.DY = 0
+		}
 		dragCallback(c.dragging2, ev)
 	}
 }
@@ -346,11 +351,17 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 		ev.AbsolutePosition = pos
 		dragCallback(c.dragging, ev)
 		if c.dragging2 != nil {
+			if c.otherDirection == container.ScrollVerticalOnly {
+				ev.Dragged.DX = 0
+			} else {
+				ev.Dragged.DY = 0
+			}
 			dragCallback(c.dragging2, ev)
 		}
 
 		c.dragging = nil
 		c.dragging2 = nil
+		c.otherDirection = container.ScrollBoth
 		return
 	}
 
