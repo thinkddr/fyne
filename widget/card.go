@@ -42,10 +42,8 @@ func (c *Card) CreateRenderer() fyne.WidgetRenderer {
 	subHeader := canvas.NewText(c.Subtitle, header.Color)
 
 	background := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
-	background.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
-	// TODO update initial shadow offset and softness to match ShadowingRenderer
-	background.Shadow.BlurRadius = 2
-	background.Shadow.Offset = fyne.NewPos(-float32(widget.CardLevel)*0.4, float32(widget.CardLevel)*0.8)
+	background.CornerRadius = th.Size(theme.SizeNameCardRadius)
+	widget.ApplyShadowConfig(&background.Shadow, widget.ShadowForLevel(widget.CardLevel), th.Color(theme.ColorNameShadow, v))
 	objects := []fyne.CanvasObject{background, header, subHeader}
 	if c.Image != nil {
 		objects = append(objects, c.Image)
@@ -248,4 +246,5 @@ func (c *cardRenderer) applyTheme() {
 	}
 	c.background.FillColor = th.Color(theme.ColorNameBackground, v)
 	c.background.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
+	c.background.CornerRadius = th.Size(theme.SizeNameCardRadius)
 }

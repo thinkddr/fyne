@@ -41,13 +41,12 @@ void main()
     if (add_shadow == 1.0)
     {
         vec2 frag_pos = gl_FragCoord.xy + vec2(-shadow_offset.x, shadow_offset.y);
+        vec2 center = vec2((rect_coords[0] + rect_coords[1]) * 0.5, frame_size.y - (rect_coords[2] + rect_coords[3]) * 0.5);
         // expand/contract rectangle bounds by spread on all sides
-        vec2 p = vec2(
-            clamp(frag_pos.x, rect_coords[0] - shadow_spread, rect_coords[1] + shadow_spread),
-            clamp(frag_pos.y, frame_size.y - rect_coords[3] - shadow_spread, frame_size.y - rect_coords[2] + shadow_spread)
-        );
+        vec2 half_size = vec2(rect_coords[1] - rect_coords[0], rect_coords[3] - rect_coords[2]) * 0.5 + vec2(shadow_spread);
 
-        float distance_shadow = smoothstep(0.0, shadow_blur_radius, length(frag_pos - p));
+        vec2 d = abs(frag_pos - center) - half_size;
+        float distance_shadow = smoothstep(-shadow_blur_radius * 0.5, shadow_blur_radius * 0.5, length(max(d, 0.0)) + min(max(d.x, d.y), 0.0));
         float shadow_alpha = shadow_color.a * (1.0 - distance_shadow);
 
         if (shadow_type == 0.0)

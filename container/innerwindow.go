@@ -123,10 +123,7 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameInnerWindowBorder, v))
 	bg.CornerRadius = th.Size(theme.SizeNameInnerWindowRadius)
-	bg.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
-	// TODO update initial shadow offset and softness to match ShadowingRenderer
-	bg.Shadow.BlurRadius = 8
-	bg.Shadow.Offset = fyne.NewPos(-float32(intWidget.DialogLevel)*0.1, float32(intWidget.DialogLevel)*0.05)
+	intWidget.ApplyShadowConfig(&bg.Shadow, intWidget.ShadowForLevel(intWidget.PopUpLevel), th.Color(theme.ColorNameShadow, v))
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
 	bar := New(&titleBarLayout{buttons: buttons, icon: borderIcon, title: barMid, win: w},

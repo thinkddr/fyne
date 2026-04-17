@@ -24,9 +24,10 @@ type ElevationLevel int
 // https://storage.googleapis.com/spec-host/mio-staging%2Fmio-design%2F1584058305895%2Fassets%2F0B6xUSjjSulxceF9udnA4Sk5tdU0%2Fbaselineelevation-chart.png
 const (
 	BaseLevel             ElevationLevel = 0
-	CardLevel             ElevationLevel = 1
-	ButtonLevel           ElevationLevel = 2
+	MenuBarLevel          ElevationLevel = 1
 	MenuLevel             ElevationLevel = 4
+	ButtonLevel           ElevationLevel = 6
+	CardLevel             ElevationLevel = 6
 	PopUpLevel            ElevationLevel = 8
 	SubmergedContentLevel ElevationLevel = 8
 	DialogLevel           ElevationLevel = 24
@@ -43,6 +44,44 @@ const (
 	ShadowBottom
 	ShadowTop
 )
+
+// ShadowConfig holds the resolved shadow parameters for a given ElevationLevel.
+// It is intended to be applied to a [canvas.Shadow] embedded in canvas objects.
+type ShadowConfig struct {
+	BlurRadius float32
+	Spread     float32
+	Offset     fyne.Position
+	Variant    canvas.ShadowVariant
+}
+
+// ShadowForLevel returns MD3-inspired shadow parameters for the given elevation level.
+// Shadows use a downward Y-axis offset matching the Material Design 3 directional light model.
+// The Variant is always [canvas.DropShadow].
+func ShadowForLevel(level ElevationLevel) ShadowConfig {
+	switch {
+	case level <= 0:
+		return ShadowConfig{Variant: canvas.DropShadow}
+	case level <= 1: // MenuBarLevel
+		return ShadowConfig{BlurRadius: 2, Offset: fyne.NewPos(0, 1), Variant: canvas.DropShadow}
+	case level <= 4: // MenuLevel
+		return ShadowConfig{BlurRadius: 6, Offset: fyne.NewPos(0, 2), Variant: canvas.DropShadow}
+	case level <= 6: // ButtonLevel, CardLevel
+		return ShadowConfig{BlurRadius: 8, Offset: fyne.NewPos(0, 2), Variant: canvas.DropShadow}
+	case level <= 8: // PopUpLevel, SubmergedContentLevel
+		return ShadowConfig{BlurRadius: 14, Offset: fyne.NewPos(0, 4), Variant: canvas.DropShadow}
+	default: // DialogLevel
+		return ShadowConfig{BlurRadius: 18, Offset: fyne.NewPos(0, 6), Variant: canvas.DropShadow}
+	}
+}
+
+// ApplyShadowConfig applies a [ShadowConfig] to a [canvas.Shadow], using the given color.
+func ApplyShadowConfig(s *canvas.Shadow, cfg ShadowConfig, shadowColor color.Color) {
+	s.FillColor = shadowColor
+	s.BlurRadius = cfg.BlurRadius
+	s.Spread = cfg.Spread
+	s.Offset = cfg.Offset
+	s.Variant = cfg.Variant
+}
 
 // NewShadow create a new Shadow.
 func NewShadow(typ ShadowType, level ElevationLevel) *Shadow {

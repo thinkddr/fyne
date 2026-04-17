@@ -106,10 +106,8 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	scroll := widget.NewVScroll(box)
 	scroll.SetMinSize(box.MinSize())
 	background := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
-	background.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
-	// TODO update initial shadow offset and softness to match ShadowingRenderer
-	background.Shadow.BlurRadius = 1
-	background.Shadow.Offset = fyne.NewPos(-float32(widget.MenuLevel)*0.4, float32(widget.MenuLevel)*0.4)
+	background.CornerRadius = th.Size(theme.SizeNameMenuRadius)
+	widget.ApplyShadowConfig(&background.Shadow, widget.ShadowForLevel(widget.MenuLevel), th.Color(theme.ColorNameShadow, v))
 	objects := []fyne.CanvasObject{background, scroll}
 	for _, i := range m.Items {
 		if item, ok := i.(*menuItem); ok && item.Child() != nil {
@@ -275,6 +273,7 @@ func (r *menuRenderer) Refresh() {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	r.b.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
 	r.b.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
+	r.b.CornerRadius = th.Size(theme.SizeNameMenuRadius)
 
 	for _, i := range r.m.Items {
 		if txt, ok := i.(*menuItem); ok {
@@ -338,6 +337,7 @@ func (b *menuBox) CreateRenderer() fyne.WidgetRenderer {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	background := canvas.NewRectangle(th.Color(theme.ColorNameMenuBackground, v))
+	background.CornerRadius = th.Size(theme.SizeNameMenuRadius)
 	cont := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: b.items}
 	return &menuBoxRenderer{
 		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{background, cont}),
@@ -371,6 +371,7 @@ func (r *menuBoxRenderer) Refresh() {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	r.background.FillColor = th.Color(theme.ColorNameMenuBackground, v)
+	r.background.CornerRadius = th.Size(theme.SizeNameMenuRadius)
 	r.background.Refresh()
 	canvas.Refresh(r.b)
 }

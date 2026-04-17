@@ -130,6 +130,10 @@ void main()
             shadow_radius = max(radius * min(ratio_x, ratio_y), 0.0);
         }
 
+        float blur_inset = shadow_blur_radius * 0.5;
+        shadow_size = max(shadow_size - blur_inset, 0.0);
+        shadow_radius = max(shadow_radius - blur_inset, 0.0);
+
         // apply shadow effect
         float distance_shadow;
         // flip the shadow offset to get the correct shadow position
@@ -137,13 +141,13 @@ void main()
         vec2 shadow_offset_corrected = vec2(-shadow_offset.x, shadow_offset.y);
         if (calc_all_quadrants)
         {
-            distance_shadow = smoothstep(-edge_softness, shadow_blur_radius + edge_softness, calc_distance_all_quadrants(vec_centered_pos + shadow_offset_corrected, shadow_size, shadow_radius));
+            distance_shadow = calc_distance_all_quadrants(vec_centered_pos + shadow_offset_corrected, shadow_size, shadow_radius);
         }
         else
         {
-            distance_shadow = smoothstep(-edge_softness, shadow_blur_radius + edge_softness, calc_distance(vec_centered_pos + shadow_offset_corrected, shadow_size, shadow_radius));
+            distance_shadow = calc_distance(vec_centered_pos + shadow_offset_corrected, shadow_size, shadow_radius);
         }
-        float shadow_alpha = shadow_color.a * (1.0 - distance_shadow);
+        float shadow_alpha = shadow_color.a * (1.0 - smoothstep(-edge_softness, shadow_blur_radius + edge_softness, distance_shadow));
 
         if (shadow_type == 0.0)
         {

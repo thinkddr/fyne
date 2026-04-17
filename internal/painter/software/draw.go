@@ -468,7 +468,7 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 	screenStartX := scale.ToScreenCoordinate(c, startX)
 	screenStartY := scale.ToScreenCoordinate(c, startY)
 
-	blurred := blur.Gaussian(shadowRaw, float64(scale.ToScreenCoordinate(c, shadowBlurRadius)))
+	blurred := blur.Gaussian(shadowRaw, float64(shadowBlurRadius*c.Scale()))
 	destRect := image.Rect(screenStartX, screenStartY, screenStartX+blurred.Bounds().Dx(), screenStartY+blurred.Bounds().Dy())
 	shadowBounds := clip.Intersect(destRect)
 
