@@ -28,10 +28,10 @@
 	<overlay>
 		<widget pos="2,3" size="196x95" type="*widget.OverlayContainer">
 			<widget pos="145,20" size="50x74" type="*widget.PopUpMenu">
-				<rectangle fillColor="overlayBackground" shadowBlurRadius="1" shadowColor="shadow" shadowOffset="-1,1" size="50x74"/>
+				<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="50x74"/>
 				<widget size="50x74" type="*widget.Scroll">
 					<widget size="50x74" type="*widget.menuBox">
-						<rectangle fillColor="menuBackground" size="50x74"/>
+						<rectangle fillColor="menuBackground" radius="4" size="50x74"/>
 						<container size="50x74">
 							<widget size="50x35" type="*widget.menuItem">
 								<text color="disabled" pos="8,8" size="34x19">Test3</text>
