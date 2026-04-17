@@ -278,7 +278,7 @@ func (r *markupRenderer) writeCircle(c *fynecanvas.Circle, attrs map[string]*str
 	r.setColorAttr(attrs, "fillColor", c.FillColor)
 	r.setColorAttr(attrs, "strokeColor", c.StrokeColor)
 	r.setFloatAttr(attrs, "strokeWidth", float64(c.StrokeWidth))
-	r.setShadowAttrs(c.Shadow, attrs)
+	r.setShadowAttrs(attrs, c.Shadow)
 	r.writeTag("circle", true, attrs)
 }
 
@@ -398,11 +398,11 @@ func (r *markupRenderer) writeRectangle(rct *fynecanvas.Rectangle, attrs map[str
 	r.setFloatAttr(attrs, "topLeftRadius", float64(rct.TopLeftCornerRadius))
 	r.setFloatAttr(attrs, "bottomRightRadius", float64(rct.BottomRightCornerRadius))
 	r.setFloatAttr(attrs, "bottomLeftRadius", float64(rct.BottomLeftCornerRadius))
-	r.setShadowAttrs(rct.Shadow, attrs)
+	r.setShadowAttrs(attrs, rct.Shadow)
 	r.writeTag("rectangle", true, attrs)
 }
 
-func (r *markupRenderer) setShadowAttrs(s fynecanvas.Shadow, attrs map[string]*string) {
+func (r *markupRenderer) setShadowAttrs(attrs map[string]*string, s fynecanvas.Shadow) {
 	r.setColorAttr(attrs, "shadowColor", s.FillColor)
 	r.setFloatAttr(attrs, "shadowBlurRadius", float64(s.BlurRadius))
 	r.setFloatAttr(attrs, "shadowSpread", float64(s.Spread))
