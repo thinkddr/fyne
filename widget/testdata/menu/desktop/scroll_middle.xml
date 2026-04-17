@@ -5,10 +5,10 @@
 	<overlay>
 		<widget pos="2,3" size="100x100" type="*widget.OverlayContainer">
 			<widget pos="10,10" size="26x90" type="*widget.Menu">
-				<rectangle fillColor="overlayBackground" shadowBlurRadius="1" shadowColor="shadow" shadowOffset="-1,1" size="26x90"/>
+				<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="26x90"/>
 				<widget size="26x90" type="*widget.Scroll">
 					<widget pos="0,-50" size="26x230" type="*widget.menuBox">
-						<rectangle fillColor="menuBackground" size="26x230"/>
+						<rectangle fillColor="menuBackground" radius="4" size="26x230"/>
 						<container size="26x230">
 							<widget size="26x35" type="*widget.menuItem">
 								<text pos="8,8" size="10x19">A</text>

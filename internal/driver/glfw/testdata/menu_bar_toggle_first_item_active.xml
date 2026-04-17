@@ -4,7 +4,7 @@
 			<widget size="300x27" type="*glfw.MenuBar">
 				<widget size="300x300" type="*glfw.menuBarUnderlay">
 				</widget>
-				<rectangle fillColor="background" shadowColor="shadow" shadowBlurRadius="3" size="300x27"/>
+				<rectangle fillColor="background" shadowBlurRadius="2" shadowColor="shadow" shadowOffset="0,1" size="300x27"/>
 				<container pos="8,0" size="284x27">
 					<widget size="38x27" type="*glfw.menuBarItem">
 						<rectangle fillColor="focus" radius="4" size="38x27"/>
@@ -15,10 +15,10 @@
 					</widget>
 				</container>
 				<widget pos="8,27" size="52x74" type="*widget.Menu">
-					<rectangle fillColor="overlayBackground" shadowColor="shadow" shadowOffset="-1,1" shadowBlurRadius="1" size="52x74"/>
+					<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="52x74"/>
 					<widget size="52x74" type="*widget.Scroll">
 						<widget size="52x74" type="*widget.menuBox">
-							<rectangle fillColor="menuBackground" size="52x74"/>
+							<rectangle fillColor="menuBackground" radius="4" size="52x74"/>
 							<container size="52x74">
 								<widget size="52x35" type="*widget.menuItem">
 									<text pos="8,8" size="36x19">New</text>

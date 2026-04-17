@@ -5,16 +5,16 @@
 	<overlay>
 		<widget pos="2,3" size="796x595" type="*widget.OverlayContainer">
 			<widget pos="13,45" size="94x74" type="*widget.PopUpMenu">
-				<rectangle fillColor="overlayBackground" shadowBlurRadius="1" shadowColor="shadow" shadowOffset="-1,1" size="94x74"/>
+				<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="94x74"/>
 				<widget size="94x74" type="*widget.Scroll">
 					<widget size="94x74" type="*widget.menuBox">
-						<rectangle fillColor="menuBackground" size="94x74"/>
+						<rectangle fillColor="menuBackground" radius="4" size="94x74"/>
 						<container size="94x74">
 							<widget size="94x35" type="*widget.menuItem">
 								<text pos="8,8" size="78x19">Option A</text>
 							</widget>
 							<widget pos="0,39" size="94x35" type="*widget.menuItem">
-								<rectangle fillColor="focus" radius="4" size="94x35"/>
+								<rectangle fillColor="focus" pos="2,2" radius="4" size="90x31"/>
 								<text pos="8,8" size="58x19">Option B</text>
 								<image pos="74,7" rsc="menuExpandIcon" size="iconInlineSize" themed="foreground"/>
 							</widget>

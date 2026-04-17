@@ -2,10 +2,10 @@
 	<content>
 		<widget size="90x128" type="*widget.OverlayContainer">
 			<widget size="86x123" type="*widget.Menu">
-				<rectangle fillColor="overlayBackground" shadowBlurRadius="1" shadowColor="shadow" shadowOffset="-1,1" size="86x123"/>
+				<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="86x123"/>
 				<widget size="86x123" type="*widget.Scroll">
 					<widget size="86x123" type="*widget.menuBox">
-						<rectangle fillColor="menuBackground" size="86x123"/>
+						<rectangle fillColor="menuBackground" radius="4" size="86x123"/>
 						<container size="86x123">
 							<widget size="86x35" type="*widget.menuItem">
 								<text pos="8,8" size="70x19">Foo</text>

@@ -5,10 +5,10 @@
 	<overlay>
 		<widget pos="2,3" size="196x295" type="*widget.OverlayContainer">
 			<widget pos="10,10" size="66x162" type="*widget.Menu">
-				<rectangle fillColor="overlayBackground" shadowBlurRadius="1" shadowColor="shadow" shadowOffset="-1,1" size="66x162"/>
+				<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="66x162"/>
 				<widget size="66x162" type="*widget.Scroll">
 					<widget size="66x162" type="*widget.menuBox">
-						<rectangle fillColor="menuBackground" size="66x162"/>
+						<rectangle fillColor="menuBackground" radius="4" size="66x162"/>
 						<container size="66x162">
 							<widget size="66x35" type="*widget.menuItem">
 								<text pos="8,8" size="50x19">A</text>
@@ -20,7 +20,7 @@
 								<text pos="8,8" size="50x19">B (long)</text>
 							</widget>
 							<widget pos="0,83" size="66x35" type="*widget.menuItem">
-								<rectangle fillColor="focus" radius="4" size="66x35"/>
+								<rectangle fillColor="focus" pos="2,2" radius="4" size="62x31"/>
 								<text pos="8,8" size="30x19">C</text>
 								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize" themed="foreground"/>
 							</widget>
@@ -35,10 +35,10 @@
 					</widget>
 				</widget>
 				<widget pos="-9,83" size="199x113" type="*widget.Menu">
-					<rectangle fillColor="overlayBackground" shadowBlurRadius="1" shadowColor="shadow" shadowOffset="-1,1" size="199x113"/>
+					<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="199x113"/>
 					<widget size="199x113" type="*widget.Scroll">
 						<widget size="199x113" type="*widget.menuBox">
-							<rectangle fillColor="menuBackground" size="199x113"/>
+							<rectangle fillColor="menuBackground" radius="4" size="199x113"/>
 							<container size="199x113">
 								<widget size="199x35" type="*widget.menuItem">
 									<text pos="36,8" size="155x19">subitem A</text>
