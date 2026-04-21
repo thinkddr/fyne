@@ -419,7 +419,6 @@ func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
 	assert.Equal(t, 20, y)
 }
 
-// TODO: this can be removed when #707 is addressed
 func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	w := createWindow("Test")
 	w.SetPadded(false)
@@ -432,13 +431,8 @@ func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 		c.Overlays().Add(over)
 	})
 	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
-	// TODO: address #707; overlays should always be canvas size
-	size := w.Canvas().Size()
-	runOnMain(func() {
-		over.Resize(size)
-	})
 
-	size = fyne.NewSize(200, 100)
+	size := fyne.NewSize(200, 100)
 	runOnMain(func() {
 		assert.NotEqual(t, size, content.Size())
 	})
@@ -483,31 +477,31 @@ func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
 	assert.Equal(t, size, o3.Size(), "canvas overlay 3 is resized")
 }
 
-// TODO: this can be removed when #707 is addressed
 func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 	w := createWindow("Test")
 	w.SetPadded(false)
 
 	content := widget.NewLabel("Content")
-	over := widget.NewPopUp(widget.NewLabel("Over"), w.Canvas())
+	pop := widget.NewPopUp(widget.NewLabel("Over"), w.Canvas())
 	w.SetContent(content)
 	runOnMain(func() {
-		over.Show()
+		pop.Show()
 	})
 	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 
 	size := fyne.NewSize(200, 100)
-	overContentSize := over.Content.Size()
+	overContentSize := pop.Size()
 	assert.NotZero(t, overContentSize)
 	assert.NotEqual(t, size, content.Size())
-	assert.NotEqual(t, size, over.Size())
+	assert.NotEqual(t, size, pop.Size())
 	assert.NotEqual(t, size, overContentSize)
 
 	w.Resize(size)
+	over := w.Canvas().Overlays().Top()
 	require.Equal(t, size, w.Canvas().Size())
 	assert.Equal(t, size, content.Size(), "canvas content is resized")
 	assert.Equal(t, size, over.Size(), "canvas overlay is resized")
-	assert.Equal(t, overContentSize, over.Content.Size(), "canvas overlay content is _not_ resized")
+	assert.Equal(t, overContentSize, pop.Size(), "canvas overlay content is _not_ resized")
 }
 
 func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {

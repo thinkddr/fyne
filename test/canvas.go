@@ -188,17 +188,7 @@ func (c *canvas) doResize(size fyne.Size) {
 
 	// Ensure testcanvas mimics real canvas.Resize behavior
 	for _, overlay := range overlays.List() {
-		type popupWidget interface {
-			fyne.CanvasObject
-			ShowAtPosition(fyne.Position)
-		}
-		if p, ok := overlay.(popupWidget); ok {
-			// TODO: remove this when #707 is being addressed.
-			// “Notifies” the PopUp of the canvas size change.
-			p.Refresh()
-		} else {
-			overlay.Resize(size)
-		}
+		overlay.Resize(size)
 	}
 
 	if padded {
