@@ -305,6 +305,23 @@ func TestRichTextMarkdown_Lines(t *testing.T) {
 	}
 }
 
+func TestRichTextMarkdown_TrailingExclamationMark(t *testing.T) {
+	r := NewRichTextFromMarkdown("Hello! Hi!")
+
+	assert.Len(t, r.Segments, 3)
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "Hello! Hi", text.Text)
+		assert.True(t, text.Inline())
+	} else {
+		t.Error("Segment should be Text")
+	}
+	if text, ok := r.Segments[1].(*TextSegment); ok {
+		assert.Equal(t, "!", text.Text)
+	} else {
+		t.Error("Segment should be Text")
+	}
+}
+
 func TestRichTextMarkdown_List(t *testing.T) {
 	r := NewRichTextFromMarkdown("* line1 in _three_ segments\n* line2")
 
