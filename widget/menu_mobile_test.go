@@ -150,9 +150,7 @@ func TestMenu_Dragging(t *testing.T) {
 		fyne.NewMenuItem("F", nil),
 	)
 
-	// 100x100
-	// + 4,5 for canvas’ safe area
-	w.Resize(fyne.NewSize(104, 105))
+	w.Resize(fyne.NewSize(100, 100))
 	m := widget.NewMenu(menu)
 	o := internalWidget.NewOverlayContainer(m, c, nil)
 	c.Overlays().Add(o)
