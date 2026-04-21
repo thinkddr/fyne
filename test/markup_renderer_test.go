@@ -700,10 +700,10 @@ func Test_snapshot(t *testing.T) {
 				"\t\t<circle fillColor=\"rgba(0,0,0,255)\" pos=\"4,4\" size=\"92x92\"/>\n"+
 				"\t</content>\n"+
 				"\t<overlay>\n"+
-				"\t\t<rectangle fillColor=\"rgba(250,250,250,250)\" size=\"100x100\"/>\n"+
+				"\t\t<rectangle fillColor=\"rgba(250,250,250,250)\" pos=\"2,3\" size=\"100x100\"/>\n"+
 				"\t</overlay>\n"+
 				"\t<overlay>\n"+
-				"\t\t<rectangle size=\"100x100\"/>\n"+
+				"\t\t<rectangle pos=\"2,3\" size=\"100x100\"/>\n"+
 				"\t</overlay>\n"+
 				"</canvas>\n",
 			snapshot(c),

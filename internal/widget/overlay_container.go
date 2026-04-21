@@ -92,6 +92,17 @@ type overlayRenderer struct {
 var _ fyne.WidgetRenderer = (*overlayRenderer)(nil)
 
 func (r *overlayRenderer) Layout(s fyne.Size) {
+	if s.IsZero() {
+		return
+	}
+
+	size := r.o.Content.Size()
+	if size.IsZero() {
+		size = r.o.Content.MinSize()
+	}
+	size = size.Min(s)
+	r.o.Content.Resize(size)
+
 	if r.o.Background != nil {
 		r.o.Background.Resize(s)
 	}

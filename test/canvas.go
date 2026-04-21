@@ -187,8 +187,10 @@ func (c *canvas) doResize(size fyne.Size) {
 	}
 
 	// Ensure testcanvas mimics real canvas.Resize behavior
+	fullPos, fullSize := c.InteractiveArea()
 	for _, overlay := range overlays.List() {
-		overlay.Resize(size)
+		overlay.Move(fullPos)
+		overlay.Resize(fullSize)
 	}
 
 	if padded {

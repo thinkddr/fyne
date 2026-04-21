@@ -2,6 +2,7 @@ package dialog
 
 import (
 	"image/color"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -30,7 +31,7 @@ func TestShowCustom_ApplyTheme(t *testing.T) {
 
 	test.ApplyTheme(t, test.NewTheme())
 	w.Resize(d.MinSize().Add(fyne.NewSize(shadowPad, shadowPad)))
-	d.Resize(d.MinSize()) // TODO remove once #707 is resolved
+	log.Println("D, ", d.win.Size(), d.MinSize())
 	test.AssertRendersToImage(t, "dialog-custom-ugly.png", w.Canvas())
 }
 

@@ -26,10 +26,12 @@ func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 
 	s.overlays = append(s.overlays, overlay)
 
-	safePos, safeSize := s.Canvas.InteractiveArea()
+	if !s.Canvas.Size().IsZero() {
+		safePos, safeSize := s.Canvas.InteractiveArea()
 
-	overlay.Resize(safeSize)
-	overlay.Move(safePos)
+		overlay.Resize(safeSize)
+		overlay.Move(safePos)
+	}
 
 	s.focusManagers = append(s.focusManagers, app.NewFocusManager(overlay))
 }
