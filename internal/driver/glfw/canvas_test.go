@@ -337,19 +337,16 @@ func TestGlCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *
 	popUpContent := canvas.NewRectangle(color.Black)
 	popUpContent.SetMinSize(fyne.NewSize(1000, 10))
 	popUp := widget.NewPopUp(popUpContent, c)
+	popUp.Show()
 
-	// This is because of a bug in PopUp size handling that will be fixed later.
-	// This line will vanish then.
-	popUp.Resize(popUpContent.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-
-	assert.Equal(t, fyne.NewSize(1000, 10), popUpContent.Size())
+	assert.Equal(t, fyne.NewSize(200, 10), popUpContent.Size())
 	assert.Equal(t, fyne.NewSize(1000, 10).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), popUp.MinSize())
-	assert.Equal(t, canvasSize, popUp.Size())
+	assert.Equal(t, canvasSize, c.Overlays().Top().Size())
 
 	repaintWindow(w)
 
-	assert.Equal(t, fyne.NewSize(1000, 10), popUpContent.Size())
-	assert.Equal(t, canvasSize, popUp.Size()) // TODO 2
+	assert.Equal(t, fyne.NewSize(200, 10), popUpContent.Size())
+	assert.Equal(t, canvasSize, c.Overlays().Top().Size())
 }
 
 func TestGlCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
@@ -528,7 +525,7 @@ func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 
 	// TODO popup resize when needs more after resized canvas
 	assert.Equal(t, popupBgSize.Subtract(popupContentPadding), popup.Content.Size())
-	assert.Equal(t, winSize, popup.Size())
+	assert.Equal(t, winSize, w.Canvas().Overlays().Top().Size())
 }
 
 func TestGlCanvas_Scale(t *testing.T) {

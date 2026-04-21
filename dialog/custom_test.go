@@ -85,13 +85,13 @@ func TestCustom_ResizeOnShow(t *testing.T) {
 	d := NewCustom("Title", "OK", label, w).dialog
 
 	d.Show()
-	assert.Equal(t, size, d.win.Size())
+	assert.Equal(t, size, w.Canvas().Overlays().Top().Size())
 	d.Hide()
 
 	size = fyne.NewSize(500, 500)
 	w.Resize(size)
 	d.Show()
-	assert.Equal(t, size, d.win.Size())
+	assert.Equal(t, size, w.Canvas().Overlays().Top().Size())
 	d.Hide()
 }
 

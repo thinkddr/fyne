@@ -101,6 +101,7 @@ func TestConfirmDialog_Resize(t *testing.T) {
 	// Test resize - greater than max size scenario
 	size = fyne.NewSize(800, 600)
 	theDialog.Resize(size)
+	// TODO we cannot surely block this resize AND be consistent
 	expectedWidth = 600                                        // since win width only 600
 	assert.Equal(t, expectedWidth, theDialog.win.Size().Width) // max, also work
 	assert.Equal(t, expectedWidth, theDialog.win.Content.Size().Width+theme.Padding()*2)
