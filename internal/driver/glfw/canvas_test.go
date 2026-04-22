@@ -520,11 +520,8 @@ func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 	w.Resize(winSize)
 	require.Equal(t, winSize, w.Canvas().Size())
 
-	// get popup content padding dynamically
-	popupContentPadding := popup.MinSize().Subtract(popup.Content.MinSize())
-
-	// TODO popup resize when needs more after resized canvas
-	assert.Equal(t, popupBgSize.Subtract(popupContentPadding), popup.Content.Size())
+	popup.Resize(popupBgSize)
+	assert.Equal(t, popupBgSize, popup.Size())
 	assert.Equal(t, winSize, w.Canvas().Overlays().Top().Size())
 }
 
