@@ -40,10 +40,13 @@ func (p *PopUp) Show() {
 			th := p.Theme()
 			v := fyne.CurrentApp().Settings().ThemeVariant()
 
-			p.overlay.Background = &fyne.Container{Layout: layout.NewStackLayout(),
+			p.overlay.Background = &fyne.Container{
+				Layout: layout.NewStackLayout(),
 				Objects: []fyne.CanvasObject{
 					canvas.NewBlur(th.Size(theme.SizeNameModalBlurRadius)),
-					canvas.NewRectangle(th.Color(theme.ColorNameShadow, v))}}
+					canvas.NewRectangle(th.Color(theme.ColorNameShadow, v)),
+				},
+			}
 		}
 		p.Canvas.Overlays().Add(p.overlay)
 	}

@@ -198,9 +198,9 @@ func TestPopUp_Move_Constrained(t *testing.T) {
 	assert.Less(t, innerPos.Y-theme.Padding(), pos.Y,
 		"content Y position is adjusted to keep the content inside the window")
 	// TODO constrain after a move
-	//assert.Equal(t, win.Canvas().Size().Width-pop.Size().Width, innerPos.X,
+	// assert.Equal(t, win.Canvas().Size().Width-pop.Size().Width, innerPos.X,
 	//	"content X position is adjusted to keep the content inside the window")
-	//assert.Equal(t, win.Canvas().Size().Height-pop.Size().Height-theme.Padding(), innerPos.Y,
+	// assert.Equal(t, win.Canvas().Size().Height-pop.Size().Height-theme.Padding(), innerPos.Y,
 	//	"content Y position is adjusted to keep the content inside the window")
 }
 
@@ -216,10 +216,10 @@ func TestPopUp_Move_ConstrainedWindowToSmall(t *testing.T) {
 	pos := fyne.NewPos(20, 10)
 	pop.Move(pos)
 
-	//innerPos := pop.Position()
+	// innerPos := pop.Position()
 	// TODO this constrain too
-	//assert.Equal(t, theme.Padding(), innerPos.X, "content X position is adjusted but the window is too small")
-	//assert.Equal(t, theme.Padding(), innerPos.Y, "content Y position is adjusted but the window is too small")
+	// assert.Equal(t, theme.Padding(), innerPos.X, "content X position is adjusted but the window is too small")
+	// assert.Equal(t, theme.Padding(), innerPos.Y, "content Y position is adjusted but the window is too small")
 }
 
 func TestPopUp_Resize(t *testing.T) {
