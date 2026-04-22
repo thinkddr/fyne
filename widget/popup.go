@@ -233,7 +233,7 @@ type modalPopUpRenderer struct {
 	popUpBaseRenderer
 }
 
-func (r *modalPopUpRenderer) Layout(size fyne.Size) {
+func (r *modalPopUpRenderer) Layout(_ fyne.Size) {
 	canvasSize := r.popUp.Canvas.Size()
 	padding := r.padding()
 	innerSize := r.popUp.Size().Max(r.popUp.Content.MinSize().Add(padding))
@@ -241,7 +241,7 @@ func (r *modalPopUpRenderer) Layout(size fyne.Size) {
 		innerSize = innerSize.Min(canvasSize)
 	}
 
-	size = innerSize.Subtract(padding)
+	size := innerSize.Subtract(padding)
 	if !canvasSize.IsZero() {
 		size = size.Min(canvasSize.Subtract(padding))
 	}
