@@ -35,7 +35,7 @@ func (p *PopUp) Hide() {
 // Show this pop-up as overlay if not already shown.
 func (p *PopUp) Show() {
 	if p.overlay == nil {
-		p.overlay = widget.NewOverlayContainer(p, p.Canvas, p.Hide)
+		p.overlay = widget.NewOverlayContainer(p.super(), p.Canvas, p.Hide)
 		if p.modal {
 			th := p.Theme()
 			v := fyne.CurrentApp().Settings().ThemeVariant()
@@ -245,8 +245,11 @@ func (r *modalPopUpRenderer) Layout(_ fyne.Size) {
 	if !canvasSize.IsZero() {
 		size = size.Min(canvasSize.Subtract(padding))
 	}
-	pos := fyne.NewPos((canvasSize.Width-size.Width)/2, (canvasSize.Height-size.Height)/2)
-	r.popUp.Content.Move(pos)
+	pos := r.popUp.Position()
+	if pos.IsZero() {
+		pos = fyne.NewPos((canvasSize.Width-size.Width)/2, (canvasSize.Height-size.Height)/2)
+		r.popUp.Content.Move(pos)
+	}
 	r.popUp.Content.Resize(size)
 
 	innerPos := pos.Subtract(r.offset())
