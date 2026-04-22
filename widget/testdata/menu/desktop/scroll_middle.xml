@@ -16,7 +16,7 @@
 					<linearGradient angle="270" endColor="shadow" pos="-3,1" size="4x93"/>
 				</widget>
 				<widget size="26x95" type="*widget.Scroll">
-					<widget pos="0,-50" size="26x230" type="*widget.menuBox">
+					<widget pos="0,-45" size="26x230" type="*widget.menuBox">
 						<rectangle fillColor="menuBackground" size="26x230"/>
 						<container size="26x230">
 							<widget size="26x35" type="*widget.menuItem">
@@ -46,7 +46,7 @@
 						<linearGradient endColor="shadow" pos="0,-8" size="26x8"/>
 					</widget>
 					<widget pos="20,0" size="6x95" type="*widget.scrollBarArea">
-						<widget pos="3,20" size="3x39" type="*widget.scrollBar">
+						<widget pos="3,18" size="3x39" type="*widget.scrollBar">
 							<rectangle fillColor="scrollbar" radius="3" size="3x39"/>
 						</widget>
 					</widget>
