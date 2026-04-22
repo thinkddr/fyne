@@ -74,9 +74,9 @@
 									<text color="rgba(255,255,255,50)" pos="183,8" size="21x19">Del</text>
 								</widget>
 								<widget pos="0,117" size="212x35" type="*widget.menuItem">
-									<text pos="8,8" size="143x19">d</text>
-									<text color="rgba(255,255,255,50)" pos="159,8" size="37x19">Shift+</text>
-									<text color="rgba(255,255,255,50)" pos="197,8" size="7x19">↓</text>
+									<text pos="8,8" size="134x19">d</text>
+									<text color="rgba(255,255,255,50)" pos="150,8" size="37x19">Shift+</text>
+									<text color="rgba(255,255,255,50)" pos="188,8" size="16x19">↓</text>
 								</widget>
 								<widget pos="0,156" size="212x35" type="*widget.menuItem">
 									<text pos="8,8" size="106x19">e</text>
@@ -99,9 +99,9 @@
 									<text color="rgba(255,255,255,50)" pos="164,8" size="39x19">Home</text>
 								</widget>
 								<widget pos="0,312" size="212x35" type="*widget.menuItem">
-									<text pos="8,8" size="111x19">i</text>
-									<text color="rgba(255,255,255,50)" pos="127,8" size="63x19">Alt+Shift+</text>
-									<text color="rgba(255,255,255,50)" pos="190,8" size="14x19">←</text>
+									<text pos="8,8" size="108x19">i</text>
+									<text color="rgba(255,255,255,50)" pos="124,8" size="63x19">Alt+Shift+</text>
+									<text color="rgba(255,255,255,50)" pos="188,8" size="16x19">←</text>
 								</widget>
 								<widget pos="0,351" size="212x35" type="*widget.menuItem">
 									<text pos="8,8" size="68x19">j</text>
@@ -119,9 +119,9 @@
 									<text color="rgba(255,255,255,50)" pos="160,8" size="44x19">Return</text>
 								</widget>
 								<widget pos="0,468" size="212x35" type="*widget.menuItem">
-									<text pos="8,8" size="59x19">m</text>
-									<text color="rgba(255,255,255,50)" pos="75,8" size="115x19">Ctrl+Shift+Super+</text>
-									<text color="rgba(255,255,255,50)" pos="190,8" size="14x19">→</text>
+									<text pos="8,8" size="56x19">m</text>
+									<text color="rgba(255,255,255,50)" pos="72,8" size="115x19">Ctrl+Shift+Super+</text>
+									<text color="rgba(255,255,255,50)" pos="188,8" size="16x19">→</text>
 								</widget>
 								<widget pos="0,508" size="212x35" type="*widget.menuItem">
 									<text pos="8,8" size="8x19">n</text>
@@ -134,9 +134,9 @@
 									<text color="rgba(255,255,255,50)" pos="181,8" size="23x19">Tab</text>
 								</widget>
 								<widget pos="0,586" size="212x35" type="*widget.menuItem">
-									<text pos="8,8" size="150x19">p</text>
-									<text color="rgba(255,255,255,50)" pos="166,8" size="31x19">Ctrl+</text>
-									<text color="rgba(255,255,255,50)" pos="197,8" size="7x19">↑</text>
+									<text pos="8,8" size="140x19">p</text>
+									<text color="rgba(255,255,255,50)" pos="156,8" size="31x19">Ctrl+</text>
+									<text color="rgba(255,255,255,50)" pos="188,8" size="16x19">↑</text>
 								</widget>
 								<widget pos="0,625" size="212x35" type="*widget.menuItem">
 									<text pos="8,8" size="173x19">q</text>
