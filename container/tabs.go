@@ -622,7 +622,7 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 		var iconOffset fyne.Position
 		if r.button.iconPosition == buttonIconTop {
 			iconOffset = fyne.NewPos((innerSize.Width-iconSize)/2, 0)
-			shiftPad = -pad
+			shiftPad = 0
 		} else {
 			iconOffset = fyne.NewPos(0, (innerSize.Height-iconSize)/2)
 		}
