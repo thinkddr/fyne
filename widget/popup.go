@@ -107,7 +107,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
 	if p.modal {
 		background.CornerRadius = th.Size(theme.SizeNameDialogRadius)
-		widget.ApplyShadowConfig(&background.Shadow, widget.ShadowForLevel(widget.DialogLevel), th.Color(theme.ColorNameShadow, v))
+		widget.ApplyShadowForLevel(&background.Shadow, widget.DialogLevel, th.Color(theme.ColorNameShadow, v))
 		blur := canvas.NewBlur(th.Size(theme.SizeNameModalBlurRadius))
 		underlay := canvas.NewRectangle(th.Color(theme.ColorNameShadow, v))
 		objects := []fyne.CanvasObject{blur, underlay, background, p.Content}
@@ -118,7 +118,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 		}
 	}
 	background.CornerRadius = th.Size(theme.SizeNamePopupRadius)
-	widget.ApplyShadowConfig(&background.Shadow, widget.ShadowForLevel(widget.PopUpLevel), th.Color(theme.ColorNameShadow, v))
+	widget.ApplyShadowForLevel(&background.Shadow, widget.PopUpLevel, th.Color(theme.ColorNameShadow, v))
 	objects := []fyne.CanvasObject{background, p.Content}
 	return &popUpRenderer{
 		widget.NewBaseRenderer(objects),

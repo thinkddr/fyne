@@ -123,7 +123,7 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameInnerWindowBorder, v))
 	bg.CornerRadius = th.Size(theme.SizeNameInnerWindowRadius)
-	intWidget.ApplyShadowConfig(&bg.Shadow, intWidget.ShadowForLevel(intWidget.PopUpLevel), th.Color(theme.ColorNameShadow, v))
+	intWidget.ApplyShadowForLevel(&bg.Shadow, intWidget.PopUpLevel, th.Color(theme.ColorNameShadow, v))
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
 	bar := New(&titleBarLayout{buttons: buttons, icon: borderIcon, title: barMid, win: w},

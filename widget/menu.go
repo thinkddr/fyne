@@ -107,7 +107,7 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	scroll.SetMinSize(box.MinSize())
 	background := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
 	background.CornerRadius = th.Size(theme.SizeNameMenuRadius)
-	widget.ApplyShadowConfig(&background.Shadow, widget.ShadowForLevel(widget.MenuLevel), th.Color(theme.ColorNameShadow, v))
+	widget.ApplyShadowForLevel(&background.Shadow, widget.MenuLevel, th.Color(theme.ColorNameShadow, v))
 	objects := []fyne.CanvasObject{background, scroll}
 	for _, i := range m.Items {
 		if item, ok := i.(*menuItem); ok && item.Child() != nil {

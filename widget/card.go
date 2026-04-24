@@ -43,7 +43,7 @@ func (c *Card) CreateRenderer() fyne.WidgetRenderer {
 
 	background := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	background.CornerRadius = th.Size(theme.SizeNameCardRadius)
-	widget.ApplyShadowConfig(&background.Shadow, widget.ShadowForLevel(widget.CardLevel), th.Color(theme.ColorNameShadow, v))
+	widget.ApplyShadowForLevel(&background.Shadow, widget.CardLevel, th.Color(theme.ColorNameShadow, v))
 	objects := []fyne.CanvasObject{background, header, subHeader}
 	if c.Image != nil {
 		objects = append(objects, c.Image)

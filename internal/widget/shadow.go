@@ -20,8 +20,6 @@ type Shadow struct {
 // ElevationLevel is the level of elevation of the shadow casting object.
 type ElevationLevel int
 
-// ElevationLevel constants inspired by:
-// https://storage.googleapis.com/spec-host/mio-staging%2Fmio-design%2F1584058305895%2Fassets%2F0B6xUSjjSulxceF9udnA4Sk5tdU0%2Fbaselineelevation-chart.png
 const (
 	BaseLevel             ElevationLevel = 0
 	MenuBarLevel          ElevationLevel = 1
@@ -45,42 +43,37 @@ const (
 	ShadowTop
 )
 
-// ShadowConfig holds the resolved shadow parameters for a given ElevationLevel.
-// It is intended to be applied to a [canvas.Shadow] embedded in canvas objects.
-type ShadowConfig struct {
-	BlurRadius float32
-	Spread     float32
-	Offset     fyne.Position
-	Variant    canvas.ShadowVariant
-}
-
-// ShadowForLevel returns MD3-inspired shadow parameters for the given elevation level.
-// Shadows use a downward Y-axis offset matching the Material Design 3 directional light model.
+// ApplyShadowForLevel applies Material Design inspired shadow parameters (only downward Y-axis offset + blur) to the given shadow.
 // The Variant is always [canvas.DropShadow].
-func ShadowForLevel(level ElevationLevel) ShadowConfig {
-	switch {
-	case level <= 0:
-		return ShadowConfig{Variant: canvas.DropShadow}
-	case level <= 1: // MenuBarLevel
-		return ShadowConfig{BlurRadius: 2, Offset: fyne.NewPos(0, 1), Variant: canvas.DropShadow}
-	case level <= 4: // MenuLevel
-		return ShadowConfig{BlurRadius: 6, Offset: fyne.NewPos(0, 2), Variant: canvas.DropShadow}
-	case level <= 6: // ButtonLevel, CardLevel
-		return ShadowConfig{BlurRadius: 8, Offset: fyne.NewPos(0, 2), Variant: canvas.DropShadow}
-	case level <= 8: // PopUpLevel, SubmergedContentLevel
-		return ShadowConfig{BlurRadius: 14, Offset: fyne.NewPos(0, 4), Variant: canvas.DropShadow}
-	default: // DialogLevel
-		return ShadowConfig{BlurRadius: 18, Offset: fyne.NewPos(0, 6), Variant: canvas.DropShadow}
-	}
-}
+func ApplyShadowForLevel(s *canvas.Shadow, level ElevationLevel, shadowColor color.Color) {
+	var blurRadius float32
+	var offset fyne.Position
 
-// ApplyShadowConfig applies a [ShadowConfig] to a [canvas.Shadow], using the given color.
-func ApplyShadowConfig(s *canvas.Shadow, cfg ShadowConfig, shadowColor color.Color) {
+	switch {
+	case level <= 0: // BaseLevel
+		// no shadow
+	case level <= 1: // MenuBarLevel
+		blurRadius = 2
+		offset = fyne.NewPos(0, 1)
+	case level <= 4: // MenuLevel
+		blurRadius = 6
+		offset = fyne.NewPos(0, 2)
+	case level <= 6: // ButtonLevel, CardLevel
+		blurRadius = 8
+		offset = fyne.NewPos(0, 2)
+	case level <= 8: // PopUpLevel, SubmergedContentLevel
+		blurRadius = 14
+		offset = fyne.NewPos(0, 4)
+	default: // DialogLevel
+		blurRadius = 18
+		offset = fyne.NewPos(0, 6)
+	}
+
 	s.FillColor = shadowColor
-	s.BlurRadius = cfg.BlurRadius
-	s.Spread = cfg.Spread
-	s.Offset = cfg.Offset
-	s.Variant = cfg.Variant
+	s.BlurRadius = blurRadius
+	s.Offset = offset
+	s.Spread = 0
+	s.Variant = canvas.DropShadow
 }
 
 // NewShadow create a new Shadow.

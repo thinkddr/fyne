@@ -38,7 +38,7 @@ func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
 func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
 	cont := container.NewHBox(b.Items...)
 	background := canvas.NewRectangle(theme.Color(theme.ColorNameBackground))
-	widget.ApplyShadowConfig(&background.Shadow, widget.ShadowForLevel(widget.MenuBarLevel), theme.Color(theme.ColorNameShadow))
+	widget.ApplyShadowForLevel(&background.Shadow, widget.MenuBarLevel, theme.Color(theme.ColorNameShadow))
 	underlay := &menuBarUnderlay{action: b.deactivate}
 	underlay.ExtendBaseWidget(underlay)
 	objects := []fyne.CanvasObject{underlay, background, cont}
