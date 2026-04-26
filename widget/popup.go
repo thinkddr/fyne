@@ -32,6 +32,19 @@ func (p *PopUp) Hide() {
 	p.BaseWidget.Hide()
 }
 
+// Refresh the background for a modal popup and hte content of this popup.
+func (p *PopUp) Refresh() {
+	if p.modal && p.overlay != nil {
+		th := p.Theme()
+		v := fyne.CurrentApp().Settings().ThemeVariant()
+
+		bg := p.overlay.Background.(*fyne.Container).Objects[1].(*canvas.Rectangle)
+		bg.FillColor = th.Color(theme.ColorNameShadow, v)
+	}
+
+	p.BaseWidget.Refresh()
+}
+
 // Show this pop-up as overlay if not already shown.
 func (p *PopUp) Show() {
 	if p.overlay == nil {

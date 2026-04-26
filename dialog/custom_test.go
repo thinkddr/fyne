@@ -2,7 +2,6 @@ package dialog
 
 import (
 	"image/color"
-	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -31,7 +30,7 @@ func TestShowCustom_ApplyTheme(t *testing.T) {
 
 	test.ApplyTheme(t, test.NewTheme())
 	w.Resize(d.MinSize().Add(fyne.NewSize(shadowPad, shadowPad)))
-	log.Println("D, ", d.win.Size(), d.MinSize())
+	d.Resize(d.MinSize())
 	test.AssertRendersToImage(t, "dialog-custom-ugly.png", w.Canvas())
 }
 
@@ -57,6 +56,7 @@ func TestCustom_ApplyThemeOnShow(t *testing.T) {
 	label := widget.NewLabel("Content")
 	label.Alignment = fyne.TextAlignCenter
 	d := NewCustom("Title", "OK", label, w)
+	oldMin := d.MinSize()
 
 	test.ApplyTheme(t, test.Theme())
 	d.Show()
@@ -65,11 +65,13 @@ func TestCustom_ApplyThemeOnShow(t *testing.T) {
 
 	test.ApplyTheme(t, test.NewTheme())
 	d.Show()
+	d.Resize(d.MinSize())
 	test.AssertRendersToImage(t, "dialog-onshow-theme-changed.png", w.Canvas())
 	d.Hide()
 
 	test.ApplyTheme(t, test.Theme())
 	d.Show()
+	d.Resize(oldMin)
 	test.AssertRendersToImage(t, "dialog-onshow-theme-default.png", w.Canvas())
 	d.Hide()
 }
