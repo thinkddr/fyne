@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"log"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -553,8 +552,6 @@ func TestModelPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
 
 	// get content padding dynamically
 	popContentPadding := pop.MinSize().Subtract(pop.Content.MinSize())
-
-	log.Println("SSS", pop.Size(), pop.Content.Size())
 	assert.Equal(t, popBgSize.Subtract(popContentPadding), pop.Content.Size())
 	assert.Equal(t, popBgSize, pop.Size())
 }

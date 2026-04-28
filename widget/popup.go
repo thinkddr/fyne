@@ -32,7 +32,7 @@ func (p *PopUp) Hide() {
 	p.BaseWidget.Hide()
 }
 
-// Refresh the background for a modal popup and hte content of this popup.
+// Refresh the background for a modal popup and the content of this popup.
 func (p *PopUp) Refresh() {
 	if p.modal && p.overlay != nil {
 		th := p.Theme()
@@ -282,6 +282,7 @@ func (r *modalPopUpRenderer) Refresh() {
 	r.background.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
 	r.popUp.Content.Refresh()
 	r.background.Refresh()
+	r.ShadowingRenderer.RefreshShadow()
 }
 
 func withRelativePosition(rel fyne.Position, to fyne.CanvasObject, f func(position fyne.Position)) {
