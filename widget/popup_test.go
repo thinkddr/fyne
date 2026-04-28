@@ -504,8 +504,8 @@ func TestModalPopUp_ApplyThemeOnShow(t *testing.T) {
 	test.AssertImageMatches(t, "popup/modal-onshow-theme-default.png", w.Canvas().Capture())
 	pop.Hide()
 
-	test.ApplyTheme(t, test.NewTheme())
 	pop.Show()
+	test.ApplyTheme(t, test.NewTheme())
 	test.AssertImageMatches(t, "popup/modal-onshow-theme-changed.png", w.Canvas().Capture())
 	pop.Hide()
 }
