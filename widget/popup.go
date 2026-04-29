@@ -81,12 +81,12 @@ func (p *PopUp) ShowAtRelativePosition(rel fyne.Position, to fyne.CanvasObject) 
 }
 
 // Tapped is called when the user taps the popUp.
-// If not modal and the tap is outside the content area, then dismiss this widget
+// This is not called when tapping the background, but non-modal popups will dismiss when tapped outside.
 func (p *PopUp) Tapped(*fyne.PointEvent) {
 }
 
 // TappedSecondary is called when the user right/alt taps the popUp.
-// If not modal and the tap is outside the content area, then dismiss this widget
+// This is not called when tapping the background, but non-modal popups will dismiss when tapped outside.
 func (p *PopUp) TappedSecondary(*fyne.PointEvent) {
 }
 
