@@ -409,12 +409,14 @@ func TestPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
 
 func TestModalPopUp_Tapped(t *testing.T) {
 	label := NewLabel("Hi")
-	pop := NewModalPopUp(label, test.Canvas())
+	c := test.Canvas().(test.WindowlessCanvas)
+	c.Resize(fyne.NewSquareSize(200))
+	pop := NewModalPopUp(label, c)
 	pop.Show()
 	defer pop.Hide()
 
 	assert.True(t, pop.Visible())
-	test.Tap(pop)
+	test.TapCanvas(c, fyne.NewSquareOffsetPos(195))
 	assert.True(t, pop.Visible())
 	assert.Len(t, test.Canvas().Overlays().List(), 1)
 	assert.Equal(t, pop, test.Canvas().Overlays().List()[0].(*widget.OverlayContainer).Content)

@@ -48,7 +48,11 @@ func (p *PopUp) Refresh() {
 // Show this pop-up as overlay if not already shown.
 func (p *PopUp) Show() {
 	if p.overlay == nil {
-		p.overlay = widget.NewOverlayContainer(p.super(), p.Canvas, p.Hide)
+		dismiss := p.Hide
+		if p.modal {
+			dismiss = nil
+		}
+		p.overlay = widget.NewOverlayContainer(p.super(), p.Canvas, dismiss)
 		if p.modal {
 			th := p.Theme()
 			v := fyne.CurrentApp().Settings().ThemeVariant()
