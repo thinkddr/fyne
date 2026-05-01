@@ -217,8 +217,7 @@ func TestMenu_Scrolling(t *testing.T) {
 	)
 
 	// 100x100
-	// + 4,5 for canvas’ safe area
-	w.Resize(fyne.NewSize(104, 105))
+	w.Resize(fyne.NewSize(100, 100))
 	m := widget.NewMenu(menu)
 	o := internalWidget.NewOverlayContainer(m, c, nil)
 	c.Overlays().Add(o)
