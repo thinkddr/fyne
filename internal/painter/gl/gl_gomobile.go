@@ -22,6 +22,7 @@ const (
 	glFalse               = gl.False
 	linkStatus            = gl.LinkStatus
 	one                   = gl.One
+	zero                  = gl.Zero
 	oneMinusConstantAlpha = gl.OneMinusConstantAlpha
 	oneMinusSrcAlpha      = gl.OneMinusSrcAlpha
 	scissorTest           = gl.ScissorTest
@@ -324,6 +325,10 @@ func (c *mobileContext) Uniform1f(uniform Uniform, v float32) {
 
 func (c *mobileContext) Uniform1fv(uniform Uniform, v []float32) {
 	c.glContext.Uniform1fv(gl.Uniform(uniform), v)
+}
+
+func (c *mobileContext) Uniform1i(uniform Uniform, v int32) {
+	c.glContext.Uniform1i(gl.Uniform(uniform), int(v))
 }
 
 func (c *mobileContext) Uniform2f(uniform Uniform, v0, v1 float32) {

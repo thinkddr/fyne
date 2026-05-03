@@ -22,6 +22,7 @@ const (
 	glFalse               = gl.FALSE
 	linkStatus            = gl.LINK_STATUS
 	one                   = gl.ONE
+	zero                  = gl.ZERO
 	oneMinusConstantAlpha = gl.ONE_MINUS_CONSTANT_ALPHA
 	oneMinusSrcAlpha      = gl.ONE_MINUS_SRC_ALPHA
 	scissorTest           = gl.SCISSOR_TEST

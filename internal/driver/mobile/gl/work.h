@@ -77,6 +77,7 @@ typedef enum {
 	glfnTexImage2D,
 	glfnTexParameteri,
 	glfnUniform1f,
+	glfnUniform1i,
 	glfnUniform1fv,
 	glfnUniform2f,
 	glfnUniform2fv,

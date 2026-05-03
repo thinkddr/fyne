@@ -72,6 +72,7 @@ const (
 	glfnTexParameteri
 	glfnUniform1f
 	glfnUniform1fv
+	glfnUniform1i
 	glfnUniform2f
 	glfnUniform2fv
 	glfnUniform4f
