@@ -8,12 +8,12 @@ import (
 	"os"
 	"runtime"
 
-	"fyne.io/fyne/v2/internal/async"
 	"github.com/fyne-io/image/ico"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/animation"
 	intapp "fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"

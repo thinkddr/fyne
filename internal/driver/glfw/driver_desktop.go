@@ -16,6 +16,7 @@ import (
 	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/systray"
+	"github.com/go-gl/glfw/v3.3/glfw"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
@@ -27,6 +28,10 @@ var (
 	systrayIcon    fyne.Resource
 	systrayRunning bool
 )
+
+func (d *gLDriver) HasSecondaryDisplay() bool {
+	return len(glfw.GetMonitors()) > 1
+}
 
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 	if !systrayRunning {
