@@ -28,7 +28,9 @@ const (
 	srcAlpha              = gl.SrcAlpha
 	staticDraw            = gl.StaticDraw
 	texture0              = gl.Texture0
+	texture1              = gl.Texture1
 	texture2D             = gl.Texture2D
+	textureNearest        = gl.Nearest
 	textureMinFilter      = gl.TextureMinFilter
 	textureMagFilter      = gl.TextureMagFilter
 	textureWrapS          = gl.TextureWrapS
@@ -65,7 +67,8 @@ func (p *painter) glctx() gl.Context {
 
 func (p *painter) Init() {
 	p.ctx = &mobileContext{glContext: p.contextProvider.Context().(gl.Context)}
-	p.blurSnapTexValid = false // reset on context recreation; old texture IDs are no longer valid
+	p.blurSnapTexValid = false   // reset on context recreation; old texture IDs are no longer valid
+	p.blurKernelTexValid = false // kernel texture must also be re-created
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
 	if compiled == nil {

@@ -28,7 +28,9 @@ const (
 	srcAlpha              = gl.SRC_ALPHA
 	staticDraw            = gl.STATIC_DRAW
 	texture0              = gl.TEXTURE0
+	texture1              = gl.TEXTURE1
 	texture2D             = gl.TEXTURE_2D
+	textureNearest        = gl.NEAREST
 	textureMinFilter      = gl.TEXTURE_MIN_FILTER
 	textureMagFilter      = gl.TEXTURE_MAG_FILTER
 	textureWrapS          = gl.TEXTURE_WRAP_S
@@ -293,6 +295,10 @@ func (c *xjsContext) Uniform1f(uniform Uniform, v float32) {
 
 func (c *xjsContext) Uniform1fv(uniform Uniform, v []float32) {
 	gl.Uniform1fv(gl.Uniform(uniform), v)
+}
+
+func (c *xjsContext) Uniform1i(uniform Uniform, v int32) {
+	gl.Uniform1i(gl.Uniform(uniform), int(v))
 }
 
 func (c *xjsContext) Uniform2f(uniform Uniform, v0, v1 float32) {

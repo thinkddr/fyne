@@ -59,6 +59,10 @@ type painter struct {
 	blurSnapTex             Texture // cached texture for GPU-side blur snapshot
 	blurSnapTexValid        bool    // whether blurSnapTex has been allocated
 	blurSnapW, blurSnapH    int     // size of blurSnapTex in pixels
+	blurKernelTex           Texture // cached 1D kernel texture on GPU
+	blurKernelTexValid      bool    // whether blurKernelTex has been allocated
+	blurKernelTexLen        int     // width of the current kernel texture (kernel length)
+	blurKernelRadius        float32 // radius the current kernel texture was built for
 	fbHeight                int     // current framebuffer height in pixels
 }
 
@@ -91,6 +95,15 @@ func (p *painter) SetUniform1fv(pState ProgramState, name string, v []float32) {
 	}
 	u.prevv = append(u.prevv[:0], v...)
 	p.ctx.Uniform1fv(u.ref, v)
+}
+
+func (p *painter) SetUniform1i(pState ProgramState, name string, v int32) {
+	u := p.getUniformLocation(pState, name)
+	if u.prev[0] == float32(v) {
+		return
+	}
+	u.prev[0] = float32(v)
+	p.ctx.Uniform1i(u.ref, v)
 }
 
 func (p *painter) SetUniform2f(pState ProgramState, name string, v0, v1 float32) {

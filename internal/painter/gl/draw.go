@@ -80,8 +80,37 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 		cache.SetBlurKernel(radius, values)
 	}
 
-	kernel := p.ctx.GetUniformLocation(p.blurProgram.ref, "kernel")
-	p.ctx.Uniform1fv(kernel, values)
+	// Upload kernel as a 1D texture if radius changed.
+	if !p.blurKernelTexValid || p.blurKernelRadius != radius {
+		if !p.blurKernelTexValid {
+			p.blurKernelTex = p.ctx.CreateTexture()
+		}
+		p.ctx.ActiveTexture(texture1)
+		p.ctx.BindTexture(texture2D, p.blurKernelTex)
+		p.ctx.TexParameteri(texture2D, textureMinFilter, textureNearest)
+		p.ctx.TexParameteri(texture2D, textureMagFilter, textureNearest)
+		p.ctx.TexParameteri(texture2D, textureWrapS, clampToEdge)
+		p.ctx.TexParameteri(texture2D, textureWrapT, clampToEdge)
+		data := kernelToRGBA(values)
+		p.ctx.TexImage2D(texture2D, 0, len(values), 1, colorFormatRGBA, unsignedByte, data)
+		p.blurKernelTexValid = true
+		p.blurKernelRadius = radius
+		p.blurKernelTexLen = len(values)
+		p.logError()
+	}
+
+	// Bind kernel texture to unit 1.
+	p.ctx.ActiveTexture(texture1)
+	p.ctx.BindTexture(texture2D, p.blurKernelTex)
+
+	// Bind source texture to unit 0.
+	p.ctx.ActiveTexture(texture0)
+	p.ctx.BindTexture(texture2D, p.blurSnapTex)
+
+	// Set sampler uniforms.
+	p.SetUniform1i(p.blurProgram, "tex", 0)
+	p.SetUniform1i(p.blurProgram, "kernelTex", 1)
+	p.SetUniform1f(p.blurProgram, "kernelLen", float32(p.blurKernelTexLen))
 
 	p.ctx.DrawArrays(triangleStrip, 0, 4)
 	p.logError()
@@ -906,4 +935,21 @@ func createKernel(radius float32) []float32 {
 	}
 
 	return values
+}
+
+// kernelToRGBA packs normalised float32 kernel weights into RGBA uint8 pixel
+// data suitable for upload via TexImage2D.  Each weight is quantised to [0,255]
+// and written to all four channels (we read .r in the shader; the remaining
+// channels are padding for universal RGBA compatibility across GL backends).
+func kernelToRGBA(values []float32) []uint8 {
+	data := make([]uint8, len(values)*4)
+	for i, v := range values {
+		b := uint8(v*255.0 + 0.5)
+		off := i * 4
+		data[off+0] = b   // R
+		data[off+1] = b   // G
+		data[off+2] = b   // B
+		data[off+3] = 255 // A
+	}
+	return data
 }
