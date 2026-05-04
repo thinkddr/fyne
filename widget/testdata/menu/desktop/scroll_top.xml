@@ -1,9 +1,9 @@
-<canvas size="104x105">
+<canvas size="100x100">
 	<content>
-		<rectangle size="104x105"/>
+		<rectangle size="100x100"/>
 	</content>
 	<overlay>
-		<widget pos="2,3" size="100x100" type="*widget.OverlayContainer">
+		<widget size="100x100" type="*widget.OverlayContainer">
 			<widget pos="10,10" size="26x90" type="*widget.Menu">
 				<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="26x90"/>
 				<widget size="26x90" type="*widget.Scroll">

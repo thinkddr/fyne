@@ -3,11 +3,13 @@
 		<rectangle pos="4,4" size="192x192"/>
 	</content>
 	<overlay>
-		<widget size="200x200" type="*widget.PopUp">
-			<rectangle fillColor="overlayBackground" radius="5" shadowBlurRadius="14" shadowColor="shadow" shadowOffset="0,4" size="37x43"/>
-			<widget pos="4,4" size="29x35" type="*widget.Label">
-				<widget size="29x35" type="*widget.RichText">
-					<text pos="8,8" size="13x19">Hi</text>
+		<widget size="200x200" type="*widget.OverlayContainer">
+			<widget size="37x43" type="*widget.PopUp">
+				<rectangle fillColor="overlayBackground" radius="5" shadowBlurRadius="14" shadowColor="shadow" shadowOffset="0,4" size="29x35"/>
+				<widget size="29x35" type="*widget.Label">
+					<widget size="29x35" type="*widget.RichText">
+						<text pos="8,8" size="13x19">Hi</text>
+					</widget>
 				</widget>
 			</widget>
 		</widget>

@@ -27,7 +27,7 @@
 						</container>
 					</widget>
 				</widget>
-				<widget pos="14,44" size="50x74" type="*widget.Menu">
+				<widget pos="12,44" size="50x74" type="*widget.Menu">
 					<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="50x74"/>
 					<widget size="50x74" type="*widget.Scroll">
 						<widget size="50x74" type="*widget.menuBox">

@@ -3,7 +3,7 @@
 		<rectangle size="500x300"/>
 	</content>
 	<overlay>
-		<widget pos="2,3" size="496x295" type="*widget.OverlayContainer">
+		<widget size="500x300" type="*widget.OverlayContainer">
 			<widget pos="10,10" size="66x162" type="*widget.Menu">
 				<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="66x162"/>
 				<widget size="66x162" type="*widget.Scroll">

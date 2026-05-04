@@ -3,7 +3,7 @@
 		<rectangle size="200x300"/>
 	</content>
 	<overlay>
-		<widget pos="2,3" size="196x295" type="*widget.OverlayContainer">
+		<widget size="200x300" type="*widget.OverlayContainer">
 			<widget pos="10,10" size="66x118" type="*widget.Menu">
 				<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="66x118"/>
 				<widget size="66x118" type="*widget.Scroll">
@@ -47,6 +47,23 @@
 									<image pos="36,7" rsc="menuIcon" size="iconInlineSize" themed="foreground"/>
 								</widget>
 							</container>
+						</widget>
+					</widget>
+					<widget pos="23,78" size="175x74" type="*widget.Menu">
+						<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="175x74"/>
+						<widget size="175x74" type="*widget.Scroll">
+							<widget size="175x74" type="*widget.menuBox">
+								<rectangle fillColor="menuBackground" radius="4" size="175x74"/>
+								<container size="175x74">
+									<widget size="175x35" type="*widget.menuItem">
+										<text pos="36,8" size="131x19">subsubitem A (long)</text>
+										<image pos="8,7" rsc="fileIcon" size="iconInlineSize" themed="foreground"/>
+									</widget>
+									<widget pos="0,39" size="175x35" type="*widget.menuItem">
+										<text pos="8,8" size="159x19">subsubitem B</text>
+									</widget>
+								</container>
+							</widget>
 						</widget>
 					</widget>
 				</widget>
