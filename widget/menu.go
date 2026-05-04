@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"image/color"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/widget"
@@ -105,7 +107,7 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	box := newMenuBox(m.Items)
 	scroll := widget.NewVScroll(box)
 	scroll.SetMinSize(box.MinSize())
-	background := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
+	background := canvas.NewRectangle(color.Transparent)
 	background.CornerRadius = th.Size(theme.SizeNameMenuRadius)
 	widget.ApplyShadowForLevel(&background.Shadow, widget.MenuLevel, th.Color(theme.ColorNameShadow, v))
 	objects := []fyne.CanvasObject{background, scroll}
@@ -255,9 +257,7 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 		return
 	}
 
-	r.b.Move(fyne.NewPos(0, 0))
 	r.b.Resize(scrollSize)
-
 	r.scroll.Resize(scrollSize)
 	r.box.Resize(boxSize)
 	r.layoutActiveChild()
@@ -271,7 +271,6 @@ func (r *menuRenderer) Refresh() {
 	r.layoutActiveChild()
 	th := r.m.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
-	r.b.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
 	r.b.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
 	r.b.CornerRadius = th.Size(theme.SizeNameMenuRadius)
 
@@ -357,13 +356,13 @@ type menuBoxRenderer struct {
 var _ fyne.WidgetRenderer = (*menuBoxRenderer)(nil)
 
 func (r *menuBoxRenderer) Layout(size fyne.Size) {
-	s := fyne.NewSize(size.Width, size.Height)
-	r.background.Resize(s)
-	r.cont.Resize(s)
+	r.background.Resize(size)
+	r.cont.Resize(size)
 }
 
 func (r *menuBoxRenderer) MinSize() fyne.Size {
-	return r.cont.MinSize()
+	// add 0.5 to width to ensure item separators are not wider than the menu box
+	return r.cont.MinSize().AddWidthHeight(0.5, 0)
 }
 
 func (r *menuBoxRenderer) Refresh() {

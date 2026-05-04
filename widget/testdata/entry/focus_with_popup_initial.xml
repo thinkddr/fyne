@@ -16,23 +16,23 @@
 	</content>
 	<overlay>
 		<widget size="150x200" type="*widget.OverlayContainer">
-			<widget pos="11,11" size="73x152" type="*widget.PopUpMenu">
-				<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="73x152"/>
-				<widget size="73x152" type="*widget.Scroll">
-					<widget size="73x152" type="*widget.menuBox">
-						<rectangle fillColor="menuBackground" radius="4" size="73x152"/>
-						<container size="73x152">
-							<widget size="73x35" type="*widget.menuItem">
-								<text pos="8,8" size="57x19">Cut</text>
+			<widget pos="11,11" size="74x152" type="*widget.PopUpMenu">
+				<rectangle radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="74x152"/>
+				<widget size="74x152" type="*widget.Scroll">
+					<widget size="74x152" type="*widget.menuBox">
+						<rectangle fillColor="menuBackground" radius="4" size="74x152"/>
+						<container size="74x152">
+							<widget size="74x35" type="*widget.menuItem">
+								<text pos="8,8" size="58x19">Cut</text>
 							</widget>
-							<widget pos="0,39" size="73x35" type="*widget.menuItem">
-								<text pos="8,8" size="57x19">Copy</text>
+							<widget pos="0,39" size="74x35" type="*widget.menuItem">
+								<text pos="8,8" size="58x19">Copy</text>
 							</widget>
-							<widget pos="0,78" size="73x35" type="*widget.menuItem">
-								<text pos="8,8" size="57x19">Paste</text>
+							<widget pos="0,78" size="74x35" type="*widget.menuItem">
+								<text pos="8,8" size="58x19">Paste</text>
 							</widget>
-							<widget pos="0,117" size="73x35" type="*widget.menuItem">
-								<text pos="8,8" size="57x19">Select all</text>
+							<widget pos="0,117" size="74x35" type="*widget.menuItem">
+								<text pos="8,8" size="58x19">Select all</text>
 							</widget>
 						</container>
 					</widget>

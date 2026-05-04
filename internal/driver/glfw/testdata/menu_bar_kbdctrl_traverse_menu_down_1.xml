@@ -22,22 +22,22 @@
 						<text pos="8,4" size="30x19">Help</text>
 					</widget>
 				</container>
-				<widget pos="8,27" size="80x113" type="*widget.Menu">
-					<rectangle fillColor="overlayBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="80x113"/>
-					<widget size="80x113" type="*widget.Scroll">
-						<widget size="80x113" type="*widget.menuBox">
-							<rectangle fillColor="menuBackground" radius="4" size="80x113"/>
-							<container size="80x113">
-								<widget size="80x35" type="*widget.menuItem">
-									<rectangle fillColor="focus" pos="2,2" radius="4" size="76x31"/>
-									<text pos="8,8" size="64x19">New</text>
+				<widget pos="8,27" size="81x113" type="*widget.Menu">
+					<rectangle radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="81x113"/>
+					<widget size="81x113" type="*widget.Scroll">
+						<widget size="81x113" type="*widget.menuBox">
+							<rectangle fillColor="menuBackground" radius="4" size="81x113"/>
+							<container size="81x113">
+								<widget size="81x35" type="*widget.menuItem">
+									<rectangle fillColor="focus" pos="2,2" radius="4" size="77x31"/>
+									<text pos="8,8" size="65x19">New</text>
 								</widget>
-								<widget pos="0,39" size="80x35" type="*widget.menuItem">
-									<text pos="8,8" size="64x19">Open</text>
+								<widget pos="0,39" size="81x35" type="*widget.menuItem">
+									<text pos="8,8" size="65x19">Open</text>
 								</widget>
-								<widget pos="0,78" size="80x35" type="*widget.menuItem">
-									<text pos="8,8" size="44x19">Recent</text>
-									<image pos="60,7" rsc="menuExpandIcon" size="iconInlineSize" themed="foreground"/>
+								<widget pos="0,78" size="81x35" type="*widget.menuItem">
+									<text pos="8,8" size="45x19">Recent</text>
+									<image pos="61,7" rsc="menuExpandIcon" size="iconInlineSize" themed="foreground"/>
 								</widget>
 							</container>
 						</widget>
