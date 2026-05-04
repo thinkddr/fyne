@@ -483,7 +483,8 @@ func TestWindow_HandleDragging(t *testing.T) {
 		// drag event for other widget
 		w.mouseMoved(w.viewport, 26, 9)
 		assert.Nil(t, d1.popDragEvent())
-		assert.Equal(t,
+		assert.Equal(
+			t,
 			&fyne.DragEvent{
 				PointEvent: fyne.PointEvent{
 					Position:         fyne.NewPos(8, 5),
@@ -559,14 +560,16 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 		// we should only have 2 mouse events on d1
-		assert.Equal(t,
+		assert.Equal(
+			t,
 			&desktop.MouseEvent{
 				PointEvent: fyne.PointEvent{Position: fyne.NewPos(7, 7), AbsolutePosition: fyne.NewPos(11, 11)},
 				Button:     desktop.MouseButtonPrimary,
 			},
 			d1.popMouseEvent(),
 		)
-		assert.Equal(t,
+		assert.Equal(
+			t,
 			&desktop.MouseEvent{
 				PointEvent: fyne.PointEvent{Position: fyne.NewPos(17, 7), AbsolutePosition: fyne.NewPos(21, 11)},
 				Button:     desktop.MouseButtonPrimary,
