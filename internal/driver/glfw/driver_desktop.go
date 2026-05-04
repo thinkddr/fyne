@@ -30,7 +30,20 @@ var (
 )
 
 func (d *gLDriver) HasSecondaryDisplay() bool {
-	return len(glfw.GetMonitors()) > 1
+	monitors := glfw.GetMonitors()
+	if len(monitors) == 1 {
+		return false
+	}
+
+	primaryTop, primaryLeft := monitors[0].GetPos()
+	for _, m := range monitors[1:] {
+		top, left := m.GetPos()
+		if top != primaryTop || left != primaryLeft {
+			return true
+		}
+	}
+
+	return false // all the monitors had same origin, thus mirroring
 }
 
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
