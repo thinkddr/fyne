@@ -6,12 +6,11 @@ uniform sampler2D kernelTex;
 varying vec2 fragTexCoord;
 uniform float radius;
 uniform vec2 size;
-uniform float kernelLen;
 uniform vec2 direction;
 uniform float sampleScale;
 
-float getKernel(int i) {
-    float u = (float(i) + 0.5) / kernelLen;
+float getKernel(int i, int kernelLen) {
+    float u = (float(i) + 0.5) / float(kernelLen);
     return texture2D(kernelTex, vec2(u, 0.5)).r;
 }
 
@@ -23,7 +22,7 @@ void main() {
     for (int i = 0; i < length; ++i) {
         float offset = (float(i) - radius) * sampleScale;
         vec2 tc = fragTexCoord + inverseSize * direction * offset;
-        sum += getKernel(i) * texture2D(tex, tc);
+        sum += getKernel(i, length) * texture2D(tex, tc);
     }
     gl_FragColor = sum;
 }

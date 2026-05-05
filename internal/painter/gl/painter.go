@@ -61,7 +61,6 @@ type painter struct {
 	blurSnapW, blurSnapH    int     // size of blurSnapTex in pixels
 	blurKernelTex           Texture // cached 1D kernel texture on GPU
 	blurKernelTexValid      bool    // whether blurKernelTex has been allocated
-	blurKernelTexLen        int     // width of the current kernel texture (kernel length)
 	blurKernelRadius        float32 // radius the current kernel texture was built for
 	fbHeight                int     // current framebuffer height in pixels
 }

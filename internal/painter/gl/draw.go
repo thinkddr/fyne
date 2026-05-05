@@ -110,7 +110,6 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 		p.ctx.TexImage2D(texture2D, 0, len(values), 1, colorFormatRGBA, unsignedByte, data)
 		p.blurKernelTexValid = true
 		p.blurKernelRadius = kernelRadius
-		p.blurKernelTexLen = len(values)
 		p.logError()
 	}
 
@@ -125,7 +124,6 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	// Set sampler uniforms.
 	p.SetUniform1i(p.blurProgram, "tex", 0)
 	p.SetUniform1i(p.blurProgram, "kernelTex", 1)
-	p.SetUniform1f(p.blurProgram, "kernelLen", float32(p.blurKernelTexLen))
 
 	// Horizontal Blur
 	// Draw horizontal blur over the background. Use gl: one, gl: zero to replace the screen content.
