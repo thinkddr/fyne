@@ -5,10 +5,9 @@
 	<overlay>
 		<widget size="800x600" type="*widget.OverlayContainer">
 			<widget pos="13,45" size="94x74" type="*widget.PopUpMenu">
-				<rectangle radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="94x74"/>
+				<rectangle fillColor="menuBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="94x74"/>
 				<widget size="94x74" type="*widget.Scroll">
 					<widget size="94x74" type="*widget.menuBox">
-						<rectangle fillColor="menuBackground" radius="4" size="94x74"/>
 						<container size="94x74">
 							<widget size="94x35" type="*widget.menuItem">
 								<text pos="8,8" size="78x19">Option A</text>
@@ -21,28 +20,26 @@
 						</container>
 					</widget>
 				</widget>
-				<widget pos="94,39" size="123x74" type="*widget.Menu">
-					<rectangle radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="123x74"/>
-					<widget size="123x74" type="*widget.Scroll">
-						<widget size="123x74" type="*widget.menuBox">
-							<rectangle fillColor="menuBackground" radius="4" size="123x74"/>
-							<container size="123x74">
-								<widget size="123x35" type="*widget.menuItem">
-									<text pos="8,8" size="107x19">Sub Option A</text>
+				<widget pos="94,39" size="122x74" type="*widget.Menu">
+					<rectangle fillColor="menuBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="122x74"/>
+					<widget size="122x74" type="*widget.Scroll">
+						<widget size="122x74" type="*widget.menuBox">
+							<container size="122x74">
+								<widget size="122x35" type="*widget.menuItem">
+									<text pos="8,8" size="106x19">Sub Option A</text>
 								</widget>
-								<widget pos="0,39" size="123x35" type="*widget.menuItem">
-									<rectangle fillColor="focus" pos="2,2" radius="4" size="119x31"/>
-									<text pos="8,8" size="87x19">Sub Option B</text>
-									<image pos="103,7" rsc="menuExpandIcon" size="iconInlineSize" themed="foreground"/>
+								<widget pos="0,39" size="122x35" type="*widget.menuItem">
+									<rectangle fillColor="focus" pos="2,2" radius="4" size="118x31"/>
+									<text pos="8,8" size="86x19">Sub Option B</text>
+									<image pos="102,7" rsc="menuExpandIcon" size="iconInlineSize" themed="foreground"/>
 								</widget>
 							</container>
 						</widget>
 					</widget>
-					<widget pos="123,39" size="131x74" type="*widget.Menu">
-						<rectangle radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="131x74"/>
+					<widget pos="122,39" size="131x74" type="*widget.Menu">
+						<rectangle fillColor="menuBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="131x74"/>
 						<widget size="131x74" type="*widget.Scroll">
 							<widget size="131x74" type="*widget.menuBox">
-								<rectangle fillColor="menuBackground" radius="4" size="131x74"/>
 								<container size="131x74">
 									<widget size="131x35" type="*widget.menuItem">
 										<text pos="8,8" size="115x19">Sub Sub Option A</text>
