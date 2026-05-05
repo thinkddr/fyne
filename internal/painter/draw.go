@@ -255,21 +255,25 @@ func DrawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, vectorPad float32, s
 // DrawRectangle rasterizes the given rectangle object with stroke border into an image.
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
 // The scale function is used to understand how many pixels are required per unit of size.
-func DrawRectangle(rect *canvas.Rectangle, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
+func DrawRectangle(rect *canvas.Rectangle, rWidth, rHeight, vectorPad float32, scaleFactor float32) *image.RGBA {
 	topRightRadius := GetCornerRadius(rect.TopRightCornerRadius, rect.CornerRadius)
 	topLeftRadius := GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
 	bottomRightRadius := GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
 	bottomLeftRadius := GetCornerRadius(rect.BottomLeftCornerRadius, rect.CornerRadius)
-	return drawOblong(rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad, scale)
+	return drawOblong(rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad, scaleFactor)
 }
 
-func drawOblong(fill, strokeCol color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
+func drawOblong(fill, strokeCol color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad float32, scaleFactor float32) *image.RGBA {
 	// The maximum possible corner radii for a circular shape
 	size := fyne.NewSize(rWidth, rHeight)
 	topRightRadius = GetMaximumCornerRadius(topRightRadius, topLeftRadius, bottomRightRadius, size)
 	topLeftRadius = GetMaximumCornerRadius(topLeftRadius, topRightRadius, bottomLeftRadius, size)
 	bottomRightRadius = GetMaximumCornerRadius(bottomRightRadius, bottomLeftRadius, topRightRadius, size)
 	bottomLeftRadius = GetMaximumCornerRadius(bottomLeftRadius, bottomRightRadius, topLeftRadius, size)
+
+	// for math.Round generated rectangle is sometimes smaller than expected
+	// e.g. widget/testdata/menu/desktop/layout_shortcuts_other.png (menu background is too small)
+	scale := func(in float32) float32 { return float32(math.Ceil(float64(in) * float64(scaleFactor))) }
 
 	width := int(scale(rWidth + vectorPad*2))
 	height := int(scale(rHeight + vectorPad*2))

@@ -305,9 +305,7 @@ func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float3
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	raw := painter.DrawRectangle(obj.(*canvas.Rectangle), width, height, pad, func(in float32) float32 {
-		return float32(math.Round(float64(in) * float64(c.Scale())))
-	})
+	raw := painter.DrawRectangle(obj.(*canvas.Rectangle), width, height, pad, c.Scale())
 
 	if painter.IsShadowVisible(shadow) {
 		drawShadow(c, obj, fyne.NewSize(width, height), shadow, pad, base, clip, pos)
@@ -436,9 +434,7 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 			TopLeftCornerRadius:     o.TopLeftCornerRadius,
 			BottomRightCornerRadius: o.BottomRightCornerRadius,
 			BottomLeftCornerRadius:  o.BottomLeftCornerRadius,
-		}, fyne.Max(objSize.Width+2*shadowSpread, 0), fyne.Max(objSize.Height+2*shadowSpread, 0), vPad, func(in float32) float32 {
-			return float32(math.Round(float64(in) * float64(c.Scale())))
-		})
+		}, fyne.Max(objSize.Width+2*shadowSpread, 0), fyne.Max(objSize.Height+2*shadowSpread, 0), vPad, c.Scale())
 		maskRaw = painter.DrawRectangle(&canvas.Rectangle{
 			FillColor:               color.Opaque,
 			CornerRadius:            o.CornerRadius,
@@ -446,9 +442,7 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 			TopLeftCornerRadius:     o.TopLeftCornerRadius,
 			BottomRightCornerRadius: o.BottomRightCornerRadius,
 			BottomLeftCornerRadius:  o.BottomLeftCornerRadius,
-		}, objSize.Width, objSize.Height, vPad+shadowSpread, func(in float32) float32 {
-			return float32(math.Round(float64(in) * float64(c.Scale())))
-		})
+		}, objSize.Width, objSize.Height, vPad+shadowSpread, c.Scale())
 	case *canvas.Circle:
 		shadowCircle := &canvas.Circle{FillColor: shadowColor}
 		shadowCircle.Resize(objSize.AddWidthHeight(2*shadowSpread, 2*shadowSpread))
