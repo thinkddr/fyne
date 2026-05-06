@@ -107,6 +107,10 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
 	p.logError()
 
+	cornerRadius := fyne.Min(paint.GetMaximumRadius(b.Size()), b.CornerRadius)
+	p.SetUniform1f(p.blurProgram, "cornerRadius", roundToPixel(cornerRadius*p.pixScale, 1.0))
+	p.SetUniform2f(p.blurProgram, "size", float32(bw), float32(bh))
+
 	p.SetUniform1f(p.blurProgram, "radius", kernelRadius)
 	p.SetUniform1f(p.blurProgram, "sampleScale", sampleScale)
 
