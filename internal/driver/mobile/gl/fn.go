@@ -70,9 +70,9 @@ const (
 	glfnShaderSource
 	glfnTexImage2D
 	glfnTexParameteri
+	glfnUniform1i
 	glfnUniform1f
 	glfnUniform1fv
-	glfnUniform1i
 	glfnUniform2f
 	glfnUniform2fv
 	glfnUniform4f

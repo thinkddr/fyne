@@ -248,16 +248,16 @@ var glfnFuncs = [...]func(c call) (ret uintptr){
 		syscall.SyscallN(glTexParameteri.Addr(), c.args.a0, c.args.a1, c.args.a2)
 		return ret
 	},
+	glfnUniform1i: func(c call) (ret uintptr) {
+		syscall.SyscallN(glUniform1i.Addr(), c.args.a0, c.args.a1)
+		return ret
+	},
 	glfnUniform1f: func(c call) (ret uintptr) {
 		syscall.SyscallN(glUniform1f.Addr(), c.args.a0, c.args.a1)
 		return ret
 	},
 	glfnUniform1fv: func(c call) (ret uintptr) {
 		syscall.Syscall(glUniform1fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-		return ret
-	},
-	glfnUniform1i: func(c call) (ret uintptr) {
-		syscall.SyscallN(glUniform1i.Addr(), c.args.a0, c.args.a1)
 		return ret
 	},
 	glfnUniform2f: func(c call) (ret uintptr) {
@@ -355,9 +355,9 @@ var (
 	glShaderSource            = libGLESv2.NewProc("glShaderSource")
 	glTexImage2D              = libGLESv2.NewProc("glTexImage2D")
 	glTexParameteri           = libGLESv2.NewProc("glTexParameteri")
+	glUniform1i               = libGLESv2.NewProc("glUniform1i")
 	glUniform1f               = libGLESv2.NewProc("glUniform1f")
 	glUniform1fv              = libGLESv2.NewProc("glUniform1fv")
-	glUniform1i               = libGLESv2.NewProc("glUniform1i")
 	glUniform2f               = libGLESv2.NewProc("glUniform2f")
 	glUniform2fv              = libGLESv2.NewProc("glUniform2fv")
 	glUniform4f               = libGLESv2.NewProc("glUniform4f")

@@ -496,22 +496,22 @@ func (ctx *context) TexParameteri(target, pname Enum, param int) {
 	})
 }
 
-func (ctx *context) Uniform1f(dst Uniform, v float32) {
-	ctx.enqueue(call{
-		args: fnargs{
-			fn: glfnUniform1f,
-			a0: dst.c(),
-			a1: uintptr(math.Float32bits(v)),
-		},
-	})
-}
-
 func (ctx *context) Uniform1i(dst Uniform, v int) {
 	ctx.enqueue(call{
 		args: fnargs{
 			fn: glfnUniform1i,
 			a0: dst.c(),
 			a1: uintptr(v),
+		},
+	})
+}
+
+func (ctx *context) Uniform1f(dst Uniform, v float32) {
+	ctx.enqueue(call{
+		args: fnargs{
+			fn: glfnUniform1f,
+			a0: dst.c(),
+			a1: uintptr(math.Float32bits(v)),
 		},
 	})
 }

@@ -51,6 +51,40 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 		p.blurSnapH = bh
 	}
 
+	// Cap the kernel samples at 101 (maxKernelRadius = 50.0) per pass to ensure high performance.
+	var kernelRadius float32 = radius
+	var sampleScale float32 = 1.0
+	const maxKernelRadius = 50.0
+	if kernelRadius > maxKernelRadius {
+		// When the radius exceeds 50, stretch the 101 samples to cover the larger area.
+		// This performs downsampling, where the GPU skips pixels but uses bilinear
+		// filtering (ImageScaleSmooth, enabled above) to maintain smoothness.
+		sampleScale = kernelRadius / maxKernelRadius
+		kernelRadius = maxKernelRadius
+	}
+
+	values, ok := cache.GetBlurKernel(kernelRadius)
+	if !ok {
+		values = createKernel(kernelRadius)
+		cache.SetBlurKernel(kernelRadius, values)
+	}
+
+	// Upload kernel as a 1D texture if radius changed.
+	if !p.blurKernelTexValid || p.blurKernelRadius != kernelRadius {
+		if !p.blurKernelTexValid {
+			p.blurKernelTex = p.ctx.CreateTexture()
+		}
+		p.ctx.ActiveTexture(texture1)
+		p.ctx.BindTexture(texture2D, p.blurKernelTex)
+		p.ctx.TexParameteri(texture2D, textureMinFilter, textureNearest)
+		p.ctx.TexParameteri(texture2D, textureMagFilter, textureNearest)
+		p.ctx.TexParameteri(texture2D, textureWrapS, clampToEdge)
+		p.ctx.TexParameteri(texture2D, textureWrapT, clampToEdge)
+		p.ctx.TexImage2D(texture2D, 0, len(values), 1, colorFormatRGBA, unsignedByte, kernelToRGBA(values))
+		p.blurKernelTexValid = true
+		p.blurKernelRadius = kernelRadius
+	}
+
 	// Copy the blur region from the framebuffer directly to the texture on the GPU.
 	// glCopyTexSubImage2D uses GL coordinates (y=0 at bottom), so convert the canvas-top y.
 	fbY := p.fbHeight - int(y) - bh
@@ -73,45 +107,8 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
 	p.logError()
 
-	// Cap the kernel samples at 101 (maxKernelRadius = 50.0) per pass to ensure high performance.
-	var kernelRadius float32 = radius
-	var sampleScale float32 = 1.0
-	const maxKernelRadius = 50.0
-	if kernelRadius > maxKernelRadius {
-		// When the radius exceeds 50, stretch the 101 samples to cover the larger area.
-		// This performs downsampling, where the GPU skips pixels but uses bilinear
-		// filtering (ImageScaleSmooth, enabled above) to maintain smoothness.
-		sampleScale = kernelRadius / maxKernelRadius
-		kernelRadius = maxKernelRadius
-	}
-
 	p.SetUniform1f(p.blurProgram, "radius", kernelRadius)
 	p.SetUniform1f(p.blurProgram, "sampleScale", sampleScale)
-	p.SetUniform2f(p.blurProgram, "size", float32(bw), float32(bh))
-
-	values, ok := cache.GetBlurKernel(kernelRadius)
-	if !ok {
-		values = createKernel(kernelRadius)
-		cache.SetBlurKernel(kernelRadius, values)
-	}
-
-	// Upload kernel as a 1D texture if radius changed.
-	if !p.blurKernelTexValid || p.blurKernelRadius != kernelRadius {
-		if !p.blurKernelTexValid {
-			p.blurKernelTex = p.ctx.CreateTexture()
-		}
-		p.ctx.ActiveTexture(texture1)
-		p.ctx.BindTexture(texture2D, p.blurKernelTex)
-		p.ctx.TexParameteri(texture2D, textureMinFilter, textureNearest)
-		p.ctx.TexParameteri(texture2D, textureMagFilter, textureNearest)
-		p.ctx.TexParameteri(texture2D, textureWrapS, clampToEdge)
-		p.ctx.TexParameteri(texture2D, textureWrapT, clampToEdge)
-		data := kernelToRGBA(values)
-		p.ctx.TexImage2D(texture2D, 0, len(values), 1, colorFormatRGBA, unsignedByte, data)
-		p.blurKernelTexValid = true
-		p.blurKernelRadius = kernelRadius
-		p.logError()
-	}
 
 	// Bind kernel texture to unit 1.
 	p.ctx.ActiveTexture(texture1)
@@ -128,7 +125,8 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	// Horizontal Blur
 	// Draw horizontal blur over the background. Use gl: one, gl: zero to replace the screen content.
 	p.ctx.BlendFunc(one, zero)
-	p.SetUniform2f(p.blurProgram, "direction", 1.0, 0.0)
+	p.SetUniform2f(p.blurProgram, "direction", 1.0/float32(bw), 0.0)
+
 	p.ctx.DrawArrays(triangleStrip, 0, 4)
 
 	// Capture the horizontally-blurred result back into blurSnapTex
@@ -138,11 +136,9 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	// Draw vertical blur using the horizontally-blurred texture.
 	// Use one, zero since it replaces the exact same rect we just copied from.
 	p.ctx.BlendFunc(one, zero)
-	p.SetUniform2f(p.blurProgram, "direction", 0.0, 1.0)
-	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.SetUniform2f(p.blurProgram, "direction", 0.0, 1.0/float32(bh))
 
-	// Restore normal blend mode for subsequent draws
-	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
 	p.logError()
 }
 
