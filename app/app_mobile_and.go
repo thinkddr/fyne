@@ -14,6 +14,7 @@ import "C"
 
 import (
 	"net/url"
+	"time"
 	"unsafe"
 
 	"fyne.io/fyne/v2"
@@ -41,4 +42,17 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 		C.sendNotification(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx), titleStr, contentStr)
 		return nil
 	})
+}
+
+// Native AlarmManager-based scheduling on Android requires registering a
+// BroadcastReceiver in AndroidManifest.xml, which is owned by the Fyne packaging
+// tool. Until that wiring lands the in-process scheduler with cache persistence
+// and replay-on-launch is used; this gives correct timing while the process is
+// alive and recovers any past-due deliveries on next launch.
+func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*fyne.ScheduledNotification, error) {
+	return a.scheduleViaScheduler(n, when)
+}
+
+func (a *fyneApp) CancelScheduledNotification(id string) error {
+	return a.cancelViaScheduler(id)
 }
