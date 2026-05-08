@@ -113,6 +113,11 @@ const (
 	// Since: 2.6
 	SizeNameWindowTitleBarHeight fyne.ThemeSizeName = "windowTitleBarHeight"
 
+	// SizeNameButtonRadius is the name of theme lookup for button corner radius.
+	//
+	// Since: 2.8
+	SizeNameButtonRadius fyne.ThemeSizeName = "buttonRadius"
+
 	// SizeNameCardRadius is the name of theme lookup for card widget corner radius.
 	//
 	// Since: 2.8
@@ -264,6 +269,8 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	case SizeNameInputBorder:
 		return 1
 	case SizeNameInputRadius:
+		return 5
+	case SizeNameButtonRadius:
 		return 5
 	case SizeNameModalBlurRadius:
 		return 1.5
