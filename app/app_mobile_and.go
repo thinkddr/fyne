@@ -5,14 +5,21 @@ package app
 /*
 #cgo LDFLAGS: -landroid -llog
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 void openURL(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *url);
 void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *title, char *content);
+bool scheduleNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx,
+	char *id, char *title, char *body, long long deliveryMillis);
+void cancelScheduledNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *id);
 */
 import "C"
 
 import (
+	"crypto/rand"
+	"encoding/hex"
+	"errors"
 	"net/url"
 	"time"
 	"unsafe"
@@ -44,15 +51,59 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	})
 }
 
-// Native AlarmManager-based scheduling on Android requires registering a
-// BroadcastReceiver in AndroidManifest.xml, which is owned by the Fyne packaging
-// tool. Until that wiring lands the in-process scheduler with cache persistence
-// and replay-on-launch is used; this gives correct timing while the process is
-// alive and recovers any past-due deliveries on next launch.
+// ScheduleNotification posts a notification via Android's AlarmManager, which
+// survives the app process being killed. This requires the Fyne packaging tool
+// to register the FyneNotificationReceiver in AndroidManifest.xml; if it is
+// missing the Java bridge returns false and we fall back to the in-process
+// scheduler with cache persistence.
 func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*fyne.ScheduledNotification, error) {
-	return a.scheduleViaScheduler(n, when)
+	if !when.After(time.Now()) {
+		return nil, errors.New("scheduled delivery time must be in the future")
+	}
+
+	id, err := newAndroidNotificationID()
+	if err != nil {
+		return nil, err
+	}
+	idStr := C.CString(id)
+	defer C.free(unsafe.Pointer(idStr))
+	titleStr := C.CString(n.Title)
+	defer C.free(unsafe.Pointer(titleStr))
+	bodyStr := C.CString(n.Content)
+	defer C.free(unsafe.Pointer(bodyStr))
+
+	deliveryMillis := C.longlong(when.UnixMilli())
+	var ok bool
+	app.RunOnJVM(func(vm, env, ctx uintptr) error {
+		ok = bool(C.scheduleNotification(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx),
+			idStr, titleStr, bodyStr, deliveryMillis))
+		return nil
+	})
+
+	if !ok {
+		return a.scheduleViaScheduler(n, when)
+	}
+	return fyne.NewScheduledNotification(id, n, when), nil
 }
 
 func (a *fyneApp) CancelScheduledNotification(id string) error {
+	idStr := C.CString(id)
+	defer C.free(unsafe.Pointer(idStr))
+
+	app.RunOnJVM(func(vm, env, ctx uintptr) error {
+		C.cancelScheduledNotification(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx), idStr)
+		return nil
+	})
+
+	// Also cancel any in-process schedule with the same ID, in case this app
+	// previously fell back to scheduleViaScheduler before the manifest was wired.
 	return a.cancelViaScheduler(id)
+}
+
+func newAndroidNotificationID() (string, error) {
+	var b [16]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return "", err
+	}
+	return "fyne-sched-" + hex.EncodeToString(b[:]), nil
 }
