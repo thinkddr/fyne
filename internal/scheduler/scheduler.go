@@ -12,7 +12,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"io"
 	"sync"
 	"time"
 
@@ -210,13 +209,8 @@ func (s *Scheduler) loadLocked() []*Entry {
 	}
 	defer r.Close()
 
-	data, err := io.ReadAll(r)
-	if err != nil || len(data) == 0 {
-		return nil
-	}
-
 	var list []*Entry
-	if err := json.Unmarshal(data, &list); err != nil {
+	if err = json.NewDecoder(r).Decode(&list); err != nil {
 		fyne.LogError("Failed to read scheduled notifications", err)
 		return nil
 	}
