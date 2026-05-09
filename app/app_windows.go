@@ -19,8 +19,8 @@ import (
 	internalapp "fyne.io/fyne/v2/internal/app"
 )
 
-const notificationTemplate = `$title = "%s"
-$content = "%s"
+const notificationTemplate = `$title = %q
+$content = %q
 $iconPath = "file:///%s"
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
 $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastImageAndText02)
@@ -33,11 +33,11 @@ $xml.LoadXml($toastXml.OuterXml)
 $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
 [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("%s").Show($toast);`
 
-const scheduledNotificationTemplate = `$title = "%s"
-$content = "%s"
+const scheduledNotificationTemplate = `$title = %q
+$content = %q
 $iconPath = "file:///%s"
-$id = "%s"
-$delivery = [DateTimeOffset]::Parse("%s")
+$id = %q
+$delivery = [DateTimeOffset]::Parse(%q)
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
 $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastImageAndText02)
 $toastXml = [xml] $template.GetXml()
@@ -66,8 +66,8 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 var scriptNum = 0
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
-	title := escapeNotificationString(n.Title)
-	content := escapeNotificationString(n.Content)
+	title := n.Title
+	content := n.Content
 	iconFilePath := a.cachedIconPath()
 	appID := a.notificationAppID()
 
@@ -85,8 +85,8 @@ func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*f
 		return nil, err
 	}
 
-	title := escapeNotificationString(n.Title)
-	content := escapeNotificationString(n.Content)
+	title := n.Title
+	content := n.Content
 	iconFilePath := a.cachedIconPath()
 	delivery := when.UTC().Format(time.RFC3339)
 	appID := a.notificationAppID()
@@ -135,11 +135,6 @@ func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
 // You should have previously called `SetSystemTrayMenu` to initialise the menu icon.
 func (a *fyneApp) SetSystemTrayWindow(w fyne.Window) {
 	a.Driver().(systrayDriver).SetSystemTrayWindow(w)
-}
-
-func escapeNotificationString(in string) string {
-	noSlash := strings.ReplaceAll(in, "`", "``")
-	return strings.ReplaceAll(noSlash, "\"", "`\"")
 }
 
 func runScript(name, script string) {
