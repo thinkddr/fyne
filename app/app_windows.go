@@ -3,8 +3,6 @@
 package app
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/url"
@@ -17,6 +15,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	internalapp "fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/scheduler"
 )
 
 const notificationTemplate = `$title = %q
@@ -80,7 +79,7 @@ func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*f
 		return nil, errors.New("scheduled delivery time must be in the future")
 	}
 
-	id, err := newWindowsNotificationID()
+	id, err := scheduler.NewID()
 	if err != nil {
 		return nil, err
 	}
@@ -109,14 +108,6 @@ func (a *fyneApp) notificationAppID() string {
 		appID = a.Metadata().Name
 	}
 	return appID
-}
-
-func newWindowsNotificationID() (string, error) {
-	var b [16]byte
-	if _, err := rand.Read(b[:]); err != nil {
-		return "", err
-	}
-	return "fyne-sched-" + hex.EncodeToString(b[:]), nil
 }
 
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.

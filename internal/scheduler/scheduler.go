@@ -98,7 +98,7 @@ func (s *Scheduler) Schedule(n *fyne.Notification, when time.Time) (string, erro
 		return "", errors.New("scheduled delivery time must be in the future")
 	}
 
-	id, err := newID()
+	id, err := NewID()
 	if err != nil {
 		return "", err
 	}
@@ -223,8 +223,10 @@ func (s *Scheduler) loadLocked() []*Entry {
 	return list
 }
 
-// newID generates a random hex identifier suitable for a scheduled notification.
-func newID() (string, error) {
+// NewID generates a random hex identifier suitable for a scheduled notification.
+//
+// Since: 2.8
+func NewID() (string, error) {
 	var b [16]byte
 	if _, err := rand.Read(b[:]); err != nil {
 		return "", err

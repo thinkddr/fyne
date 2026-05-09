@@ -2,8 +2,6 @@
 package test // import "fyne.io/fyne/v2/test"
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"net/url"
 	"sync"
 	"time"
@@ -13,6 +11,7 @@ import (
 	intapp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/scheduler"
 	"fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/theme"
 )
@@ -94,11 +93,7 @@ func (a *app) SendNotification(notify *fyne.Notification) {
 }
 
 func (a *app) ScheduleNotification(n *fyne.Notification, when time.Time) (*fyne.ScheduledNotification, error) {
-	var b [16]byte
-	if _, err := rand.Read(b[:]); err != nil {
-		return nil, err
-	}
-	id := "test-sched-" + hex.EncodeToString(b[:])
+	id, _ := scheduler.NewID()
 	scheduled := fyne.NewScheduledNotification(id, n, when)
 
 	a.propertyLock.Lock()

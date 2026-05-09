@@ -17,8 +17,6 @@ void cancelScheduledNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t
 import "C"
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"errors"
 	"net/url"
 	"time"
@@ -26,6 +24,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/driver/mobile/app"
+	"fyne.io/fyne/v2/internal/scheduler"
 )
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
@@ -61,7 +60,7 @@ func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*f
 		return nil, errors.New("scheduled delivery time must be in the future")
 	}
 
-	id, err := newAndroidNotificationID()
+	id, err := scheduler.NewID()
 	if err != nil {
 		return nil, err
 	}
@@ -98,12 +97,4 @@ func (a *fyneApp) CancelScheduledNotification(id string) error {
 	// Also cancel any in-process schedule with the same ID, in case this app
 	// previously fell back to scheduleViaScheduler before the manifest was wired.
 	return a.cancelViaScheduler(id)
-}
-
-func newAndroidNotificationID() (string, error) {
-	var b [16]byte
-	if _, err := rand.Read(b[:]); err != nil {
-		return "", err
-	}
-	return "fyne-sched-" + hex.EncodeToString(b[:]), nil
 }
