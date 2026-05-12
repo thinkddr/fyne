@@ -459,20 +459,7 @@ func (t *RichText) updateRowBounds() {
 				if len(retBounds) > 0 {
 					bounds[len(bounds)-1].end = retBounds[0].end // invalidate row ending as we have more content
 					bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
-					// continuation rows that result from wrapping (not \n) inherit the indent
-					// from the first row so that wrapped text aligns after the bullet/prefix.
-					continuationIndent := bounds[len(bounds)-1].indent + (maxWidth - wrapWidth)
-					if continuationIndent > 0 {
-						runes := []rune(seg.Textual())
-						for i := range retBounds[1:] {
-							b := &retBounds[1+i]
-							// skip newline-broken rows — text[b.begin-1] is '\n'
-							if b.begin > 0 && b.begin <= len(runes) && runes[b.begin-1] == '\n' {
-								continue
-							}
-							b.indent = continuationIndent
-						}
-					}
+					alignWrappedText(&bounds[len(bounds)-1], retBounds[1:], seg, maxWidth-wrapWidth)
 					bounds = append(bounds, retBounds[1:]...)
 
 					fitSize.Height -= height
@@ -1194,6 +1181,22 @@ func setAlign(obj fyne.CanvasObject, align fyne.TextAlign) {
 			link.Alignment = align
 			link.Refresh()
 		}
+	}
+}
+
+func alignWrappedText(priorBound *rowBoundary, wrappedBounds []rowBoundary, seg RichTextSegment, xOffset float32) {
+	indent := priorBound.indent + xOffset
+	if indent <= 0 {
+		return
+	}
+
+	runes := []rune(seg.Textual())
+	for i := range wrappedBounds {
+		b := &wrappedBounds[i]
+		if b.begin > 0 && b.begin <= len(runes) && runes[b.begin-1] == '\n' {
+			continue
+		}
+		b.indent = indent
 	}
 }
 
