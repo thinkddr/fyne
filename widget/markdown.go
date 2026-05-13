@@ -57,7 +57,7 @@ func renderNode(source []byte, n ast.Node, blockquote bool, listDepth int) ([]Ri
 		return renderChildren(source, n, blockquote, listDepth)
 	case *ast.Paragraph:
 		children, err := renderChildren(source, n, blockquote, listDepth)
-		if !blockquote {
+		if !blockquote && listDepth == 0 {
 			linebreak := &TextSegment{Style: RichTextStyleParagraph}
 			children = append(children, linebreak)
 		}

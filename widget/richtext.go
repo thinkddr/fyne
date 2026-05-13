@@ -406,6 +406,7 @@ func (t *RichText) updateRowBounds() {
 	wrapWidth := maxWidth
 
 	var currentBound *rowBoundary
+	trueLineStart := true
 	var iterateSegments func(segList []RichTextSegment)
 	iterateSegments = func(segList []RichTextSegment) {
 		for _, seg := range segList {
@@ -415,6 +416,7 @@ func (t *RichText) updateRowBounds() {
 				if len(segs) > 0 && !segs[len(segs)-1].Inline() {
 					wrapWidth = maxWidth
 					currentBound = nil
+					trueLineStart = true
 				}
 				continue
 			}
@@ -435,6 +437,7 @@ func (t *RichText) updateRowBounds() {
 				} else {
 					wrapWidth = maxWidth
 					currentBound = nil
+					trueLineStart = true
 					fitSize.Height -= itemMin.Height + th.Size(theme.SizeNameLineSpacing)
 				}
 				continue
@@ -459,7 +462,9 @@ func (t *RichText) updateRowBounds() {
 				if len(retBounds) > 0 {
 					bounds[len(bounds)-1].end = retBounds[0].end // invalidate row ending as we have more content
 					bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
-					alignWrappedText(&bounds[len(bounds)-1], retBounds[1:], seg, maxWidth-wrapWidth)
+					if trueLineStart {
+						alignWrappedText(&bounds[len(bounds)-1], retBounds[1:], seg, maxWidth-wrapWidth)
+					}
 					bounds = append(bounds, retBounds[1:]...)
 
 					fitSize.Height -= height
@@ -492,10 +497,12 @@ func (t *RichText) updateRowBounds() {
 					wrapWidth -= lastWidth
 				} else {
 					wrapWidth = maxWidth - lastWidth
+					trueLineStart = false
 				}
 			} else {
 				currentBound = nil
 				wrapWidth = maxWidth
+				trueLineStart = true
 			}
 		}
 	}
