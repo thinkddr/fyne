@@ -407,6 +407,7 @@ func (t *RichText) updateRowBounds() {
 
 	var currentBound *rowBoundary
 	currentBoundDepth := 0
+	rowContinuationIndent := float32(-1)
 	var iterateSegments func(segList []RichTextSegment, depth int)
 	iterateSegments = func(segList []RichTextSegment, depth int) {
 		for _, seg := range segList {
@@ -417,6 +418,7 @@ func (t *RichText) updateRowBounds() {
 					wrapWidth = maxWidth
 					currentBound = nil
 					currentBoundDepth = depth
+					rowContinuationIndent = -1
 				}
 				continue
 			}
@@ -439,6 +441,7 @@ func (t *RichText) updateRowBounds() {
 					wrapWidth = maxWidth
 					currentBound = nil
 					currentBoundDepth = depth
+					rowContinuationIndent = -1
 					fitSize.Height -= itemMin.Height + th.Size(theme.SizeNameLineSpacing)
 				}
 				continue
@@ -459,15 +462,26 @@ func (t *RichText) updateRowBounds() {
 			retBounds, height := lineBounds(t, seg, wrapWidth-leftPad, fyne.NewSize(maxWidth, fitSize.Height), func(text []rune) fyne.Size {
 				return fyne.MeasureText(string(text), textSize, textStyle)
 			})
+			boundWasNil := currentBound == nil
 			if currentBound != nil {
 				if len(retBounds) > 0 {
 					bounds[len(bounds)-1].end = retBounds[0].end // invalidate row ending as we have more content
 					bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
-					xOff := float32(0)
 					if depth > currentBoundDepth {
-						xOff = maxWidth - wrapWidth
+						if rowContinuationIndent == -1 {
+							rowContinuationIndent = maxWidth - wrapWidth
+						}
+						if rowContinuationIndent > 0 {
+							runes := []rune(seg.Textual())
+							for i := range retBounds[1:] {
+								b := &retBounds[1+i]
+								if b.begin > 0 && b.begin <= len(runes) && runes[b.begin-1] == '\n' {
+									continue
+								}
+								b.indent = rowContinuationIndent
+							}
+						}
 					}
-					alignWrappedText(&bounds[len(bounds)-1], retBounds[1:], seg, xOff)
 					bounds = append(bounds, retBounds[1:]...)
 
 					fitSize.Height -= height
@@ -478,7 +492,10 @@ func (t *RichText) updateRowBounds() {
 				fitSize.Height -= height
 			}
 			currentBound = &bounds[len(bounds)-1]
-			currentBoundDepth = depth
+			if boundWasNil {
+				currentBoundDepth = depth
+				rowContinuationIndent = -1
+			}
 			if seg.Inline() {
 				last := bounds[len(bounds)-1]
 				begin := 0
@@ -505,6 +522,7 @@ func (t *RichText) updateRowBounds() {
 			} else {
 				currentBound = nil
 				currentBoundDepth = depth
+				rowContinuationIndent = -1
 				wrapWidth = maxWidth
 			}
 		}
@@ -548,6 +566,9 @@ func (r *textRenderer) Layout(size fyne.Size) {
 	rowAlign := fyne.TextAlignLeading
 	i := 0
 	for row, bound := range bounds {
+		leftPad, align := rowPaddingAndAlign(bound, lineSpacing, rowAlign)
+		rowAlign = align
+
 		for segI := range bound.segments {
 			if i == len(objs) {
 				break // Refresh may not have created all objects for all rows yet...
@@ -558,14 +579,14 @@ func (r *textRenderer) Layout(size fyne.Size) {
 			_, isText := obj.(*canvas.Text)
 			if !isText && !inline {
 				if len(rowItems) != 0 {
-					width, _ := r.layoutRow(rowItems, rowAlign, left, yPos, lineWidth)
+					width, _ := r.layoutRow(rowItems, rowAlign, left+leftPad, yPos, lineWidth-leftPad)
 					left += width
 					rowItems = nil
 				}
 				height := obj.MinSize().Height
 
-				obj.Move(fyne.NewPos(left, yPos))
-				obj.Resize(fyne.NewSize(lineWidth, height))
+				obj.Move(fyne.NewPos(left+leftPad, yPos))
+				obj.Resize(fyne.NewSize(lineWidth-leftPad, height))
 				yPos += height
 				left = xInset
 				continue
@@ -575,15 +596,6 @@ func (r *textRenderer) Layout(size fyne.Size) {
 				continue
 			}
 
-			leftPad := bound.indent
-			if text, ok := bound.segments[0].(*TextSegment); ok {
-				rowAlign = text.Style.Alignment
-				if text.Style == RichTextStyleBlockquote {
-					leftPad = lineSpacing * 4
-				}
-			} else if link, ok := bound.segments[0].(*HyperlinkSegment); ok {
-				rowAlign = link.Alignment
-			}
 			_, y := r.layoutRow(rowItems, rowAlign, left+leftPad, yPos, lineWidth-leftPad)
 			yPos += y
 			rowItems = nil
@@ -1194,20 +1206,20 @@ func setAlign(obj fyne.CanvasObject, align fyne.TextAlign) {
 	}
 }
 
-func alignWrappedText(priorBound *rowBoundary, wrappedBounds []rowBoundary, seg RichTextSegment, xOffset float32) {
-	indent := priorBound.indent + xOffset
-	if indent <= 0 {
-		return
-	}
-
-	runes := []rune(seg.Textual())
-	for i := range wrappedBounds {
-		b := &wrappedBounds[i]
-		if b.begin > 0 && b.begin <= len(runes) && runes[b.begin-1] == '\n' {
-			continue
+func rowPaddingAndAlign(bound rowBoundary, lineSpacing float32, currentAlign fyne.TextAlign) (float32, fyne.TextAlign) {
+	leftPad := bound.indent
+	align := currentAlign
+	if len(bound.segments) > 0 {
+		if text, ok := bound.segments[0].(*TextSegment); ok {
+			align = text.Style.Alignment
+			if text.Style == RichTextStyleBlockquote {
+				leftPad = lineSpacing * 4
+			}
+		} else if link, ok := bound.segments[0].(*HyperlinkSegment); ok {
+			align = link.Alignment
 		}
-		b.indent = indent
 	}
+	return leftPad, align
 }
 
 // splitLines accepts a text segment and returns a slice of boundary metadata denoting the
