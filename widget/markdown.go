@@ -125,7 +125,9 @@ func renderNode(source []byte, n ast.Node, blockquote bool, listDepth int) ([]Ri
 			// These empty text elements indicate single line breaks after non-text elements in goldmark.
 			return []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: " "}}, nil
 		}
-		text = suffixSpaceIfAppropriate(text, n)
+		if n.(*ast.Text).SoftLineBreak() {
+			text = text + " "
+		}
 		if blockquote {
 			return []RichTextSegment{&TextSegment{Style: RichTextStyleBlockquote, Text: text}}, nil
 		}
@@ -136,14 +138,6 @@ func renderNode(source []byte, n ast.Node, blockquote bool, listDepth int) ([]Ri
 		return parseMarkdownImage(t), nil
 	}
 	return nil, nil
-}
-
-func suffixSpaceIfAppropriate(text string, n ast.Node) string {
-	next := n.NextSibling()
-	if next != nil && next.Type() == ast.TypeInline && !strings.HasSuffix(text, " ") {
-		return text + " "
-	}
-	return text
 }
 
 func renderChildren(source []byte, n ast.Node, blockquote bool, listDepth int) ([]RichTextSegment, error) {

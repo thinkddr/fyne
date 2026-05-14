@@ -82,7 +82,7 @@ func lookupRuneFont(r rune, family string, aspect font.Aspect) *font.Face {
 	return fm.ResolveFace(r)
 }
 
-func lookupFaces(theme, fallback, emoji fyne.Resource, family string, style fyne.TextStyle) (faces *dynamicFontMap) {
+func lookupFaces(theme, fallback fyne.Resource, additional []fyne.Resource, family string, style fyne.TextStyle) (faces *dynamicFontMap) {
 	f1 := loadMeasureFont(theme)
 	if theme == fallback {
 		faces = &dynamicFontMap{family: family, faces: []*font.Face{f1}}
@@ -99,8 +99,8 @@ func lookupFaces(theme, fallback, emoji fyne.Resource, family string, style fyne
 		aspect.Weight = font.WeightBold
 	}
 
-	if emoji != nil {
-		faces.addFace(loadMeasureFont(emoji))
+	for _, added := range additional {
+		faces.addFace(loadMeasureFont(added))
 	}
 
 	local := lookupLangFont(family, aspect)
@@ -141,17 +141,18 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		font1 := th.Font(style)
 
 		emoji := theme.DefaultEmojiFont() // TODO only one emoji - maybe others too
+		fallbacks := []fyne.Resource{emoji, theme.DefaultSymbolFont()}
 		switch {
 		case style.Monospace:
-			faces = lookupFaces(font1, theme.DefaultTextMonospaceFont(), emoji, fontscan.Monospace, style)
+			faces = lookupFaces(font1, theme.DefaultTextMonospaceFont(), fallbacks, fontscan.Monospace, style)
 		case style.Bold:
 			if style.Italic {
-				faces = lookupFaces(font1, theme.DefaultTextBoldItalicFont(), emoji, fontscan.SansSerif, style)
+				faces = lookupFaces(font1, theme.DefaultTextBoldItalicFont(), fallbacks, fontscan.SansSerif, style)
 			} else {
-				faces = lookupFaces(font1, theme.DefaultTextBoldFont(), emoji, fontscan.SansSerif, style)
+				faces = lookupFaces(font1, theme.DefaultTextBoldFont(), fallbacks, fontscan.SansSerif, style)
 			}
 		case style.Italic:
-			faces = lookupFaces(font1, theme.DefaultTextItalicFont(), emoji, fontscan.SansSerif, style)
+			faces = lookupFaces(font1, theme.DefaultTextItalicFont(), fallbacks, fontscan.SansSerif, style)
 		case style.Symbol:
 			th := theme.SymbolFont()
 			fallback := theme.DefaultSymbolFont()
@@ -164,7 +165,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []*font.Face{f1, f2}}
 			}
 		default:
-			faces = lookupFaces(font1, theme.DefaultTextFont(), emoji, fontscan.SansSerif, style)
+			faces = lookupFaces(font1, theme.DefaultTextFont(), fallbacks, fontscan.SansSerif, style)
 		}
 
 		val = &FontCacheItem{Fonts: faces}
@@ -189,11 +190,8 @@ func DrawString(dst draw.Image, s string, color color.Color, f shaping.Fontmap, 
 	}
 
 	advance := float32(0)
-	y := math.MinInt
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x float32) {
-		if y == math.MinInt {
-			y = int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * r.PixScale)))
-		}
+		y := int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * r.PixScale)))
 		if len(run.Glyphs) == 1 {
 			if run.Glyphs[0].GlyphID == 0 {
 				r.DrawStringAt(string([]rune{0xfffd}), dst, int(x), y, f.ResolveFace(0xfffd))

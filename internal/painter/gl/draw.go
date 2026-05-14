@@ -1,7 +1,6 @@
 package gl
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 
@@ -12,7 +11,7 @@ import (
 	paint "fyne.io/fyne/v2/internal/painter"
 )
 
-const edgeSoftness = 1.0
+const edgeSoftness = 0.5
 
 func (p *painter) createBuffer(size int) Buffer {
 	vbo := p.ctx.CreateBuffer()
@@ -22,13 +21,6 @@ func (p *painter) createBuffer(size int) Buffer {
 	p.ctx.BufferData(arrayBuffer, make([]float32, size), staticDraw)
 	p.logError()
 	return vbo
-}
-
-func (p *painter) defineVertexArray(prog Program, name string, size, stride, offset int) {
-	vertAttrib := p.ctx.GetAttribLocation(prog, name)
-	p.ctx.EnableVertexAttribArray(vertAttrib)
-	p.ctx.VertexAttribPointerWithOffset(vertAttrib, size, float, false, stride*floatSize, offset*floatSize)
-	p.logError()
 }
 
 func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
@@ -73,8 +65,8 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 
 	p.ctx.UseProgram(p.blurProgram.ref)
 	p.updateBuffer(p.blurProgram.buff, points)
-	p.defineVertexArray(p.blurProgram.ref, "vert", 3, 5, 0)
-	p.defineVertexArray(p.blurProgram.ref, "vertTexCoord", 2, 5, 3)
+	p.UpdateVertexArray(p.blurProgram, "vert", 3, 5, 0)
+	p.UpdateVertexArray(p.blurProgram, "vertTexCoord", 2, 5, 3)
 
 	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
 	p.logError()
@@ -270,7 +262,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
 
-	numPoints := int(fyne.Min(canvas.ArbitraryPolygonVerticesMaximum, float32(len(polygon.Points))))
+	numPoints := int(fyne.Min(paint.ArbitraryPolygonVerticesMaximum, float32(len(polygon.Points))))
 	p.SetUniform1f(program, "vertex_count", float32(numPoints))
 
 	size := polygon.Size()
@@ -279,7 +271,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	}
 
 	fixedPoints := make([]fyne.Position, numPoints)
-	radii := make([]float32, numPoints)
+	cornerRadii := make([]float32, numPoints)
 
 	for i := 0; i < numPoints; i++ {
 		px, py := polygon.Points[i].X, polygon.Points[i].Y
@@ -293,18 +285,21 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 		if i < len(polygon.CornerRadii) {
 			radius = polygon.CornerRadii[i]
 		}
-		radii[i] = radius
+		cornerRadii[i] = radius
 	}
 
-	scaledRadii := paint.GetMaximumCornerRadiusPolygon(fixedPoints, radii)
+	cornerRadii = paint.GetMaximumCornerRadii(fixedPoints, cornerRadii)
 
+	verticesScaled := make([]float32, numPoints*2)
+	cornerRadiiScaled := make([]float32, numPoints)
 	for i := 0; i < numPoints; i++ {
-		pXScaled, pYScaled := roundToPixel(fixedPoints[i].X*p.pixScale, 1.0), roundToPixel(fixedPoints[i].Y*p.pixScale, 1.0)
-		p.SetUniform2f(program, fmt.Sprintf("vertices[%d]", i), pXScaled, pYScaled)
-
-		radiusScaled := roundToPixel(scaledRadii[i]*p.pixScale, 1.0)
-		p.SetUniform1f(program, fmt.Sprintf("radii[%d]", i), radiusScaled)
+		verticesScaled[i*2] = roundToPixel(fixedPoints[i].X*p.pixScale, 1.0)
+		verticesScaled[i*2+1] = roundToPixel(fixedPoints[i].Y*p.pixScale, 1.0)
+		cornerRadiiScaled[i] = roundToPixel(cornerRadii[i]*p.pixScale, 1.0)
 	}
+
+	p.SetUniform2fv(program, "vertices", verticesScaled)
+	p.SetUniform1fv(program, "corner_radii", cornerRadiiScaled)
 
 	// Colors and Stroke
 	r, g, b, a := getFragmentColor(polygon.FillColor)
