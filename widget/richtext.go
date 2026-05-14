@@ -1206,6 +1206,7 @@ func setAlign(obj fyne.CanvasObject, align fyne.TextAlign) {
 	}
 }
 
+// rowPaddingAndAlign returns the left padding and text alignment for a row.
 func rowPaddingAndAlign(bound rowBoundary, lineSpacing float32, currentAlign fyne.TextAlign) (float32, fyne.TextAlign) {
 	leftPad := bound.indent
 	align := currentAlign
