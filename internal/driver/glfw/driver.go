@@ -5,10 +5,11 @@ package glfw
 import (
 	"bytes"
 	"image"
+	"image/draw"
+	_ "image/jpeg"
+	"image/png"
 	"os"
 	"runtime"
-
-	"github.com/fyne-io/image/ico"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/animation"
@@ -19,6 +20,7 @@ import (
 	"fyne.io/fyne/v2/internal/painter"
 	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/storage/repository"
+	"github.com/fyne-io/image/ico"
 )
 
 var curWindow *window
@@ -47,21 +49,45 @@ func (d *gLDriver) init() {
 }
 
 func toOSIcon(icon []byte) ([]byte, error) {
-	if runtime.GOOS != "windows" {
+	return toOSIconForRuntime(icon, runtime.GOOS)
+}
+
+// toOSIconForRuntime make a helper so test can work.
+func toOSIconForRuntime(icon []byte, goos string) ([]byte, error) {
+	// not sure how other os works, keep current behavior
+	if goos != "windows" && !usesUnixSystrayIcon(goos) {
 		return icon, nil
 	}
 
-	img, _, err := image.Decode(bytes.NewReader(icon))
+	img, format, err := image.Decode(bytes.NewReader(icon))
 	if err != nil {
 		return nil, err
 	}
 
 	buf := &bytes.Buffer{}
-	err = ico.Encode(buf, img)
-	if err != nil {
+	// keep windows behavior: convert to ico
+	if goos == "windows" {
+		if err = ico.Encode(buf, img); err != nil {
+			return nil, err
+		}
+		return buf.Bytes(), nil
+	}
+	if format == "png" {
+		return icon, nil
+	}
+	// the Unix systray backend reads low 8-bit RGBA values, so normalize
+	// formats like JPEG/YCbCr to an 8-bit PNG before handing bytes over.
+	bounds := img.Bounds()
+	nrgba := image.NewNRGBA(bounds)
+	draw.Draw(nrgba, bounds, img, bounds.Min, draw.Src)
+	if err = png.Encode(buf, nrgba); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+func usesUnixSystrayIcon(goos string) bool {
+	return goos == "linux" || goos == "freebsd" || goos == "openbsd" || goos == "netbsd"
 }
 
 func (d *gLDriver) DoFromGoroutine(f func(), wait bool) {
