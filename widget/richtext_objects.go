@@ -18,7 +18,7 @@ var (
 	// Since: 2.1
 	RichTextStyleBlockquote = RichTextStyle{
 		ColorName: theme.ColorNameForeground,
-		Inline:    false,
+		Inline:    true,
 		SizeName:  theme.SizeNameText,
 		TextStyle: fyne.TextStyle{Italic: true},
 	}

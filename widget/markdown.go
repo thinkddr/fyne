@@ -57,10 +57,8 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 		return renderChildren(source, n, quotingDepth, listDepth)
 	case *ast.Paragraph:
 		children, err := renderChildren(source, n, quotingDepth, listDepth)
-		if quotingDepth == 0 && listDepth == 0 {
-			linebreak := &TextSegment{Style: RichTextStyleParagraph}
-			children = append(children, linebreak)
-		}
+		linebreak := &TextSegment{Style: RichTextStyleParagraph}
+		children = append(children, linebreak)
 		return children, err
 	case *ast.List:
 		items, err := renderChildren(source, n, quotingDepth, listDepth+1)
