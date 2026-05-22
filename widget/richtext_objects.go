@@ -405,6 +405,8 @@ type RichTextStyle struct {
 	Inline    bool
 	SizeName  fyne.ThemeSizeName // The theme name of the text size to use, if blank will be the standard text size
 	TextStyle fyne.TextStyle
+	// Since: 2.8
+	QuotingDepth int
 
 	// an internal detail where we obscure password fields
 	concealed bool
