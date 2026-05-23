@@ -23,7 +23,8 @@ func TestList_Bind(t *testing.T) {
 			return widget.NewLabel("Item")
 		}, func(i widget.ListItemID, o fyne.CanvasObject) {
 			o.(*widget.Label).SetText(strconv.Itoa(i))
-		})
+		},
+	)
 	assert.Equal(t, 5, c.Length()) // TODO check rendered count
 
 	val := binding.NewStringList()
