@@ -19,10 +19,13 @@ type FormItem struct {
 	// Since: 2.0
 	HintText string
 
-	validationError error
-	invalid         bool
-	helperOutput    *canvas.Text
-	wasFocused      bool
+	// Since: 2.8
+	Required bool
+
+	validationError        error
+	invalid, meetsRequired bool
+	helperOutput           *canvas.Text
+	wasFocused             bool
 }
 
 // NewFormItem creates a new form item with the specified label text and input widget
@@ -77,7 +80,7 @@ func (f *Form) AppendItem(item *FormItem) {
 
 	f.Items = append(f.Items, item)
 	if f.itemGrid != nil {
-		f.itemGrid.Add(f.createLabel(item.Text))
+		f.itemGrid.Add(f.createLabel(item))
 		f.itemGrid.Add(f.createInput(item))
 		f.setUpValidation(item.Widget, len(f.Items)-1)
 	}
@@ -98,6 +101,7 @@ func (f *Form) Refresh() {
 	f.ensureRenderItems()
 	f.updateButtons()
 	f.updateLabels()
+	f.checkValidation(f.validationError)
 
 	if f.isVertical() {
 		f.itemGrid.Layout = layout.NewVBoxLayout()
@@ -189,14 +193,24 @@ func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
 	return validator != nil
 }
 
-func (f *Form) createLabel(text string) fyne.CanvasObject {
-	label := &Label{
-		Text:      text,
-		Alignment: fyne.TextAlignTrailing,
-		TextStyle: fyne.TextStyle{Bold: true},
-	}
+func (f *Form) createLabel(item *FormItem) fyne.CanvasObject {
+	label := NewRichTextWithText(item.Text)
+	seg1 := label.Segments[0].(*TextSegment)
+	seg1.Style.Alignment = fyne.TextAlignTrailing
+	seg1.Style.TextStyle.Bold = true
 	if f.isVertical() {
-		label.Alignment = fyne.TextAlignLeading
+		seg1.Style.Alignment = fyne.TextAlignLeading
+	}
+
+	if item.Required {
+		marker := &TextSegment{Text: "* "}
+		if dis, ok := item.Widget.(fyne.Disableable); ok && dis.Disabled() {
+			marker.Style.ColorName = theme.ColorNameDisabled
+		} else {
+			marker.Style.ColorName = theme.ColorNameError
+		}
+		marker.Style.Inline = true
+		label.Segments = append([]RichTextSegment{marker}, label.Segments...)
 	}
 
 	return label
@@ -243,6 +257,12 @@ func (f *Form) checkValidation(err error) {
 			f.submitButton.Disable()
 			return
 		}
+		if item.Required {
+			if has, ok := item.Widget.(fyne.Requireable); ok && !has.HasValue() {
+				f.submitButton.Disable()
+				return
+			}
+		}
 	}
 
 	if !f.disabled {
@@ -265,7 +285,7 @@ func (f *Form) ensureRenderItems() {
 			continue
 		}
 
-		objects[off] = f.createLabel(item.Text)
+		objects[off] = f.createLabel(item)
 		off++
 		f.setUpValidation(item.Widget, i)
 		objects[off] = f.createInput(item)
@@ -302,8 +322,33 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 		f.checkValidation(err)
 		f.updateHelperText(f.Items[i])
 	}
+	updateRequired := func(hasValue bool) {
+		if !f.Items[i].Required {
+			f.Items[i].validationError = nil
+			f.Items[i].meetsRequired = false
+		} else {
+
+			if hasValue {
+				f.Items[i].validationError = nil
+				f.Items[i].meetsRequired = false
+			} else {
+				if f.Items[i].validationError == nil {
+					f.Items[i].validationError = errors.New("item is required")
+				}
+				f.Items[i].meetsRequired = true
+			}
+		}
+
+		f.checkValidation(f.Items[i].validationError)
+		f.updateHelperText(f.Items[i])
+	}
 	if w, ok := widget.(fyne.Validatable); ok {
 		f.Items[i].invalid = w.Validate() != nil
+		if r, ok := w.(fyne.Requireable); ok {
+			r.SetRequiredChanged(updateRequired)
+		} else if f.Items[i].Required {
+			fyne.LogError("Cannot mark a widget that is not `Requirable` as required", nil)
+		}
 		w.SetOnValidationChanged(updateValidation)
 	}
 }
@@ -365,24 +410,48 @@ func (f *Form) updateHelperText(item *FormItem) {
 
 func (f *Form) updateLabels() {
 	for i, item := range f.Items {
-		l := f.itemGrid.Objects[i*2].(*Label)
-		if dis, ok := item.Widget.(fyne.Disableable); ok {
-			if dis.Disabled() {
-				l.Importance = LowImportance
-			} else {
-				l.Importance = MediumImportance
+		r := f.itemGrid.Objects[i*2].(*RichText)
+
+		if len(r.Segments) == 1 {
+			if item.Required {
+				marker := &TextSegment{Text: "* "}
+				marker.Style.ColorName = theme.ColorNameError
+				marker.Style.Inline = true
+				r.Segments = append([]RichTextSegment{marker}, r.Segments...)
 			}
 		} else {
-			l.Importance = MediumImportance
+			if !item.Required {
+				r.Segments = r.Segments[1:]
+			}
+		}
+
+		if item.Required {
+			m := r.Segments[0].(*TextSegment)
+			if dis, ok := item.Widget.(fyne.Disableable); ok && dis.Disabled() {
+				m.Style.ColorName = theme.ColorNameDisabled
+			} else {
+				m.Style.ColorName = theme.ColorNameError
+			}
+		}
+
+		l := r.Segments[len(r.Segments)-1].(*TextSegment)
+		if dis, ok := item.Widget.(fyne.Disableable); ok {
+			if dis.Disabled() {
+				l.Style.ColorName = theme.ColorNameDisabled
+			} else {
+				l.Style.ColorName = theme.ColorNameForeground
+			}
+		} else {
+			l.Style.ColorName = theme.ColorNameForeground
 		}
 
 		l.Text = item.Text
 		if f.isVertical() {
-			l.Alignment = fyne.TextAlignLeading
+			l.Style.Alignment = fyne.TextAlignLeading
 		} else {
-			l.Alignment = fyne.TextAlignTrailing
+			l.Style.Alignment = fyne.TextAlignTrailing
 		}
-		l.Refresh()
+		r.Refresh()
 		f.updateHelperText(item)
 	}
 }

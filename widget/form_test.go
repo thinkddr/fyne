@@ -191,6 +191,39 @@ func TestForm_Hints(t *testing.T) {
 	test.AssertImageMatches(t, "form/hint_valid.png", w.Canvas().Capture())
 }
 
+func TestForm_Required(t *testing.T) {
+	test.NewTempApp(t)
+	test.ApplyTheme(t, test.Theme())
+
+	entry1 := &Entry{Text: "anything"}
+	entry2 := &Entry{}
+	items := []*FormItem{
+		{Text: "First", Widget: entry1},
+		{Text: "Second", Widget: entry2, Required: true},
+	}
+
+	form := &Form{Items: items, OnSubmit: func() {}, OnCancel: func() {}}
+	w := test.NewWindow(form)
+	defer w.Close()
+
+	label1 := form.itemGrid.Objects[0].(*RichText)
+	label2 := form.itemGrid.Objects[2].(*RichText)
+	assert.Equal(t, "First", label1.String())
+	assert.Equal(t, "* Second", label2.String())
+	assert.True(t, form.submitButton.Disabled())
+
+	test.Type(entry2, "thing")
+	assert.False(t, form.submitButton.Disabled())
+
+	entry2.SetText("")
+	assert.True(t, form.submitButton.Disabled())
+
+	form.Items[1].Required = false
+	form.Refresh()
+	assert.Equal(t, "Second", label2.String())
+	assert.False(t, form.submitButton.Disabled())
+}
+
 func TestForm_Validation(t *testing.T) {
 	test.NewTempApp(t)
 	test.ApplyTheme(t, test.Theme())

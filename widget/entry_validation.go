@@ -6,7 +6,23 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+var _ fyne.Requireable = (*Entry)(nil)
 var _ fyne.Validatable = (*Entry)(nil)
+
+// HasValue is used for required validation and returns true if the text is not entry.
+//
+// Since: 2.8
+func (e *Entry) HasValue() bool {
+	return e.Text != ""
+}
+
+// SetRequiredChanged is intended for parent widgets or containers to hook into the required state.
+// The function might be overwritten by a parent that cares about child state (e.g. widget.Form).
+//
+// Since: 2.8
+func (e *Entry) SetRequiredChanged(callback func(bool)) {
+	e.onRequiredChanged = callback
+}
 
 // Validate validates the current text in the widget.
 func (e *Entry) Validate() error {

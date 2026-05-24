@@ -11,6 +11,16 @@ type Validatable interface {
 	SetOnValidationChanged(func(error))
 }
 
+// Requireable is implemented by any widgets that want to support the
+// [Required] field of a [FormItem]
+//
+// Since: 2.8
+type Requireable interface {
+	HasValue() bool
+
+	SetRequiredChanged(func(bool))
+}
+
 // StringValidator is a function signature for validating string inputs.
 //
 // Since: 1.4
