@@ -406,15 +406,19 @@ func (t *RichText) updateRowBounds() {
 	wrapWidth := maxWidth
 
 	var currentBound *rowBoundary
-	var iterateSegments func(segList []RichTextSegment)
-	iterateSegments = func(segList []RichTextSegment) {
+	currentBoundDepth := 0
+	rowContinuationIndent := float32(-1)
+	var iterateSegments func(segList []RichTextSegment, depth int)
+	iterateSegments = func(segList []RichTextSegment, depth int) {
 		for _, seg := range segList {
 			if parent, ok := seg.(RichTextBlock); ok {
 				segs := parent.Segments()
-				iterateSegments(segs)
+				iterateSegments(segs, depth+1)
 				if len(segs) > 0 && !segs[len(segs)-1].Inline() {
 					wrapWidth = maxWidth
 					currentBound = nil
+					currentBoundDepth = depth
+					rowContinuationIndent = -1
 				}
 				continue
 			}
@@ -425,6 +429,7 @@ func (t *RichText) updateRowBounds() {
 					bound := rowBoundary{segments: []RichTextSegment{seg}}
 					bounds = append(bounds, bound)
 					currentBound = &bound
+					currentBoundDepth = depth
 				} else {
 					bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
 				}
@@ -435,6 +440,8 @@ func (t *RichText) updateRowBounds() {
 				} else {
 					wrapWidth = maxWidth
 					currentBound = nil
+					currentBoundDepth = depth
+					rowContinuationIndent = -1
 					fitSize.Height -= itemMin.Height + th.Size(theme.SizeNameLineSpacing)
 				}
 				continue
@@ -455,10 +462,26 @@ func (t *RichText) updateRowBounds() {
 			retBounds, height := lineBounds(t, seg, wrapWidth-leftPad, fyne.NewSize(maxWidth, fitSize.Height), func(text []rune) fyne.Size {
 				return fyne.MeasureText(string(text), textSize, textStyle)
 			})
+			boundWasNil := currentBound == nil
 			if currentBound != nil {
 				if len(retBounds) > 0 {
 					bounds[len(bounds)-1].end = retBounds[0].end // invalidate row ending as we have more content
 					bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
+					if depth > currentBoundDepth {
+						if rowContinuationIndent == -1 {
+							rowContinuationIndent = maxWidth - wrapWidth
+						}
+						if rowContinuationIndent > 0 {
+							runes := []rune(seg.Textual())
+							for i := range retBounds[1:] {
+								b := &retBounds[1+i]
+								if b.begin > 0 && b.begin <= len(runes) && runes[b.begin-1] == '\n' {
+									continue
+								}
+								b.indent = rowContinuationIndent
+							}
+						}
+					}
 					bounds = append(bounds, retBounds[1:]...)
 
 					fitSize.Height -= height
@@ -469,6 +492,10 @@ func (t *RichText) updateRowBounds() {
 				fitSize.Height -= height
 			}
 			currentBound = &bounds[len(bounds)-1]
+			if boundWasNil {
+				currentBoundDepth = depth
+				rowContinuationIndent = -1
+			}
 			if seg.Inline() {
 				last := bounds[len(bounds)-1]
 				begin := 0
@@ -494,12 +521,14 @@ func (t *RichText) updateRowBounds() {
 				}
 			} else {
 				currentBound = nil
+				currentBoundDepth = depth
+				rowContinuationIndent = -1
 				wrapWidth = maxWidth
 			}
 		}
 	}
 
-	iterateSegments(t.Segments)
+	iterateSegments(t.Segments, 0)
 	t.rowBounds = bounds
 }
 
@@ -537,6 +566,9 @@ func (r *textRenderer) Layout(size fyne.Size) {
 	rowAlign := fyne.TextAlignLeading
 	i := 0
 	for row, bound := range bounds {
+		leftPad, align := rowPaddingAndAlign(bound, lineSpacing, rowAlign)
+		rowAlign = align
+
 		for segI := range bound.segments {
 			if i == len(objs) {
 				break // Refresh may not have created all objects for all rows yet...
@@ -547,14 +579,14 @@ func (r *textRenderer) Layout(size fyne.Size) {
 			_, isText := obj.(*canvas.Text)
 			if !isText && !inline {
 				if len(rowItems) != 0 {
-					width, _ := r.layoutRow(rowItems, rowAlign, left, yPos, lineWidth)
+					width, _ := r.layoutRow(rowItems, rowAlign, left+leftPad, yPos, lineWidth-leftPad)
 					left += width
 					rowItems = nil
 				}
 				height := obj.MinSize().Height
 
-				obj.Move(fyne.NewPos(left, yPos))
-				obj.Resize(fyne.NewSize(lineWidth, height))
+				obj.Move(fyne.NewPos(left+leftPad, yPos))
+				obj.Resize(fyne.NewSize(lineWidth-leftPad, height))
 				yPos += height
 				left = xInset
 				continue
@@ -564,15 +596,6 @@ func (r *textRenderer) Layout(size fyne.Size) {
 				continue
 			}
 
-			leftPad := float32(0)
-			if text, ok := bound.segments[0].(*TextSegment); ok {
-				rowAlign = text.Style.Alignment
-				if text.Style == RichTextStyleBlockquote {
-					leftPad = lineSpacing * 4
-				}
-			} else if link, ok := bound.segments[0].(*HyperlinkSegment); ok {
-				rowAlign = link.Alignment
-			}
 			_, y := r.layoutRow(rowItems, rowAlign, left+leftPad, yPos, lineWidth-leftPad)
 			yPos += y
 			rowItems = nil
@@ -1018,7 +1041,7 @@ func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth
 
 			fitCount := howManyRunesFit(text[low:high], measureWidth, charWidth, measurer)
 			if fitCount == high-low { // all characters fit on this line
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
+				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0})
 				reuse++
 				low = high
 				high = l.end
@@ -1026,7 +1049,7 @@ func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth
 
 				yPos += lineHeight
 			} else if fitCount == 0 { // even a character won't fit
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1, false})
+				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1, false, 0})
 				reuse++
 				low++
 
@@ -1064,7 +1087,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 			sub := text[low:high]
 			fitCount := howManyRunesFit(sub, measureWidth, charWidth, measurer)
 			if fitCount == high-low { // all characters fit on this line
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
+				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0})
 				reuse++
 				low = high
 				high = l.end
@@ -1078,7 +1101,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 			}
 			if fitCount == 0 { // even a character won't fit
 				if measureWidth < max.Width {
-					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false})
+					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false, 0})
 					reuse++
 					measureWidth = max.Width
 					yPos += lineHeight
@@ -1090,7 +1113,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 					include = 0
 					ellipsis = true
 				}
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + include, ellipsis})
+				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + include, ellipsis, 0})
 				low++
 				high = low + 1
 				reuse++
@@ -1112,7 +1135,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 			oldHigh := high
 			high = low + fitCount
 			if low == 0 && measureWidth < max.Width { // add a newline as there is more space on next
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false})
+				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false, 0})
 				reuse++
 				high = oldHigh
 				measureWidth = max.Width
@@ -1157,12 +1180,12 @@ func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, 
 			}
 			end, full := truncateLimit(string(txt), textObj, int(measureWidth), []rune{'…'})
 			high = low + end
-			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full})
+			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full, 0})
 			reuse++
 		} else if trunc == fyne.TextTruncateClip {
 			fitCount := howManyRunesFit(text[low:high], measureWidth, charWidth, measurer)
 			high = low + fitCount
-			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
+			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0})
 			reuse++
 		}
 	}
@@ -1183,6 +1206,23 @@ func setAlign(obj fyne.CanvasObject, align fyne.TextAlign) {
 	}
 }
 
+// rowPaddingAndAlign returns the left padding and text alignment for a row.
+func rowPaddingAndAlign(bound rowBoundary, lineSpacing float32, currentAlign fyne.TextAlign) (float32, fyne.TextAlign) {
+	leftPad := bound.indent
+	align := currentAlign
+	if len(bound.segments) > 0 {
+		if text, ok := bound.segments[0].(*TextSegment); ok {
+			align = text.Style.Alignment
+			if text.Style == RichTextStyleBlockquote {
+				leftPad = lineSpacing * 4
+			}
+		} else if link, ok := bound.segments[0].(*HyperlinkSegment); ok {
+			align = link.Alignment
+		}
+	}
+	return leftPad, align
+}
+
 // splitLines accepts a text segment and returns a slice of boundary metadata denoting the
 // start and end indices of each line delimited by the newline character.
 func splitLines(seg RichTextSegment) []rowBoundary {
@@ -1193,11 +1233,11 @@ func splitLines(seg RichTextSegment) []rowBoundary {
 	for i := 0; i < length; i++ {
 		if text[i] == '\n' {
 			high = i
-			lines = append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, high, false})
+			lines = append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, high, false, 0})
 			low = i + 1
 		}
 	}
-	return append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, length, false})
+	return append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, length, false, 0})
 }
 
 func truncateLimit(s string, text *canvas.Text, limit int, ellipsis []rune) (int, bool) {
@@ -1250,4 +1290,5 @@ type rowBoundary struct {
 	firstSegmentReuse int
 	begin, end        int
 	ellipsis          bool
+	indent            float32
 }
