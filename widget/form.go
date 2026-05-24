@@ -11,10 +11,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-// errFormItemInitialState defines the error if the initial validation for a FormItem result
-// in an error
-var errFormItemInitialState = errors.New("widget.FormItem initial state error")
-
 // FormItem provides the details for a row in a form
 type FormItem struct {
 	Text   string
@@ -299,9 +295,7 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 		if i >= len(f.Items) {
 			return // called after form has been truncated
 		}
-		if err == errFormItemInitialState {
-			return
-		}
+
 		f.Items[i].validationError = err
 		f.Items[i].invalid = err != nil
 		f.setValidationError(err)
@@ -310,15 +304,6 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	}
 	if w, ok := widget.(fyne.Validatable); ok {
 		f.Items[i].invalid = w.Validate() != nil
-		if e, ok := w.(*Entry); ok {
-			e.onFocusChanged = func(bool) {
-				updateValidation(e.validationError)
-			}
-			if e.Validator != nil && f.Items[i].invalid {
-				// set initial state error to guarantee next error (if triggers) is always different
-				e.SetValidationError(errFormItemInitialState)
-			}
-		}
 		w.SetOnValidationChanged(updateValidation)
 	}
 }
@@ -410,7 +395,6 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.submitButton = &Button{Icon: th.Icon(theme.IconNameConfirm), OnTapped: f.OnSubmit, Importance: HighImportance}
 	buttons := &fyne.Container{Layout: layout.NewGridLayoutWithRows(1), Objects: []fyne.CanvasObject{f.cancelButton, f.submitButton}}
 	f.buttonBox = &fyne.Container{Layout: layout.NewBorderLayout(nil, nil, nil, buttons), Objects: []fyne.CanvasObject{buttons}}
-	f.validationError = errFormItemInitialState // set initial state error to guarantee next error (if triggers) is always different
 
 	f.itemGrid = &fyne.Container{Layout: layout.NewFormLayout()}
 	if f.isVertical() {

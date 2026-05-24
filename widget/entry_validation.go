@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"errors"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/theme"
@@ -53,16 +51,15 @@ func (e *Entry) SetValidationError(err error) {
 // setValidationError sets the validation error and returns a bool to indicate if it changes.
 // It assumes that the widget has a validator.
 func (e *Entry) setValidationError(err error) bool {
-	if err == nil && e.validationError == nil {
+	if e.focused || !e.hasFocused {
 		return false
 	}
-	if errors.Is(err, e.validationError) {
+	if err == nil && e.validationError == nil {
 		return false
 	}
 
 	changed := e.validationError != err
 	e.validationError = err
-
 	if e.onValidationChanged != nil && changed {
 		e.onValidationChanged(err)
 	}

@@ -83,12 +83,12 @@ type Entry struct {
 
 	cursorAnim *entryCursorAnimation
 
-	dirty       bool
-	focused     bool
-	text        RichText
-	placeholder RichText
-	content     *entryContent
-	scroll      *widget.Scroll
+	dirty               bool
+	focused, hasFocused bool
+	text                RichText
+	placeholder         RichText
+	content             *entryContent
+	scroll              *widget.Scroll
 
 	// useful for Form validation (as the error text should only be shown when
 	// the entry is unfocused)
@@ -303,6 +303,7 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 // FocusGained is called when the Entry has been given focus.
 func (e *Entry) FocusGained() {
 	e.setFieldsAndRefresh(func() {
+		e.hasFocused = true
 		e.dirty = true
 		e.focused = true
 	})
@@ -317,6 +318,10 @@ func (e *Entry) FocusLost() {
 		e.focused = false
 		e.selectKeyDown = false
 	})
+	if e.Validator != nil {
+		e.validate()
+		e.Refresh()
+	}
 	if e.onFocusChanged != nil {
 		e.onFocusChanged(false)
 	}
