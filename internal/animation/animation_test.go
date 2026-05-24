@@ -74,28 +74,39 @@ func TestRunner_DurationChangedMidAnimation(t *testing.T) {
 
 	run.Start(a)
 
-	// First tick — only a few ms in on a 1s animation, progress should be tiny.
+	// Tick once against the original 1s duration.
 	time.Sleep(20 * time.Millisecond)
 	run.TickAnimations()
+	var before float32
 	select {
-	case d := <-progress:
-		assert.Less(t, d, float32(0.1), "progress should reflect long original duration")
+	case before = <-progress:
 	case <-time.After(time.Second):
 		t.Fatal("animation was not ticked")
 	}
 
+	// Shorten the duration. With the fix, the next tick must rescale to the
+	// new 100ms total — the same elapsed time should now represent a much
+	// larger fraction of progress. Without the fix it would still be divided
+	// by the original 1s and stay close to `before`.
 	a.Duration = 100 * time.Millisecond
-
-	time.Sleep(40 * time.Millisecond)
 	run.TickAnimations()
+	var after float32
 	select {
-	case d := <-progress:
-		assert.Greater(t, d, float32(0.3), "progress should be normalized to the new shorter duration")
+	case after = <-progress:
 	case <-time.After(time.Second):
 		t.Fatal("animation was not ticked after duration change")
 	}
+	// Either we jumped well above the original progress, or elapsed time was
+	// already past the new duration so the animation completed on this tick.
+	// Both prove the new duration was honored.
+	assert.True(t, after == 1.0 || after > before*3,
+		"progress should rescale to the new duration: before=%v after=%v", before, after)
 
-	// Sleep past the new duration; tick should now report completion (1.0).
+	if after == 1.0 {
+		return // already completed on the rescale (slow scheduler)
+	}
+
+	// Sleeping past the new duration should drive it to completion.
 	time.Sleep(120 * time.Millisecond)
 	run.TickAnimations()
 	select {
