@@ -6,8 +6,10 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var _ fyne.Requireable = (*Entry)(nil)
-var _ fyne.Validatable = (*Entry)(nil)
+var (
+	_ fyne.Requireable = (*Entry)(nil)
+	_ fyne.Validatable = (*Entry)(nil)
+)
 
 // HasValue is used for required validation and returns true if the text is not entry.
 //

@@ -327,7 +327,6 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 			f.Items[i].validationError = nil
 			f.Items[i].meetsRequired = false
 		} else {
-
 			if hasValue {
 				f.Items[i].validationError = nil
 				f.Items[i].meetsRequired = false
