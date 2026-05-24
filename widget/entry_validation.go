@@ -69,6 +69,13 @@ func (e *Entry) SetValidationError(err error) {
 // setValidationError sets the validation error and returns a bool to indicate if it changes.
 // It assumes that the widget has a validator.
 func (e *Entry) setValidationError(err error) bool {
+	if e.AlwaysShowValidationError {
+		e.validationError = err
+		if e.onValidationChanged != nil {
+			e.onValidationChanged(err)
+		}
+		return true
+	}
 	if e.focused || !e.hasFocused {
 		return false
 	}
