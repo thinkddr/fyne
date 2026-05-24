@@ -130,7 +130,8 @@ func (r *Runner) runOneFrame() (done bool) {
 
 // tickAnimation will process a frame of animation and return true if this should continue animating
 func (r *Runner) tickAnimation(a *anim) bool {
-	if time.Now().After(a.end) {
+	duration := a.a.Duration
+	if time.Since(a.start) >= duration {
 		if a.reverse {
 			a.a.Tick(0.0)
 			if a.repeatsLeft == 0 {
@@ -153,13 +154,13 @@ func (r *Runner) tickAnimation(a *anim) bool {
 		}
 
 		a.start = time.Now()
-		a.end = a.start.Add(a.a.Duration)
 		return true
 	}
 
 	delta := time.Since(a.start).Milliseconds()
+	total := duration.Milliseconds()
 
-	val := float32(delta) / float32(a.total)
+	val := float32(delta) / float32(total)
 	curve := a.a.Curve
 	if curve == nil {
 		curve = fyne.AnimationEaseInOut

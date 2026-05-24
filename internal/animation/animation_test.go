@@ -61,6 +61,51 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 	run.animationMutex.RUnlock()
 }
 
+func TestRunner_DurationChangedMidAnimation(t *testing.T) {
+	progress := make(chan float32, 4)
+	run := &Runner{}
+	a := &fyne.Animation{
+		Duration: time.Second,
+		Curve:    fyne.AnimationLinear,
+		Tick: func(d float32) {
+			progress <- d
+		},
+	}
+
+	run.Start(a)
+
+	// First tick — only a few ms in on a 1s animation, progress should be tiny.
+	time.Sleep(20 * time.Millisecond)
+	run.TickAnimations()
+	select {
+	case d := <-progress:
+		assert.Less(t, d, float32(0.1), "progress should reflect long original duration")
+	case <-time.After(time.Second):
+		t.Fatal("animation was not ticked")
+	}
+
+	a.Duration = 100 * time.Millisecond
+
+	time.Sleep(40 * time.Millisecond)
+	run.TickAnimations()
+	select {
+	case d := <-progress:
+		assert.Greater(t, d, float32(0.3), "progress should be normalized to the new shorter duration")
+	case <-time.After(time.Second):
+		t.Fatal("animation was not ticked after duration change")
+	}
+
+	// Sleep past the new duration; tick should now report completion (1.0).
+	time.Sleep(120 * time.Millisecond)
+	run.TickAnimations()
+	select {
+	case d := <-progress:
+		assert.Equal(t, float32(1.0), d, "animation should complete based on the new duration")
+	case <-time.After(time.Second):
+		t.Fatal("animation did not complete after duration change")
+	}
+}
+
 func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 	var wg sync.WaitGroup
 	run := &Runner{}
