@@ -359,24 +359,18 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 }
 
 func (f *Form) setValidationError(err error) {
-	if err == nil && f.validationError == nil {
-		return
-	}
-
-	if !errors.Is(err, f.validationError) {
-		if err == nil {
-			for _, item := range f.Items {
-				if item.invalid {
-					err = item.validationError
-					break
-				}
+	if err == nil {
+		for _, item := range f.Items {
+			if item.invalid {
+				err = item.validationError
+				break
 			}
 		}
-		f.validationError = err
+	}
+	f.validationError = err
 
-		if f.onValidationChanged != nil {
-			f.onValidationChanged(err)
-		}
+	if f.onValidationChanged != nil {
+		f.onValidationChanged(err)
 	}
 }
 
