@@ -51,6 +51,12 @@ func (e *Entry) validate() {
 // The function might be overwritten by a parent that cares about child validation (e.g. widget.Form).
 func (e *Entry) SetOnValidationChanged(callback func(error)) {
 	e.onValidationChanged = callback
+
+	if e.Validator != nil && callback != nil && e.Text != "" {
+		if err := e.Validator(e.Text); err != nil {
+			callback(err)
+		}
+	}
 }
 
 // SetValidationError manually updates the validation status until the next input change.
@@ -76,17 +82,18 @@ func (e *Entry) setValidationError(err error) bool {
 		}
 		return true
 	}
-	if e.focused || !e.hasFocused {
-		return false
-	}
-	if err == nil && e.validationError == nil {
+
+	gone := err == nil
+	if !gone && (e.focused || (!e.hasFocused && e.Text == "")) {
 		return false
 	}
 
 	changed := e.validationError != err
 	e.validationError = err
-	if e.onValidationChanged != nil && changed {
-		e.onValidationChanged(err)
+	if e.onValidationChanged != nil {
+		if changed || gone {
+			e.onValidationChanged(err)
+		}
 	}
 
 	return true

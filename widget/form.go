@@ -144,6 +144,12 @@ func (f *Form) Disabled() bool {
 // The function might be overwritten by a parent that cares about child validation (e.g. widget.Form)
 func (f *Form) SetOnValidationChanged(callback func(error)) {
 	f.onValidationChanged = callback
+
+	if callback != nil {
+		if f.validationError != nil {
+			callback(f.validationError)
+		}
+	}
 }
 
 // Validate validates the entire form and returns the first error that is encountered.

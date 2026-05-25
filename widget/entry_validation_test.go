@@ -32,13 +32,11 @@ func TestEntry_ValidatedEntry(t *testing.T) {
 	entry.Validator = r
 	test.AssertRendersToMarkup(t, "entry/validate_initial.xml", c)
 
-	entry.FocusGained()
 	test.Type(entry, "2020-02")
 	assert.Error(t, r(entry.Text))
 	entry.FocusLost()
 	test.AssertRendersToMarkup(t, "entry/validate_invalid.xml", c)
 
-	entry.FocusGained()
 	test.Type(entry, "-12")
 	entry.FocusLost()
 	assert.NoError(t, r(entry.Text))

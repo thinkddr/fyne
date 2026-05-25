@@ -176,6 +176,8 @@ func TestForm_Hints(t *testing.T) {
 	}
 
 	form := &Form{Items: items, OnSubmit: func() {}, OnCancel: func() {}}
+	entry2.FocusGained()
+	entry2.FocusLost()
 	w := test.NewWindow(form)
 	defer w.Close()
 
@@ -243,8 +245,9 @@ func TestForm_Validation(t *testing.T) {
 
 	test.AssertImageMatches(t, "form/validation_initial.png", w.Canvas().Capture())
 
-	test.Type(entry2, "not-")
 	entry1.SetText("incorrect")
+	test.Type(entry2, "not-")
+	form.Refresh() // this was expecting a full refresh during type
 	w = test.NewTempWindow(t, form)
 
 	test.AssertImageMatches(t, "form/validation_invalid.png", w.Canvas().Capture())
@@ -300,9 +303,8 @@ func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 	test.AssertImageMatches(t, "form/validation_entry_first_type_initial.png", w.Canvas().Capture())
 
 	test.Type(entry1, "H")
+	entry1.FocusLost()
 	test.Type(entry2, "L")
-	entry1.focused = false
-	entry1.Refresh()
 	w = test.NewTempWindow(t, form)
 
 	test.AssertImageMatches(t, "form/validation_entry_first_type_valid.png", w.Canvas().Capture())
@@ -355,6 +357,9 @@ func TestForm_Disable_Validation(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 
 	entry := &Entry{Validator: validation.NewRegexp(`^\d{2}-\w{4}$`, "Input is not valid"), Text: "wrong"}
+	// user has interacted
+	entry.FocusGained()
+	entry.FocusLost()
 
 	form := &Form{Items: []*FormItem{{Text: "test", Widget: entry}}, OnSubmit: func() {}, OnCancel: func() {}}
 	w := test.NewWindow(form)
@@ -463,6 +468,7 @@ func TestForm_SetOnValidationChanged(t *testing.T) {
 	form.CreateRenderer()
 
 	entry1.SetText("incorrect")
+	entry1.FocusLost()
 	assert.Error(t, form.Validate())
 	assert.True(t, validationError)
 
