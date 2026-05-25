@@ -53,7 +53,8 @@ func toOSIcon(icon []byte) ([]byte, error) {
 	return toOSIconForRuntime(icon, runtime.GOOS)
 }
 
-// toOSIconForRuntime make a helper so test can work
+// toOSIconForRuntime takes the input image bytes and converts it to an image type
+// that is suitable for the specified GOOS runtime. Which makes platform-specific icon handling testable.
 func toOSIconForRuntime(icon []byte, goos string) ([]byte, error) {
 	if goos != "windows" && !usesUnixSystrayIcon(goos) {
 		return icon, nil
