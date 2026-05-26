@@ -61,7 +61,102 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 	run.animationMutex.RUnlock()
 }
 
-func TestRunner_DurationChangedMidAnimation(t *testing.T) {
+func TestRunner_DurationIncreasedMidAnimation(t *testing.T) {
+	progress := make(chan float32, 8)
+	run := &Runner{}
+	a := &fyne.Animation{
+		Duration: time.Second,
+		Curve:    fyne.AnimationLinear,
+		Tick: func(d float32) {
+			progress <- d
+		},
+	}
+	run.Start(a)
+
+	time.Sleep(200 * time.Millisecond)
+	run.TickAnimations()
+	var before float32
+	select {
+	case before = <-progress:
+	case <-time.After(time.Second):
+		t.Fatal("animation was not ticked")
+	}
+
+	// Extend the duration. The value passed to Tick must not snap backwards
+	// — dividing the same elapsed time by the new (larger) total would yield
+	// a smaller progress and visibly jump a progress bar in reverse.
+	a.Duration = 4 * time.Second
+	run.TickAnimations()
+	var after float32
+	select {
+	case after = <-progress:
+	case <-time.After(time.Second):
+		t.Fatal("animation was not ticked after duration change")
+	}
+	assert.InDelta(t, before, after, 0.1,
+		"progress should be preserved when Duration grows: before=%v after=%v", before, after)
+
+	// And from here it should pace against the new longer total — far from
+	// completing within a tiny extra wait.
+	time.Sleep(100 * time.Millisecond)
+	run.TickAnimations()
+	select {
+	case d := <-progress:
+		assert.Greater(t, d, after,
+			"progress should continue forward after pin: after=%v d=%v", after, d)
+		assert.Less(t, d, float32(0.6),
+			"progress should pace against the new longer duration: d=%v", d)
+	case <-time.After(time.Second):
+		t.Fatal("animation did not continue ticking")
+	}
+}
+
+func TestRunner_DurationDecreasedMidAnimation(t *testing.T) {
+	progress := make(chan float32, 8)
+	run := &Runner{}
+	a := &fyne.Animation{
+		Duration: time.Second,
+		Curve:    fyne.AnimationLinear,
+		Tick: func(d float32) {
+			progress <- d
+		},
+	}
+	run.Start(a)
+
+	time.Sleep(200 * time.Millisecond)
+	run.TickAnimations()
+	var before float32
+	select {
+	case before = <-progress:
+	case <-time.After(time.Second):
+		t.Fatal("animation was not ticked")
+	}
+
+	// Shorten Duration but keep it longer than time already elapsed. Progress
+	// must be preserved at the moment of change and then advance faster.
+	a.Duration = 400 * time.Millisecond
+	run.TickAnimations()
+	var after float32
+	select {
+	case after = <-progress:
+	case <-time.After(time.Second):
+		t.Fatal("animation was not ticked after duration change")
+	}
+	assert.InDelta(t, before, after, 0.1,
+		"progress should be preserved when Duration shrinks: before=%v after=%v", before, after)
+
+	// Sleeping past the new total should drive it to 1.0.
+	time.Sleep(300 * time.Millisecond)
+	run.TickAnimations()
+	select {
+	case d := <-progress:
+		assert.Equal(t, float32(1.0), d, "animation should complete on the new shorter duration")
+	case <-time.After(time.Second):
+		t.Fatal("animation did not complete after duration change")
+	}
+}
+
+func TestRunner_DurationShortenedBelowElapsed(t *testing.T) {
 	progress := make(chan float32, 4)
 	run := &Runner{}
 	a := &fyne.Animation{
@@ -71,49 +166,26 @@ func TestRunner_DurationChangedMidAnimation(t *testing.T) {
 			progress <- d
 		},
 	}
-
 	run.Start(a)
 
-	// Tick once against the original 1s duration.
-	time.Sleep(20 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	run.TickAnimations()
-	var before float32
 	select {
-	case before = <-progress:
+	case <-progress:
 	case <-time.After(time.Second):
 		t.Fatal("animation was not ticked")
 	}
 
-	// Shorten the duration. With the fix, the next tick must rescale to the
-	// new 100ms total — the same elapsed time should now represent a much
-	// larger fraction of progress. Without the fix it would still be divided
-	// by the original 1s and stay close to `before`.
-	a.Duration = 100 * time.Millisecond
-	run.TickAnimations()
-	var after float32
-	select {
-	case after = <-progress:
-	case <-time.After(time.Second):
-		t.Fatal("animation was not ticked after duration change")
-	}
-	// Either we jumped well above the original progress, or elapsed time was
-	// already past the new duration so the animation completed on this tick.
-	// Both prove the new duration was honored.
-	assert.True(t, after == 1.0 || after > before*3,
-		"progress should rescale to the new duration: before=%v after=%v", before, after)
-
-	if after == 1.0 {
-		return // already completed on the rescale (slow scheduler)
-	}
-
-	// Sleeping past the new duration should drive it to completion.
-	time.Sleep(120 * time.Millisecond)
+	// Shorten Duration below the elapsed time — animation must finish on the
+	// next tick rather than overshoot or stall.
+	a.Duration = 50 * time.Millisecond
 	run.TickAnimations()
 	select {
 	case d := <-progress:
-		assert.Equal(t, float32(1.0), d, "animation should complete based on the new duration")
+		assert.Equal(t, float32(1.0), d,
+			"animation should complete when new duration is shorter than elapsed time")
 	case <-time.After(time.Second):
-		t.Fatal("animation did not complete after duration change")
+		t.Fatal("animation did not complete")
 	}
 }
 

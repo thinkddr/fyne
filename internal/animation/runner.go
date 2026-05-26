@@ -131,7 +131,17 @@ func (r *Runner) runOneFrame() (done bool) {
 // tickAnimation will process a frame of animation and return true if this should continue animating
 func (r *Runner) tickAnimation(a *anim) bool {
 	duration := a.a.Duration
-	if time.Since(a.start) >= duration {
+	now := time.Now()
+
+	// If Duration changed since the last tick, pin progress to its current
+	// value so the value passed to Tick stays continuous across the change.
+	if duration != a.lastDuration {
+		a.pinProgress = a.progressFraction(now, a.lastDuration)
+		a.pinTime = now
+		a.lastDuration = duration
+	}
+
+	if !now.Before(a.start.Add(duration)) {
 		if a.reverse {
 			a.a.Tick(0.0)
 			if a.repeatsLeft == 0 {
@@ -153,14 +163,11 @@ func (r *Runner) tickAnimation(a *anim) bool {
 			}
 		}
 
-		a.start = time.Now()
+		a.resetCycle(time.Now())
 		return true
 	}
 
-	delta := time.Since(a.start).Milliseconds()
-	total := duration.Milliseconds()
-
-	val := float32(delta) / float32(total)
+	val := a.progressFraction(now, duration)
 	curve := a.a.Curve
 	if curve == nil {
 		curve = fyne.AnimationEaseInOut
