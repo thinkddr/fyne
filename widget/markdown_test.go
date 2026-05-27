@@ -12,10 +12,22 @@ import (
 func TestRichTextMarkdown_Blockquote(t *testing.T) {
 	r := NewRichTextFromMarkdown("p1\n\n> quote\n\np2")
 
-	assert.Len(t, r.Segments, 5)
+	assert.Len(t, r.Segments, 6)
 	if text, ok := r.Segments[2].(*TextSegment); ok {
 		assert.Equal(t, "quote", text.Text)
-		assert.Equal(t, RichTextStyleBlockquote, text.Style)
+		assert.Equal(t, 1, text.Style.QuotingDepth)
+	} else {
+		t.Error("Segment should be Text")
+	}
+}
+
+func TestRichTextMarkdown_NestedBlockquote(t *testing.T) {
+	r := NewRichTextFromMarkdown("p1\n\n> quote\n> > nested quote\n\np2")
+
+	assert.Len(t, r.Segments, 8)
+	if text, ok := r.Segments[4].(*TextSegment); ok {
+		assert.Equal(t, "nested quote", text.Text)
+		assert.Equal(t, 2, text.Style.QuotingDepth)
 	} else {
 		t.Error("Segment should be Text")
 	}

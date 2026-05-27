@@ -452,8 +452,8 @@ func (t *RichText) updateRowBounds() {
 			if textSeg, ok := seg.(*TextSegment); ok {
 				textStyle = textSeg.Style.TextStyle
 				textSize = textSeg.size()
-				if textSeg.Style == RichTextStyleBlockquote {
-					leftPad = innerPadding * 2
+				if textSeg.Style.QuotingDepth > 0 {
+					leftPad = innerPadding * 2 * float32(textSeg.Style.QuotingDepth)
 				}
 			} else if linkSeg, ok := seg.(*HyperlinkSegment); ok {
 				textStyle = linkSeg.TextStyle
@@ -1213,8 +1213,8 @@ func rowPaddingAndAlign(bound rowBoundary, lineSpacing float32, currentAlign fyn
 	if len(bound.segments) > 0 {
 		if text, ok := bound.segments[0].(*TextSegment); ok {
 			align = text.Style.Alignment
-			if text.Style == RichTextStyleBlockquote {
-				leftPad = lineSpacing * 4
+			if text.Style.QuotingDepth > 0 {
+				leftPad = lineSpacing * 4 * float32(text.Style.QuotingDepth)
 			}
 		} else if link, ok := bound.segments[0].(*HyperlinkSegment); ok {
 			align = link.Alignment
