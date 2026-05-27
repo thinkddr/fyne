@@ -21,6 +21,9 @@ type PopUpMenu struct {
 //
 // Since: 2.0
 func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
+	if c == nil {
+		return nil
+	}
 	m := &Menu{}
 	m.setMenu(menu)
 	p := &PopUpMenu{Menu: m, canvas: c}
@@ -40,6 +43,9 @@ func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 // It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
 func ShowPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) {
 	m := NewPopUpMenu(menu, c)
+	if m == nil {
+		return
+	}
 	m.ShowAtPosition(pos)
 }
 

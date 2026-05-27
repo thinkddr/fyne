@@ -583,9 +583,15 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	}
 
 	driver := app.Driver()
+	c := driver.CanvasForObject(super)
+	if c == nil {
+		// Entry was detached from its canvas between the tap event and
+		// this call (see fyne-io/fyne#5965). Skip the context menu.
+		return
+	}
 	entryPos := driver.AbsolutePositionForObject(super)
 	popUpPos := entryPos.Add(pe.Position)
-	e.popUp = NewPopUpMenu(fyne.NewMenu("", menuItems...), driver.CanvasForObject(super))
+	e.popUp = NewPopUpMenu(fyne.NewMenu("", menuItems...), c)
 	e.popUp.ShowAtPosition(popUpPos)
 }
 
