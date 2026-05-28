@@ -1,9 +1,5 @@
 [Details]
-  Icon = "../../theme/icons/fyne.png"
-  Name = "Fyne Hello"
+  Name = "Fyne_Hello"
   ID = "io.fyne.hello"
   Version = "2.6.0"
-  Build = 16
-
-[Migrations]
-  fyneDo = true
+  Build = 19
