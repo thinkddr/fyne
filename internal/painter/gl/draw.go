@@ -3,7 +3,6 @@ package gl
 import (
 	"image/color"
 	"math"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -352,12 +351,6 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 	}
 }
 
-// maxShaderFrameDelta caps the time advanced per drawn frame for a shader's
-// "time" uniform. It keeps long gaps between frames - such as while a shader is
-// stopped or its window is hidden - from accumulating, so animation resumes
-// smoothly rather than jumping forward.
-const maxShaderFrameDelta = 100 * time.Millisecond
-
 // shaderProgram returns the cached state for the given shader, building and
 // caching the program on first use. Programs are keyed by Shader.Name and kept
 // for the lifetime of the GL context, like the built in shader programs, so a
@@ -392,20 +385,6 @@ func (p *painter) shaderProgram(shader *canvas.Shader) (*shaderState, bool) {
 	return state, true
 }
 
-// shaderTime advances and returns the elapsed animation time for a shader. The
-// clock lives in the painter so the shader object does not have to expose it.
-func (s *shaderState) shaderTime(now time.Time) float32 {
-	if !s.lastFrame.IsZero() {
-		delta := now.Sub(s.lastFrame)
-		if delta > maxShaderFrameDelta {
-			delta = maxShaderFrameDelta
-		}
-		s.elapsed += delta
-	}
-	s.lastFrame = now
-	return float32(s.elapsed.Seconds())
-}
-
 func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyne.Size) {
 	state, ok := p.shaderProgram(shader)
 	if !ok {
@@ -434,7 +413,7 @@ func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyn
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
 
-	p.SetUniform1f(program, "time", state.shaderTime(time.Now()))
+	p.SetUniform1f(program, "time", cache.ShaderTime(shader.Name))
 	p.logError()
 	// Fragment: END
 

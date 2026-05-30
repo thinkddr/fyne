@@ -4,7 +4,6 @@ package gl
 import (
 	"fmt"
 	"image"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
@@ -71,16 +70,12 @@ type ProgramState struct {
 	attributes map[string]Attribute
 }
 
-// shaderState caches a user shader's compiled program along with the clock used
-// to feed its "time" uniform. valid is false when the source failed to compile,
-// so we can record the failure without comparing the (not always comparable)
-// program reference.
+// shaderState caches a user shader's compiled program. valid is false when the
+// source failed to compile, so we can record the failure without comparing the
+// (not always comparable) program reference.
 type shaderState struct {
 	program ProgramState
 	valid   bool
-
-	elapsed   time.Duration // animation time accumulated across drawn frames
-	lastFrame time.Time     // wall-clock time of the previous draw
 }
 
 type UniformState struct {

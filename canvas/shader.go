@@ -4,7 +4,13 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/cache"
 )
+
+// shaderMaxFrameDelta caps the time advanced per animation frame so that an
+// unusually long frame (such as the first one after the animation resumes)
+// does not make the shader jump forward.
+const shaderMaxFrameDelta = 100 * time.Millisecond
 
 // Declare conformity with CanvasObject interface
 var _ fyne.CanvasObject = (*Shader)(nil)
@@ -40,8 +46,10 @@ type Shader struct {
 	// SourceES is the GLSL fragment shader used on OpenGL ES, mobile and web.
 	SourceES []byte
 
-	anim    *fyne.Animation // drives continuous repaints while animating
-	running bool
+	anim     *fyne.Animation // drives continuous repaints while animating
+	running  bool
+	elapsed  time.Duration // animation time accumulated while running
+	lastTick time.Time     // wall-clock time of the previous animation tick
 }
 
 // NewShader returns a new Shader instance using the specified fragment shader
@@ -98,8 +106,10 @@ func (s *Shader) Start() {
 	}
 
 	s.running = true
+	s.lastTick = time.Time{} // the next tick re-establishes the clock, so the pause is not counted
 
 	s.anim = fyne.NewAnimation(time.Second, func(float32) {
+		s.advance(time.Now())
 		s.Refresh()
 	})
 	s.anim.Curve = fyne.AnimationLinear
@@ -108,7 +118,8 @@ func (s *Shader) Start() {
 }
 
 // Stop ends the animation started by Start. The "time" uniform freezes at its
-// current value, so the shader keeps its last rendered state until restarted.
+// current value, so the shader keeps its last rendered state until restarted -
+// a repaint triggered for any other reason will not advance it.
 // Calling Stop on a shader that is not animating has no effect.
 //
 // Since: 2.8
@@ -123,4 +134,19 @@ func (s *Shader) Stop() {
 		s.anim.Stop()
 		s.anim = nil
 	}
+}
+
+// advance accumulates animation time for the current frame and publishes it for
+// the painter. It is only called from the animation tick, so the shader's time
+// progresses solely while it is running, never on an unrelated repaint.
+func (s *Shader) advance(now time.Time) {
+	if !s.lastTick.IsZero() {
+		delta := now.Sub(s.lastTick)
+		if delta > shaderMaxFrameDelta {
+			delta = shaderMaxFrameDelta
+		}
+		s.elapsed += delta
+	}
+	s.lastTick = now
+	cache.SetShaderTime(s.Name, float32(s.elapsed.Seconds()))
 }
