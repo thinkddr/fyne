@@ -107,7 +107,7 @@ func (f *Form) Refresh() {
 	f.ensureRenderItems()
 	f.updateButtons()
 	f.updateLabels()
-	f.checkValidation(f.validationError)
+	f.checkValidation(nil)
 
 	if f.isVertical() {
 		f.itemGrid.Layout = layout.NewVBoxLayout()
@@ -286,6 +286,7 @@ func (f *Form) checkValidation(err error) {
 			f.submitButton.Disable()
 			return
 		} else {
+			f.validationError = nil
 			f.validateText.Hide()
 		}
 	}

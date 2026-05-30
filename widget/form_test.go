@@ -258,6 +258,33 @@ func TestForm_Validation(t *testing.T) {
 	test.AssertImageMatches(t, "form/validation_valid.png", w.Canvas().Capture())
 }
 
+func TestForm_Validator(t *testing.T) {
+	test.NewTempApp(t)
+
+	valid := false
+	form := &Form{
+		Items:    []*FormItem{{Text: "First", Widget: &Entry{Text: "value"}}},
+		OnSubmit: func() {},
+		Validator: func() error {
+			if !valid {
+				return errors.New("form is not valid yet")
+			}
+			return nil
+		},
+	}
+	test.NewTempWindow(t, form)
+
+	assert.True(t, form.submitButton.Disabled())
+
+	valid = true
+	form.Refresh()
+	assert.False(t, form.submitButton.Disabled())
+
+	valid = false
+	form.Refresh()
+	assert.True(t, form.submitButton.Disabled())
+}
+
 func TestForm_Validation_Reset(t *testing.T) {
 	test.NewTempApp(t)
 	test.ApplyTheme(t, test.Theme())
