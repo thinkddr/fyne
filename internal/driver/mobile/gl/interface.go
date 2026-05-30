@@ -220,6 +220,11 @@ type Context interface {
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
 	Uniform1f(dst Uniform, v float32)
 
+	// Uniform1i writes an int uniform variable, used to bind a sampler to a texture unit.
+	//
+	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
+	Uniform1i(dst Uniform, v int)
+
 	// Uniform1fv writes a float array uniform variable.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml

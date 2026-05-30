@@ -3,6 +3,7 @@ package gl
 import (
 	"image/color"
 	"math"
+	"sort"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -414,11 +415,49 @@ func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyn
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
 
 	p.SetUniform1f(program, "time", cache.ShaderTime(shader.Name))
+	for name, v := range shader.Uniforms {
+		p.SetUniform1f(program, name, v)
+	}
+
+	p.bindShaderTextures(state, shader)
 	p.logError()
 	// Fragment: END
 
 	p.ctx.DrawArrays(triangleStrip, 0, 4)
 	p.logError()
+}
+
+// bindShaderTextures uploads (once) and binds the shader's textures to
+// successive texture units, pointing each "sampler2D <name>" uniform at its
+// unit. Units are assigned by sorted name so the mapping is stable across frames.
+func (p *painter) bindShaderTextures(state *shaderState, shader *canvas.Shader) {
+	if len(shader.Textures) == 0 {
+		return
+	}
+	if state.textures == nil {
+		state.textures = make(map[string]*shaderTexture, len(shader.Textures))
+	}
+
+	// Upload any new or replaced images first; uploading binds to texture unit 0,
+	// so it must happen before we assign the per-unit bindings below.
+	names := make([]string, 0, len(shader.Textures))
+	for name, img := range shader.Textures {
+		names = append(names, name)
+		if cached := state.textures[name]; cached == nil || cached.src != img {
+			if cached != nil {
+				p.ctx.DeleteTexture(cached.tex)
+			}
+			state.textures[name] = &shaderTexture{tex: p.imgToTexture(img, canvas.ImageScaleSmooth), src: img}
+		}
+	}
+	sort.Strings(names)
+
+	for i, name := range names {
+		p.ctx.ActiveTexture(texture0 + uint32(i))
+		p.ctx.BindTexture(texture2D, state.textures[name].tex)
+		p.SetUniform1i(state.program, name, int32(i))
+	}
+	p.ctx.ActiveTexture(texture0) // restore the default unit for later draws
 }
 
 func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.Size) {

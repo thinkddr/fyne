@@ -1,6 +1,7 @@
 package canvas
 
 import (
+	"image"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -28,6 +29,8 @@ var _ fyne.CanvasObject = (*Shader)(nil)
 //	uniform float time;        // elapsed animation time in seconds (see Start)
 //
 // and should compute its colour from gl_FragCoord, as the built in shapes do.
+// Any images set in Textures are additionally exposed as "uniform sampler2D"
+// values, and any values in Uniforms as "uniform float", named by their map key.
 //
 // Two source variants are held so that the object renders on both desktop
 // OpenGL (core profile) and OpenGL ES / mobile / web targets.
@@ -45,6 +48,19 @@ type Shader struct {
 
 	// SourceES is the GLSL fragment shader used on OpenGL ES, mobile and web.
 	SourceES []byte
+
+	// Textures supplies named images to the shader. Each entry is uploaded to
+	// the GPU and exposed to the fragment shader as a "uniform sampler2D <name>".
+	// Images are uploaded once and reused; replacing an entry with a different
+	// image updates the GPU copy on the next paint, so static textures cost
+	// nothing per frame.
+	Textures map[string]image.Image
+
+	// Uniforms supplies named scalar values to the shader, each exposed to the
+	// fragment shader as a "uniform float <name>". They are applied every paint,
+	// so an application can drive a shader's parameters - for example animating a
+	// transition - by updating an entry and calling Refresh.
+	Uniforms map[string]float32
 
 	anim     *fyne.Animation // drives continuous repaints while animating
 	running  bool

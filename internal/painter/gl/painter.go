@@ -70,12 +70,20 @@ type ProgramState struct {
 	attributes map[string]Attribute
 }
 
-// shaderState caches a user shader's compiled program. valid is false when the
-// source failed to compile, so we can record the failure without comparing the
-// (not always comparable) program reference.
+// shaderState caches a user shader's compiled program and uploaded textures.
+// valid is false when the source failed to compile, so we can record the
+// failure without comparing the (not always comparable) program reference.
 type shaderState struct {
-	program ProgramState
-	valid   bool
+	program  ProgramState
+	valid    bool
+	textures map[string]*shaderTexture // uploaded textures, keyed by uniform name
+}
+
+// shaderTexture is a GPU texture uploaded for a shader, remembering the source
+// image so we only re-upload when it is replaced.
+type shaderTexture struct {
+	tex Texture
+	src image.Image
 }
 
 type UniformState struct {
@@ -91,6 +99,16 @@ func (p *painter) SetUniform1f(pState ProgramState, name string, v float32) {
 	}
 	u.prev[0] = v
 	p.ctx.Uniform1f(u.ref, v)
+}
+
+func (p *painter) SetUniform1i(pState ProgramState, name string, v int32) {
+	u := p.getUniformLocation(pState, name)
+	fv := float32(v)
+	if u.prev[0] == fv {
+		return
+	}
+	u.prev[0] = fv
+	p.ctx.Uniform1i(u.ref, v)
 }
 
 func (p *painter) SetUniform1fv(pState ProgramState, name string, v []float32) {

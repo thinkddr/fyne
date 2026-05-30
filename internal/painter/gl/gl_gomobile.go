@@ -324,6 +324,10 @@ func (c *mobileContext) Uniform1f(uniform Uniform, v float32) {
 	c.glContext.Uniform1f(gl.Uniform(uniform), v)
 }
 
+func (c *mobileContext) Uniform1i(uniform Uniform, v int32) {
+	c.glContext.Uniform1i(gl.Uniform(uniform), int(v))
+}
+
 func (c *mobileContext) Uniform1fv(uniform Uniform, v []float32) {
 	c.glContext.Uniform1fv(gl.Uniform(uniform), v)
 }

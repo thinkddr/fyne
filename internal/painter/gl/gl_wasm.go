@@ -296,6 +296,10 @@ func (c *xjsContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(gl.Uniform(uniform), v)
 }
 
+func (c *xjsContext) Uniform1i(uniform Uniform, v int32) {
+	gl.Uniform1i(gl.Uniform(uniform), int(v))
+}
+
 func (c *xjsContext) Uniform1fv(uniform Uniform, v []float32) {
 	gl.Uniform1fv(gl.Uniform(uniform), v)
 }

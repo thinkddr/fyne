@@ -40,6 +40,7 @@ type context interface {
 	TexParameteri(target, param uint32, value int32)
 	Uniform1f(uniform Uniform, v float32)
 	Uniform1fv(uniform Uniform, v []float32)
+	Uniform1i(uniform Uniform, v int32)
 	Uniform2f(uniform Uniform, v0, v1 float32)
 	Uniform2fv(uniform Uniform, v []float32)
 	Uniform4f(uniform Uniform, v0, v1, v2, v3 float32)
