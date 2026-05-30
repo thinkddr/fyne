@@ -86,6 +86,7 @@ typedef enum {
 	glfnVertexAttribPointer,
 	glfnViewport,
 	glfnCopyTexSubImage2D,
+	glfnDeleteProgram,
 } glfn;
 
 // TODO: generate this type from fn.go.

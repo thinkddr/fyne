@@ -346,7 +346,83 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 		p.drawArc(obj, pos, frame)
 	case *canvas.BezierCurve:
 		p.drawBezierCurve(obj, pos, frame)
+	case *canvas.Shader:
+		p.drawShader(obj, pos, frame)
 	}
+}
+
+// shaderProgram returns the compiled program for the given shader, building and
+// caching it on first use. The second return is false if the shader source could
+// not be compiled - in that case the failure is cached so we do not retry every frame.
+func (p *painter) shaderProgram(shader *canvas.Shader) (ProgramState, bool) {
+	if p.shaderPrograms == nil {
+		p.shaderPrograms = make(map[*canvas.Shader]shaderState)
+	}
+	if state, ok := p.shaderPrograms[shader]; ok {
+		return state.program, state.valid
+	}
+
+	ref, err := p.createProgramFromSource(rectangleVertexSource(), userShaderFragment(shader))
+	if err != nil {
+		fyne.LogError("Failed to compile shader "+shader.Name, err)
+		p.shaderPrograms[shader] = shaderState{} // cache the failure so we do not retry
+		return ProgramState{}, false
+	}
+
+	state := ProgramState{
+		ref:        ref,
+		buff:       p.createBuffer(16),
+		uniforms:   make(map[string]*UniformState),
+		attributes: make(map[string]Attribute),
+	}
+	p.shaderPrograms[shader] = shaderState{program: state, valid: true}
+	return state, true
+}
+
+func (p *painter) freeShaderProgram(shader *canvas.Shader) {
+	state, ok := p.shaderPrograms[shader]
+	if !ok {
+		return
+	}
+	if state.valid {
+		p.ctx.DeleteProgram(state.program.ref)
+		p.ctx.DeleteBuffer(state.program.buff)
+		p.logError()
+	}
+	delete(p.shaderPrograms, shader)
+}
+
+func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyne.Size) {
+	program, ok := p.shaderProgram(shader)
+	if !ok {
+		return
+	}
+
+	// Vertex: BEG
+	bounds, points := p.vecRectCoords(pos, shader, frame, 0.0)
+	p.ctx.UseProgram(program.ref)
+	p.updateBuffer(program.buff, points)
+	p.UpdateVertexArray(program, "vert", 2, 4, 0)
+	p.UpdateVertexArray(program, "normal", 2, 4, 2)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.logError()
+	// Vertex: END
+
+	// Fragment: BEG - the standard uniform contract shared with the built in vector shaders
+	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+
+	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
+	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+
+	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
+	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+	p.logError()
+	// Fragment: END
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
 }
 
 func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.Size) {

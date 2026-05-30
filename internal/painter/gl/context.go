@@ -17,6 +17,7 @@ type context interface {
 	CreateShader(typ uint32) Shader
 	CreateTexture() Texture
 	DeleteBuffer(buffer Buffer)
+	DeleteProgram(program Program)
 	DeleteTexture(texture Texture)
 	Disable(capability uint32)
 	DrawArrays(mode uint32, first, count int)

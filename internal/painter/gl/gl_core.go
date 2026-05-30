@@ -43,8 +43,9 @@ const (
 )
 
 const (
-	noBuffer = Buffer(0)
-	noShader = Shader(0)
+	noBuffer  = Buffer(0)
+	noProgram = Program(0)
+	noShader  = Shader(0)
 )
 
 type (
@@ -207,6 +208,10 @@ func (c *coreContext) CreateTexture() (texture Texture) {
 
 func (c *coreContext) DeleteBuffer(buffer Buffer) {
 	gl.DeleteBuffers(1, (*uint32)(&buffer))
+}
+
+func (c *coreContext) DeleteProgram(program Program) {
+	gl.DeleteProgram(uint32(program))
 }
 
 func (c *coreContext) DeleteTexture(texture Texture) {

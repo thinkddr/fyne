@@ -156,6 +156,10 @@ var glfnFuncs = [...]func(c call) (ret uintptr){
 		syscall.SyscallN(glDeleteTextures.Addr(), 1, uintptr(unsafe.Pointer(&c.args.a0)))
 		return ret
 	},
+	glfnDeleteProgram: func(c call) (ret uintptr) {
+		syscall.SyscallN(glDeleteProgram.Addr(), c.args.a0)
+		return ret
+	},
 	glfnDisable: func(c call) (ret uintptr) {
 		syscall.SyscallN(glDisable.Addr(), c.args.a0)
 		return ret
@@ -326,6 +330,7 @@ var (
 	glCreateProgram           = libGLESv2.NewProc("glCreateProgram")
 	glCreateShader            = libGLESv2.NewProc("glCreateShader")
 	glDeleteBuffers           = libGLESv2.NewProc("glDeleteBuffers")
+	glDeleteProgram           = libGLESv2.NewProc("glDeleteProgram")
 	glDeleteTextures          = libGLESv2.NewProc("glDeleteTextures")
 	glDisable                 = libGLESv2.NewProc("glDisable")
 	glDrawArrays              = libGLESv2.NewProc("glDrawArrays")

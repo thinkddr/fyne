@@ -208,6 +208,15 @@ func (ctx *context) DeleteBuffer(v Buffer) {
 	})
 }
 
+func (ctx *context) DeleteProgram(p Program) {
+	ctx.enqueue(call{
+		args: fnargs{
+			fn: glfnDeleteProgram,
+			a0: p.c(),
+		},
+	})
+}
+
 func (ctx *context) DeleteTexture(v Texture) {
 	ctx.enqueue(call{
 		args: fnargs{

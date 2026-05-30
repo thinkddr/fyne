@@ -106,6 +106,11 @@ type Context interface {
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glDeleteBuffers.xhtml
 	DeleteBuffer(v Buffer)
 
+	// DeleteProgram deletes the given program object.
+	//
+	// http://www.khronos.org/opengles/sdk/docs/man3/html/glDeleteProgram.xhtml
+	DeleteProgram(p Program)
+
 	// DeleteTexture deletes the given texture object.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glDeleteTextures.xhtml

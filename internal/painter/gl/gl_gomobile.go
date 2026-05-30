@@ -55,6 +55,7 @@ type (
 var (
 	compiled          []ProgramState // avoid multiple compilations with the re-used mobile GUI context
 	noBuffer          = Buffer{}
+	noProgram         = Program{}
 	noShader          = Shader{}
 	textureFilterToGL = [...]int32{gl.Linear, gl.Nearest, gl.Linear}
 )
@@ -225,6 +226,10 @@ func (c *mobileContext) CreateTexture() (texture Texture) {
 
 func (c *mobileContext) DeleteBuffer(buffer Buffer) {
 	c.glContext.DeleteBuffer(gl.Buffer(buffer))
+}
+
+func (c *mobileContext) DeleteProgram(program Program) {
+	c.glContext.DeleteProgram(gl.Program(program))
 }
 
 func (c *mobileContext) DeleteTexture(texture Texture) {

@@ -6,6 +6,7 @@ import (
 	"image"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/theme"
@@ -54,6 +55,7 @@ type painter struct {
 	arcProgram              ProgramState
 	bezierCurveProgram      ProgramState
 	arbitraryPolygonProgram ProgramState
+	shaderPrograms          map[*canvas.Shader]shaderState // lazily compiled programs for user shaders
 	texScale                float32
 	pixScale                float32 // pre-calculate scale*texScale for each draw
 	blurSnapTex             Texture // cached texture for GPU-side blur snapshot
@@ -67,6 +69,14 @@ type ProgramState struct {
 	buff       Buffer
 	uniforms   map[string]*UniformState
 	attributes map[string]Attribute
+}
+
+// shaderState caches a user shader's compiled program. valid is false when the
+// source failed to compile, so we can record the failure without comparing the
+// (not always comparable) program reference.
+type shaderState struct {
+	program ProgramState
+	valid   bool
 }
 
 type UniformState struct {
@@ -142,6 +152,9 @@ func (p *painter) Clear() {
 }
 
 func (p *painter) Free(obj fyne.CanvasObject) {
+	if shader, ok := obj.(*canvas.Shader); ok {
+		p.freeShaderProgram(shader)
+	}
 	p.freeTexture(obj)
 }
 
@@ -208,13 +221,25 @@ func (p *painter) createProgram(shaderFilename string) Program {
 		panic("shader not found: " + shaderFilename)
 	}
 
-	vertShader, err := p.compileShader(string(vertexSrc), vertexShader)
+	prog, err := p.createProgramFromSource(vertexSrc, fragmentSrc)
 	if err != nil {
 		panic(err)
 	}
+
+	return prog
+}
+
+// createProgramFromSource compiles and links the given vertex and fragment shader sources
+// into a program. Unlike createProgram it returns an error rather than panicking, so it is
+// safe to use with application supplied shader source that may fail to compile.
+func (p *painter) createProgramFromSource(vertexSrc, fragmentSrc []byte) (Program, error) {
+	vertShader, err := p.compileShader(string(vertexSrc), vertexShader)
+	if err != nil {
+		return noProgram, err
+	}
 	fragShader, err := p.compileShader(string(fragmentSrc), fragmentShader)
 	if err != nil {
-		panic(err)
+		return noProgram, err
 	}
 
 	prog := p.ctx.CreateProgram()
@@ -224,7 +249,7 @@ func (p *painter) createProgram(shaderFilename string) Program {
 
 	info := p.ctx.GetProgramInfoLog(prog)
 	if p.ctx.GetProgrami(prog, linkStatus) == glFalse {
-		panic(fmt.Errorf("failed to link OpenGL program:\n%s", info))
+		return noProgram, fmt.Errorf("failed to link OpenGL program:\n%s", info)
 	}
 
 	// The info is probably a null terminated string.
@@ -234,12 +259,12 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	}
 
 	if glErr := p.ctx.GetError(); glErr != 0 {
-		panic(fmt.Sprintf("failed to link OpenGL program; error code: %x", glErr))
+		return noProgram, fmt.Errorf("failed to link OpenGL program; error code: %x", glErr)
 	}
 
 	p.ctx.UseProgram(prog)
 
-	return prog
+	return prog, nil
 }
 
 func (p *painter) enableAttribArray(pState ProgramState, name string) Attribute {

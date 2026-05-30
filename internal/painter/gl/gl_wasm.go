@@ -54,6 +54,7 @@ type (
 
 var (
 	noBuffer          = Buffer(gl.NoBuffer)
+	noProgram         = Program(gl.NoProgram)
 	noShader          = Shader(gl.NoShader)
 	textureFilterToGL = [...]int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
 )
@@ -194,6 +195,10 @@ func (c *xjsContext) CreateTexture() (texture Texture) {
 
 func (c *xjsContext) DeleteBuffer(buffer Buffer) {
 	gl.DeleteBuffer(gl.Buffer(buffer))
+}
+
+func (c *xjsContext) DeleteProgram(program Program) {
+	gl.DeleteProgram(gl.Program(program))
 }
 
 func (c *xjsContext) DeleteTexture(texture Texture) {
