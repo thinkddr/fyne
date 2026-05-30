@@ -3,6 +3,7 @@ package gl
 import (
 	"image/color"
 	"math"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -351,52 +352,66 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 	}
 }
 
-// shaderProgram returns the compiled program for the given shader, building and
-// caching it on first use. The second return is false if the shader source could
-// not be compiled - in that case the failure is cached so we do not retry every frame.
-func (p *painter) shaderProgram(shader *canvas.Shader) (ProgramState, bool) {
+// maxShaderFrameDelta caps the time advanced per drawn frame for a shader's
+// "time" uniform. It keeps long gaps between frames - such as while a shader is
+// stopped or its window is hidden - from accumulating, so animation resumes
+// smoothly rather than jumping forward.
+const maxShaderFrameDelta = 100 * time.Millisecond
+
+// shaderProgram returns the cached state for the given shader, building and
+// caching the program on first use. Programs are keyed by Shader.Name and kept
+// for the lifetime of the GL context, like the built in shader programs, so a
+// per-frame Refresh does not recompile them (see Free). The second return is
+// false if the shader source could not be compiled - the failure is cached so
+// we do not retry, and log, every frame.
+func (p *painter) shaderProgram(shader *canvas.Shader) (*shaderState, bool) {
 	if p.shaderPrograms == nil {
-		p.shaderPrograms = make(map[*canvas.Shader]shaderState)
+		p.shaderPrograms = make(map[string]*shaderState)
 	}
-	if state, ok := p.shaderPrograms[shader]; ok {
-		return state.program, state.valid
+	if state, ok := p.shaderPrograms[shader.Name]; ok {
+		return state, state.valid
 	}
 
 	ref, err := p.createProgramFromSource(rectangleVertexSource(), userShaderFragment(shader))
 	if err != nil {
 		fyne.LogError("Failed to compile shader "+shader.Name, err)
-		p.shaderPrograms[shader] = shaderState{} // cache the failure so we do not retry
-		return ProgramState{}, false
+		p.shaderPrograms[shader.Name] = &shaderState{} // cache the failure so we do not retry
+		return p.shaderPrograms[shader.Name], false
 	}
 
-	state := ProgramState{
-		ref:        ref,
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
-		attributes: make(map[string]Attribute),
+	state := &shaderState{
+		program: ProgramState{
+			ref:        ref,
+			buff:       p.createBuffer(16),
+			uniforms:   make(map[string]*UniformState),
+			attributes: make(map[string]Attribute),
+		},
+		valid: true,
 	}
-	p.shaderPrograms[shader] = shaderState{program: state, valid: true}
+	p.shaderPrograms[shader.Name] = state
 	return state, true
 }
 
-func (p *painter) freeShaderProgram(shader *canvas.Shader) {
-	state, ok := p.shaderPrograms[shader]
-	if !ok {
-		return
+// shaderTime advances and returns the elapsed animation time for a shader. The
+// clock lives in the painter so the shader object does not have to expose it.
+func (s *shaderState) shaderTime(now time.Time) float32 {
+	if !s.lastFrame.IsZero() {
+		delta := now.Sub(s.lastFrame)
+		if delta > maxShaderFrameDelta {
+			delta = maxShaderFrameDelta
+		}
+		s.elapsed += delta
 	}
-	if state.valid {
-		p.ctx.DeleteProgram(state.program.ref)
-		p.ctx.DeleteBuffer(state.program.buff)
-		p.logError()
-	}
-	delete(p.shaderPrograms, shader)
+	s.lastFrame = now
+	return float32(s.elapsed.Seconds())
 }
 
 func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyne.Size) {
-	program, ok := p.shaderProgram(shader)
+	state, ok := p.shaderProgram(shader)
 	if !ok {
 		return
 	}
+	program := state.program
 
 	// Vertex: BEG
 	bounds, points := p.vecRectCoords(pos, shader, frame, 0.0)
@@ -418,6 +433,8 @@ func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyn
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+
+	p.SetUniform1f(program, "time", state.shaderTime(time.Now()))
 	p.logError()
 	// Fragment: END
 

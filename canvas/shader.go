@@ -1,6 +1,8 @@
 package canvas
 
 import (
+	"time"
+
 	"fyne.io/fyne/v2"
 )
 
@@ -17,6 +19,7 @@ var _ fyne.CanvasObject = (*Shader)(nil)
 //	uniform vec2 frame_size;   // the size of the output frame, in pixels
 //	uniform vec4 rect_coords;  // this object's bounds (x1, y1, x2, y2), in pixels
 //	uniform float edge_softness;
+//	uniform float time;        // elapsed animation time in seconds (see Start)
 //
 // and should compute its colour from gl_FragCoord, as the built in shapes do.
 //
@@ -36,6 +39,9 @@ type Shader struct {
 
 	// SourceES is the GLSL fragment shader used on OpenGL ES, mobile and web.
 	SourceES []byte
+
+	anim    *fyne.Animation // drives continuous repaints while animating
+	running bool
 }
 
 // NewShader returns a new Shader instance using the specified fragment shader
@@ -79,4 +85,42 @@ func (s *Shader) Resize(size fyne.Size) {
 	s.baseObject.Resize(size)
 
 	Refresh(s)
+}
+
+// Start begins animating this shader. While running the shader is redrawn every
+// frame and its "time" uniform advances, allowing the fragment shader to produce
+// motion. Calling Start on an already running shader has no effect.
+//
+// Since: 2.8
+func (s *Shader) Start() {
+	if s.running {
+		return
+	}
+
+	s.running = true
+
+	s.anim = fyne.NewAnimation(time.Second, func(float32) {
+		s.Refresh()
+	})
+	s.anim.Curve = fyne.AnimationLinear
+	s.anim.RepeatCount = fyne.AnimationRepeatForever
+	s.anim.Start()
+}
+
+// Stop ends the animation started by Start. The "time" uniform freezes at its
+// current value, so the shader keeps its last rendered state until restarted.
+// Calling Stop on a shader that is not animating has no effect.
+//
+// Since: 2.8
+func (s *Shader) Stop() {
+	if !s.running {
+		return
+	}
+
+	s.running = false
+
+	if s.anim != nil {
+		s.anim.Stop()
+		s.anim = nil
+	}
 }

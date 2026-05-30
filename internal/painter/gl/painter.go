@@ -4,9 +4,9 @@ package gl
 import (
 	"fmt"
 	"image"
+	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/theme"
@@ -55,7 +55,7 @@ type painter struct {
 	arcProgram              ProgramState
 	bezierCurveProgram      ProgramState
 	arbitraryPolygonProgram ProgramState
-	shaderPrograms          map[*canvas.Shader]shaderState // lazily compiled programs for user shaders
+	shaderPrograms          map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
 	texScale                float32
 	pixScale                float32 // pre-calculate scale*texScale for each draw
 	blurSnapTex             Texture // cached texture for GPU-side blur snapshot
@@ -71,12 +71,16 @@ type ProgramState struct {
 	attributes map[string]Attribute
 }
 
-// shaderState caches a user shader's compiled program. valid is false when the
-// source failed to compile, so we can record the failure without comparing the
-// (not always comparable) program reference.
+// shaderState caches a user shader's compiled program along with the clock used
+// to feed its "time" uniform. valid is false when the source failed to compile,
+// so we can record the failure without comparing the (not always comparable)
+// program reference.
 type shaderState struct {
 	program ProgramState
 	valid   bool
+
+	elapsed   time.Duration // animation time accumulated across drawn frames
+	lastFrame time.Time     // wall-clock time of the previous draw
 }
 
 type UniformState struct {
@@ -152,9 +156,11 @@ func (p *painter) Clear() {
 }
 
 func (p *painter) Free(obj fyne.CanvasObject) {
-	if shader, ok := obj.(*canvas.Shader); ok {
-		p.freeShaderProgram(shader)
-	}
+	// Shader programs are immutable and compiled once per Shader.Name, living for
+	// the lifetime of the GL context like the built in shader programs. They are
+	// deliberately not freed here: Free is also called for every object on each
+	// Refresh (see Canvas.FreeDirtyTextures), so freeing would recompile the
+	// program - and reset its animation clock - every single frame.
 	p.freeTexture(obj)
 }
 
