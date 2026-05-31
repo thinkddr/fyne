@@ -213,6 +213,10 @@ func renderHeading(source []byte, n ast.Node, quotingDepth int, listDepth int) (
 	default:
 		style = RichTextStyleStrong
 	}
+	if quotingDepth > 0 {
+		style.QuotingDepth = quotingDepth
+		style.TextStyle.Italic = true
+	}
 
 	children := make([]RichTextSegment, 0, n.ChildCount())
 	for childCount, child := n.ChildCount(), n.FirstChild(); childCount > 0; childCount-- {
