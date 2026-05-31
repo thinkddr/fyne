@@ -289,13 +289,3 @@ func (c *softwareCanvas) focusManager() *intapp.FocusManager {
 	}
 	return c.focusMgr
 }
-
-func (c *softwareCanvas) objectTrees() []fyne.CanvasObject {
-	overlays := c.Overlays().List()
-	trees := make([]fyne.CanvasObject, 0, len(overlays)+1)
-	if c.content != nil {
-		trees = append(trees, c.content)
-	}
-	trees = append(trees, overlays...)
-	return trees
-}

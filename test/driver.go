@@ -56,8 +56,13 @@ func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 		return fyne.NewPos(0, 0)
 	}
 
-	tc := c.(*softwareCanvas)
-	pos := intdriver.AbsolutePositionForObject(co, tc.objectTrees())
+	overlays := c.Overlays().List()
+	trees := make([]fyne.CanvasObject, 0, len(overlays)+1)
+	if content := c.Content(); content != nil {
+		trees = append(trees, content)
+	}
+	trees = append(trees, overlays...)
+	pos := intdriver.AbsolutePositionForObject(co, trees)
 	inset, _ := c.InteractiveArea()
 	return pos.Subtract(inset)
 }
