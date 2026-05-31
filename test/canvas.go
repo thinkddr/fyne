@@ -39,23 +39,13 @@ func Canvas() fyne.Canvas {
 // NewCanvas returns a single use in-memory canvas used for testing.
 // This canvas has no painter so calls to Capture() will return a blank image.
 func NewCanvas() WindowlessCanvas {
-	c := &canvas{
-		focusMgr: intapp.NewFocusManager(nil),
-		padded:   true,
-		scale:    1.0,
-		size:     fyne.NewSize(100, 100),
-	}
-	c.overlays.Canvas = c
-	return c
+	return newCanvas(nil, false)
 }
 
 // NewCanvasWithPainter allows creation of an in-memory canvas with a specific painter.
 // The painter will be used to render in the Capture() call.
 func NewCanvasWithPainter(painter fynedriver.Painter) WindowlessCanvas {
-	c := NewCanvas().(*canvas)
-	c.painter = painter
-
-	return c
+	return newCanvas(painter, false)
 }
 
 // NewTransparentCanvasWithPainter allows creation of an in-memory canvas with a specific painter without a background color.
@@ -63,9 +53,19 @@ func NewCanvasWithPainter(painter fynedriver.Painter) WindowlessCanvas {
 //
 // Since: 2.2
 func NewTransparentCanvasWithPainter(painter fynedriver.Painter) WindowlessCanvas {
-	c := NewCanvasWithPainter(painter).(*canvas)
-	c.transparent = true
+	return newCanvas(painter, true)
+}
 
+func newCanvas(painter fynedriver.Painter, transparent bool) WindowlessCanvas {
+	c := &canvas{
+		focusMgr:    intapp.NewFocusManager(nil),
+		padded:      true,
+		painter:     painter,
+		scale:       1.0,
+		size:        fyne.NewSize(100, 100),
+		transparent: transparent,
+	}
+	c.overlays.Canvas = c
 	return c
 }
 
