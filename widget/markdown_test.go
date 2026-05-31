@@ -46,11 +46,10 @@ func TestRichTextMarkdown_Code(t *testing.T) {
 
 	r.ParseMarkdown("``` go\ncode\nblock\n```")
 	assert.Len(t, r.Segments, 1)
-	if text, ok := r.Segments[0].(*TextSegment); ok {
-		assert.Equal(t, "code\nblock", text.Text)
-		assert.Equal(t, RichTextStyleCodeBlock, text.Style)
+	if code, ok := r.Segments[0].(*CodeBlockSegment); ok {
+		assert.Equal(t, "code\nblock", code.Text)
 	} else {
-		t.Error("Segment should be Text")
+		t.Error("Segment should be CodeBlock")
 	}
 }
 
