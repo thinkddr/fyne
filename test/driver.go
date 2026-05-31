@@ -1,11 +1,11 @@
 package test
 
 import (
-	"image"
 	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
+	fynedriver "fyne.io/fyne/v2/driver"
 	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/painter/software"
@@ -13,14 +13,9 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
-// SoftwarePainter describes a simple type that can render canvases
-type SoftwarePainter interface {
-	Paint(fyne.Canvas) image.Image
-}
-
 type driver struct {
 	device       device
-	painter      SoftwarePainter
+	painter      fynedriver.Painter
 	windows      []fyne.Window
 	windowsMutex sync.RWMutex
 }
@@ -45,7 +40,7 @@ func NewDriver() fyne.Driver {
 
 // NewDriverWithPainter creates a new dummy driver that will pass the given
 // painter to all canvases created
-func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
+func NewDriverWithPainter(painter fynedriver.Painter) fyne.Driver {
 	return &driver{painter: painter}
 }
 

@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne/v2"
+	fynedriver "fyne.io/fyne/v2/driver"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	intapp "fyne.io/fyne/v2/internal/app"
@@ -42,7 +43,7 @@ type canvas struct {
 	onTypedKey  func(*fyne.KeyEvent)
 
 	fyne.ShortcutHandler
-	painter      SoftwarePainter
+	painter      fynedriver.Painter
 	propertyLock sync.RWMutex
 }
 
@@ -70,7 +71,7 @@ func NewCanvas() WindowlessCanvas {
 
 // NewCanvasWithPainter allows creation of an in-memory canvas with a specific painter.
 // The painter will be used to render in the Capture() call.
-func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
+func NewCanvasWithPainter(painter fynedriver.Painter) WindowlessCanvas {
 	c := NewCanvas().(*canvas)
 	c.painter = painter
 
@@ -81,7 +82,7 @@ func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 // The painter will be used to render in the Capture() call.
 //
 // Since: 2.2
-func NewTransparentCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
+func NewTransparentCanvasWithPainter(painter fynedriver.Painter) WindowlessCanvas {
 	c := NewCanvasWithPainter(painter).(*canvas)
 	c.transparent = true
 
