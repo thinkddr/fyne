@@ -39,13 +39,13 @@ func Canvas() fyne.Canvas {
 // NewCanvas returns a single use in-memory canvas used for testing.
 // This canvas has no painter so calls to Capture() will return a blank image.
 func NewCanvas() WindowlessCanvas {
-	return &canvas{WindowlessCanvas: newSoftwareCanvas(nil, false)}
+	return wrapCanvas(newSoftwareCanvas(nil, false))
 }
 
 // NewCanvasWithPainter allows creation of an in-memory canvas with a specific painter.
 // The painter will be used to render in the Capture() call.
 func NewCanvasWithPainter(painter fynedriver.Painter) WindowlessCanvas {
-	return &canvas{WindowlessCanvas: newSoftwareCanvas(painter, false)}
+	return wrapCanvas(newSoftwareCanvas(painter, false))
 }
 
 // NewTransparentCanvasWithPainter allows creation of an in-memory canvas with a specific painter without a background color.
@@ -53,7 +53,7 @@ func NewCanvasWithPainter(painter fynedriver.Painter) WindowlessCanvas {
 //
 // Since: 2.2
 func NewTransparentCanvasWithPainter(painter fynedriver.Painter) WindowlessCanvas {
-	return &canvas{WindowlessCanvas: newSoftwareCanvas(painter, true)}
+	return wrapCanvas(newSoftwareCanvas(painter, true))
 }
 
 func newSoftwareCanvas(painter fynedriver.Painter, transparent bool) *softwareCanvas {
@@ -67,6 +67,10 @@ func newSoftwareCanvas(painter fynedriver.Painter, transparent bool) *softwareCa
 	}
 	c.overlays.Canvas = c
 	return c
+}
+
+func wrapCanvas(c WindowlessCanvas) *canvas {
+	return &canvas{WindowlessCanvas: c}
 }
 
 type canvas struct {
