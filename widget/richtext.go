@@ -1224,6 +1224,11 @@ func rowPaddingAndAlign(bound rowBoundary, lineSpacing float32, currentAlign fyn
 			if link.quotingLevel > 0 {
 				leftPad = lineSpacing * 4 * float32(link.quotingLevel)
 			}
+		} else if block, ok := bound.segments[0].(*CodeBlockSegment); ok {
+			align = fyne.TextAlignLeading
+			if block.quotingLevel > 0 {
+				leftPad = lineSpacing * 4 * float32(block.quotingLevel)
+			}
 		}
 	}
 	return leftPad, align

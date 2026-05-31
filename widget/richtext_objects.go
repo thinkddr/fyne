@@ -407,7 +407,8 @@ func (s *SeparatorSegment) Unselect() {
 //
 // Since: 2.8
 type CodeBlockSegment struct {
-	Text string
+	Text         string
+	quotingLevel int
 }
 
 // Inline returns false as a code block is a full-width block element.

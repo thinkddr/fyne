@@ -120,7 +120,7 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 		if data[len(data)-1] == '\n' {
 			data = data[:len(data)-1]
 		}
-		return []RichTextSegment{&CodeBlockSegment{Text: string(data)}}, nil
+		return []RichTextSegment{&CodeBlockSegment{Text: string(data), quotingLevel: quotingDepth}}, nil
 	case *ast.Emphasis:
 		return renderEmphasis(source, n, quotingDepth, n.(*ast.Emphasis).Level, listDepth)
 	case *ast2.Strikethrough:
