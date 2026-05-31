@@ -239,6 +239,7 @@ type ListSegment struct {
 	// number to any int, including 0.
 	startIndex       int
 	indentationLevel int
+	quotingLevel     int
 }
 
 // SetStartNumber sets the starting number for an ordered list.
@@ -274,7 +275,9 @@ func (l *ListSegment) Segments() []RichTextSegment {
 				j++
 			}
 			indentation := strings.Repeat(" ", l.indentationLevel*4)
-			bullet := &TextSegment{Text: indentation + txt + " ", Style: RichTextStyleStrong}
+			style := RichTextStyleStrong
+			style.QuotingDepth = l.quotingLevel
+			bullet := &TextSegment{Text: indentation + txt + " ", Style: style}
 			texts = append(texts, bullet)
 			if _, ok := in.(*ParagraphSegment); !ok {
 				in = &ParagraphSegment{Texts: []RichTextSegment{in}}

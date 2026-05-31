@@ -63,7 +63,7 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 	case *ast.List:
 		items, err := renderChildren(source, n, quotingDepth, listDepth+1)
 		return []RichTextSegment{
-			&ListSegment{startIndex: t.Start - 1, Items: items, Ordered: t.Marker != '*' && t.Marker != '-' && t.Marker != '+', indentationLevel: listDepth},
+			&ListSegment{startIndex: t.Start - 1, Items: items, Ordered: t.Marker != '*' && t.Marker != '-' && t.Marker != '+', indentationLevel: listDepth, quotingLevel: quotingDepth},
 		}, err
 	case *ast.ListItem:
 		children, err := renderChildren(source, n, quotingDepth, listDepth)
