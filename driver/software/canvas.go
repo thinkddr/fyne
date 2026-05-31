@@ -12,12 +12,21 @@ import (
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter/software"
 	"fyne.io/fyne/v2/internal/scale"
-	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 )
 
+// WindowlessCanvas provides functionality for a canvas to operate without a window
+type WindowlessCanvas interface {
+	fyne.Canvas
+
+	Padded() bool
+	Resize(fyne.Size)
+	SetPadded(bool)
+	SetScale(float32)
+}
+
 // NewCanvas creates a new canvas in memory that can render without hardware support.
-func NewCanvas() test.WindowlessCanvas {
+func NewCanvas() WindowlessCanvas {
 	return newCanvas(software.NewPainter(), false)
 }
 
@@ -25,14 +34,14 @@ func NewCanvas() test.WindowlessCanvas {
 // which uses the given driver.Painter for #Capture().
 //
 // Since: 2.8
-func NewCanvasWithPainter(painter driver.Painter) test.WindowlessCanvas {
+func NewCanvasWithPainter(painter driver.Painter) WindowlessCanvas {
 	return newCanvas(painter, false)
 }
 
 // NewTransparentCanvas creates a new canvas in memory that can render without hardware support without a background color.
 //
 // Since: 2.2
-func NewTransparentCanvas() test.WindowlessCanvas {
+func NewTransparentCanvas() WindowlessCanvas {
 	return newCanvas(software.NewPainter(), true)
 }
 
@@ -40,11 +49,11 @@ func NewTransparentCanvas() test.WindowlessCanvas {
 // which uses the given driver.Painter for #Capture() without a background color.
 //
 // Since: 2.8
-func NewTransparentCanvasWithPainter(painter driver.Painter) test.WindowlessCanvas {
+func NewTransparentCanvasWithPainter(painter driver.Painter) WindowlessCanvas {
 	return newCanvas(painter, true)
 }
 
-func newCanvas(painter driver.Painter, transparent bool) test.WindowlessCanvas {
+func newCanvas(painter driver.Painter, transparent bool) WindowlessCanvas {
 	c := &canvas{
 		focusMgr:    app.NewFocusManager(nil),
 		padded:      true,
