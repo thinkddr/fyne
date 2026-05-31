@@ -458,6 +458,9 @@ func (t *RichText) updateRowBounds() {
 			} else if linkSeg, ok := seg.(*HyperlinkSegment); ok {
 				textStyle = linkSeg.TextStyle
 				textSize = theme.SizeForWidget(theme.SizeNameText, t)
+				if linkSeg.quotingLevel > 0 {
+					leftPad = innerPadding * 2 * float32(linkSeg.quotingLevel)
+				}
 			}
 			retBounds, height := lineBounds(t, seg, wrapWidth-leftPad, fyne.NewSize(maxWidth, fitSize.Height), func(text []rune) fyne.Size {
 				return fyne.MeasureText(string(text), textSize, textStyle)
@@ -1218,6 +1221,9 @@ func rowPaddingAndAlign(bound rowBoundary, lineSpacing float32, currentAlign fyn
 			}
 		} else if link, ok := bound.segments[0].(*HyperlinkSegment); ok {
 			align = link.Alignment
+			if link.quotingLevel > 0 {
+				leftPad = lineSpacing * 4 * float32(link.quotingLevel)
+			}
 		}
 	}
 	return leftPad, align
