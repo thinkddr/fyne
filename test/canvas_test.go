@@ -1,4 +1,4 @@
-package test
+package test_test
 
 import (
 	"image/color"
@@ -6,14 +6,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"fyne.io/fyne/v2/widget"
-
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 func Test_canvas_Capture(t *testing.T) {
-	c := NewCanvas()
+	c := test.NewCanvas()
 	c.Resize(fyne.NewSquareSize(100))
 
 	img := c.Capture()
@@ -29,7 +29,7 @@ func Test_canvas_Capture(t *testing.T) {
 }
 
 func Test_canvas_InteractiveArea(t *testing.T) {
-	c := NewCanvas()
+	c := test.NewCanvas()
 	// TODO a custom interactive area that does not break other tests (overlays restrict to the space)
 	c.Resize(fyne.NewSize(600, 400))
 	pos, size := c.InteractiveArea()
@@ -38,17 +38,17 @@ func Test_canvas_InteractiveArea(t *testing.T) {
 }
 
 func Test_canvas_PixelCoordinateAtPosition(t *testing.T) {
-	c := NewCanvas().(*canvas).WindowlessCanvas.(*softwareCanvas)
+	c := test.NewCanvas()
 
 	pos := fyne.NewPos(4, 4)
-	c.scale = 2.5
+	c.SetScale(2.5)
 	x, y := c.PixelCoordinateForPosition(pos)
 	assert.Equal(t, 10, x)
 	assert.Equal(t, 10, y)
 }
 
 func Test_canvas_TransparentCapture(t *testing.T) {
-	c := NewTransparentCanvasWithPainter(nil)
+	c := test.NewTransparentCanvasWithPainter(nil)
 	c.Resize(fyne.NewSquareSize(10))
 
 	img := c.Capture()
@@ -64,7 +64,7 @@ func Test_canvas_TransparentCapture(t *testing.T) {
 }
 
 func Test_canvas_Resize(t *testing.T) {
-	c := NewCanvas()
+	c := test.NewCanvas()
 	assert.Equal(t, float32(100), c.Size().Width) // backwards compatible
 
 	smallSize := fyne.NewSize(10, 5)
@@ -74,7 +74,7 @@ func Test_canvas_Resize(t *testing.T) {
 	assert.Greater(t, c.Size().Width, smallSize.Width)
 	assert.Greater(t, c.Size().Height, smallSize.Height)
 
-	c = NewCanvas()
+	c = test.NewCanvas()
 	largeSize := fyne.NewSize(100, 75)
 	c.Resize(largeSize)
 	c.SetContent(widget.NewLabel("Smaller"))
