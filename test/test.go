@@ -68,7 +68,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 		return
 	}
 
-	tc, _ := c.(*softwareCanvas)
+	tc, _ := c.(*canvas)
 	var oldHovered, hovered desktop.Hoverable
 	if tc != nil {
 		oldHovered = tc.hovered

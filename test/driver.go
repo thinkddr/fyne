@@ -76,7 +76,7 @@ func (d *driver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {
-	c := NewCanvas().(*softwareCanvas)
+	c := NewCanvas().(*canvas).WindowlessCanvas.(*softwareCanvas)
 	if d.painter != nil {
 		c.painter = d.painter
 	} else {

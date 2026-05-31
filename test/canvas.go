@@ -57,6 +57,10 @@ func NewTransparentCanvasWithPainter(painter fynedriver.Painter) WindowlessCanva
 }
 
 func newCanvas(painter fynedriver.Painter, transparent bool) WindowlessCanvas {
+	return &canvas{WindowlessCanvas: newSoftwareCanvas(painter, transparent)}
+}
+
+func newSoftwareCanvas(painter fynedriver.Painter, transparent bool) *softwareCanvas {
 	c := &softwareCanvas{
 		focusMgr:    intapp.NewFocusManager(nil),
 		padded:      true,
@@ -69,6 +73,10 @@ func newCanvas(painter fynedriver.Painter, transparent bool) WindowlessCanvas {
 	return c
 }
 
+type canvas struct {
+	WindowlessCanvas
+	hovered desktop.Hoverable
+}
 type softwareCanvas struct {
 	size    fyne.Size
 	resized bool
@@ -77,7 +85,6 @@ type softwareCanvas struct {
 	content     fyne.CanvasObject
 	overlays    internal.OverlayStack
 	focusMgr    *intapp.FocusManager
-	hovered     desktop.Hoverable
 	padded      bool
 	transparent bool
 
