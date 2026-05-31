@@ -56,7 +56,7 @@ func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 		return fyne.NewPos(0, 0)
 	}
 
-	tc := c.(*canvas)
+	tc := c.(*softwareCanvas)
 	pos := intdriver.AbsolutePositionForObject(co, tc.objectTrees())
 	inset, _ := c.InteractiveArea()
 	return pos.Subtract(inset)
@@ -76,7 +76,7 @@ func (d *driver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {
-	c := NewCanvas().(*canvas)
+	c := NewCanvas().(*softwareCanvas)
 	if d.painter != nil {
 		c.painter = d.painter
 	} else {

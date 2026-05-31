@@ -4,8 +4,9 @@ import (
 	"image/color"
 	"testing"
 
-	"fyne.io/fyne/v2/widget"
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/v2/widget"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
@@ -37,7 +38,7 @@ func Test_canvas_InteractiveArea(t *testing.T) {
 }
 
 func Test_canvas_PixelCoordinateAtPosition(t *testing.T) {
-	c := NewCanvas().(*canvas)
+	c := NewCanvas().(*softwareCanvas)
 
 	pos := fyne.NewPos(4, 4)
 	c.scale = 2.5
