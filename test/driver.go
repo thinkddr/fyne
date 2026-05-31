@@ -76,13 +76,11 @@ func (d *driver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {
-	c := NewCanvas().(*canvas).WindowlessCanvas.(*softwareCanvas)
-	if d.painter != nil {
-		c.painter = d.painter
-	} else {
-		c.painter = software.NewPainter()
+	p := d.painter
+	if p == nil {
+		p = software.NewPainter()
 	}
-
+	c := NewCanvasWithPainter(p)
 	w := &window{canvas: c, driver: d, title: title}
 
 	d.windowsMutex.Lock()

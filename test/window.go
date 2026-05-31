@@ -12,7 +12,7 @@ type window struct {
 	onClosed           func()
 	onCloseIntercepted func()
 
-	canvas *softwareCanvas
+	canvas WindowlessCanvas
 	driver *driver
 	menu   *fyne.MainMenu
 }
