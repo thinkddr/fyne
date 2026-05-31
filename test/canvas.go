@@ -27,26 +27,6 @@ type WindowlessCanvas interface {
 	SetScale(float32)
 }
 
-type canvas struct {
-	size    fyne.Size
-	resized bool
-	scale   float32
-
-	content     fyne.CanvasObject
-	overlays    internal.OverlayStack
-	focusMgr    *intapp.FocusManager
-	hovered     desktop.Hoverable
-	padded      bool
-	transparent bool
-
-	onTypedRune func(rune)
-	onTypedKey  func(*fyne.KeyEvent)
-
-	fyne.ShortcutHandler
-	painter      fynedriver.Painter
-	propertyLock sync.RWMutex
-}
-
 // Canvas returns a reusable in-memory canvas used for testing
 func Canvas() fyne.Canvas {
 	if dummyCanvas == nil {
@@ -87,6 +67,26 @@ func NewTransparentCanvasWithPainter(painter fynedriver.Painter) WindowlessCanva
 	c.transparent = true
 
 	return c
+}
+
+type canvas struct {
+	size    fyne.Size
+	resized bool
+	scale   float32
+
+	content     fyne.CanvasObject
+	overlays    internal.OverlayStack
+	focusMgr    *intapp.FocusManager
+	hovered     desktop.Hoverable
+	padded      bool
+	transparent bool
+
+	onTypedRune func(rune)
+	onTypedKey  func(*fyne.KeyEvent)
+
+	fyne.ShortcutHandler
+	painter      fynedriver.Painter
+	propertyLock sync.RWMutex
 }
 
 func (c *canvas) Capture() image.Image {
