@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/test"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -53,4 +54,27 @@ func TestShader_Hide(t *testing.T) {
 
 	shader.Show()
 	assert.True(t, shader.Visible())
+}
+
+func TestShader_Refresh(t *testing.T) {
+	test.NewTempApp(t)
+	shader := canvas.NewShader("test", nil, nil)
+
+	assert.NotPanics(t, shader.Refresh)
+}
+
+func TestShader_StartStop(t *testing.T) {
+	test.NewTempApp(t)
+	shader := canvas.NewShader("test", nil, nil)
+
+	assert.NotPanics(t, shader.Stop, "Stopping a shader before start should be no-op")
+
+	assert.NotPanics(t, shader.Start)
+	assert.NotPanics(t, shader.Start, "Starting a started shader should be a no-op")
+
+	assert.NotPanics(t, shader.Stop)
+	assert.NotPanics(t, shader.Stop, "Stopping a stopped shader should be no-op")
+
+	assert.NotPanics(t, shader.Start, "Re-starting a shader should function correctly")
+	assert.NotPanics(t, shader.Stop)
 }
