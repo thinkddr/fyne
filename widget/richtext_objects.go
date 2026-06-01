@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/scale"
+	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -394,6 +395,94 @@ func (s *SeparatorSegment) SelectedText() string {
 
 // Unselect does nothing for a separator.
 func (s *SeparatorSegment) Unselect() {
+}
+
+// CodeBlockSegment represents a fenced or indented code block. It renders its
+// content as monospace text on a panel, so the block stands apart from the
+// surrounding prose.
+//
+// Since: 2.8
+type CodeBlockSegment struct {
+	Text string
+}
+
+// Inline returns false as a code block is a full-width block element.
+func (c *CodeBlockSegment) Inline() bool {
+	return false
+}
+
+// Textual returns the raw content of this code block.
+func (c *CodeBlockSegment) Textual() string {
+	return c.Text
+}
+
+// Visual returns a new panel widget rendering this code block.
+func (c *CodeBlockSegment) Visual() fyne.CanvasObject {
+	return newRichCodeBlock(c.Text)
+}
+
+// Update applies the current content of this segment to an existing visual.
+func (c *CodeBlockSegment) Update(o fyne.CanvasObject) {
+	o.(*richCodeBlock).setText(c.Text)
+}
+
+// Select does nothing for a code block.
+func (c *CodeBlockSegment) Select(_, _ fyne.Position) {
+}
+
+// SelectedText returns the code block content.
+func (c *CodeBlockSegment) SelectedText() string {
+	return c.Text
+}
+
+// Unselect does nothing for a code block.
+func (c *CodeBlockSegment) Unselect() {
+}
+
+// richCodeBlock is the internal widget that draws a code block: monospace text
+// on a rounded, bordered panel.
+type richCodeBlock struct {
+	BaseWidget
+	text  string
+	bg    *canvas.Rectangle
+	label *Label
+}
+
+func newRichCodeBlock(text string) *richCodeBlock {
+	c := &richCodeBlock{text: text}
+	c.ExtendBaseWidget(c)
+	return c
+}
+
+func (c *richCodeBlock) setText(text string) {
+	c.text = text
+	if c.label != nil {
+		c.label.SetText(text)
+	}
+}
+
+func (c *richCodeBlock) CreateRenderer() fyne.WidgetRenderer {
+	c.bg = canvas.NewRectangle(theme.Color(theme.ColorNameBackground))
+	c.bg.StrokeColor = theme.Color(theme.ColorNameInputBorder)
+	c.bg.StrokeWidth = 1
+	c.bg.CornerRadius = theme.Size(theme.SizeNameInputRadius)
+	c.label = NewLabelWithStyle(c.text, fyne.TextAlignLeading, fyne.TextStyle{Monospace: true})
+	scroll := widget.NewHScroll(c.label)
+	cont := &fyne.Container{Layout: &richCodeBlockLayout{}, Objects: []fyne.CanvasObject{c.bg, scroll}}
+	return NewSimpleRenderer(cont)
+}
+
+type richCodeBlockLayout struct{}
+
+func (l *richCodeBlockLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	return objects[1].MinSize()
+}
+
+func (l *richCodeBlockLayout) Layout(objects []fyne.CanvasObject, s fyne.Size) {
+	for _, o := range objects {
+		o.Move(fyne.NewPos(0, 0))
+		o.Resize(s)
+	}
 }
 
 // CheckBoxSegment represents checkbox (with text) in a rich text widget.
