@@ -467,11 +467,7 @@ func (c *richCodeBlock) CreateRenderer() fyne.WidgetRenderer {
 	c.bg.StrokeWidth = 1
 	c.bg.CornerRadius = theme.Size(theme.SizeNameInputRadius)
 	c.label = NewLabelWithStyle(c.text, fyne.TextAlignLeading, fyne.TextStyle{Monospace: true})
-	c.label.Wrapping = fyne.TextWrapOff
-
 	scroll := widget.NewHScroll(c.label)
-	scroll.SetMinSize(fyne.NewSize(0, c.label.MinSize().Height)) // keep height, scroll width
-
 	cont := &fyne.Container{Layout: &richCodeBlockLayout{}, Objects: []fyne.CanvasObject{c.bg, scroll}}
 	return NewSimpleRenderer(cont)
 }
