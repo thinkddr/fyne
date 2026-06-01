@@ -1,12 +1,13 @@
 package widget
 
 import (
+	"strings"
 	"testing"
 
+	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"github.com/stretchr/testify/assert"
-
-	"fyne.io/fyne/v2/storage"
 )
 
 func TestRichTextMarkdown_Blockquote(t *testing.T) {
@@ -51,6 +52,16 @@ func TestRichTextMarkdown_Code(t *testing.T) {
 	} else {
 		t.Error("Segment should be CodeBlock")
 	}
+}
+
+func TestRichTextMarkdown_CodeBlockScrolls(t *testing.T) {
+	long := strings.Repeat("abcdefghij", 50) // one ~500-char line
+	cb := newRichCodeBlock(long)
+	test.TempWidgetRenderer(t, cb)
+	min := cb.MinSize()
+
+	assert.Less(t, min.Width, float32(200)) // scrolls rather than demanding full width
+	assert.Greater(t, min.Height, float32(10))
 }
 
 func TestRichTextMarkdown_Code_Incomplete(t *testing.T) {

@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/scale"
+	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -467,12 +468,14 @@ func (c *richCodeBlock) CreateRenderer() fyne.WidgetRenderer {
 	c.bg.CornerRadius = theme.Size(theme.SizeNameInputRadius)
 	c.label = NewLabelWithStyle(c.text, fyne.TextAlignLeading, fyne.TextStyle{Monospace: true})
 	c.label.Wrapping = fyne.TextWrapOff
-	cont := &fyne.Container{Layout: &richCodeBlockLayout{}, Objects: []fyne.CanvasObject{c.bg, c.label}}
+
+	scroll := widget.NewHScroll(c.label)
+	scroll.SetMinSize(fyne.NewSize(0, c.label.MinSize().Height)) // keep height, scroll width
+
+	cont := &fyne.Container{Layout: &richCodeBlockLayout{}, Objects: []fyne.CanvasObject{c.bg, scroll}}
 	return NewSimpleRenderer(cont)
 }
 
-// richCodeBlockLayout stretches the background to fill the block while the
-// label (with its own inner padding) insets the code text from the edges.
 type richCodeBlockLayout struct{}
 
 func (l *richCodeBlockLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
