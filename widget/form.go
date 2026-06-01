@@ -140,6 +140,36 @@ func (f *Form) Disabled() bool {
 	return f.disabled
 }
 
+// RemoveItem removes a specified item from the form.
+//
+// Since: 2.8
+func (f *Form) RemoveItem(item *FormItem) {
+	if len(f.Items) == 0 {
+		return
+	}
+	if f.Items[0] == item {
+		f.Items = f.Items[1:]
+	} else if f.Items[len(f.Items)-1] == item {
+		f.Items = f.Items[:len(f.Items)-1]
+	} else {
+		pos := -1
+		for i, child := range f.Items {
+			if child == item {
+				pos = i
+				break
+			}
+		}
+
+		if pos != -1 {
+			f.Items = append(f.Items[:pos], f.Items[pos+1:]...)
+		} else {
+			return
+		}
+	}
+
+	f.Refresh()
+}
+
 // SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
 // The function might be overwritten by a parent that cares about child validation (e.g. widget.Form)
 func (f *Form) SetOnValidationChanged(callback func(error)) {

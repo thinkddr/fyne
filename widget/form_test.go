@@ -112,6 +112,23 @@ func TestForm_Renderer(t *testing.T) {
 	test.AssertRendersToMarkup(t, "form/layout.xml", w.Canvas())
 }
 
+func TestForm_RemoveItem(t *testing.T) {
+	mid := &FormItem{Text: "test2", Widget: NewEntry()}
+	end := &FormItem{Text: "test3", Widget: NewEntry()}
+	form := &Form{Items: []*FormItem{
+		{Text: "test1", Widget: NewEntry()}, mid, end,
+	}}
+	assert.Len(t, form.Items, 3)
+
+	form.RemoveItem(mid)
+	assert.Len(t, form.Items, 2)
+	assert.Equal(t, "test3", form.Items[1].Text)
+
+	form.RemoveItem(end)
+	assert.Len(t, form.Items, 1)
+	assert.Equal(t, "test1", form.Items[0].Text)
+}
+
 func TestForm_ChangeText(t *testing.T) {
 	item := NewFormItem("Test", NewEntry())
 	form := NewForm(item)
