@@ -11,18 +11,18 @@ var (
 	_ fyne.Validatable = (*Entry)(nil)
 )
 
-// HasValue is used for required validation and returns true if the text is not entry.
+// HasValue is used for required validation and returns true if the text is not empty.
 //
 // Since: 2.8
 func (e *Entry) HasValue() bool {
 	return e.Text != ""
 }
 
-// SetRequiredChanged is intended for parent widgets or containers to hook into the required state.
+// SetOnRequiredChanged is intended for parent widgets or containers to hook into the required state.
 // The function might be overwritten by a parent that cares about child state (e.g. widget.Form).
 //
 // Since: 2.8
-func (e *Entry) SetRequiredChanged(callback func(bool)) {
+func (e *Entry) SetOnRequiredChanged(callback func(bool)) {
 	e.onRequiredChanged = callback
 }
 

@@ -175,10 +175,8 @@ func (f *Form) RemoveItem(item *FormItem) {
 func (f *Form) SetOnValidationChanged(callback func(error)) {
 	f.onValidationChanged = callback
 
-	if callback != nil {
-		if f.validationError != nil {
-			callback(f.validationError)
-		}
+	if callback != nil && f.validationError != nil {
+		callback(f.validationError)
 	}
 }
 
@@ -380,7 +378,7 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	if w, ok := widget.(fyne.Validatable); ok {
 		f.Items[i].invalid = w.Validate() != nil
 		if r, ok := w.(fyne.Requireable); ok {
-			r.SetRequiredChanged(updateRequired)
+			r.SetOnRequiredChanged(updateRequired)
 		} else if f.Items[i].Required {
 			fyne.LogError("Cannot mark a widget that is not `Requirable` as required", nil)
 		}

@@ -18,7 +18,9 @@ type Validatable interface {
 type Requireable interface {
 	HasValue() bool
 
-	SetRequiredChanged(func(bool))
+	// SetOnRequiredChanged is used to set the callback that will be triggered when the required state changes.
+	// The function might be overwritten by a parent that cares about child validation (e.g. widget.Form).
+	SetOnRequiredChanged(func(bool))
 }
 
 // StringValidator is a function signature for validating string inputs.
