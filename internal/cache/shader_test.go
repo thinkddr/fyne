@@ -6,6 +6,29 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestDestroyExpiredShaders(t *testing.T) {
+	tm := &timeMock{}
+	tm.setTime(0, 0)
+	defer testClearAll()
+
+	SetShaderTime("shader-stale", 1.5)
+
+	// not yet expired
+	destroyExpiredShaders(tm.createTime(0, 30))
+	assert.Equal(t, float32(1.5), ShaderTime("shader-stale"))
+
+	// reading kept it alive, so it survives just past the original window
+	tm.setTime(1, 0)
+	destroyExpiredShaders(tm.createTime(1, 0))
+	assert.Equal(t, float32(1.5), ShaderTime("shader-stale"))
+
+	// no more access, it expires and is removed
+	destroyExpiredShaders(tm.createTime(5, 0))
+	_, ok := shaderTimes.Load("shader-stale")
+	assert.False(t, ok, "stale shader was not cleaned up")
+	assert.Equal(t, float32(0), ShaderTime("shader-stale"))
+}
+
 func TestShaderTime_unknown(t *testing.T) {
 	assert.Equal(t, float32(0), ShaderTime("shader-never-set"))
 }
