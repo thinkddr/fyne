@@ -644,7 +644,7 @@ func (t *TableSegment) Unselect() {
 func newTableCell(segs []RichTextSegment, align fyne.TextAlign, header bool) fyne.CanvasObject {
 	fill := theme.Color(theme.ColorNameBackground)
 	if header {
-		fill = theme.Color(theme.ColorNameInputBackground)
+		fill = theme.Color(theme.ColorNameHeaderBackground)
 	}
 	bg := canvas.NewRectangle(fill)
 
@@ -679,8 +679,6 @@ type tableSegmentLayout struct {
 	cols int
 }
 
-const tableSegmentGap float32 = 1
-
 func (l *tableSegmentLayout) measure(objects []fyne.CanvasObject) (colWidths, rowHeights []float32) {
 	rows := (len(objects) + l.cols - 1) / l.cols
 	colWidths = make([]float32, l.cols)
@@ -700,23 +698,25 @@ func (l *tableSegmentLayout) measure(objects []fyne.CanvasObject) (colWidths, ro
 
 func (l *tableSegmentLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	colWidths, rowHeights := l.measure(objects)
-	w := tableSegmentGap
+	gap := theme.Size(theme.SizeNameSeparatorThickness)
+	w := gap
 	for _, cw := range colWidths {
-		w += cw + tableSegmentGap
+		w += cw + gap
 	}
-	h := tableSegmentGap
+	h := gap
 	for _, rh := range rowHeights {
-		h += rh + tableSegmentGap
+		h += rh + gap
 	}
 	return fyne.NewSize(w, h)
 }
 
 func (l *tableSegmentLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	colWidths, rowHeights := l.measure(objects)
+	gap := theme.Size(theme.SizeNameSeparatorThickness)
 
-	minWidth := tableSegmentGap
+	minWidth := gap
 	for _, cw := range colWidths {
-		minWidth += cw + tableSegmentGap
+		minWidth += cw + gap
 	}
 	if extra := size.Width - minWidth; extra > 0 && l.cols > 0 {
 		share := extra / float32(l.cols)
@@ -725,9 +725,9 @@ func (l *tableSegmentLayout) Layout(objects []fyne.CanvasObject, size fyne.Size)
 		}
 	}
 
-	y := tableSegmentGap
+	y := gap
 	for r, rh := range rowHeights {
-		x := tableSegmentGap
+		x := gap
 		for c := 0; c < l.cols; c++ {
 			idx := r*l.cols + c
 			if idx >= len(objects) {
@@ -735,9 +735,9 @@ func (l *tableSegmentLayout) Layout(objects []fyne.CanvasObject, size fyne.Size)
 			}
 			objects[idx].Move(fyne.NewPos(x, y))
 			objects[idx].Resize(fyne.NewSize(colWidths[c], rh))
-			x += colWidths[c] + tableSegmentGap
+			x += colWidths[c] + gap
 		}
-		y += rh + tableSegmentGap
+		y += rh + gap
 	}
 }
 
