@@ -120,7 +120,8 @@ type HyperlinkSegment struct {
 	// Since 2.8
 	TextStyle fyne.TextStyle
 	// Since 2.8
-	SizeName fyne.ThemeSizeName // The theme name of the text size to use, if blank will be the standard text size
+	SizeName     fyne.ThemeSizeName // The theme name of the text size to use, if blank will be the standard text size
+	quotingLevel int
 }
 
 // Inline returns true as hyperlinks are inside other elements.
@@ -239,6 +240,7 @@ type ListSegment struct {
 	// number to any int, including 0.
 	startIndex       int
 	indentationLevel int
+	quotingLevel     int
 }
 
 // SetStartNumber sets the starting number for an ordered list.
@@ -274,7 +276,9 @@ func (l *ListSegment) Segments() []RichTextSegment {
 				j++
 			}
 			indentation := strings.Repeat(" ", l.indentationLevel*4)
-			bullet := &TextSegment{Text: indentation + txt + " ", Style: RichTextStyleStrong}
+			style := RichTextStyleStrong
+			style.QuotingDepth = l.quotingLevel
+			bullet := &TextSegment{Text: indentation + txt + " ", Style: style}
 			texts = append(texts, bullet)
 			if _, ok := in.(*ParagraphSegment); !ok {
 				in = &ParagraphSegment{Texts: []RichTextSegment{in}}
@@ -403,7 +407,8 @@ func (s *SeparatorSegment) Unselect() {
 //
 // Since: 2.8
 type CodeBlockSegment struct {
-	Text string
+	Text         string
+	quotingLevel int
 }
 
 // Inline returns false as a code block is a full-width block element.

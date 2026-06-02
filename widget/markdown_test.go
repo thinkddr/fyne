@@ -20,6 +20,60 @@ func TestRichTextMarkdown_Blockquote(t *testing.T) {
 	} else {
 		t.Error("Segment should be Text")
 	}
+
+	r = NewRichTextFromMarkdown("> # Head1\n> > # Head2")
+
+	assert.Len(t, r.Segments, 4)
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "Head1", text.Text)
+		assert.Equal(t, RichTextStyleHeading.SizeName, text.Style.SizeName)
+		assert.Equal(t, true, text.Style.TextStyle.Bold)
+		assert.Equal(t, true, text.Style.TextStyle.Italic)
+		assert.Equal(t, 1, text.Style.QuotingDepth)
+	} else {
+		t.Error("Segment should be blockquoted Heading")
+	}
+	if text, ok := r.Segments[2].(*TextSegment); ok {
+		assert.Equal(t, "Head2", text.Text)
+		assert.Equal(t, RichTextStyleHeading.SizeName, text.Style.SizeName)
+		assert.Equal(t, true, text.Style.TextStyle.Bold)
+		assert.Equal(t, true, text.Style.TextStyle.Italic)
+		assert.Equal(t, 2, text.Style.QuotingDepth)
+	} else {
+		t.Error("Segment should be a blockquoted Heading")
+	}
+
+	r = NewRichTextFromMarkdown("> - quoted list item")
+
+	assert.Len(t, r.Segments, 1)
+	if list, ok := r.Segments[0].(*ListSegment); ok {
+		assert.Len(t, list.Items[0].(*ParagraphSegment).Texts, 1)
+		assert.Equal(t, "quoted list item", list.Items[0].(*ParagraphSegment).Texts[0].(*TextSegment).Text)
+		assert.Equal(t, 1, list.Items[0].(*ParagraphSegment).Texts[0].(*TextSegment).Style.QuotingDepth)
+		assert.Equal(t, 1, list.quotingLevel)
+	} else {
+		t.Error("Segment should be a List")
+	}
+
+	r = NewRichTextFromMarkdown("> [fyne.io](https://fyne.io/)")
+
+	assert.Len(t, r.Segments, 2)
+	if link, ok := r.Segments[0].(*HyperlinkSegment); ok {
+		assert.Equal(t, "fyne.io", link.Text)
+		assert.Equal(t, 1, link.quotingLevel)
+	} else {
+		t.Error("Segment should be a blockquoted hyperlink")
+	}
+
+	r = NewRichTextFromMarkdown("> ```go\n> package main\n> ```")
+
+	assert.Len(t, r.Segments, 1)
+	if block, ok := r.Segments[0].(*CodeBlockSegment); ok {
+		assert.Equal(t, "package main", block.Text)
+		assert.Equal(t, 1, block.quotingLevel)
+	} else {
+		t.Error("Segment should be a blockquoted code block")
+	}
 }
 
 func TestRichTextMarkdown_NestedBlockquote(t *testing.T) {
