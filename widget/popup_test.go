@@ -69,7 +69,8 @@ func TestShowPopUpAtRelativePosition(t *testing.T) {
 	parent1 := NewLabel("Parent1")
 	parent2 := NewLabel("Parent2")
 	w := test.NewTempWindow(
-		t, &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{parent1, parent2}})
+		t, &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{parent1, parent2}},
+	)
 	w.Resize(fyne.NewSize(100, 200))
 
 	ShowPopUpAtRelativePosition(label, w.Canvas(), pos, parent2)
@@ -531,6 +532,59 @@ func TestModalPopUp_ResizeOnShow(t *testing.T) {
 	assert.Equal(t, fullSize, w.Canvas().Overlays().Top().Size())
 	assert.Equal(t, size, pop.Size())
 	pop.Hide()
+}
+
+// Repro for fyne-io/fyne#5965.
+//
+// Root cause: internal/widget.overlayRenderer.MinSize dereferences
+// OverlayContainer.canvas unconditionally. When the canvas reference is nil
+// (e.g. the owning widget was detached from its window between the tap event
+// and the popup creation) the call panics with a nil pointer dereference.
+//
+// Higher-level trigger seen in the wild: widget.Select.Tapped ->
+// showPopUp -> NewPopUpMenu(menu, c) where Driver.CanvasForObject(s.super())
+// returns nil because the Select was already removed from its parent tree.
+// That path is driver-specific (real GLFW driver consults the canvas cache;
+// the test driver fakes CanvasForObject), so the underlying contract is
+// exercised here directly.
+func TestNewPopUpMenu_NilCanvas_NoPanic(t *testing.T) {
+	test.NewTempApp(t)
+
+	menu := fyne.NewMenu(
+		"",
+		fyne.NewMenuItem("a", func() {}),
+		fyne.NewMenuItem("b", func() {}),
+		fyne.NewMenuItem("c", func() {}),
+	)
+
+	defer func() {
+		if r := recover(); r != nil {
+			t.Fatalf("NewPopUpMenu with nil canvas panicked: %v", r)
+		}
+	}()
+
+	pop := NewPopUpMenu(menu, nil)
+	if pop == nil {
+		return
+	}
+	pop.ShowAtPosition(fyne.NewPos(0, 0))
+}
+
+func TestShowPopUpMenuAtPosition_NilCanvas_NoPanic(t *testing.T) {
+	test.NewTempApp(t)
+
+	menu := fyne.NewMenu(
+		"",
+		fyne.NewMenuItem("only", func() {}),
+	)
+
+	defer func() {
+		if r := recover(); r != nil {
+			t.Fatalf("ShowPopUpMenuAtPosition with nil canvas panicked: %v", r)
+		}
+	}()
+
+	ShowPopUpMenuAtPosition(menu, nil, fyne.NewPos(0, 0))
 }
 
 func TestModelPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {

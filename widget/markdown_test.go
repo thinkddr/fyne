@@ -1,21 +1,34 @@
 package widget
 
 import (
+	"strings"
 	"testing"
 
+	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"github.com/stretchr/testify/assert"
-
-	"fyne.io/fyne/v2/storage"
 )
 
 func TestRichTextMarkdown_Blockquote(t *testing.T) {
 	r := NewRichTextFromMarkdown("p1\n\n> quote\n\np2")
 
-	assert.Len(t, r.Segments, 5)
+	assert.Len(t, r.Segments, 6)
 	if text, ok := r.Segments[2].(*TextSegment); ok {
 		assert.Equal(t, "quote", text.Text)
-		assert.Equal(t, RichTextStyleBlockquote, text.Style)
+		assert.Equal(t, 1, text.Style.QuotingDepth)
+	} else {
+		t.Error("Segment should be Text")
+	}
+}
+
+func TestRichTextMarkdown_NestedBlockquote(t *testing.T) {
+	r := NewRichTextFromMarkdown("p1\n\n> quote\n> > nested quote\n\np2")
+
+	assert.Len(t, r.Segments, 8)
+	if text, ok := r.Segments[4].(*TextSegment); ok {
+		assert.Equal(t, "nested quote", text.Text)
+		assert.Equal(t, 2, text.Style.QuotingDepth)
 	} else {
 		t.Error("Segment should be Text")
 	}
@@ -34,12 +47,21 @@ func TestRichTextMarkdown_Code(t *testing.T) {
 
 	r.ParseMarkdown("``` go\ncode\nblock\n```")
 	assert.Len(t, r.Segments, 1)
-	if text, ok := r.Segments[0].(*TextSegment); ok {
-		assert.Equal(t, "code\nblock", text.Text)
-		assert.Equal(t, RichTextStyleCodeBlock, text.Style)
+	if code, ok := r.Segments[0].(*CodeBlockSegment); ok {
+		assert.Equal(t, "code\nblock", code.Text)
 	} else {
-		t.Error("Segment should be Text")
+		t.Error("Segment should be CodeBlock")
 	}
+}
+
+func TestRichTextMarkdown_CodeBlockScrolls(t *testing.T) {
+	long := strings.Repeat("abcdefghij", 50) // one ~500-char line
+	cb := newRichCodeBlock(long)
+	test.TempWidgetRenderer(t, cb)
+	min := cb.MinSize()
+
+	assert.Less(t, min.Width, float32(200)) // scrolls rather than demanding full width
+	assert.Greater(t, min.Height, float32(10))
 }
 
 func TestRichTextMarkdown_Code_Incomplete(t *testing.T) {

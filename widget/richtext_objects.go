@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/scale"
+	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -18,7 +19,7 @@ var (
 	// Since: 2.1
 	RichTextStyleBlockquote = RichTextStyle{
 		ColorName: theme.ColorNameForeground,
-		Inline:    false,
+		Inline:    true,
 		SizeName:  theme.SizeNameText,
 		TextStyle: fyne.TextStyle{Italic: true},
 	}
@@ -275,6 +276,9 @@ func (l *ListSegment) Segments() []RichTextSegment {
 			indentation := strings.Repeat(" ", l.indentationLevel*4)
 			bullet := &TextSegment{Text: indentation + txt + " ", Style: RichTextStyleStrong}
 			texts = append(texts, bullet)
+			if _, ok := in.(*ParagraphSegment); !ok {
+				in = &ParagraphSegment{Texts: []RichTextSegment{in}}
+			}
 		}
 		texts = append(texts, in)
 		out[i] = &ParagraphSegment{Texts: texts}
@@ -393,6 +397,141 @@ func (s *SeparatorSegment) SelectedText() string {
 func (s *SeparatorSegment) Unselect() {
 }
 
+// CodeBlockSegment represents a fenced or indented code block. It renders its
+// content as monospace text on a panel, so the block stands apart from the
+// surrounding prose.
+//
+// Since: 2.8
+type CodeBlockSegment struct {
+	Text string
+}
+
+// Inline returns false as a code block is a full-width block element.
+func (c *CodeBlockSegment) Inline() bool {
+	return false
+}
+
+// Textual returns the raw content of this code block.
+func (c *CodeBlockSegment) Textual() string {
+	return c.Text
+}
+
+// Visual returns a new panel widget rendering this code block.
+func (c *CodeBlockSegment) Visual() fyne.CanvasObject {
+	return newRichCodeBlock(c.Text)
+}
+
+// Update applies the current content of this segment to an existing visual.
+func (c *CodeBlockSegment) Update(o fyne.CanvasObject) {
+	o.(*richCodeBlock).setText(c.Text)
+}
+
+// Select does nothing for a code block.
+func (c *CodeBlockSegment) Select(_, _ fyne.Position) {
+}
+
+// SelectedText returns the code block content.
+func (c *CodeBlockSegment) SelectedText() string {
+	return c.Text
+}
+
+// Unselect does nothing for a code block.
+func (c *CodeBlockSegment) Unselect() {
+}
+
+// richCodeBlock is the internal widget that draws a code block: monospace text
+// on a rounded, bordered panel.
+type richCodeBlock struct {
+	BaseWidget
+	text  string
+	bg    *canvas.Rectangle
+	label *Label
+}
+
+func newRichCodeBlock(text string) *richCodeBlock {
+	c := &richCodeBlock{text: text}
+	c.ExtendBaseWidget(c)
+	return c
+}
+
+func (c *richCodeBlock) setText(text string) {
+	c.text = text
+	if c.label != nil {
+		c.label.SetText(text)
+	}
+}
+
+func (c *richCodeBlock) CreateRenderer() fyne.WidgetRenderer {
+	c.bg = canvas.NewRectangle(theme.Color(theme.ColorNameBackground))
+	c.bg.StrokeColor = theme.Color(theme.ColorNameInputBorder)
+	c.bg.StrokeWidth = 1
+	c.bg.CornerRadius = theme.Size(theme.SizeNameInputRadius)
+	c.label = NewLabelWithStyle(c.text, fyne.TextAlignLeading, fyne.TextStyle{Monospace: true})
+	scroll := widget.NewHScroll(c.label)
+	cont := &fyne.Container{Layout: &richCodeBlockLayout{}, Objects: []fyne.CanvasObject{c.bg, scroll}}
+	return NewSimpleRenderer(cont)
+}
+
+type richCodeBlockLayout struct{}
+
+func (l *richCodeBlockLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	return objects[1].MinSize()
+}
+
+func (l *richCodeBlockLayout) Layout(objects []fyne.CanvasObject, s fyne.Size) {
+	for _, o := range objects {
+		o.Move(fyne.NewPos(0, 0))
+		o.Resize(s)
+	}
+}
+
+// CheckBoxSegment represents checkbox (with text) in a rich text widget.
+//
+// Since: 2.8
+type CheckBoxSegment struct {
+	Checked bool
+	Text    string
+}
+
+// Inline returns true as a CheckBoxSegment is usually part of a list item.
+func (c *CheckBoxSegment) Inline() bool {
+	return true
+}
+
+// Textual returns the content of this segment rendered to plain text.
+func (c *CheckBoxSegment) Textual() string {
+	if c.Checked {
+		return "[x] "
+	}
+	return "[ ] "
+}
+
+// Visual returns a new instance of a check widget for this segment.
+func (c *CheckBoxSegment) Visual() fyne.CanvasObject {
+	check := NewCheck(c.Text, nil)
+	if c.Checked {
+		check.SetChecked(true)
+	}
+	return &fyne.Container{Layout: &unpadTextWidgetLayout{parent: check}, Objects: []fyne.CanvasObject{check}}
+}
+
+// Update doesn't need to change a checkbox
+func (c *CheckBoxSegment) Update(fyne.CanvasObject) {
+}
+
+// Select does nothing for a checkbox.
+func (c *CheckBoxSegment) Select(_, _ fyne.Position) {
+}
+
+// SelectedText returns the empty string for a checkbox.
+func (c *CheckBoxSegment) SelectedText() string {
+	return ""
+}
+
+// Unselect does nothing for a checkbox.
+func (c *CheckBoxSegment) Unselect() {
+}
+
 // RichTextStyle describes the details of a text object inside a RichText widget.
 //
 // Since: 2.1
@@ -402,6 +541,8 @@ type RichTextStyle struct {
 	Inline    bool
 	SizeName  fyne.ThemeSizeName // The theme name of the text size to use, if blank will be the standard text size
 	TextStyle fyne.TextStyle
+	// Since: 2.8
+	QuotingDepth int
 
 	// an internal detail where we obscure password fields
 	concealed bool
