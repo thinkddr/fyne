@@ -63,18 +63,16 @@ func TestShader_Refresh(t *testing.T) {
 	assert.NotPanics(t, shader.Refresh)
 }
 
-func TestShader_StartStop(t *testing.T) {
+func TestNewShaderAnimation(t *testing.T) {
 	test.NewTempApp(t)
 	shader := canvas.NewShader("test", nil, nil)
 
-	assert.NotPanics(t, shader.Stop, "Stopping a shader before start should be no-op")
+	anim := canvas.NewShaderAnimation(shader)
+	assert.NotNil(t, anim)
 
-	assert.NotPanics(t, shader.Start)
-	assert.NotPanics(t, shader.Start, "Starting a started shader should be a no-op")
+	assert.NotPanics(t, anim.Start)
+	assert.NotPanics(t, anim.Stop)
 
-	assert.NotPanics(t, shader.Stop)
-	assert.NotPanics(t, shader.Stop, "Stopping a stopped shader should be no-op")
-
-	assert.NotPanics(t, shader.Start, "Re-starting a shader should function correctly")
-	assert.NotPanics(t, shader.Stop)
+	assert.NotPanics(t, anim.Start, "Re-starting a shader animation should function correctly")
+	assert.NotPanics(t, anim.Stop)
 }

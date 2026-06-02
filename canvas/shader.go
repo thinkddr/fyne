@@ -2,16 +2,9 @@ package canvas
 
 import (
 	"image"
-	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/cache"
 )
-
-// shaderMaxFrameDelta caps the time advanced per animation frame so that an
-// unusually long frame (such as the first one after the animation resumes)
-// does not make the shader jump forward.
-const shaderMaxFrameDelta = 100 * time.Millisecond
 
 // Declare conformity with CanvasObject interface
 var _ fyne.CanvasObject = (*Shader)(nil)
@@ -26,7 +19,7 @@ var _ fyne.CanvasObject = (*Shader)(nil)
 //	uniform vec2 frame_size;   // the size of the output frame, in pixels
 //	uniform vec4 rect_coords;  // this object's bounds (x1, y1, x2, y2), in pixels
 //	uniform float edge_softness;
-//	uniform float time;        // elapsed animation time in seconds (see Start)
+//	uniform float time;        // elapsed animation time in seconds (see NewShaderAnimation)
 //
 // and should compute its colour from gl_FragCoord, as the built in shapes do.
 // Any images set in Textures are additionally exposed as "uniform sampler2D"
@@ -61,11 +54,6 @@ type Shader struct {
 	// so an application can drive a shader's parameters - for example animating a
 	// transition - by updating an entry and calling Refresh.
 	Uniforms map[string]float32
-
-	anim     *fyne.Animation // drives continuous repaints while animating
-	running  bool
-	elapsed  time.Duration // animation time accumulated while running
-	lastTick time.Time     // wall-clock time of the previous animation tick
 }
 
 // NewShader returns a new Shader instance using the specified fragment shader
@@ -109,60 +97,4 @@ func (s *Shader) Resize(size fyne.Size) {
 	s.baseObject.Resize(size)
 
 	Refresh(s)
-}
-
-// Start begins animating this shader. While running the shader is redrawn every
-// frame and its "time" uniform advances, allowing the fragment shader to produce
-// motion. Calling Start on an already running shader has no effect.
-//
-// Since: 2.8
-func (s *Shader) Start() {
-	if s.running {
-		return
-	}
-
-	s.running = true
-	s.lastTick = time.Time{} // the next tick re-establishes the clock, so the pause is not counted
-
-	s.anim = fyne.NewAnimation(time.Second, func(float32) {
-		s.advance(time.Now())
-		s.Refresh()
-	})
-	s.anim.Curve = fyne.AnimationLinear
-	s.anim.RepeatCount = fyne.AnimationRepeatForever
-	s.anim.Start()
-}
-
-// Stop ends the animation started by Start. The "time" uniform freezes at its
-// current value, so the shader keeps its last rendered state until restarted -
-// a repaint triggered for any other reason will not advance it.
-// Calling Stop on a shader that is not animating has no effect.
-//
-// Since: 2.8
-func (s *Shader) Stop() {
-	if !s.running {
-		return
-	}
-
-	s.running = false
-
-	if s.anim != nil {
-		s.anim.Stop()
-		s.anim = nil
-	}
-}
-
-// advance accumulates animation time for the current frame and publishes it for
-// the painter. It is only called from the animation tick, so the shader's time
-// progresses solely while it is running, never on an unrelated repaint.
-func (s *Shader) advance(now time.Time) {
-	if !s.lastTick.IsZero() {
-		delta := now.Sub(s.lastTick)
-		if delta > shaderMaxFrameDelta {
-			delta = shaderMaxFrameDelta
-		}
-		s.elapsed += delta
-	}
-	s.lastTick = now
-	cache.SetShaderTime(s.Name, float32(s.elapsed.Seconds()))
 }

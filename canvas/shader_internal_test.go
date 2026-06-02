@@ -4,31 +4,28 @@ import (
 	"testing"
 	"time"
 
-	"fyne.io/fyne/v2/internal/cache"
-
 	"github.com/stretchr/testify/assert"
 )
 
-func TestShader_advance(t *testing.T) {
-	s := &Shader{Name: "test-advance"}
+func TestAdvanceShaderTime(t *testing.T) {
+	var elapsed time.Duration
+	var lastTick time.Time
 	base := time.Unix(100, 0)
 
-	// the first tick establishes the clock and publishes zero elapsed
-	s.advance(base)
-	assert.Equal(t, float32(0), cache.ShaderTime(s.Name))
+	// the first tick only establishes the clock, accumulating no time
+	elapsed, lastTick = advanceShaderTime(elapsed, lastTick, base)
+	assert.Equal(t, time.Duration(0), elapsed)
 
-	// a normal tick advances the published time by its own duration
-	s.advance(base.Add(16 * time.Millisecond))
-	assert.InDelta(t, 0.016, cache.ShaderTime(s.Name), 1e-4)
+	// a normal tick advances elapsed by its own duration
+	elapsed, lastTick = advanceShaderTime(elapsed, lastTick, base.Add(16*time.Millisecond))
+	assert.Equal(t, 16*time.Millisecond, elapsed)
 
-	// an unusually long tick is capped so the shader does not jump forward
-	s.advance(base.Add(16*time.Millisecond + 5*time.Second))
-	assert.InDelta(t, 0.016+shaderMaxFrameDelta.Seconds(), float64(cache.ShaderTime(s.Name)), 1e-4)
+	// an over-cap gap is treated as a pause/resume and contributes nothing, so
+	// the shader neither jumps forward nor counts time spent stopped
+	elapsed, lastTick = advanceShaderTime(elapsed, lastTick, base.Add(16*time.Millisecond+5*time.Second))
+	assert.Equal(t, 16*time.Millisecond, elapsed)
 
-	// Start resets lastTick; the first tick after resuming must not count the
-	// time that elapsed while the shader was stopped
-	resumeFrom := cache.ShaderTime(s.Name)
-	s.lastTick = time.Time{}
-	s.advance(base.Add(time.Hour))
-	assert.Equal(t, resumeFrom, cache.ShaderTime(s.Name))
+	// once resumed, a normal tick continues to accumulate from where it left off
+	elapsed, _ = advanceShaderTime(elapsed, lastTick, base.Add(32*time.Millisecond+5*time.Second))
+	assert.Equal(t, 32*time.Millisecond, elapsed)
 }
