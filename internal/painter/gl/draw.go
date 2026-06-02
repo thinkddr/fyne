@@ -411,9 +411,6 @@ func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyn
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
 	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
-	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
-	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
-
 	p.SetUniform1f(program, "time", cache.ShaderTime(shader.Name))
 	for name, v := range shader.Uniforms {
 		p.SetUniform1f(program, name, v)

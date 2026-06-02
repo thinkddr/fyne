@@ -18,7 +18,6 @@ var _ fyne.CanvasObject = (*Shader)(nil)
 //
 //	uniform vec2 frame_size;   // the size of the output frame, in pixels
 //	uniform vec4 rect_coords;  // this object's bounds (x1, y1, x2, y2), in pixels
-//	uniform float edge_softness;
 //	uniform float time;        // elapsed animation time in seconds (see NewShaderAnimation)
 //
 // and should compute its colour from gl_FragCoord, as the built in shapes do.
