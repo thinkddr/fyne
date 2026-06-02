@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/cache"
 )
 
 const (
@@ -104,7 +103,10 @@ func NewShaderAnimation(s *Shader) *fyne.Animation {
 		RepeatCount: fyne.AnimationRepeatForever,
 		Tick: func(float32) {
 			elapsed, lastTick = advanceShaderTime(elapsed, lastTick, time.Now())
-			cache.SetShaderTime(s.Name, float32(elapsed.Seconds()))
+			if s.Uniforms == nil {
+				s.Uniforms = make(map[string]float32, 1)
+			}
+			s.Uniforms["time"] = float32(elapsed.Seconds())
 			s.Refresh()
 		},
 	}

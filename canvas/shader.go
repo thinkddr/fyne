@@ -51,7 +51,9 @@ type Shader struct {
 	// Uniforms supplies named scalar values to the shader, each exposed to the
 	// fragment shader as a "uniform float <name>". They are applied every paint,
 	// so an application can drive a shader's parameters - for example animating a
-	// transition - by updating an entry and calling Refresh.
+	// transition - by updating an entry and calling Refresh. The "time" entry is
+	// supplied by NewShaderAnimation while a shader is animating; setting it
+	// directly lets a static shader pick an arbitrary frame.
 	Uniforms map[string]float32
 }
 
