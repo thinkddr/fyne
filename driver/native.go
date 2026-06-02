@@ -32,8 +32,7 @@ type AndroidWindowContext struct {
 // when it is executed on an iOS device.
 //
 // Since: 2.8
-type IOSWindowContext struct {
-}
+type IOSWindowContext struct{}
 
 // UnknownContext is passed to the RunNative callback when it is executed
 // on devices or windows without special native context.
