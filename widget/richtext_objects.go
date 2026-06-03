@@ -468,7 +468,7 @@ func (c *richCodeBlock) setText(text string) {
 }
 
 func (c *richCodeBlock) CreateRenderer() fyne.WidgetRenderer {
-	c.bg = canvas.NewRectangle(theme.Color(theme.ColorNameBackground))
+	c.bg = canvas.NewRectangle(theme.Color(theme.ColorNameInputBackground))
 	c.bg.StrokeColor = theme.Color(theme.ColorNameInputBorder)
 	c.bg.StrokeWidth = 1
 	c.bg.CornerRadius = theme.Size(theme.SizeNameInputRadius)
@@ -595,7 +595,7 @@ func (t *TextSegment) Textual() string {
 func (t *TextSegment) Visual() fyne.CanvasObject {
 	text := canvas.NewText(t.Text, t.color())
 	if t.Style.codeInline {
-		bg := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameBackground, t.parent))
+		bg := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameInputBackground, t.parent))
 		c := &fyne.Container{Layout: &codeInlineLayout{}, Objects: []fyne.CanvasObject{bg, text}}
 		t.Update(c)
 		return c
@@ -611,7 +611,7 @@ func (t *TextSegment) Update(o fyne.CanvasObject) {
 	if !ok { // inline code container: [background, text]
 		c := o.(*fyne.Container)
 		bg := c.Objects[0].(*canvas.Rectangle)
-		bg.FillColor = theme.ColorForWidget(theme.ColorNameBackground, t.parent)
+		bg.FillColor = theme.ColorForWidget(theme.ColorNameInputBackground, t.parent)
 		bg.Refresh()
 		obj = c.Objects[1].(*canvas.Text)
 	}

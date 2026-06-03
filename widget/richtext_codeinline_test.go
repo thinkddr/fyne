@@ -31,7 +31,7 @@ func TestTextSegment_InlineCodeVisualHasBackground(t *testing.T) {
 	if !ok {
 		t.Fatalf("first object should be the background rectangle, got %T", c.Objects[0])
 	}
-	assert.Equal(t, theme.Color(theme.ColorNameBackground), bg.FillColor)
+	assert.Equal(t, theme.Color(theme.ColorNameInputBackground), bg.FillColor)
 
 	txt, ok := c.Objects[1].(*canvas.Text)
 	if !ok {
@@ -73,7 +73,16 @@ func TestTextSegment_InlineCodeUpdate(t *testing.T) {
 
 	c := vis.(*fyne.Container)
 	assert.Equal(t, "y", c.Objects[1].(*canvas.Text).Text)
-	assert.Equal(t, theme.Color(theme.ColorNameBackground), c.Objects[0].(*canvas.Rectangle).FillColor)
+	assert.Equal(t, theme.Color(theme.ColorNameInputBackground), c.Objects[0].(*canvas.Rectangle).FillColor)
+}
+
+// The fenced code block shares the inline code background colour.
+func TestRichCodeBlock_BackgroundColour(t *testing.T) {
+	test.NewTempApp(t)
+
+	cb := newRichCodeBlock("x")
+	test.TempWidgetRenderer(t, cb)
+	assert.Equal(t, theme.Color(theme.ColorNameInputBackground), cb.bg.FillColor)
 }
 
 // A rendered document with inline code lays out without panicking and the code
