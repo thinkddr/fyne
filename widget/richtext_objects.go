@@ -36,10 +36,11 @@ var (
 	//
 	// Since: 2.1
 	RichTextStyleCodeInline = RichTextStyle{
-		ColorName: theme.ColorNameForeground,
-		Inline:    true,
-		SizeName:  theme.SizeNameText,
-		TextStyle: fyne.TextStyle{Monospace: true},
+		ColorName:  theme.ColorNameForeground,
+		Inline:     true,
+		SizeName:   theme.SizeNameText,
+		TextStyle:  fyne.TextStyle{Monospace: true},
+		codeInline: true,
 	}
 	// RichTextStyleEmphasis represents regular text with emphasis.
 	//
@@ -551,6 +552,9 @@ type RichTextStyle struct {
 
 	// an internal detail where we obscure password fields
 	concealed bool
+
+	// an internal detail marking inline code, which renders on a background fill
+	codeInline bool
 }
 
 // RichTextSegment describes any element that can be rendered in a RichText widget.
@@ -589,21 +593,51 @@ func (t *TextSegment) Textual() string {
 
 // Visual returns a new instance of a graphical element required to render this segment.
 func (t *TextSegment) Visual() fyne.CanvasObject {
-	obj := canvas.NewText(t.Text, t.color())
+	text := canvas.NewText(t.Text, t.color())
+	if t.Style.codeInline {
+		bg := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameBackground, t.parent))
+		c := &fyne.Container{Layout: &codeInlineLayout{}, Objects: []fyne.CanvasObject{bg, text}}
+		t.Update(c)
+		return c
+	}
 
-	t.Update(obj)
-	return obj
+	t.Update(text)
+	return text
 }
 
 // Update applies the current state of this text segment to an existing visual.
 func (t *TextSegment) Update(o fyne.CanvasObject) {
-	obj := o.(*canvas.Text)
+	obj, ok := o.(*canvas.Text)
+	if !ok { // inline code container: [background, text]
+		c := o.(*fyne.Container)
+		bg := c.Objects[0].(*canvas.Rectangle)
+		bg.FillColor = theme.ColorForWidget(theme.ColorNameBackground, t.parent)
+		bg.Refresh()
+		obj = c.Objects[1].(*canvas.Text)
+	}
 	obj.Text = t.Text
 	obj.Color = t.color()
 	obj.Alignment = t.Style.Alignment
 	obj.TextStyle = t.Style.TextStyle
 	obj.TextSize = t.size()
 	obj.Refresh()
+}
+
+// codeInlineLayout keeps the inline-code background tight to the text, so when
+// the row layout stretches the container to fill trailing space the fill does
+// not stretch with it.
+type codeInlineLayout struct{}
+
+func (codeInlineLayout) MinSize(o []fyne.CanvasObject) fyne.Size {
+	return o[1].MinSize()
+}
+
+func (codeInlineLayout) Layout(o []fyne.CanvasObject, _ fyne.Size) {
+	size := o[1].MinSize()
+	for _, obj := range o {
+		obj.Resize(size)
+		obj.Move(fyne.NewPos(0, 0))
+	}
 }
 
 // Select tells the segment that the user is selecting the content between the two positions.
