@@ -76,6 +76,29 @@ func TestTextSegment_InlineCodeUpdate(t *testing.T) {
 	assert.Equal(t, theme.Color(theme.ColorNameInputBackground), c.Objects[0].(*canvas.Rectangle).FillColor)
 }
 
+// Emphasised inline code (e.g. **`x`**) keeps its background. Emphasis mutates
+// the segment's TextStyle (sets Bold), so its Style no longer equals the
+// RichTextStyleCodeInline var — a struct-equality check would miss it, but the
+// codeInline marker survives the mutation.
+func TestTextSegment_EmphasisedInlineCodeHasBackground(t *testing.T) {
+	test.NewTempApp(t)
+
+	r := NewRichTextFromMarkdown("**`code`**")
+	var seg *TextSegment
+	for _, s := range r.Segments {
+		if ts, ok := s.(*TextSegment); ok && ts.Style.TextStyle.Monospace {
+			seg = ts
+		}
+	}
+	if seg == nil {
+		t.Fatal("no monospace inline-code segment found")
+	}
+	assert.True(t, seg.Style.TextStyle.Bold, "precondition: emphasis set Bold on the code segment")
+	assert.NotEqual(t, RichTextStyleCodeInline, seg.Style, "precondition: style differs from the var once Bold is set")
+	_, ok := seg.Visual().(*fyne.Container)
+	assert.True(t, ok, "emphasised inline code should still get a background")
+}
+
 // The fenced code block shares the inline code background colour.
 func TestRichCodeBlock_BackgroundColour(t *testing.T) {
 	test.NewTempApp(t)

@@ -548,18 +548,16 @@ type textRenderer struct {
 	obj *RichText
 }
 
-// codeInlineText returns the text inside an inline-code [background, text]
-// container, or a bare *canvas.Text as-is. It returns false for anything else,
-// including the single-child hyperlink container (hence the len == 2 check).
+// codeInlineText returns the text inside an inline-code container, identified by
+// its codeInlineLayout, or a bare *canvas.Text as-is. It returns false for any
+// other object.
 func codeInlineText(obj fyne.CanvasObject) (*canvas.Text, bool) {
 	switch o := obj.(type) {
 	case *canvas.Text:
 		return o, true
 	case *fyne.Container:
-		if len(o.Objects) == 2 {
-			if t, ok := o.Objects[1].(*canvas.Text); ok {
-				return t, true
-			}
+		if _, ok := o.Layout.(*codeInlineLayout); ok {
+			return o.Objects[1].(*canvas.Text), true
 		}
 	}
 	return nil, false
@@ -847,17 +845,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	driver := fyne.CurrentApp().Driver()
 	for i, text := range texts {
 		var size fyne.Size
-		if txt, ok := text.(*canvas.Text); ok {
-			s, base := driver.RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle, txt.FontSource)
-			if base > tallestBaseline {
-				if tallestBaseline > 0 {
-					realign = true
-				}
-				tallestBaseline = base
-			}
-			size = s
-			baselines[i] = base
-		} else if txt, ok := codeInlineText(text); ok {
+		if txt, ok := codeInlineText(text); ok { // bare text or an inline-code container
 			s, base := driver.RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle, txt.FontSource)
 			if base > tallestBaseline {
 				if tallestBaseline > 0 {
