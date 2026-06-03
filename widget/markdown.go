@@ -108,7 +108,7 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 		text := forceIntoText(source, n)
 		return []RichTextSegment{&TextSegment{Style: RichTextStyleCodeInline, Text: text}}, nil
 	case *ast.CodeBlock, *ast.FencedCodeBlock:
-		return renderCodeBlock(source, n), nil
+		return renderCodeBlock(source, n, quotingDepth), nil
 	case *ast.Emphasis:
 		return renderEmphasis(source, n, quotingDepth, n.(*ast.Emphasis).Level, listDepth)
 	case *ast2.Strikethrough:
@@ -161,7 +161,7 @@ func renderTable(source []byte, n *ast2.Table) *TableSegment {
 	return seg
 }
 
-func renderCodeBlock(source []byte, n ast.Node) []RichTextSegment {
+func renderCodeBlock(source []byte, n ast.Node, quotingDepth int) []RichTextSegment {
 	var data []byte
 	lines := n.Lines()
 	for i := 0; i < lines.Len(); i++ {
@@ -174,7 +174,7 @@ func renderCodeBlock(source []byte, n ast.Node) []RichTextSegment {
 	if data[len(data)-1] == '\n' {
 		data = data[:len(data)-1]
 	}
-	return []RichTextSegment{&CodeBlockSegment{Text: string(data)}}
+	return []RichTextSegment{&CodeBlockSegment{Text: string(data), quotingLevel: quotingDepth}}
 }
 
 func tableAlignment(a ast2.Alignment) fyne.TextAlign {
