@@ -6,9 +6,10 @@ import (
 )
 
 var (
-	_ fyne.Widget       = (*OverlayContainer)(nil)
-	_ fyne.Tappable     = (*OverlayContainer)(nil)
-	_ desktop.Hoverable = (*OverlayContainer)(nil)
+	_ fyne.Widget            = (*OverlayContainer)(nil)
+	_ fyne.Tappable          = (*OverlayContainer)(nil)
+	_ fyne.SecondaryTappable = (*OverlayContainer)(nil)
+	_ desktop.Hoverable      = (*OverlayContainer)(nil)
 )
 
 // OverlayContainer is a transparent widget containing one fyne.CanvasObject and meant to be used as overlay.
@@ -79,6 +80,14 @@ func (o *OverlayContainer) Show() {
 // Tapped catches tap events not handled by the container’s content.
 // It performs the overlay container’s dismiss action.
 func (o *OverlayContainer) Tapped(*fyne.PointEvent) {
+	if o.onDismiss != nil {
+		o.onDismiss()
+	}
+}
+
+// TappedSecondary catches secondary tap events not handled by the container’s content.
+// It performs the overlay container’s dismiss action.
+func (o *OverlayContainer) TappedSecondary(*fyne.PointEvent) {
 	if o.onDismiss != nil {
 		o.onDismiss()
 	}

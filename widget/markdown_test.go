@@ -1,12 +1,13 @@
 package widget
 
 import (
+	"strings"
 	"testing"
 
+	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"github.com/stretchr/testify/assert"
-
-	"fyne.io/fyne/v2/storage"
 )
 
 func TestRichTextMarkdown_Blockquote(t *testing.T) {
@@ -18,6 +19,60 @@ func TestRichTextMarkdown_Blockquote(t *testing.T) {
 		assert.Equal(t, 1, text.Style.QuotingDepth)
 	} else {
 		t.Error("Segment should be Text")
+	}
+
+	r = NewRichTextFromMarkdown("> # Head1\n> > # Head2")
+
+	assert.Len(t, r.Segments, 4)
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "Head1", text.Text)
+		assert.Equal(t, RichTextStyleHeading.SizeName, text.Style.SizeName)
+		assert.Equal(t, true, text.Style.TextStyle.Bold)
+		assert.Equal(t, true, text.Style.TextStyle.Italic)
+		assert.Equal(t, 1, text.Style.QuotingDepth)
+	} else {
+		t.Error("Segment should be blockquoted Heading")
+	}
+	if text, ok := r.Segments[2].(*TextSegment); ok {
+		assert.Equal(t, "Head2", text.Text)
+		assert.Equal(t, RichTextStyleHeading.SizeName, text.Style.SizeName)
+		assert.Equal(t, true, text.Style.TextStyle.Bold)
+		assert.Equal(t, true, text.Style.TextStyle.Italic)
+		assert.Equal(t, 2, text.Style.QuotingDepth)
+	} else {
+		t.Error("Segment should be a blockquoted Heading")
+	}
+
+	r = NewRichTextFromMarkdown("> - quoted list item")
+
+	assert.Len(t, r.Segments, 1)
+	if list, ok := r.Segments[0].(*ListSegment); ok {
+		assert.Len(t, list.Items[0].(*ParagraphSegment).Texts, 1)
+		assert.Equal(t, "quoted list item", list.Items[0].(*ParagraphSegment).Texts[0].(*TextSegment).Text)
+		assert.Equal(t, 1, list.Items[0].(*ParagraphSegment).Texts[0].(*TextSegment).Style.QuotingDepth)
+		assert.Equal(t, 1, list.quotingLevel)
+	} else {
+		t.Error("Segment should be a List")
+	}
+
+	r = NewRichTextFromMarkdown("> [fyne.io](https://fyne.io/)")
+
+	assert.Len(t, r.Segments, 2)
+	if link, ok := r.Segments[0].(*HyperlinkSegment); ok {
+		assert.Equal(t, "fyne.io", link.Text)
+		assert.Equal(t, 1, link.quotingLevel)
+	} else {
+		t.Error("Segment should be a blockquoted hyperlink")
+	}
+
+	r = NewRichTextFromMarkdown("> ```go\n> package main\n> ```")
+
+	assert.Len(t, r.Segments, 1)
+	if block, ok := r.Segments[0].(*CodeBlockSegment); ok {
+		assert.Equal(t, "package main", block.Text)
+		assert.Equal(t, 1, block.quotingLevel)
+	} else {
+		t.Error("Segment should be a blockquoted code block")
 	}
 }
 
@@ -46,12 +101,21 @@ func TestRichTextMarkdown_Code(t *testing.T) {
 
 	r.ParseMarkdown("``` go\ncode\nblock\n```")
 	assert.Len(t, r.Segments, 1)
-	if text, ok := r.Segments[0].(*TextSegment); ok {
-		assert.Equal(t, "code\nblock", text.Text)
-		assert.Equal(t, RichTextStyleCodeBlock, text.Style)
+	if code, ok := r.Segments[0].(*CodeBlockSegment); ok {
+		assert.Equal(t, "code\nblock", code.Text)
 	} else {
-		t.Error("Segment should be Text")
+		t.Error("Segment should be CodeBlock")
 	}
+}
+
+func TestRichTextMarkdown_CodeBlockScrolls(t *testing.T) {
+	long := strings.Repeat("abcdefghij", 50) // one ~500-char line
+	cb := newRichCodeBlock(long)
+	test.TempWidgetRenderer(t, cb)
+	min := cb.MinSize()
+
+	assert.Less(t, min.Width, float32(200)) // scrolls rather than demanding full width
+	assert.Greater(t, min.Height, float32(10))
 }
 
 func TestRichTextMarkdown_Code_Incomplete(t *testing.T) {

@@ -43,8 +43,9 @@ const (
 )
 
 const (
-	noBuffer = Buffer(0)
-	noShader = Shader(0)
+	noBuffer  = Buffer(0)
+	noProgram = Program(0)
+	noShader  = Shader(0)
 )
 
 type (
@@ -209,6 +210,10 @@ func (c *esContext) DeleteBuffer(buffer Buffer) {
 	gl.DeleteBuffers(1, (*uint32)(&buffer))
 }
 
+func (c *esContext) DeleteProgram(program Program) {
+	gl.DeleteProgram(uint32(program))
+}
+
 func (c *esContext) DeleteTexture(texture Texture) {
 	tex := uint32(texture)
 	gl.DeleteTextures(1, &tex)
@@ -320,6 +325,10 @@ func (c *esContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *esContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(int32(uniform), v)
+}
+
+func (c *esContext) Uniform1i(uniform Uniform, v int32) {
+	gl.Uniform1i(int32(uniform), v)
 }
 
 func (c *esContext) Uniform1fv(uniform Uniform, v []float32) {
