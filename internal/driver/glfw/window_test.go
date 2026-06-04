@@ -1215,6 +1215,31 @@ func TestWindow_TappedSecondary(t *testing.T) {
 	})
 }
 
+func TestWindow_TappedSecondary_RedispatchAfterOverlayDismiss(t *testing.T) {
+	w := createWindow("Test")
+	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
+	o.SetMinSize(fyne.NewSize(100, 100))
+	w.SetContent(o)
+	ensureCanvasSize(t, w, fyne.NewSize(108, 108))
+
+	menu := fyne.NewMenu("", fyne.NewMenuItem("A", nil))
+	pop := widget.NewPopUpMenu(menu, w.canvas)
+
+	runOnMain(func() {
+		pop.ShowAtPosition(fyne.NewPos(0, 0))
+		assert.NotNil(t, w.canvas.Overlays().Top(), "overlay should be present")
+
+		// right-click outside the popup menu but inside the tappable object
+		w.mousePos = fyne.NewPos(80, 80)
+		w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
+
+		assert.Nil(t, w.canvas.Overlays().Top(), "overlay should be dismissed")
+		assert.Nil(t, o.popTapEvent(), "no primary tap")
+		assert.NotNil(t, o.popSecondaryTapEvent(), "secondary tap should reach widget underneath")
+	})
+}
+
 func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 	w := createWindow("Test")
 	tapped := false
