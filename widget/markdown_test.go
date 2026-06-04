@@ -156,6 +156,65 @@ func TestRichTextMarkdown_Table(t *testing.T) {
 	}
 }
 
+func TestRichTextMarkdown_TableAlignment(t *testing.T) {
+	// The four GFM delimiter forms: left, center, right and none (no marker).
+	r := NewRichTextFromMarkdown("| L | C | R | D |\n| :--- | :---: | ---: | --- |\n| a | b | c | d |")
+
+	table, ok := r.Segments[0].(*TableSegment)
+	if !ok {
+		t.Fatal("Segment should be a Table")
+	}
+
+	want := []fyne.TextAlign{
+		fyne.TextAlignLeading,  // :---
+		fyne.TextAlignCenter,   // :---:
+		fyne.TextAlignTrailing, // ---:
+		fyne.TextAlignLeading,  // --- (no marker defaults to leading)
+	}
+	assert.Equal(t, want, table.Alignments)
+
+	// alignFor reports each column's alignment and defaults to leading for
+	// columns beyond the delimiter row.
+	for col, a := range want {
+		assert.Equal(t, a, table.alignFor(col))
+	}
+	assert.Equal(t, fyne.TextAlignLeading, table.alignFor(len(want)))
+}
+
+func TestTableCellAppliesAlignment(t *testing.T) {
+	test.NewTempApp(t)
+
+	// A body cell applies the column alignment to its text without bolding it.
+	body := &TextSegment{Style: RichTextStyleInline, Text: "x"}
+	newTableCell([]RichTextSegment{body}, fyne.TextAlignTrailing, false)
+	assert.Equal(t, fyne.TextAlignTrailing, body.Style.Alignment)
+	assert.False(t, body.Style.TextStyle.Bold)
+
+	// A header cell applies the alignment and makes the text bold.
+	header := &TextSegment{Style: RichTextStyleInline, Text: "h"}
+	newTableCell([]RichTextSegment{header}, fyne.TextAlignCenter, true)
+	assert.Equal(t, fyne.TextAlignCenter, header.Style.Alignment)
+	assert.True(t, header.Style.TextStyle.Bold)
+
+	// Hyperlink cells are aligned via their own Alignment field.
+	link := &HyperlinkSegment{Text: "l"}
+	newTableCell([]RichTextSegment{link}, fyne.TextAlignTrailing, false)
+	assert.Equal(t, fyne.TextAlignTrailing, link.Alignment)
+}
+
+func TestRichTextMarkdown_TableAlignmentAppliedThroughVisual(t *testing.T) {
+	test.NewTempApp(t)
+
+	r := NewRichTextFromMarkdown("| L | R |\n| :--- | ---: |\n| a | b |")
+	table := r.Segments[0].(*TableSegment)
+
+	// Visual builds the cells, feeding alignFor(col) into each via newTableCell.
+	table.Visual()
+
+	assert.Equal(t, fyne.TextAlignLeading, table.Rows[0][0][0].(*TextSegment).Style.Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, table.Rows[0][1][0].(*TextSegment).Style.Alignment)
+}
+
 func TestRichTextMarkdown_Code_Incomplete(t *testing.T) {
 	r := NewRichTextFromMarkdown("` ")
 
