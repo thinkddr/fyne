@@ -55,6 +55,7 @@ type (
 var (
 	compiled          []ProgramState // avoid multiple compilations with the re-used mobile GUI context
 	noBuffer          = Buffer{}
+	noProgram         = Program{}
 	noShader          = Shader{}
 	textureFilterToGL = [...]int32{gl.Linear, gl.Nearest, gl.Linear}
 )
@@ -227,6 +228,10 @@ func (c *mobileContext) DeleteBuffer(buffer Buffer) {
 	c.glContext.DeleteBuffer(gl.Buffer(buffer))
 }
 
+func (c *mobileContext) DeleteProgram(program Program) {
+	c.glContext.DeleteProgram(gl.Program(program))
+}
+
 func (c *mobileContext) DeleteTexture(texture Texture) {
 	c.glContext.DeleteTexture(gl.Texture(texture))
 }
@@ -317,6 +322,10 @@ func (c *mobileContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *mobileContext) Uniform1f(uniform Uniform, v float32) {
 	c.glContext.Uniform1f(gl.Uniform(uniform), v)
+}
+
+func (c *mobileContext) Uniform1i(uniform Uniform, v int32) {
+	c.glContext.Uniform1i(gl.Uniform(uniform), int(v))
 }
 
 func (c *mobileContext) Uniform1fv(uniform Uniform, v []float32) {

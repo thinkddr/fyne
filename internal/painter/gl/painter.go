@@ -54,6 +54,7 @@ type painter struct {
 	arcProgram              ProgramState
 	bezierCurveProgram      ProgramState
 	arbitraryPolygonProgram ProgramState
+	shaderPrograms          map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
 	texScale                float32
 	pixScale                float32 // pre-calculate scale*texScale for each draw
 	blurSnapTex             Texture // cached texture for GPU-side blur snapshot
@@ -69,6 +70,22 @@ type ProgramState struct {
 	attributes map[string]Attribute
 }
 
+// shaderState caches a user shader's compiled program and uploaded textures.
+// valid is false when the source failed to compile, so we can record the
+// failure without comparing the (not always comparable) program reference.
+type shaderState struct {
+	program  ProgramState
+	valid    bool
+	textures map[string]*shaderTexture // uploaded textures, keyed by uniform name
+}
+
+// shaderTexture is a GPU texture uploaded for a shader, remembering the source
+// image so we only re-upload when it is replaced.
+type shaderTexture struct {
+	tex Texture
+	src image.Image
+}
+
 type UniformState struct {
 	ref   Uniform
 	prev  [4]float32
@@ -82,6 +99,16 @@ func (p *painter) SetUniform1f(pState ProgramState, name string, v float32) {
 	}
 	u.prev[0] = v
 	p.ctx.Uniform1f(u.ref, v)
+}
+
+func (p *painter) SetUniform1i(pState ProgramState, name string, v int32) {
+	u := p.getUniformLocation(pState, name)
+	fv := float32(v)
+	if u.prev[0] == fv {
+		return
+	}
+	u.prev[0] = fv
+	p.ctx.Uniform1i(u.ref, v)
 }
 
 func (p *painter) SetUniform1fv(pState ProgramState, name string, v []float32) {
@@ -142,6 +169,11 @@ func (p *painter) Clear() {
 }
 
 func (p *painter) Free(obj fyne.CanvasObject) {
+	// Shader programs are immutable and compiled once per Shader.Name, living for
+	// the lifetime of the GL context like the built in shader programs. They are
+	// deliberately not freed here: Free is also called for every object on each
+	// Refresh (see Canvas.FreeDirtyTextures), so freeing would recompile the
+	// program - and reset its animation clock - every single frame.
 	p.freeTexture(obj)
 }
 
@@ -208,13 +240,25 @@ func (p *painter) createProgram(shaderFilename string) Program {
 		panic("shader not found: " + shaderFilename)
 	}
 
-	vertShader, err := p.compileShader(string(vertexSrc), vertexShader)
+	prog, err := p.createProgramFromSource(vertexSrc, fragmentSrc)
 	if err != nil {
 		panic(err)
 	}
+
+	return prog
+}
+
+// createProgramFromSource compiles and links the given vertex and fragment shader sources
+// into a program. Unlike createProgram it returns an error rather than panicking, so it is
+// safe to use with application supplied shader source that may fail to compile.
+func (p *painter) createProgramFromSource(vertexSrc, fragmentSrc []byte) (Program, error) {
+	vertShader, err := p.compileShader(string(vertexSrc), vertexShader)
+	if err != nil {
+		return noProgram, err
+	}
 	fragShader, err := p.compileShader(string(fragmentSrc), fragmentShader)
 	if err != nil {
-		panic(err)
+		return noProgram, err
 	}
 
 	prog := p.ctx.CreateProgram()
@@ -224,7 +268,7 @@ func (p *painter) createProgram(shaderFilename string) Program {
 
 	info := p.ctx.GetProgramInfoLog(prog)
 	if p.ctx.GetProgrami(prog, linkStatus) == glFalse {
-		panic(fmt.Errorf("failed to link OpenGL program:\n%s", info))
+		return noProgram, fmt.Errorf("failed to link OpenGL program:\n%s", info)
 	}
 
 	// The info is probably a null terminated string.
@@ -234,12 +278,12 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	}
 
 	if glErr := p.ctx.GetError(); glErr != 0 {
-		panic(fmt.Sprintf("failed to link OpenGL program; error code: %x", glErr))
+		return noProgram, fmt.Errorf("failed to link OpenGL program; error code: %x", glErr)
 	}
 
 	p.ctx.UseProgram(prog)
 
-	return prog
+	return prog, nil
 }
 
 func (p *painter) enableAttribArray(pState ProgramState, name string) Attribute {

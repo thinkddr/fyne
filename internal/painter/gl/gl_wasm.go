@@ -54,6 +54,7 @@ type (
 
 var (
 	noBuffer          = Buffer(gl.NoBuffer)
+	noProgram         = Program(gl.NoProgram)
 	noShader          = Shader(gl.NoShader)
 	textureFilterToGL = [...]int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
 )
@@ -196,6 +197,10 @@ func (c *xjsContext) DeleteBuffer(buffer Buffer) {
 	gl.DeleteBuffer(gl.Buffer(buffer))
 }
 
+func (c *xjsContext) DeleteProgram(program Program) {
+	gl.DeleteProgram(gl.Program(program))
+}
+
 func (c *xjsContext) DeleteTexture(texture Texture) {
 	gl.DeleteTexture(gl.Texture(texture))
 }
@@ -289,6 +294,10 @@ func (c *xjsContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *xjsContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(gl.Uniform(uniform), v)
+}
+
+func (c *xjsContext) Uniform1i(uniform Uniform, v int32) {
+	gl.Uniform1i(gl.Uniform(uniform), int(v))
 }
 
 func (c *xjsContext) Uniform1fv(uniform Uniform, v []float32) {
