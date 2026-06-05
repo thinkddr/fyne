@@ -1631,8 +1631,9 @@ func TestWindow_CaptureTypedShortcutClipboard(t *testing.T) {
 
 	assert.Equal(t, 1, len(content.capturedShortcuts))
 	paste, ok := content.capturedShortcuts[0].(*fyne.ShortcutPaste)
-	assert.True(t, ok)
-	assert.False(t, paste.Secondary)
+	if assert.True(t, ok) {
+		assert.False(t, paste.Secondary)
+	}
 
 	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Press, glfw.ModShift)
 	w.keyPressed(nil, glfw.KeyInsert, 0, glfw.Press, glfw.ModShift)
@@ -1641,8 +1642,9 @@ func TestWindow_CaptureTypedShortcutClipboard(t *testing.T) {
 
 	assert.Equal(t, 2, len(content.capturedShortcuts))
 	paste, ok = content.capturedShortcuts[1].(*fyne.ShortcutPaste)
-	assert.True(t, ok)
-	assert.True(t, paste.Secondary)
+	if assert.True(t, ok) {
+		assert.True(t, paste.Secondary)
+	}
 }
 
 func TestWindow_OnlyTabAndShiftTabToCapturesTab(t *testing.T) {
