@@ -1762,11 +1762,7 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	e.DoubleTapped(nil)
 	assert.Equal(t, "Testing", e.SelectedText())
 
-	ctrlMod := glfw.ModControl
-	if isMacOSRuntime() {
-		ctrlMod = glfw.ModSuper
-	}
-	w.keyPressed(nil, glfw.KeyC, 0, glfw.Repeat, ctrlMod)
+	w.keyPressed(nil, glfw.KeyC, 0, glfw.Repeat, ctrlMod())
 
 	assert.Equal(t, "Testing", NewClipboard().Content())
 
@@ -1775,13 +1771,13 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	assert.Equal(t, "Testing2", e.SelectedText())
 
 	// any other shortcut should be forbidden (Cut)
-	w.keyPressed(nil, glfw.KeyX, 0, glfw.Repeat, ctrlMod)
+	w.keyPressed(nil, glfw.KeyX, 0, glfw.Repeat, ctrlMod())
 
 	assert.Equal(t, "Testing2", e.Text)
 	assert.Equal(t, "Testing", NewClipboard().Content())
 
 	// any other shortcut should be forbidden (Paste)
-	w.keyPressed(nil, glfw.KeyV, 0, glfw.Repeat, ctrlMod)
+	w.keyPressed(nil, glfw.KeyV, 0, glfw.Repeat, ctrlMod())
 
 	assert.Equal(t, "Testing2", e.Text)
 	assert.Equal(t, "Testing", NewClipboard().Content())
@@ -1966,6 +1962,14 @@ func createWindowWithResizeCallback(title string) *safeWindow {
 		w.create()
 	})
 	return &safeWindow{window: w}
+}
+
+func ctrlMod() glfw.ModifierKey {
+	if isMacOSRuntime() {
+		return glfw.ModSuper
+	}
+
+	return glfw.ModControl
 }
 
 //
