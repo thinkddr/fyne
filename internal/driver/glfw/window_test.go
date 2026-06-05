@@ -1624,10 +1624,10 @@ func TestWindow_CaptureTypedShortcutClipboard(t *testing.T) {
 
 	w.Canvas().Focus(content)
 
-	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Press, glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyV, 0, glfw.Press, glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Release, glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyV, 0, glfw.Release, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Press, ctrlMod())
+	w.keyPressed(nil, glfw.KeyV, 0, glfw.Press, ctrlMod())
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Release, ctrlMod())
+	w.keyPressed(nil, glfw.KeyV, 0, glfw.Release, ctrlMod())
 
 	assert.Equal(t, 1, len(content.capturedShortcuts))
 	paste, ok := content.capturedShortcuts[0].(*fyne.ShortcutPaste)
