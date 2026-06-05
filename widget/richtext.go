@@ -791,11 +791,13 @@ func (r *textRenderer) Refresh() {
 	}
 
 	if r.obj.scr != nil {
-		r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
-			r.obj.prop, &fyne.Container{Objects: objs},
-		}}
-		r.obj.scr.Direction = scroll
-		r.SetObjects([]fyne.CanvasObject{r.obj.scr})
+		if isEmptyScroll(r.obj.scr) {
+			r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
+				r.obj.prop, &fyne.Container{Objects: objs},
+			}}
+			r.obj.scr.Direction = scroll
+			r.SetObjects([]fyne.CanvasObject{r.obj.scr})
+		}
 		r.obj.scr.Refresh()
 	} else {
 		r.SetObjects(objs)
@@ -928,6 +930,17 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	}
 
 	return xPos - initialX, height
+}
+
+func isEmptyScroll(o *widget.Scroll) bool {
+	if c, ok := o.Content.(*fyne.Container); ok {
+		if len(c.Objects) == 2 {
+			if inner, ok := c.Objects[1].(*fyne.Container); ok {
+				return inner.Objects == nil
+			}
+		}
+	}
+	return false
 }
 
 // howManyRunesFit accepts a rune slice, an available width, an average
