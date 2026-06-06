@@ -28,10 +28,10 @@ func TestSettingsLoad(t *testing.T) {
 	settings := &settings{}
 
 	require.NoError(t, settings.loadFromFile(filepath.Join("testdata", "light-theme.json")))
-	assert.Equal(t, "light", settings.schema.ThemeName)
+	assert.Equal(t, themeVariantNameLight, settings.schema.ThemeName)
 
 	require.NoError(t, settings.loadFromFile(filepath.Join("testdata", "dark-theme.json")))
-	assert.Equal(t, "dark", settings.schema.ThemeName)
+	assert.Equal(t, themeVariantNameDark, settings.schema.ThemeName)
 }
 
 func TestOverrideTheme(t *testing.T) {
@@ -40,12 +40,12 @@ func TestOverrideTheme(t *testing.T) {
 	set.setupTheme()
 	assert.Equal(t, internalapp.DefaultVariant(), set.ThemeVariant())
 
-	set.schema.ThemeName = "light"
+	set.schema.ThemeName = themeVariantNameLight
 	set.setupTheme()
 	assert.Equal(t, theme.DefaultTheme(), set.Theme())
 	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
 
-	set.schema.ThemeName = "dark"
+	set.schema.ThemeName = themeVariantNameDark
 	set.setupTheme()
 	assert.Equal(t, theme.DefaultTheme(), set.Theme())
 	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
@@ -54,7 +54,7 @@ func TestOverrideTheme(t *testing.T) {
 	set.setupTheme()
 	assert.Equal(t, internalapp.DefaultVariant(), set.ThemeVariant())
 
-	require.NoError(t, os.Setenv("FYNE_THEME", "light"))
+	require.NoError(t, os.Setenv("FYNE_THEME", themeVariantNameLight))
 	set.setupTheme()
 	assert.Equal(t, theme.DefaultTheme(), set.Theme())
 	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
@@ -65,7 +65,7 @@ func TestOverrideTheme(t *testing.T) {
 func TestOverrideTheme_IgnoresSettingsChange(t *testing.T) {
 	// check that a file-load does not overwrite our value
 	set := &settings{}
-	require.NoError(t, os.Setenv("FYNE_THEME", "light"))
+	require.NoError(t, os.Setenv("FYNE_THEME", themeVariantNameLight))
 	set.setupTheme()
 	assert.Equal(t, theme.DefaultTheme(), set.Theme())
 	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
@@ -99,12 +99,12 @@ func TestCustomTheme(t *testing.T) {
 	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
 
-	require.NoError(t, os.Setenv("FYNE_THEME", "light"))
+	require.NoError(t, os.Setenv("FYNE_THEME", themeVariantNameLight))
 	set.setupTheme()
 	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
 
-	require.NoError(t, os.Setenv("FYNE_THEME", "dark"))
+	require.NoError(t, os.Setenv("FYNE_THEME", themeVariantNameDark))
 	set.setupTheme()
 	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
