@@ -643,7 +643,7 @@ func (s *safeCanvas) FocusPrevious() {
 	runOnMain(s.glCanvas.FocusPrevious)
 }
 
-func (s *safeCanvas) Focussed() (ret fyne.Focusable) {
+func (s *safeCanvas) Focused() (ret fyne.Focusable) {
 	runOnMain(func() {
 		ret = s.glCanvas.Focused()
 	})
