@@ -26,6 +26,11 @@ jobs:
       - name: Set environment variable LANG
         run: echo "LANG=en_US.UTF-8" >> $GITHUB_ENV
 
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          args: '--verbose'
+
       - name: Install analysis tools
         run: |
           go install mvdan.cc/gofumpt@latest
