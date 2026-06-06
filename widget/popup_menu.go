@@ -95,9 +95,7 @@ func (p *PopUpMenu) SetCanvas(c fyne.Canvas) {
 
 // Show makes the pop-up menu visible.
 func (p *PopUpMenu) Show() {
-	p.Menu.alignment = p.alignment
 	p.Refresh()
-
 	p.overlay.Show()
 	p.Menu.Show()
 	if !fyne.CurrentDevice().IsMobile() {
