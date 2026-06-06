@@ -74,66 +74,66 @@ func (p *painter) Init() {
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	p.logError()
-	p.program = ProgramState{
+	p.program = programState{
 		ref:        p.createProgram("simple"),
 		buff:       p.createBuffer(20),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.blurProgram = ProgramState{
+	p.blurProgram = programState{
 		ref:        p.createProgram("blur"),
 		buff:       p.createBuffer(20),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.lineProgram = ProgramState{
+	p.lineProgram = programState{
 		ref:        p.createProgram("line"),
 		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.rectangleProgram = ProgramState{
+	p.rectangleProgram = programState{
 		ref:        p.createProgram("rectangle"),
 		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.roundRectangleProgram = ProgramState{
+	p.roundRectangleProgram = programState{
 		ref:        p.createProgram("round_rectangle"),
 		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.polygonProgram = ProgramState{
+	p.polygonProgram = programState{
 		ref:        p.createProgram("polygon"),
 		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.arcProgram = ProgramState{
+	p.arcProgram = programState{
 		ref:        p.createProgram("arc"),
 		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.bezierCurveProgram = ProgramState{
+	p.bezierCurveProgram = programState{
 		ref:        p.createProgram("bezier_curve"),
 		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.arbitraryPolygonProgram = ProgramState{
+	p.arbitraryPolygonProgram = programState{
 		ref:        p.createProgram("arbitrary_polygon"),
 		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 }
