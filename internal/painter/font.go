@@ -329,16 +329,15 @@ func shapeCallback(in shaping.Input, x, scale float32, cb func(shaping.Output, f
 				out.Glyphs = glyphs[start:i]
 				cb(out, x)
 				x += fixed266ToFloat32(adv) * scale
-				adv = 0
 			}
 
 			out.Glyphs = glyphs[i : i+1]
 			cb(out, x)
 			x += fixed266ToFloat32(glyphs[i].Advance) * scale
-			adv = 0
 
-			start = i + 1
+			adv = 0
 			pending = false
+			start = i + 1
 		} else {
 			pending = true
 		}
