@@ -63,6 +63,42 @@ type painter struct {
 	fbHeight                int     // current framebuffer height in pixels
 }
 
+// Declare conformity to Painter interface
+var _ Painter = (*painter)(nil)
+
+func (p *painter) Clear() {
+	r, g, b, a := theme.Color(theme.ColorNameBackground).RGBA()
+	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
+	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
+	p.logError()
+}
+
+func (p *painter) Free(obj fyne.CanvasObject) {
+	// Shader programs are immutable and compiled once per Shader.Name, living for
+	// the lifetime of the GL context like the built in shader programs. They are
+	// deliberately not freed here: Free is also called for every object on each
+	// Refresh (see Canvas.FreeDirtyTextures), so freeing would recompile the
+	// program - and reset its animation clock - every single frame.
+	p.freeTexture(obj)
+}
+
+func (p *painter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
+	if obj.Visible() {
+		p.drawObject(obj, pos, frame, clip)
+	}
+}
+
+func (p *painter) SetFrameBufferScale(scale float32) {
+	p.texScale = scale
+	p.pixScale = p.canvas.Scale() * p.texScale
+}
+
+func (p *painter) SetOutputSize(width, height int) {
+	p.ctx.Viewport(0, 0, width, height)
+	p.fbHeight = height
+	p.logError()
+}
+
 func (p *painter) SetUniform1f(pState programState, name string, v float32) {
 	u := p.getUniformLocation(pState, name)
 	if u.prev[0] == v {
@@ -122,49 +158,6 @@ func (p *painter) SetUniform4f(pState programState, name string, v0, v1, v2, v3 
 	p.ctx.Uniform4f(u.ref, v0, v1, v2, v3)
 }
 
-func (p *painter) UpdateVertexArray(pState programState, name string, size, stride, offset int) {
-	a := p.enableAttribArray(pState, name)
-
-	p.ctx.VertexAttribPointerWithOffset(a, size, float, false, stride*floatSize, offset*floatSize)
-	p.logError()
-}
-
-// Declare conformity to Painter interface
-var _ Painter = (*painter)(nil)
-
-func (p *painter) Clear() {
-	r, g, b, a := theme.Color(theme.ColorNameBackground).RGBA()
-	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
-	p.logError()
-}
-
-func (p *painter) Free(obj fyne.CanvasObject) {
-	// Shader programs are immutable and compiled once per Shader.Name, living for
-	// the lifetime of the GL context like the built in shader programs. They are
-	// deliberately not freed here: Free is also called for every object on each
-	// Refresh (see Canvas.FreeDirtyTextures), so freeing would recompile the
-	// program - and reset its animation clock - every single frame.
-	p.freeTexture(obj)
-}
-
-func (p *painter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
-	if obj.Visible() {
-		p.drawObject(obj, pos, frame, clip)
-	}
-}
-
-func (p *painter) SetFrameBufferScale(scale float32) {
-	p.texScale = scale
-	p.pixScale = p.canvas.Scale() * p.texScale
-}
-
-func (p *painter) SetOutputSize(width, height int) {
-	p.ctx.Viewport(0, 0, width, height)
-	p.fbHeight = height
-	p.logError()
-}
-
 func (p *painter) StartClipping(pos fyne.Position, size fyne.Size) {
 	x := p.textureScale(pos.X)
 	y := p.textureScale(p.canvas.Size().Height - pos.Y - size.Height)
@@ -177,6 +170,13 @@ func (p *painter) StartClipping(pos fyne.Position, size fyne.Size) {
 
 func (p *painter) StopClipping() {
 	p.ctx.Disable(scissorTest)
+	p.logError()
+}
+
+func (p *painter) UpdateVertexArray(pState programState, name string, size, stride, offset int) {
+	a := p.enableAttribArray(pState, name)
+
+	p.ctx.VertexAttribPointerWithOffset(a, size, float, false, stride*floatSize, offset*floatSize)
 	p.logError()
 }
 
