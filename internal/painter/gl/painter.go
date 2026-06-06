@@ -63,35 +63,6 @@ type painter struct {
 	fbHeight                int     // current framebuffer height in pixels
 }
 
-type programState struct {
-	ref        Program
-	buff       Buffer
-	uniforms   map[string]*uniformState
-	attributes map[string]Attribute
-}
-
-// shaderState caches a user shader's compiled program and uploaded textures.
-// valid is false when the source failed to compile, so we can record the
-// failure without comparing the (not always comparable) program reference.
-type shaderState struct {
-	program  programState
-	valid    bool
-	textures map[string]*shaderTexture // uploaded textures, keyed by uniform name
-}
-
-// shaderTexture is a GPU texture uploaded for a shader, remembering the source
-// image so we only re-upload when it is replaced.
-type shaderTexture struct {
-	tex Texture
-	src image.Image
-}
-
-type uniformState struct {
-	ref   Uniform
-	prev  [4]float32
-	prevv []float32
-}
-
 func (p *painter) SetUniform1f(pState programState, name string, v float32) {
 	u := p.getUniformLocation(pState, name)
 	if u.prev[0] == v {
@@ -309,6 +280,35 @@ func (p *painter) getUniformLocation(pState programState, name string) *uniformS
 
 func (p *painter) logError() {
 	logGLError(p.ctx.GetError)
+}
+
+type programState struct {
+	ref        Program
+	buff       Buffer
+	uniforms   map[string]*uniformState
+	attributes map[string]Attribute
+}
+
+// shaderState caches a user shader's compiled program and uploaded textures.
+// valid is false when the source failed to compile, so we can record the
+// failure without comparing the (not always comparable) program reference.
+type shaderState struct {
+	program  programState
+	valid    bool
+	textures map[string]*shaderTexture // uploaded textures, keyed by uniform name
+}
+
+// shaderTexture is a GPU texture uploaded for a shader, remembering the source
+// image so we only re-upload when it is replaced.
+type shaderTexture struct {
+	tex Texture
+	src image.Image
+}
+
+type uniformState struct {
+	ref   Uniform
+	prev  [4]float32
+	prevv []float32
 }
 
 func float32SlicesEqual(a, b []float32) bool {
