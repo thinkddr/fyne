@@ -42,6 +42,10 @@ func TestSettingsLoad(t *testing.T) {
 }
 
 func TestOverrideTheme(t *testing.T) {
+	err := os.Setenv("FYNE_THEME", "")
+	if err != nil {
+		t.Error(err)
+	}
 	set := &settings{}
 	set.setupTheme()
 	assert.Equal(t, internalapp.DefaultVariant(), set.ThemeVariant())
@@ -60,7 +64,7 @@ func TestOverrideTheme(t *testing.T) {
 	set.setupTheme()
 	assert.Equal(t, internalapp.DefaultVariant(), set.ThemeVariant())
 
-	err := os.Setenv("FYNE_THEME", "light")
+	err = os.Setenv("FYNE_THEME", "light")
 	if err != nil {
 		t.Error(err)
 	}
