@@ -158,7 +158,7 @@ func (r *menuBarRenderer) Refresh() {
 	r.Layout(r.b.Size())
 	r.background.FillColor = theme.Color(theme.ColorNameBackground)
 	r.background.Refresh()
-	r.ShadowingRenderer.RefreshShadow()
+	r.RefreshShadow()
 	canvas.Refresh(r.b)
 }
 

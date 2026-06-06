@@ -83,7 +83,7 @@ func (p *preferences) saveToStorage(writer writeSyncCloser) error {
 	encode := json.NewEncoder(writer)
 
 	var err error
-	p.InMemoryPreferences.ReadValues(func(values map[string]any) {
+	p.ReadValues(func(values map[string]any) {
 		err = encode.Encode(&values)
 	})
 
@@ -112,7 +112,7 @@ func (p *preferences) loadFromStorage(storage io.ReadCloser) (err error) {
 	}()
 	decode := json.NewDecoder(storage)
 
-	p.InMemoryPreferences.WriteValues(func(values map[string]any) {
+	p.WriteValues(func(values map[string]any) {
 		err = decode.Decode(&values)
 		if err != nil {
 			return

@@ -259,7 +259,7 @@ func (r *menuRenderer) MinSize() fyne.Size {
 
 func (r *menuRenderer) Refresh() {
 	r.layoutActiveChild()
-	r.ShadowingRenderer.RefreshShadow()
+	r.RefreshShadow()
 
 	for _, i := range r.m.Items {
 		if txt, ok := i.(*menuItem); ok {

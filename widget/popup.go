@@ -216,7 +216,7 @@ func (r *popUpRenderer) Refresh() {
 	}
 	r.popUp.Content.Refresh()
 	r.background.Refresh()
-	r.ShadowingRenderer.RefreshShadow()
+	r.RefreshShadow()
 }
 
 func withRelativePosition(rel fyne.Position, to fyne.CanvasObject, f func(position fyne.Position)) {

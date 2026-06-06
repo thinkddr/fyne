@@ -214,11 +214,11 @@ func (c *cardRenderer) Refresh() {
 	if c.card.Content != nil {
 		objects = append(objects, c.card.Content)
 	}
-	c.ShadowingRenderer.SetObjects(objects)
+	c.SetObjects(objects)
 
 	c.applyTheme()
 	c.Layout(c.card.Size())
-	c.ShadowingRenderer.RefreshShadow()
+	c.RefreshShadow()
 	canvas.Refresh(c.card.super())
 }
 
