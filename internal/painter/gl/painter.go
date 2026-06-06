@@ -13,7 +13,7 @@ import (
 
 // Painter defines the functionality of our OpenGL based renderer
 type Painter interface {
-	// Init tell a new painter to initialise, usually called after a context is available
+	// Init tell a new painter to initialize, usually called after a context is available
 	Init()
 	// Capture requests that the specified canvas be drawn to an in-memory image
 	Capture(fyne.Canvas) image.Image
@@ -34,7 +34,7 @@ type Painter interface {
 }
 
 // NewPainter creates a new GL based renderer for the provided canvas.
-// If it is a master painter it will also initialise OpenGL
+// If it is a master painter it will also initialize OpenGL
 func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 	p := &painter{canvas: c, contextProvider: ctx}
 	p.SetFrameBufferScale(1.0)
@@ -75,7 +75,7 @@ func (p *painter) Clear() {
 
 func (p *painter) Free(obj fyne.CanvasObject) {
 	// Shader programs are immutable and compiled once per Shader.Name, living for
-	// the lifetime of the GL context like the built in shader programs. They are
+	// the lifetime of the GL context like the built-in shader programs. They are
 	// deliberately not freed here: Free is also called for every object on each
 	// Refresh (see Canvas.FreeDirtyTextures), so freeing would recompile the
 	// program - and reset its animation clock - every single frame.
