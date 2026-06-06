@@ -123,11 +123,7 @@ func (s *settings) fileChanged() {
 }
 
 func (s *settings) setupTheme() {
-	name := s.schema.ThemeName
-	if env := os.Getenv("FYNE_THEME"); env != "" {
-		name = env
-	}
-
+	name := s.explicitThemeVariantName()
 	variant := app.DefaultVariant()
 	effectiveTheme := s.theme
 	if !s.themeSpecified {
@@ -141,6 +137,14 @@ func (s *settings) setupTheme() {
 	}
 
 	s.applyTheme(effectiveTheme, variant)
+}
+
+func (s *settings) explicitThemeVariantName() string {
+	if name := os.Getenv("FYNE_THEME"); name != "" {
+		return name
+	}
+
+	return s.schema.ThemeName
 }
 
 func loadSettings() *settings {
