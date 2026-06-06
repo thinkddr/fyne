@@ -218,9 +218,10 @@ func renderEmphasis(source []byte, n ast.Node, quotingDepth int, strength, listD
 		style = RichTextStyleInline
 		style.TextStyle.Strikethrough = true
 		if emp, ok := n.Parent().(*ast.Emphasis); ok {
-			if emp.Level == 1 {
+			switch emp.Level {
+			case 1:
 				style.TextStyle.Italic = true
-			} else if emp.Level == 2 {
+			case 2:
 				style.TextStyle.Bold = true
 			}
 		}
