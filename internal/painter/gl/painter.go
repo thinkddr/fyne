@@ -66,7 +66,7 @@ type painter struct {
 type programState struct {
 	ref        Program
 	buff       Buffer
-	uniforms   map[string]*UniformState
+	uniforms   map[string]*uniformState
 	attributes map[string]Attribute
 }
 
@@ -86,7 +86,7 @@ type shaderTexture struct {
 	src image.Image
 }
 
-type UniformState struct {
+type uniformState struct {
 	ref   Uniform
 	prev  [4]float32
 	prevv []float32
@@ -297,10 +297,10 @@ func (p *painter) enableAttribArray(pState programState, name string) Attribute 
 	return a
 }
 
-func (p *painter) getUniformLocation(pState programState, name string) *UniformState {
+func (p *painter) getUniformLocation(pState programState, name string) *uniformState {
 	u, ok := pState.uniforms[name]
 	if !ok {
-		u = &UniformState{ref: p.ctx.GetUniformLocation(pState.ref, name)}
+		u = &uniformState{ref: p.ctx.GetUniformLocation(pState.ref, name)}
 		pState.uniforms[name] = u
 	}
 

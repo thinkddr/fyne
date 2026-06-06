@@ -377,7 +377,7 @@ func (p *painter) shaderProgram(shader *canvas.Shader) (*shaderState, bool) {
 		program: programState{
 			ref:        ref,
 			buff:       p.createBuffer(16),
-			uniforms:   make(map[string]*UniformState),
+			uniforms:   make(map[string]*uniformState),
 			attributes: make(map[string]Attribute),
 		},
 		valid: true,
