@@ -30,6 +30,7 @@ const (
 	StrikethroughToBaselineFactor = 0.75
 
 	fontTabSpaceSize = 10
+	replacementChar  = 0xfffd // that’s '�'
 )
 
 var (
@@ -200,7 +201,7 @@ func DrawString(dst draw.Image, s string, color color.Color, f shaping.Fontmap, 
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x float32) {
 		y := int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * r.PixScale)))
 		if len(run.Glyphs) == 1 && run.Glyphs[0].GlyphID == 0 {
-			r.DrawStringAt(string([]rune{0xfffd}), dst, int(x), y, f.ResolveFace(0xfffd))
+			r.DrawStringAt(string([]rune{replacementChar}), dst, int(x), y, f.ResolveFace(replacementChar))
 			return
 		}
 
