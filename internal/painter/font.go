@@ -321,11 +321,10 @@ func shapeCallback(in shaping.Input, x, scale float32, cb func(shaping.Output, f
 	out := shaper.Shape(in)
 	glyphs := out.Glyphs
 	start := 0
-	pending := false
 	adv := fixed.I(0)
 	for i, g := range out.Glyphs {
 		if g.GlyphID == 0 {
-			if pending {
+			if start < i {
 				out.Glyphs = glyphs[start:i]
 				cb(out, x)
 				x += fixed266ToFloat32(adv) * scale
@@ -336,15 +335,12 @@ func shapeCallback(in shaping.Input, x, scale float32, cb func(shaping.Output, f
 			x += fixed266ToFloat32(glyphs[i].Advance) * scale
 
 			adv = 0
-			pending = false
 			start = i + 1
-		} else {
-			pending = true
 		}
 		adv += g.Advance
 	}
 
-	if pending {
+	if start < len(glyphs) {
 		out.Glyphs = glyphs[start:]
 		cb(out, x)
 		x += fixed266ToFloat32(adv) * scale
