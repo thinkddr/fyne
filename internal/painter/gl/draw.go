@@ -374,7 +374,7 @@ func (p *painter) shaderProgram(shader *canvas.Shader) (*shaderState, bool) {
 	}
 
 	state := &shaderState{
-		program: ProgramState{
+		program: programState{
 			ref:        ref,
 			buff:       p.createBuffer(16),
 			uniforms:   make(map[string]*UniformState),
@@ -474,7 +474,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	}
 
 	roundedCorners := topRightRadius != 0 || topLeftRadius != 0 || bottomRightRadius != 0 || bottomLeftRadius != 0
-	var program ProgramState
+	var program programState
 	if roundedCorners {
 		program = p.roundRectangleProgram
 	} else {
