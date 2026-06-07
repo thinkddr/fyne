@@ -2,6 +2,8 @@ version: "2"
 
 linters:
   exclusions:
+    presets:
+      - std-error-handling
     rules:
       - path: cmd/fyne/ # The whole tool is deprecated
         linters:
