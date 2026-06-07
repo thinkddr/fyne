@@ -201,7 +201,9 @@ func (b *prefBoundList[T]) checkForChange() {
 	val := *b.val
 	updated := b.get(b.key)
 	if val == nil || len(updated) != len(val) {
-		b.Set(updated)
+		// #Set’s error comes via #doReload from *boundExternalListItem#setIfChanged or *boundListItem#doSet
+		// which both never return an error.
+		_ = b.Set(updated)
 		return
 	}
 
@@ -255,7 +257,9 @@ func bindPreferenceListComparable[T bool | float64 | int | string](key string, p
 			prefs.WriteValues(func(map[string]any) {})
 		}
 	}
-	listen.Set(items)
+	// #Set’s error comes via #doReload from *boundExternalListItem#setIfChanged or *boundListItem#doSet
+	// which both never return an error.
+	_ = listen.Set(items)
 
 	binds := prefBinds.ensurePreferencesAttached(p)
 	binds.Store(key, listen)

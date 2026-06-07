@@ -297,7 +297,8 @@ func renderHeading(source []byte, n ast.Node, quotingDepth int, listDepth int) (
 
 func forceIntoText(source []byte, n ast.Node) string {
 	text := strings.Builder{}
-	ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
+	// ast.Walk() only ever returns an error if the walker does and our walker does not.
+	_ = ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			switch t := n2.(type) {
 			case *ast.Text:
