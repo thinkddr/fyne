@@ -45,9 +45,8 @@ func waitForCanvasSize(t *testing.T, w *safeWindow, size fyne.Size, resizeIfNece
 	attempts := 0
 	for w.Canvas().Size() != size {
 		attempts++
-		if !assert.Less(t, attempts, 100, "canvas did not get correct size in time") {
-			break
-		}
+		require.Less(t, attempts, 100, "canvas did not get correct size in time")
+
 		if resizeIfNecessary && attempts%20 == 0 {
 			// sometimes the resize does not seem to reach the actual window at all
 			w.Resize(size)
