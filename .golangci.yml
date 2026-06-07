@@ -1,0 +1,12 @@
+version: "2"
+
+linters:
+  exclusions:
+    rules:
+      - path: cmd/fyne/ # The whole tool is deprecated
+        linters:
+          - staticcheck
+      - path: test/ # In tests, the usage of deprecated stuff is valid to check for compatibility.
+        linters:
+          - staticcheck
+        text: "SA1019"
