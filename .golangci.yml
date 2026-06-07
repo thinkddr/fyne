@@ -25,3 +25,8 @@ linters:
       - path: _test\.go # TODO: Clarify whether we should explicitly handle errors in tests (e.g., using require.NoError()).
         linters:
           - errcheck
+  settings:
+    staticcheck:
+      checks:
+        - all
+        - -ST1000
