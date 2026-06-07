@@ -2088,8 +2088,7 @@ func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
 		}
 		selfNumWS, _ := wordSeparators(i.Text)
 		otherNumWS, otherOnlyWS := wordSeparators(other.Text)
-		if !((selfNumWS == 0 && otherNumWS == 0) ||
-			(selfNumWS > 0 && otherOnlyWS)) {
+		if !(selfNumWS == 0 && otherNumWS == 0) && !(selfNumWS > 0 && otherOnlyWS) {
 			return false
 		}
 
