@@ -2076,19 +2076,9 @@ func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
 		}
 
 		// Don't merge two separate words
-		wordSeparators := func(s []rune) (num int, onlyWordSeparators bool) {
-			onlyWordSeparators = true
-			for _, r := range s {
-				if isWordSeparator(r) {
-					num++
-					onlyWordSeparators = false
-				}
-			}
-			return num, onlyWordSeparators
-		}
-		selfNumWS, _ := wordSeparators(i.Text)
-		otherNumWS, otherOnlyWS := wordSeparators(other.Text)
-		if !(selfNumWS == 0 && otherNumWS == 0) && !(selfNumWS > 0 && otherOnlyWS) {
+		containsWordSeparator := strings.IndexFunc(string(i.Text), isWordSeparator) >= 0
+		otherContainsWordSeparator := strings.IndexFunc(string(other.Text), isWordSeparator) >= 0
+		if !(!containsWordSeparator && !otherContainsWordSeparator) && !(containsWordSeparator && !otherContainsWordSeparator) {
 			return false
 		}
 
