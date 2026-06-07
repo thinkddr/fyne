@@ -59,7 +59,9 @@ func (p *preferences) resetSavedRecently() {
 			p.prefLock.Unlock()
 
 			if changedDuringSaving {
-				p.save()
+				if err := p.save(); err != nil {
+					fyne.LogError("failed on saving preferences", err)
+				}
 			}
 		})
 	}()
