@@ -998,7 +998,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 
 	if !e.MultiLine {
 		// format clipboard content to be compatible with single line entry
-		text = strings.Replace(text, "\n", " ", -1)
+		text = strings.ReplaceAll(text, "\n", " ")
 	}
 
 	if e.sel.selecting {
