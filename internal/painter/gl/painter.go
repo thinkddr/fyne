@@ -163,6 +163,13 @@ func (p *painter) StartClipping(pos fyne.Position, size fyne.Size) {
 	y := p.textureScale(p.canvas.Size().Height - pos.Y - size.Height)
 	w := p.textureScale(size.Width)
 	h := p.textureScale(size.Height)
+	// must be positive, just clamp to 0
+	if w < 0 {
+		w = 0
+	}
+	if h < 0 {
+		h = 0
+	}
 	p.ctx.Scissor(int32(x), int32(y), int32(w), int32(h))
 	p.ctx.Enable(scissorTest)
 	p.logError()
