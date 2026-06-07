@@ -2076,9 +2076,7 @@ func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
 		}
 
 		// Don't merge two separate words
-		containsWordSeparator := strings.IndexFunc(string(i.Text), isWordSeparator) >= 0
-		otherContainsWordSeparator := strings.IndexFunc(string(other.Text), isWordSeparator) >= 0
-		if !(!containsWordSeparator && !otherContainsWordSeparator) && !(containsWordSeparator && !otherContainsWordSeparator) {
+		if strings.IndexFunc(string(other.Text), isWordSeparator) >= 0 {
 			return false
 		}
 
