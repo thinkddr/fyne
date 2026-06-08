@@ -27,47 +27,54 @@ func TestEntryCursorAnim(t *testing.T) {
 	cursor := canvas.NewRectangle(color.Black)
 	a := newEntryCursorAnimation(cursor)
 
-	a.start()
-	a.anim.Tick(0.0)
-	assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
-	a.anim.Tick(1.0)
-	assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
+	t.Run("animation changes from faded to opaque", func(t *testing.T) {
+		a.start()
+		a.anim.Tick(0.0)
+		assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
+		a.anim.Tick(1.0)
+		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
+	})
 
-	a.interrupt()
-	a.anim.Tick(0.0)
-	assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
-	a.anim.Tick(0.5)
-	assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
-	a.anim.Tick(1.0)
-	assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
+	t.Run("interrupted animation is always opaque", func(t *testing.T) {
+		a.interrupt()
+		a.anim.Tick(0.0)
+		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
+		a.anim.Tick(0.5)
+		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
+		a.anim.Tick(1.0)
+		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
+	})
 
-	timeNow = func() time.Time {
-		return time.Now().Add(cursorInterruptTime)
-	}
-	// animation should be restarted inverting the colors
-	a.anim.Tick(0.0)
-	runtime.Gosched()
-	time.Sleep(10 * time.Millisecond) // ensure go routine for restart animation is executed
-	a.anim.Tick(0.0)
-	assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
-	a.anim.Tick(1.0)
-	assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
+	t.Run("animation starts fading out again 300ms after interruption", func(t *testing.T) {
+		timeNow = func() time.Time {
+			return time.Now().Add(300 * time.Millisecond)
+		}
+		a.anim.Tick(0.0)
+		runtime.Gosched()
+		time.Sleep(10 * time.Millisecond) // ensure go routine for restart animation is executed
+		a.anim.Tick(0.0)
+		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
+		a.anim.Tick(1.0)
+		assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
+	})
 
-	timeNow = time.Now
-	a.interrupt()
-	a.anim.Tick(0.0)
-	assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
+	t.Run("subsequent interruption works", func(t *testing.T) {
+		timeNow = time.Now
+		a.interrupt()
+		a.anim.Tick(0.0)
+		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
 
-	timeNow = func() time.Time {
-		return time.Now().Add(cursorInterruptTime)
-	}
-	a.anim.Tick(0.0)
-	runtime.Gosched()
-	time.Sleep(10 * time.Millisecond) // ensure go routine for restart animation is executed
-	a.anim.Tick(0.0)
-	assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
-	a.anim.Tick(1.0)
-	assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
+		timeNow = func() time.Time {
+			return time.Now().Add(300 * time.Millisecond)
+		}
+		a.anim.Tick(0.0)
+		runtime.Gosched()
+		time.Sleep(10 * time.Millisecond) // ensure go routine for restart animation is executed
+		a.anim.Tick(0.0)
+		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
+		a.anim.Tick(1.0)
+		assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
+	})
 
 	a.stop()
 	assert.Nil(t, a.anim)
