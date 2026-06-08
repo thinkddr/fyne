@@ -13,9 +13,9 @@ import (
 var timeNow = time.Now // used in tests
 
 const (
-	cursorInterruptTime = 300 * time.Millisecond
-	cursorFadeAlpha     = uint8(0x16)
-	cursorFadeRatio     = 0.1
+	cursorInterruptDuration = 300 * time.Millisecond
+	cursorFadeAlpha         = uint8(0x16)
+	cursorFadeRatio         = 0.1
 )
 
 type entryCursorAnimation struct {
@@ -51,8 +51,8 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 
 	interrupted := false
 	anim := fyne.NewAnimation(time.Second/2, func(f float32) {
-		shouldInterrupt := timeNow().Sub(a.lastInterruptTime) <= cursorInterruptTime
-		if shouldInterrupt {
+		shouldBeInterrupted := timeNow().Sub(a.lastInterruptTime) <= cursorInterruptDuration
+		if shouldBeInterrupted {
 			if !interrupted {
 				a.cursor.FillColor = cursorOpaque
 				a.cursor.Refresh()
@@ -60,6 +60,7 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 			}
 			return
 		}
+
 		if interrupted {
 			a.anim.Stop()
 			if !inverted {
@@ -109,12 +110,12 @@ func (a *entryCursorAnimation) start() {
 	}
 }
 
-// temporarily stops the animation by "cursorInterruptTime".
+// Stops the animation for cursorInterruptDuration.
+// This is used to keep the cursor visible while typing.
 func (a *entryCursorAnimation) interrupt() {
 	a.lastInterruptTime = timeNow()
 }
 
-// stops cursor animation.
 func (a *entryCursorAnimation) stop() {
 	if a.anim != nil {
 		a.anim.Stop()
