@@ -31,6 +31,34 @@ func Test_ToNRGBA_unmultiplyAlpha(t *testing.T) {
 			wantB: 100,
 			wantA: 255,
 		},
+		"RGBA64": {
+			color: imagecolor.RGBA64{R: 100<<8 + 123, G: 100<<8 + 123, B: 100<<8 + 123, A: 100<<8 + 123},
+			wantR: 255,
+			wantG: 255,
+			wantB: 255,
+			wantA: 100,
+		},
+		"RGBA64 opaque": {
+			color: imagecolor.RGBA64{R: 100<<8 + 123, G: 100<<8 + 123, B: 100<<8 + 123, A: 255 << 8},
+			wantR: 100,
+			wantG: 100,
+			wantB: 100,
+			wantA: 255,
+		},
+		"custom": {
+			color: customColor{r: 100<<8 + 123, g: 100<<8 + 123, b: 100<<8 + 123, a: 100<<8 + 123},
+			wantR: 255,
+			wantG: 255,
+			wantB: 255,
+			wantA: 100,
+		},
+		"custom opaque": {
+			color: customColor{r: 100<<8 + 123, g: 100<<8 + 123, b: 100<<8 + 123, a: 255 << 8},
+			wantR: 100,
+			wantG: 100,
+			wantB: 100,
+			wantA: 255,
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			gotR, gotG, gotB, gotA := color.ToNRGBA(tt.color)
@@ -40,4 +68,14 @@ func Test_ToNRGBA_unmultiplyAlpha(t *testing.T) {
 			assert.Equal(t, tt.wantA, gotA)
 		})
 	}
+}
+
+type customColor struct {
+	r, g, b, a uint32
+}
+
+var _ imagecolor.Color = customColor{}
+
+func (c customColor) RGBA() (r, g, b, a uint32) {
+	return c.r, c.g, c.b, c.a
 }
