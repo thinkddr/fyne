@@ -73,25 +73,18 @@ func ToNRGBA(c color.Color) (r, g, b, a int) {
 		g = 0xff
 		b = 0xff
 		a = int(col.A) >> 8
-	default: // RGBA, RGBA64, and unknown implementations of Color
-		r, g, b, a = unmultiplyAlpha(c)
+	default: // RGBA, RGBA64, and unknown implementations of Color: remove the alpha premultiplication
+		red, green, blue, alpha := c.RGBA()
+		if alpha != 0 && alpha != 0xffff {
+			red = (red * 0xffff) / alpha
+			green = (green * 0xffff) / alpha
+			blue = (blue * 0xffff) / alpha
+		}
+		// Convert from range 0-65535 to range 0-255
+		r = int(red >> 8)
+		g = int(green >> 8)
+		b = int(blue >> 8)
+		a = int(alpha >> 8)
 	}
-	return r, g, b, a
-}
-
-// unmultiplyAlpha returns a color's RGBA components as 8-bit integers by calling c.RGBA() and then removing the alpha premultiplication.
-// It is only used by ToRGBA.
-func unmultiplyAlpha(c color.Color) (r, g, b, a int) {
-	red, green, blue, alpha := c.RGBA()
-	if alpha != 0 && alpha != 0xffff {
-		red = (red * 0xffff) / alpha
-		green = (green * 0xffff) / alpha
-		blue = (blue * 0xffff) / alpha
-	}
-	// Convert from range 0-65535 to range 0-255
-	r = int(red >> 8)
-	g = int(green >> 8)
-	b = int(blue >> 8)
-	a = int(alpha >> 8)
 	return r, g, b, a
 }
