@@ -12,10 +12,10 @@ import (
 func Test_ToNRGBA_unmultiplyAlpha(t *testing.T) {
 	for name, tt := range map[string]struct {
 		color imagecolor.Color
-		wantR int
-		wantG int
-		wantB int
-		wantA int
+		wantR uint8
+		wantG uint8
+		wantB uint8
+		wantA uint8
 	}{
 		"RGBA": {
 			color: imagecolor.RGBA{R: 100, G: 100, B: 100, A: 100},

@@ -6,7 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	col "fyne.io/fyne/v2/internal/color"
+	fynecolor "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/test"
 
 	"github.com/stretchr/testify/assert"
@@ -81,7 +81,7 @@ func TestColorDialog_SetColor(t *testing.T) {
 	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(800, 600))
 
-	col := color.RGBA{70, 210, 200, 255}
+	col := color.RGBA{R: 70, G: 210, B: 200, A: 255}
 
 	d := NewColorPicker("pick colour", "select colour", func(c color.Color) {
 		r, g, b, a := c.RGBA()
@@ -98,7 +98,7 @@ func TestColorDialog_SetColor(t *testing.T) {
 	assert.Equal(t, 200, d.picker.Blue)
 	assert.Equal(t, 255, d.picker.Alpha)
 
-	col = color.RGBA{255, 40, 70, 244}
+	col = color.RGBA{R: 244, G: 40, B: 70, A: 244}
 	assert.NotEqual(t, int(col.R), d.picker.Red)
 	assert.NotEqual(t, int(col.G), d.picker.Green)
 	assert.NotEqual(t, int(col.B), d.picker.Blue)
@@ -343,16 +343,16 @@ func Test_toRGBA(t *testing.T) {
 	// Test_toRGBA is only still here instead of with ToNRGBA because it uses rgbhslMap
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
-			r, g, b, a := col.ToNRGBA(&color.NRGBA{
+			r, g, b, a := fynecolor.ToNRGBA(&color.NRGBA{
 				R: uint8(tt.r),
 				G: uint8(tt.g),
 				B: uint8(tt.b),
 				A: 0xff,
 			})
-			assert.Equal(t, tt.r, r)
-			assert.Equal(t, tt.g, g)
-			assert.Equal(t, tt.b, b)
-			assert.Equal(t, 255, a)
+			assert.Equal(t, uint8(tt.r), r)
+			assert.Equal(t, uint8(tt.g), g)
+			assert.Equal(t, uint8(tt.b), b)
+			assert.Equal(t, uint8(0xff), a)
 		})
 	}
 }

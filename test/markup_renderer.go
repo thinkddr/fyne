@@ -66,7 +66,7 @@ func (r *markupRenderer) setColorAttrWithDefault(attrs map[string]*string, name 
 	}
 
 	rd, g, b, a := col.ToNRGBA(c)
-	r.setStringAttr(attrs, name, fmt.Sprintf("rgba(%d,%d,%d,%d)", uint8(rd), uint8(g), uint8(b), uint8(a)))
+	r.setStringAttr(attrs, name, fmt.Sprintf("rgba(%d,%d,%d,%d)", rd, g, b, a))
 }
 
 func (r *markupRenderer) setFillModeAttr(attrs map[string]*string, name string, m fynecanvas.ImageFill) {
@@ -467,7 +467,7 @@ func (r *markupRenderer) writeWidget(w fyne.Widget, attrs map[string]*string) {
 func nrgbaColor(c color.Color) color.NRGBA {
 	// using ColorToNRGBA to avoid problems with colors with 16-bit components or alpha values that aren't 0 or the maximum possible alpha value
 	r, g, b, a := col.ToNRGBA(c)
-	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
+	return color.NRGBA{R: r, G: g, B: b, A: a}
 }
 
 //gocyclo:ignore

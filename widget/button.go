@@ -474,11 +474,10 @@ func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget, th fyne.Theme) *
 		bg.Resize(fyne.NewSize(size*2, w.Size().Height))
 		bg.Move(fyne.NewPos(mid-size, 0))
 
-		r, g, bb, a := col.ToNRGBA(th.Color(theme.ColorNamePressed, v))
-		aa := uint8(a)
-		fade := aa - uint8(float32(aa)*done)
+		r, g, b, a := col.ToNRGBA(th.Color(theme.ColorNamePressed, v))
+		fade := a - uint8(float32(a)*done)
 		if fade > 0 {
-			bg.FillColor = &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(bb), A: fade}
+			bg.FillColor = &color.NRGBA{R: r, G: g, B: b, A: fade}
 		} else {
 			bg.FillColor = color.Transparent
 		}
