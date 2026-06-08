@@ -15,7 +15,7 @@ var timeNow = time.Now // used in tests
 const (
 	cursorInterruptDuration = 300 * time.Millisecond
 	cursorFadeAlpha         = uint8(0x16)
-	cursorFadeRatio         = 0.1
+	cursorFadeRatio         = 0.2
 )
 
 type entryCursorAnimation struct {
@@ -30,31 +30,28 @@ func newEntryCursorAnimation(cursor *canvas.Rectangle) *entryCursorAnimation {
 
 // creates fyne animation
 func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
-	cursorOpaque := theme.Color(theme.ColorNamePrimary)
-	ri, gi, bi, ai := col.ToNRGBA(cursorOpaque)
-	r := uint8(ri >> 8)
-	g := uint8(gi >> 8)
-	b := uint8(bi >> 8)
-	endA := uint8(ai >> 8)
-	startA := cursorFadeAlpha
-	cursorDim := color.NRGBA{R: r, G: g, B: b, A: cursorFadeAlpha}
+	ri, gi, bi, ai := col.ToNRGBA(theme.Color(theme.ColorNamePrimary))
+	r := uint8(ri)
+	g := uint8(gi)
+	b := uint8(bi)
+	opaqueColor := color.NRGBA{R: r, G: g, B: b, A: uint8(ai)}
+	startColor := color.NRGBA{R: r, G: g, B: b, A: cursorFadeAlpha}
+	endColor := opaqueColor
 	if inverted {
-		a.cursor.FillColor = cursorOpaque
-		startA, endA = endA, startA
-	} else {
-		a.cursor.FillColor = cursorDim
+		startColor, endColor = endColor, startColor
 	}
+	a.cursor.FillColor = startColor
 
-	deltaA := endA - startA
-	fadeStart := float32(0.5 - cursorFadeRatio)
-	fadeStop := float32(0.5 + cursorFadeRatio)
+	deltaA := int(endColor.A) - int(startColor.A)
+	fadeStart := float32(0.5 - cursorFadeRatio/2)
+	fadeStop := float32(0.5 + cursorFadeRatio/2)
 
 	interrupted := false
 	anim := fyne.NewAnimation(time.Second/2, func(f float32) {
 		shouldBeInterrupted := timeNow().Sub(a.lastInterruptTime) <= cursorInterruptDuration
 		if shouldBeInterrupted {
 			if !interrupted {
-				a.cursor.FillColor = cursorOpaque
+				a.cursor.FillColor = opaqueColor
 				a.cursor.Refresh()
 				interrupted = true
 			}
@@ -62,34 +59,29 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 		}
 
 		if interrupted {
-			a.anim.Stop()
-			if !inverted {
-				a.anim = a.createAnim(true)
-			}
 			interrupted = false
-			canStart := a.anim != nil
-			if canStart {
-				a.anim.Start()
-			}
+			a.anim.Stop()
+			a.anim = a.createAnim(true)
+			a.anim.Start()
 			return
 		}
 
-		alpha := uint8(0)
+		var alpha uint8
 		if f < fadeStart {
-			if _, _, _, al := a.cursor.FillColor.RGBA(); uint8(al>>8) == cursorFadeAlpha {
+			if a.cursor.FillColor == startColor {
 				return
 			}
 
-			a.cursor.FillColor = cursorDim
-		} else if f >= fadeStop {
-			if _, _, _, al := a.cursor.FillColor.RGBA(); al == 0xffff {
+			a.cursor.FillColor = startColor
+		} else if f > fadeStop {
+			if a.cursor.FillColor == endColor {
 				return
 			}
 
-			a.cursor.FillColor = cursorOpaque
+			a.cursor.FillColor = endColor
 		} else {
-			fade := (f + cursorFadeRatio - 0.5) * (1 / (cursorFadeRatio * 2))
-			alpha = uint8(float32(deltaA) * fade)
+			fade := (f - fadeStart) / cursorFadeRatio
+			alpha = startColor.A + uint8(float32(deltaA)*fade)
 			a.cursor.FillColor = color.NRGBA{R: r, G: g, B: b, A: alpha}
 		}
 

@@ -21,16 +21,22 @@ func TestEntryCursorAnim(t *testing.T) {
 
 	alpha := func(c color.Color) uint8 {
 		_, _, _, a := col.ToNRGBA(c)
-		return uint8(a >> 8) // only check 8bit colour channels
+		return uint8(a)
 	}
 
 	cursor := canvas.NewRectangle(color.Black)
 	a := newEntryCursorAnimation(cursor)
 
-	t.Run("animation changes from faded to opaque", func(t *testing.T) {
+	t.Run("animation changes from dimmed to opaque fading only a small time in between", func(t *testing.T) {
 		a.start()
 		a.anim.Tick(0.0)
 		assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
+		a.anim.Tick(0.4)
+		assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
+		a.anim.Tick(0.5)
+		assert.InDelta(t, (alpha(cursorOpaque)-alpha(cursorDim))/2+alpha(cursorDim), alpha(a.cursor.FillColor), 1)
+		a.anim.Tick(0.6)
+		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
 		a.anim.Tick(1.0)
 		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
 	})
@@ -54,6 +60,12 @@ func TestEntryCursorAnim(t *testing.T) {
 		time.Sleep(10 * time.Millisecond) // ensure go routine for restart animation is executed
 		a.anim.Tick(0.0)
 		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
+		a.anim.Tick(0.4)
+		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
+		a.anim.Tick(0.5)
+		assert.InDelta(t, (alpha(cursorOpaque)-alpha(cursorDim))/2+alpha(cursorDim), alpha(a.cursor.FillColor), 1)
+		a.anim.Tick(0.6)
+		assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
 		a.anim.Tick(1.0)
 		assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
 	})
