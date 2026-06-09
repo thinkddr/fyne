@@ -126,13 +126,13 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 
 	// RGB
 	redChannel := newColorChannel("R", 0, 255, int(p.Red), func(r int) {
-		p.setRGBA(uint8(r), p.Green, p.Blue, p.Alpha)
+		p.setRGBA(uint8(r), p.Green, p.Blue, p.Alpha) //gosec:disable G115 -- r’s value is limited by newColorChannel
 	})
 	greenChannel := newColorChannel("G", 0, 255, int(p.Green), func(g int) {
-		p.setRGBA(p.Red, uint8(g), p.Blue, p.Alpha)
+		p.setRGBA(p.Red, uint8(g), p.Blue, p.Alpha) //gosec:disable G115 -- g’s value is limited by newColorChannel
 	})
 	blueChannel := newColorChannel("B", 0, 255, int(p.Blue), func(b int) {
-		p.setRGBA(p.Red, p.Green, uint8(b), p.Alpha)
+		p.setRGBA(p.Red, p.Green, uint8(b), p.Alpha) //gosec:disable G115 -- b’s value is limited by newColorChannel
 	})
 	rgbBox := container.NewVBox(
 		redChannel,
@@ -147,7 +147,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 
 	// Alpha
 	alphaChannel := newColorChannel("A", 0, 255, int(p.Alpha), func(a int) {
-		p.setRGBA(p.Red, p.Green, p.Blue, uint8(a))
+		p.setRGBA(p.Red, p.Green, p.Blue, uint8(a)) //gosec:disable G115 -- a’s value is limited by newColorChannel
 	})
 
 	// Hex
