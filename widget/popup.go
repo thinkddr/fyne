@@ -178,11 +178,6 @@ func (r *popUpBaseRenderer) padding() fyne.Size {
 	return fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 }
 
-func (r *popUpBaseRenderer) offset() fyne.Position {
-	th := r.popUp.Theme()
-	return fyne.NewSquareOffsetPos(th.Size(theme.SizeNameInnerPadding) / 2)
-}
-
 type popUpRenderer struct {
 	*widget.ShadowingRenderer
 	popUpBaseRenderer
