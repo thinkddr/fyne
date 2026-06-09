@@ -126,13 +126,13 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 
 	// RGB
 	redChannel := newColorChannel("R", 0, 255, p.Red, func(r int) {
-		p.setRGBA(r, p.Green, p.Blue, p.Alpha)
+		p.setRGBA(uint8(r), uint8(p.Green), uint8(p.Blue), uint8(p.Alpha))
 	})
 	greenChannel := newColorChannel("G", 0, 255, p.Green, func(g int) {
-		p.setRGBA(p.Red, g, p.Blue, p.Alpha)
+		p.setRGBA(uint8(p.Red), uint8(g), uint8(p.Blue), uint8(p.Alpha))
 	})
 	blueChannel := newColorChannel("B", 0, 255, p.Blue, func(b int) {
-		p.setRGBA(p.Red, p.Green, b, p.Alpha)
+		p.setRGBA(uint8(p.Red), uint8(p.Green), uint8(b), uint8(p.Alpha))
 	})
 	rgbBox := container.NewVBox(
 		redChannel,
@@ -147,7 +147,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 
 	// Alpha
 	alphaChannel := newColorChannel("A", 0, 255, p.Alpha, func(a int) {
-		p.setRGBA(p.Red, p.Green, p.Blue, a)
+		p.setRGBA(uint8(p.Red), uint8(p.Green), uint8(p.Blue), uint8(a))
 	})
 
 	// Hex
@@ -206,7 +206,7 @@ func (p *colorAdvancedPicker) setHSLA(h, s, l, a int) {
 }
 
 // setRGBA updates the Red, Green, Blue, and Alpha components of the currently selected color.
-func (p *colorAdvancedPicker) setRGBA(r, g, b, a int) {
+func (p *colorAdvancedPicker) setRGBA(r, g, b, a uint8) {
 	if p.updateRGBA(r, g, b, a) {
 		p.Refresh()
 		if f := p.onChange; f != nil {
@@ -220,7 +220,7 @@ func (p *colorAdvancedPicker) updateColor(color color.Color) bool {
 	if p.Red == int(r) && p.Green == int(g) && p.Blue == int(b) && p.Alpha == int(a) {
 		return false
 	}
-	return p.updateRGBA(int(r), int(g), int(b), int(a))
+	return p.updateRGBA(r, g, b, a)
 }
 
 func (p *colorAdvancedPicker) updateHSLA(h, s, l, a int) bool {
@@ -239,19 +239,16 @@ func (p *colorAdvancedPicker) updateHSLA(h, s, l, a int) bool {
 	return true
 }
 
-func (p *colorAdvancedPicker) updateRGBA(r, g, b, a int) bool {
-	r = clamp(r, 0, 255)
-	g = clamp(g, 0, 255)
-	b = clamp(b, 0, 255)
-	a = clamp(a, 0, 255)
-	if p.Red == r && p.Green == g && p.Blue == b && p.Alpha == a {
+func (p *colorAdvancedPicker) updateRGBA(r, g, b, a uint8) bool {
+	if p.Red == int(r) && p.Green == int(g) && p.Blue == int(b) && p.Alpha == int(a) {
 		return false
 	}
-	p.Red = r
-	p.Green = g
-	p.Blue = b
-	p.Alpha = a
-	p.Hue, p.Saturation, p.Lightness = rgbToHsl(uint8(r), uint8(g), uint8(b))
+
+	p.Red = int(r)
+	p.Green = int(g)
+	p.Blue = int(b)
+	p.Alpha = int(a)
+	p.Hue, p.Saturation, p.Lightness = rgbToHsl(r, g, b)
 	return true
 }
 
