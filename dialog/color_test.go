@@ -374,9 +374,9 @@ func Test_hslToRgb(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
 			r, g, b := hslToRgb(tt.h, tt.s, tt.l)
-			assert.Equal(t, int(tt.r), r)
-			assert.Equal(t, int(tt.g), g)
-			assert.Equal(t, int(tt.b), b)
+			assert.Equal(t, tt.r, r)
+			assert.Equal(t, tt.g, g)
+			assert.Equal(t, tt.b, b)
 		})
 	}
 }

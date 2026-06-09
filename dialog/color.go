@@ -306,14 +306,14 @@ func rgbToHsl(r, g, b uint8) (int, int, int) {
 	return h, s, l
 }
 
-func hslToRgb(h, s, l int) (int, int, int) {
+func hslToRgb(h, s, l int) (uint8, uint8, uint8) {
 	hue := float64(h) / 360.0
 	saturation := float64(s) / 100.0
 	lightness := float64(l) / 100.0
 
 	if saturation == 0.0 {
 		// Greyscale
-		g := int(lightness * 255.0)
+		g := uint8(lightness * 255.0)
 		return g, g, g
 	}
 
@@ -330,9 +330,9 @@ func hslToRgb(h, s, l int) (int, int, int) {
 	green := hueToChannel(hue, v1, v2)
 	blue := hueToChannel(hue-(1.0/3.0), v1, v2)
 
-	r := int(math.Round(255.0 * red))
-	g := int(math.Round(255.0 * green))
-	b := int(math.Round(255.0 * blue))
+	r := uint8(math.Round(255.0 * red))
+	g := uint8(math.Round(255.0 * green))
+	b := uint8(math.Round(255.0 * blue))
 
 	return r, g, b
 }

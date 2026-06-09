@@ -126,9 +126,9 @@ func (a *colorWheel) colorAt(x, y, w, h int) color.Color {
 	saturation := int(radius / limit * 100.0)
 	red, green, blue := hslToRgb(hue, saturation, a.Lightness)
 	return &color.NRGBA{
-		R: uint8(red),
-		G: uint8(green),
-		B: uint8(blue),
+		R: red,
+		G: green,
+		B: blue,
 		A: uint8(a.Alpha),
 	}
 }

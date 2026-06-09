@@ -232,7 +232,8 @@ func (p *colorAdvancedPicker) updateHSLA(h, s, l, a int) bool {
 	p.Saturation = s
 	p.Lightness = l
 	p.Alpha = a
-	p.Red, p.Green, p.Blue = hslToRgb(p.Hue, p.Saturation, p.Lightness)
+	r, g, b := hslToRgb(p.Hue, p.Saturation, p.Lightness)
+	p.Red, p.Green, p.Blue = int(r), int(g), int(b)
 	return true
 }
 
