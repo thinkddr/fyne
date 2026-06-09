@@ -261,12 +261,6 @@ func stringsToColors(ss ...string) (colors []color.Color) {
 	return colors
 }
 
-func colorToHSLA(c color.Color) (int, int, int, int) {
-	r, g, b, a := col.ToNRGBA(c)
-	h, s, l := rgbToHsl(int(r), int(g), int(b))
-	return h, s, l, int(a)
-}
-
 // https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
 
 func rgbToHsl(r, g, b int) (int, int, int) {

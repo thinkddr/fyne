@@ -325,16 +325,18 @@ func Test_stringToColor(t *testing.T) {
 func Test_colorToHSLA(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
-			h, s, l, a := colorToHSLA(&color.NRGBA{
+			var c color.Color = &color.NRGBA{
 				R: uint8(tt.r),
 				G: uint8(tt.g),
 				B: uint8(tt.b),
 				A: 0xff,
-			})
+			}
+			r, g, b, a := fynecolor.ToNRGBA(c)
+			h, s, l := rgbToHsl(int(r), int(g), int(b))
 			assert.Equal(t, tt.h, h)
 			assert.Equal(t, tt.s, s)
 			assert.Equal(t, tt.l, l)
-			assert.Equal(t, 255, a)
+			assert.Equal(t, uint8(255), a)
 		})
 	}
 }
