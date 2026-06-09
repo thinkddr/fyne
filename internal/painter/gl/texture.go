@@ -75,7 +75,7 @@ func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale)
 	case *image.Uniform:
 		texture := p.newTexture(textureFilter)
 		r, g, b, a := i.RGBA()
-		r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
+		r8, g8, b8, a8 := uint8((r>>8)&0xff), uint8((g>>8)&0xff), uint8((b>>8)&0xff), uint8((a>>8)&0xff)
 		data := []uint8{r8, g8, b8, a8}
 		p.ctx.TexImage2D(
 			texture2D,

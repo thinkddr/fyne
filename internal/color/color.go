@@ -81,10 +81,10 @@ func ToNRGBA(c color.Color) (r, g, b, a uint8) {
 			blue = (blue * 0xffff) / alpha
 		}
 		// Convert from range 0-65535 to range 0-255
-		r = uint8(red >> 8)
-		g = uint8(green >> 8)
-		b = uint8(blue >> 8)
-		a = uint8(alpha >> 8)
+		r = uint8((red >> 8) & 0xff)
+		g = uint8((green >> 8) & 0xff)
+		b = uint8((blue >> 8) & 0xff)
+		a = uint8((alpha >> 8) & 0xff)
 	}
 	return r, g, b, a
 }
