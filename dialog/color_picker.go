@@ -110,13 +110,13 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 
 	// HSL
 	hueChannel := newColorChannel("H", 0, 360, p.Hue, func(h int) {
-		p.setHSLA(h, p.Saturation, p.Lightness, p.Alpha)
+		p.setHSLA(h, p.Saturation, p.Lightness, uint8(p.Alpha))
 	})
 	saturationChannel := newColorChannel("S", 0, 100, p.Saturation, func(s int) {
-		p.setHSLA(p.Hue, s, p.Lightness, p.Alpha)
+		p.setHSLA(p.Hue, s, p.Lightness, uint8(p.Alpha))
 	})
 	lightnessChannel := newColorChannel("L", 0, 100, p.Lightness, func(l int) {
-		p.setHSLA(p.Hue, p.Saturation, l, p.Alpha)
+		p.setHSLA(p.Hue, p.Saturation, l, uint8(p.Alpha))
 	})
 	hslBox := container.NewVBox(
 		hueChannel,
@@ -142,7 +142,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 
 	// Wheel
 	wheel := newColorWheel(func(hue, saturation, lightness, alpha int) {
-		p.setHSLA(hue, saturation, lightness, alpha)
+		p.setHSLA(hue, saturation, lightness, uint8(alpha))
 	})
 
 	// Alpha
@@ -196,7 +196,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // setHSLA updates the Hue, Saturation, Lightness, and Alpha components of the currently selected color.
-func (p *colorAdvancedPicker) setHSLA(h, s, l, a int) {
+func (p *colorAdvancedPicker) setHSLA(h, s, l int, a uint8) {
 	if p.updateHSLA(h, s, l, a) {
 		p.Refresh()
 		if f := p.onChange; f != nil {
@@ -220,18 +220,17 @@ func (p *colorAdvancedPicker) updateColor(color color.Color) bool {
 	return p.updateRGBA(r, g, b, a)
 }
 
-func (p *colorAdvancedPicker) updateHSLA(h, s, l, a int) bool {
+func (p *colorAdvancedPicker) updateHSLA(h, s, l int, a uint8) bool {
 	h = wrapHue(h)
 	s = clamp(s, 0, 100)
 	l = clamp(l, 0, 100)
-	a = clamp(a, 0, 255)
-	if p.Hue == h && p.Saturation == s && p.Lightness == l && p.Alpha == a {
+	if p.Hue == h && p.Saturation == s && p.Lightness == l && p.Alpha == int(a) {
 		return false
 	}
 	p.Hue = h
 	p.Saturation = s
 	p.Lightness = l
-	p.Alpha = a
+	p.Alpha = int(a)
 	r, g, b := hslToRgb(p.Hue, p.Saturation, p.Lightness)
 	p.Red, p.Green, p.Blue = int(r), int(g), int(b)
 	return true
