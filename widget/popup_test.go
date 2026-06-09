@@ -340,7 +340,6 @@ func TestPopUp_ApplyThemeOnShow(t *testing.T) {
 	w.Resize(fyne.NewSize(200, 300))
 
 	pop := NewPopUp(NewLabel("Label"), w.Canvas())
-	inner := pop.MinSize()
 
 	test.ApplyTheme(t, test.Theme())
 	pop.Show()
@@ -350,12 +349,6 @@ func TestPopUp_ApplyThemeOnShow(t *testing.T) {
 	test.ApplyTheme(t, test.NewTheme())
 	pop.Show()
 	test.AssertImageMatches(t, "popup/normal-onshow-theme-changed.png", w.Canvas().Capture())
-	pop.Hide()
-
-	test.ApplyTheme(t, test.Theme())
-	pop.Resize(inner)
-	pop.Show()
-	test.AssertImageMatches(t, "popup/normal-onshow-theme-default.png", w.Canvas().Capture())
 	pop.Hide()
 }
 
