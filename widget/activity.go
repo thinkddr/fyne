@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	fynecolor "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -220,6 +221,6 @@ func (a *activityRenderer) hideDots() {
 
 func (a *activityRenderer) updateColor() {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
-	rr, gg, bb, aa := a.parent.Theme().Color(theme.ColorNameForeground, v).RGBA()
-	a.maxCol = color.NRGBA{R: uint8(rr >> 8), G: uint8(gg >> 8), B: uint8(bb >> 8), A: uint8(aa >> 8)}
+	rr, gg, bb, aa := fynecolor.ToNRGBA(a.parent.Theme().Color(theme.ColorNameForeground, v))
+	a.maxCol = color.NRGBA{R: rr, G: gg, B: bb, A: aa}
 }
