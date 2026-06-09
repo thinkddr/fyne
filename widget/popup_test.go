@@ -387,10 +387,10 @@ func TestPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
 	pop := NewPopUp(NewLabel("Label"), w.Canvas())
 	popBgSize := fyne.NewSize(200, 200)
 	pop.Resize(popBgSize)
-	pop.Show()
 
 	winSize := fyne.NewSize(300, 300)
 	w.Resize(winSize)
+	pop.Show()
 
 	// get content padding dynamically
 	popContentPadding := pop.MinSize().Subtract(pop.Content.MinSize())
@@ -593,10 +593,10 @@ func TestModelPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
 	pop := NewModalPopUp(NewLabel("Label"), w.Canvas())
 	popBgSize := fyne.NewSize(200, 200)
 	pop.Resize(popBgSize)
-	pop.Show()
 
 	winSize := fyne.NewSize(300, 300)
 	w.Resize(winSize)
+	pop.Show()
 
 	// get content padding dynamically
 	popContentPadding := pop.MinSize().Subtract(pop.Content.MinSize())
