@@ -149,7 +149,7 @@ func (ctx *context) CompileShader(s Shader) {
 }
 
 func (ctx *context) CreateBuffer() Buffer {
-	return Buffer{Value: uint32(ctx.enqueue(call{
+	return Buffer{Value: uint32(ctx.enqueue(call{ //gosec:disable G115 -- probably okay
 		args: fnargs{
 			fn: glfnGenBuffer,
 		},
@@ -160,7 +160,7 @@ func (ctx *context) CreateBuffer() Buffer {
 func (ctx *context) CreateProgram() Program {
 	return Program{
 		Init: true,
-		Value: uint32(ctx.enqueue(
+		Value: uint32(ctx.enqueue( //gosec:disable G115 -- probably okay
 			call{
 				args: fnargs{
 					fn: glfnCreateProgram,
@@ -172,7 +172,7 @@ func (ctx *context) CreateProgram() Program {
 }
 
 func (ctx *context) CreateShader(ty Enum) Shader {
-	return Shader{Value: uint32(ctx.enqueue(call{
+	return Shader{Value: uint32(ctx.enqueue(call{ //gosec:disable G115 -- probably okay
 		args: fnargs{
 			fn: glfnCreateShader,
 			a0: uintptr(ty),
@@ -182,7 +182,7 @@ func (ctx *context) CreateShader(ty Enum) Shader {
 }
 
 func (ctx *context) CreateTexture() Texture {
-	return Texture{Value: uint32(ctx.enqueue(call{
+	return Texture{Value: uint32(ctx.enqueue(call{ //gosec:disable G115 -- probably okay
 		args: fnargs{
 			fn: glfnGenTexture,
 		},
@@ -191,7 +191,7 @@ func (ctx *context) CreateTexture() Texture {
 }
 
 func (ctx *context) CreateVertexArray() VertexArray {
-	return VertexArray{Value: uint32(ctx.enqueue(call{
+	return VertexArray{Value: uint32(ctx.enqueue(call{ //gosec:disable G115 -- probably okay
 		args: fnargs{
 			fn: glfnGenVertexArray,
 		},
@@ -287,7 +287,7 @@ func (ctx *context) GetAttribLocation(p Program, name string) Attrib {
 }
 
 func (ctx *context) GetError() Enum {
-	return Enum(ctx.enqueue(call{
+	return Enum(ctx.enqueue(call{ //gosec:disable G115 -- probably okay
 		args: fnargs{
 			fn: glfnGetError,
 		},
@@ -391,7 +391,7 @@ func (ctx *context) GetTexParameteriv(dst []int32, target, pname Enum) {
 func (ctx *context) GetUniformLocation(p Program, name string) Uniform {
 	s, free := ctx.cString(name)
 	defer free()
-	return Uniform{Value: int32(ctx.enqueue(call{
+	return Uniform{Value: uint32(ctx.enqueue(call{ //gosec:disable G115 -- probably okay
 		args: fnargs{
 			fn: glfnGetUniformLocation,
 			a0: p.c(),
@@ -447,10 +447,10 @@ func (ctx *context) Scissor(x, y, width, height int32) {
 	ctx.enqueue(call{
 		args: fnargs{
 			fn: glfnScissor,
-			a0: uintptr(x),
-			a1: uintptr(y),
-			a2: uintptr(width),
-			a3: uintptr(height),
+			a0: uintptr(x),      //gosec:disable G115 - that’s okay, there are no negative values
+			a1: uintptr(y),      //gosec:disable G115 - that’s okay, there are no negative values
+			a2: uintptr(width),  //gosec:disable G115 - that’s okay, there are no negative values
+			a3: uintptr(height), //gosec:disable G115 - that’s okay, there are no negative values
 		},
 	})
 }
