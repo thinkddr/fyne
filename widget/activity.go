@@ -159,7 +159,7 @@ func (a *activityRenderer) scaleDot(dot *canvas.Circle, off float32) {
 	dot.Move(mid.Subtract(fyne.NewSquareOffsetPos(rad)))
 	dot.Resize(fyne.NewSquareSize(rad * 2))
 
-	alpha := uint8(0 + int(float32(a.maxCol.A)*off))
+	alpha := uint8(float32(a.maxCol.A) * off)
 	dot.FillColor = color.NRGBA{R: a.maxCol.R, G: a.maxCol.G, B: a.maxCol.B, A: alpha}
 	dot.Refresh()
 }
