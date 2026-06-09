@@ -185,8 +185,8 @@ type popUpRenderer struct {
 
 func (r *popUpRenderer) Layout(s fyne.Size) {
 	size := s.Max(r.popUp.Content.MinSize())
-	if c := fyne.CurrentApp().Driver().CanvasForObject(r.popUp); c != nil {
-		size = size.Min(c.Size())
+	if r.popUp.Canvas != nil {
+		size = size.Min(r.popUp.Canvas.Size())
 	}
 	r.popUp.Content.Resize(size)
 
