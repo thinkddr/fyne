@@ -95,26 +95,6 @@ func (p *colorAdvancedPicker) SetColor(color color.Color) {
 	}
 }
 
-// SetHSLA updated the Hue, Saturation, Lightness, and Alpha components of the currently selected color.
-func (p *colorAdvancedPicker) SetHSLA(h, s, l, a int) {
-	if p.updateHSLA(h, s, l, a) {
-		p.Refresh()
-		if f := p.onChange; f != nil {
-			f(p.Color())
-		}
-	}
-}
-
-// SetRGBA updated the Red, Green, Blue, and Alpha components of the currently selected color.
-func (p *colorAdvancedPicker) SetRGBA(r, g, b, a int) {
-	if p.updateRGBA(r, g, b, a) {
-		p.Refresh()
-		if f := p.onChange; f != nil {
-			f(p.Color())
-		}
-	}
-}
-
 // MinSize returns the size that this widget should not shrink below.
 func (p *colorAdvancedPicker) MinSize() fyne.Size {
 	p.ExtendBaseWidget(p)
@@ -130,13 +110,13 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 
 	// HSL
 	hueChannel := newColorChannel("H", 0, 360, p.Hue, func(h int) {
-		p.SetHSLA(h, p.Saturation, p.Lightness, p.Alpha)
+		p.setHSLA(h, p.Saturation, p.Lightness, p.Alpha)
 	})
 	saturationChannel := newColorChannel("S", 0, 100, p.Saturation, func(s int) {
-		p.SetHSLA(p.Hue, s, p.Lightness, p.Alpha)
+		p.setHSLA(p.Hue, s, p.Lightness, p.Alpha)
 	})
 	lightnessChannel := newColorChannel("L", 0, 100, p.Lightness, func(l int) {
-		p.SetHSLA(p.Hue, p.Saturation, l, p.Alpha)
+		p.setHSLA(p.Hue, p.Saturation, l, p.Alpha)
 	})
 	hslBox := container.NewVBox(
 		hueChannel,
@@ -146,13 +126,13 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 
 	// RGB
 	redChannel := newColorChannel("R", 0, 255, p.Red, func(r int) {
-		p.SetRGBA(r, p.Green, p.Blue, p.Alpha)
+		p.setRGBA(r, p.Green, p.Blue, p.Alpha)
 	})
 	greenChannel := newColorChannel("G", 0, 255, p.Green, func(g int) {
-		p.SetRGBA(p.Red, g, p.Blue, p.Alpha)
+		p.setRGBA(p.Red, g, p.Blue, p.Alpha)
 	})
 	blueChannel := newColorChannel("B", 0, 255, p.Blue, func(b int) {
-		p.SetRGBA(p.Red, p.Green, b, p.Alpha)
+		p.setRGBA(p.Red, p.Green, b, p.Alpha)
 	})
 	rgbBox := container.NewVBox(
 		redChannel,
@@ -162,12 +142,12 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 
 	// Wheel
 	wheel := newColorWheel(func(hue, saturation, lightness, alpha int) {
-		p.SetHSLA(hue, saturation, lightness, alpha)
+		p.setHSLA(hue, saturation, lightness, alpha)
 	})
 
 	// Alpha
 	alphaChannel := newColorChannel("A", 0, 255, p.Alpha, func(a int) {
-		p.SetRGBA(p.Red, p.Green, p.Blue, a)
+		p.setRGBA(p.Red, p.Green, p.Blue, a)
 	})
 
 	// Hex
@@ -213,6 +193,26 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	}
 	r.updateObjects()
 	return r
+}
+
+// setHSLA updates the Hue, Saturation, Lightness, and Alpha components of the currently selected color.
+func (p *colorAdvancedPicker) setHSLA(h, s, l, a int) {
+	if p.updateHSLA(h, s, l, a) {
+		p.Refresh()
+		if f := p.onChange; f != nil {
+			f(p.Color())
+		}
+	}
+}
+
+// setRGBA updates the Red, Green, Blue, and Alpha components of the currently selected color.
+func (p *colorAdvancedPicker) setRGBA(r, g, b, a int) {
+	if p.updateRGBA(r, g, b, a) {
+		p.Refresh()
+		if f := p.onChange; f != nil {
+			f(p.Color())
+		}
+	}
 }
 
 func (p *colorAdvancedPicker) updateColor(color color.Color) bool {
