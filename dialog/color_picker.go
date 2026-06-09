@@ -54,9 +54,9 @@ var _ fyne.Widget = (*colorAdvancedPicker)(nil)
 // colorAdvancedPicker widget is a component for selecting a color.
 type colorAdvancedPicker struct {
 	widget.BaseWidget
-	Red, Green, Blue, Alpha int // Range 0-255
-	Hue                     int // Range 0-360 (degrees)
-	Saturation, Lightness   int // Range 0-100 (percent)
+	Red, Green, Blue, Alpha uint8 // Range 0-255
+	Hue                     int   // Range 0-360 (degrees)
+	Saturation, Lightness   int   // Range 0-100 (percent)
 	ColorModel              string
 	previousColor           color.Color
 
@@ -77,10 +77,10 @@ func newColorAdvancedPicker(color color.Color, onChange func(color.Color)) *colo
 // Color returns the currently selected color.
 func (p *colorAdvancedPicker) Color() color.Color {
 	return &color.NRGBA{
-		uint8(p.Red),
-		uint8(p.Green),
-		uint8(p.Blue),
-		uint8(p.Alpha),
+		p.Red,
+		p.Green,
+		p.Blue,
+		p.Alpha,
 	}
 }
 
@@ -110,13 +110,13 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 
 	// HSL
 	hueChannel := newColorChannel("H", 0, 360, p.Hue, func(h int) {
-		p.setHSLA(h, p.Saturation, p.Lightness, uint8(p.Alpha))
+		p.setHSLA(h, p.Saturation, p.Lightness, p.Alpha)
 	})
 	saturationChannel := newColorChannel("S", 0, 100, p.Saturation, func(s int) {
-		p.setHSLA(p.Hue, s, p.Lightness, uint8(p.Alpha))
+		p.setHSLA(p.Hue, s, p.Lightness, p.Alpha)
 	})
 	lightnessChannel := newColorChannel("L", 0, 100, p.Lightness, func(l int) {
-		p.setHSLA(p.Hue, p.Saturation, l, uint8(p.Alpha))
+		p.setHSLA(p.Hue, p.Saturation, l, p.Alpha)
 	})
 	hslBox := container.NewVBox(
 		hueChannel,
@@ -125,14 +125,14 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	)
 
 	// RGB
-	redChannel := newColorChannel("R", 0, 255, p.Red, func(r int) {
-		p.setRGBA(uint8(r), uint8(p.Green), uint8(p.Blue), uint8(p.Alpha))
+	redChannel := newColorChannel("R", 0, 255, int(p.Red), func(r int) {
+		p.setRGBA(uint8(r), p.Green, p.Blue, p.Alpha)
 	})
-	greenChannel := newColorChannel("G", 0, 255, p.Green, func(g int) {
-		p.setRGBA(uint8(p.Red), uint8(g), uint8(p.Blue), uint8(p.Alpha))
+	greenChannel := newColorChannel("G", 0, 255, int(p.Green), func(g int) {
+		p.setRGBA(p.Red, uint8(g), p.Blue, p.Alpha)
 	})
-	blueChannel := newColorChannel("B", 0, 255, p.Blue, func(b int) {
-		p.setRGBA(uint8(p.Red), uint8(p.Green), uint8(b), uint8(p.Alpha))
+	blueChannel := newColorChannel("B", 0, 255, int(p.Blue), func(b int) {
+		p.setRGBA(p.Red, p.Green, uint8(b), p.Alpha)
 	})
 	rgbBox := container.NewVBox(
 		redChannel,
@@ -146,8 +146,8 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	})
 
 	// Alpha
-	alphaChannel := newColorChannel("A", 0, 255, p.Alpha, func(a int) {
-		p.setRGBA(uint8(p.Red), uint8(p.Green), uint8(p.Blue), uint8(a))
+	alphaChannel := newColorChannel("A", 0, 255, int(p.Alpha), func(a int) {
+		p.setRGBA(p.Red, p.Green, p.Blue, uint8(a))
 	})
 
 	// Hex
@@ -224,27 +224,26 @@ func (p *colorAdvancedPicker) updateHSLA(h, s, l int, a uint8) bool {
 	h = wrapHue(h)
 	s = clamp(s, 0, 100)
 	l = clamp(l, 0, 100)
-	if p.Hue == h && p.Saturation == s && p.Lightness == l && p.Alpha == int(a) {
+	if p.Hue == h && p.Saturation == s && p.Lightness == l && p.Alpha == a {
 		return false
 	}
 	p.Hue = h
 	p.Saturation = s
 	p.Lightness = l
-	p.Alpha = int(a)
-	r, g, b := hslToRgb(p.Hue, p.Saturation, p.Lightness)
-	p.Red, p.Green, p.Blue = int(r), int(g), int(b)
+	p.Alpha = a
+	p.Red, p.Green, p.Blue = hslToRgb(p.Hue, p.Saturation, p.Lightness)
 	return true
 }
 
 func (p *colorAdvancedPicker) updateRGBA(r, g, b, a uint8) bool {
-	if p.Red == int(r) && p.Green == int(g) && p.Blue == int(b) && p.Alpha == int(a) {
+	if p.Red == r && p.Green == g && p.Blue == b && p.Alpha == a {
 		return false
 	}
 
-	p.Red = int(r)
-	p.Green = int(g)
-	p.Blue = int(b)
-	p.Alpha = int(a)
+	p.Red = r
+	p.Green = g
+	p.Blue = b
+	p.Alpha = a
 	p.Hue, p.Saturation, p.Lightness = rgbToHsl(r, g, b)
 	return true
 }
@@ -279,12 +278,12 @@ func (r *colorPickerRenderer) updateObjects() {
 	r.lightnessChannel.SetValue(r.picker.Lightness)
 
 	// RGB
-	r.redChannel.SetValue(r.picker.Red)
-	r.greenChannel.SetValue(r.picker.Green)
-	r.blueChannel.SetValue(r.picker.Blue)
+	r.redChannel.SetValue(int(r.picker.Red))
+	r.greenChannel.SetValue(int(r.picker.Green))
+	r.blueChannel.SetValue(int(r.picker.Blue))
 
 	// Wheel
-	r.wheel.SetHSLA(r.picker.Hue, r.picker.Saturation, r.picker.Lightness, r.picker.Alpha)
+	r.wheel.SetHSLA(r.picker.Hue, r.picker.Saturation, r.picker.Lightness, int(r.picker.Alpha))
 
 	color := r.picker.Color()
 
@@ -292,7 +291,7 @@ func (r *colorPickerRenderer) updateObjects() {
 	r.preview.SetColor(color)
 
 	// Alpha
-	r.alphaChannel.SetValue(r.picker.Alpha)
+	r.alphaChannel.SetValue(int(r.picker.Alpha))
 
 	// Hex
 	r.hex.SetText(colorToString(color))

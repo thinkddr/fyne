@@ -93,22 +93,22 @@ func TestColorDialog_SetColor(t *testing.T) {
 	d.SetColor(col)
 	assert.NotNil(t, d.picker)
 
-	assert.Equal(t, 70, d.picker.Red)
-	assert.Equal(t, 210, d.picker.Green)
-	assert.Equal(t, 200, d.picker.Blue)
-	assert.Equal(t, 255, d.picker.Alpha)
+	assert.Equal(t, uint8(70), d.picker.Red)
+	assert.Equal(t, uint8(210), d.picker.Green)
+	assert.Equal(t, uint8(200), d.picker.Blue)
+	assert.Equal(t, uint8(255), d.picker.Alpha)
 
 	col = color.RGBA{R: 244, G: 40, B: 70, A: 244}
-	assert.NotEqual(t, int(col.R), d.picker.Red)
-	assert.NotEqual(t, int(col.G), d.picker.Green)
-	assert.NotEqual(t, int(col.B), d.picker.Blue)
-	assert.NotEqual(t, int(col.A), d.picker.Alpha)
+	assert.NotEqual(t, col.R, d.picker.Red)
+	assert.NotEqual(t, col.G, d.picker.Green)
+	assert.NotEqual(t, col.B, d.picker.Blue)
+	assert.NotEqual(t, col.A, d.picker.Alpha)
 
 	d.SetColor(col)
-	assert.Equal(t, 255, d.picker.Red)
-	assert.Equal(t, 41, d.picker.Green)
-	assert.Equal(t, 73, d.picker.Blue)
-	assert.Equal(t, 244, d.picker.Alpha)
+	assert.Equal(t, uint8(255), d.picker.Red)
+	assert.Equal(t, uint8(41), d.picker.Green)
+	assert.Equal(t, uint8(73), d.picker.Blue)
+	assert.Equal(t, uint8(244), d.picker.Alpha)
 
 	d.Show()
 }
