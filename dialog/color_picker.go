@@ -217,9 +217,6 @@ func (p *colorAdvancedPicker) setRGBA(r, g, b, a uint8) {
 
 func (p *colorAdvancedPicker) updateColor(color color.Color) bool {
 	r, g, b, a := col.ToNRGBA(color)
-	if p.Red == int(r) && p.Green == int(g) && p.Blue == int(b) && p.Alpha == int(a) {
-		return false
-	}
 	return p.updateRGBA(r, g, b, a)
 }
 
