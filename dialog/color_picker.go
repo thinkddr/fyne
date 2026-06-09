@@ -251,7 +251,7 @@ func (p *colorAdvancedPicker) updateRGBA(r, g, b, a int) bool {
 	p.Green = g
 	p.Blue = b
 	p.Alpha = a
-	p.Hue, p.Saturation, p.Lightness = rgbToHsl(p.Red, p.Green, p.Blue)
+	p.Hue, p.Saturation, p.Lightness = rgbToHsl(uint8(r), uint8(g), uint8(b))
 	return true
 }
 

@@ -85,7 +85,7 @@ func TestColorDialog_SetColor(t *testing.T) {
 
 	d := NewColorPicker("pick colour", "select colour", func(c color.Color) {
 		r, g, b, a := c.RGBA()
-		col = color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+		col = color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 	}, w)
 	d.Advanced = true
 
@@ -233,7 +233,7 @@ func Test_wrapHue(t *testing.T) {
 
 type rgbhsl struct {
 	hex     string
-	r, g, b int
+	r, g, b uint8
 	h, s, l int
 }
 
@@ -298,9 +298,9 @@ func Test_colorToString(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
 			hex := colorToString(&color.NRGBA{
-				R: uint8(tt.r),
-				G: uint8(tt.g),
-				B: uint8(tt.b),
+				R: tt.r,
+				G: tt.g,
+				B: tt.b,
 				A: 0xff,
 			})
 			assert.Equal(t, tt.hex, hex)
@@ -326,13 +326,13 @@ func Test_colorToHSLA(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
 			var c color.Color = &color.NRGBA{
-				R: uint8(tt.r),
-				G: uint8(tt.g),
-				B: uint8(tt.b),
+				R: tt.r,
+				G: tt.g,
+				B: tt.b,
 				A: 0xff,
 			}
 			r, g, b, a := fynecolor.ToNRGBA(c)
-			h, s, l := rgbToHsl(int(r), int(g), int(b))
+			h, s, l := rgbToHsl(r, g, b)
 			assert.Equal(t, tt.h, h)
 			assert.Equal(t, tt.s, s)
 			assert.Equal(t, tt.l, l)
@@ -346,14 +346,14 @@ func Test_toRGBA(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
 			r, g, b, a := fynecolor.ToNRGBA(&color.NRGBA{
-				R: uint8(tt.r),
-				G: uint8(tt.g),
-				B: uint8(tt.b),
+				R: tt.r,
+				G: tt.g,
+				B: tt.b,
 				A: 0xff,
 			})
-			assert.Equal(t, uint8(tt.r), r)
-			assert.Equal(t, uint8(tt.g), g)
-			assert.Equal(t, uint8(tt.b), b)
+			assert.Equal(t, tt.r, r)
+			assert.Equal(t, tt.g, g)
+			assert.Equal(t, tt.b, b)
 			assert.Equal(t, uint8(0xff), a)
 		})
 	}
@@ -374,9 +374,9 @@ func Test_hslToRgb(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
 			r, g, b := hslToRgb(tt.h, tt.s, tt.l)
-			assert.Equal(t, tt.r, r)
-			assert.Equal(t, tt.g, g)
-			assert.Equal(t, tt.b, b)
+			assert.Equal(t, int(tt.r), r)
+			assert.Equal(t, int(tt.g), g)
+			assert.Equal(t, int(tt.b), b)
 		})
 	}
 }

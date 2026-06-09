@@ -263,7 +263,7 @@ func stringsToColors(ss ...string) (colors []color.Color) {
 
 // https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
 
-func rgbToHsl(r, g, b int) (int, int, int) {
+func rgbToHsl(r, g, b uint8) (int, int, int) {
 	red := float64(r) / 255.0
 	green := float64(g) / 255.0
 	blue := float64(b) / 255.0
