@@ -141,8 +141,8 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	)
 
 	// Wheel
-	wheel := newColorWheel(func(hue, saturation, lightness, alpha int) {
-		p.setHSLA(hue, saturation, lightness, uint8(alpha))
+	wheel := newColorWheel(func(hue, saturation, lightness int, alpha uint8) {
+		p.setHSLA(hue, saturation, lightness, alpha)
 	})
 
 	// Alpha
@@ -283,7 +283,7 @@ func (r *colorPickerRenderer) updateObjects() {
 	r.blueChannel.SetValue(int(r.picker.Blue))
 
 	// Wheel
-	r.wheel.SetHSLA(r.picker.Hue, r.picker.Saturation, r.picker.Lightness, int(r.picker.Alpha))
+	r.wheel.SetHSLA(r.picker.Hue, r.picker.Saturation, r.picker.Lightness, r.picker.Alpha)
 
 	color := r.picker.Color()
 
