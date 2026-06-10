@@ -18,13 +18,13 @@ func main() {
 	fmt.Fprintln(f, "var dontEscape = [256]bool{")
 
 	dontEscape := [256]bool{}
-	for c := uint8('a'); c < uint8('z'); c++ {
+	for c := uint8('a'); c <= uint8('z'); c++ {
 		dontEscape[c] = true
 	}
-	for c := uint8('A'); c < uint8('Z'); c++ {
+	for c := uint8('A'); c <= uint8('Z'); c++ {
 		dontEscape[c] = true
 	}
-	for c := uint8('0'); c < uint8('9'); c++ {
+	for c := uint8('0'); c <= uint8('9'); c++ {
 		dontEscape[c] = true
 	}
 

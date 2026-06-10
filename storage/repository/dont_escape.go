@@ -58,7 +58,7 @@ var dontEscape = [256]bool{
 	true,  // '6'
 	true,  // '7'
 	true,  // '8'
-	false, // 0x39
+	true,  // '9'
 	true,  // ':'
 	false, // 0x3B
 	false, // 0x3C
@@ -91,7 +91,7 @@ var dontEscape = [256]bool{
 	true,  // 'W'
 	true,  // 'X'
 	true,  // 'Y'
-	false, // 0x5A
+	true,  // 'Z'
 	false, // 0x5B
 	true,  // '\'
 	false, // 0x5D
@@ -123,7 +123,7 @@ var dontEscape = [256]bool{
 	true,  // 'w'
 	true,  // 'x'
 	true,  // 'y'
-	false, // 0x7A
+	true,  // 'z'
 	false, // 0x7B
 	false, // 0x7C
 	false, // 0x7D
