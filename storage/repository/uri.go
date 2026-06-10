@@ -84,7 +84,7 @@ func (u *uri) String() string {
 	s.WriteString(u.scheme)
 	s.WriteString("://")
 	s.WriteString(u.authority)
-	s.WriteString(u.path)
+	s.WriteString(filePathEscape(u.path))
 
 	if len(u.query) > 0 {
 		s.WriteByte('?')

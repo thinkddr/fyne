@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"net/url"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -17,9 +18,6 @@ import (
 //
 // Since: 2.0
 func NewFileURI(path string) fyne.URI {
-	// escape characters for internal representation
-	path = filePathEscape(path)
-
 	// URIs are supposed to use forward slashes. On Windows, it
 	// should be OK to use the platform native filepath with UNIX
 	// or NT style paths, with / or \, but when we reconstruct
@@ -64,8 +62,13 @@ func ParseURI(s string) (fyne.URI, error) {
 			path = path[2:]
 		}
 
+		p, err := url.PathUnescape(path)
+		if err != nil {
+			return nil, err
+		}
+
 		// Windows files can break authority checks, so just return the parsed file URI
-		return NewFileURI(path), nil
+		return NewFileURI(p), nil
 	}
 
 	scheme = strings.ToLower(scheme)
