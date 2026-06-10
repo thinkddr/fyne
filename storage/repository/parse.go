@@ -17,6 +17,9 @@ import (
 //
 // Since: 2.0
 func NewFileURI(path string) fyne.URI {
+	// escape characters for internal representation
+	path = filePathEscape(path)
+
 	// URIs are supposed to use forward slashes. On Windows, it
 	// should be OK to use the platform native filepath with UNIX
 	// or NT style paths, with / or \, but when we reconstruct

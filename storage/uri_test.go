@@ -201,6 +201,15 @@ func TestURI_Name(t *testing.T) {
 	assert.Equal(t, "image.JPEG", storage.NewFileURI("C:/image.JPEG").Name())
 }
 
+func TestURI_NewFileURI(t *testing.T) {
+	path := "/home/user/file#1.txt"
+	uri := "file:///home/user/file%231.txt"
+	assert.Equal(t, uri, storage.NewFileURI(path).String())
+	u, err := storage.ParseURI(uri)
+	assert.NoError(t, err)
+	assert.Equal(t, path, u.Path())
+}
+
 func TestURI_Parent(t *testing.T) {
 	// note the trailing slashes are significant, as they tend to belie a
 	// directory
