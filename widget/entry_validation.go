@@ -27,23 +27,22 @@ func (e *Entry) SetOnRequiredChanged(callback func(bool)) {
 }
 
 // Validate validates the current text in the widget.
-func (e *Entry) Validate() error {
-	if e.Validator == nil {
-		return nil
+func (e *Entry) Validate() (err error) {
+	if e.Validator != nil {
+		err = e.Validator(e.Text)
 	}
 
-	err := e.Validator(e.Text)
 	e.SetValidationError(err)
 	return err
 }
 
 // validate works like Validate but only updates the internal state and does not refresh.
 func (e *Entry) validate() {
-	if e.Validator == nil {
-		return
-	}
+	var err error
 
-	err := e.Validator(e.Text)
+	if e.Validator != nil {
+		err = e.Validator(e.Text)
+	}
 	e.setValidationError(err)
 }
 
@@ -61,10 +60,6 @@ func (e *Entry) SetOnValidationChanged(callback func(error)) {
 
 // SetValidationError manually updates the validation status until the next input change.
 func (e *Entry) SetValidationError(err error) {
-	if e.Validator == nil && !e.AlwaysShowValidationError {
-		return
-	}
-
 	if !e.setValidationError(err) {
 		return
 	}
@@ -88,12 +83,9 @@ func (e *Entry) setValidationError(err error) bool {
 		return false
 	}
 
-	changed := e.validationError != err
 	e.validationError = err
 	if e.onValidationChanged != nil {
-		if changed || gone {
-			e.onValidationChanged(err)
-		}
+		e.onValidationChanged(err)
 	}
 
 	return true

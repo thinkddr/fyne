@@ -57,8 +57,14 @@ type Form struct {
 	// Since: 2.5
 	Orientation Orientation
 
+	// Validator allows a form to handle some overall validation before it will enable Submit.
+	//
+	// Since: 2.8
+	Validator func() error `json:"-"`
+
 	itemGrid     *fyne.Container
 	buttonBox    *fyne.Container
+	validateText *canvas.Text
 	cancelButton *Button
 	submitButton *Button
 
@@ -101,7 +107,7 @@ func (f *Form) Refresh() {
 	f.ensureRenderItems()
 	f.updateButtons()
 	f.updateLabels()
-	f.checkValidation(f.validationError)
+	f.checkValidation(nil)
 
 	if f.isVertical() {
 		f.itemGrid.Layout = layout.NewVBoxLayout()
@@ -299,6 +305,20 @@ func (f *Form) checkValidation(err error) {
 		}
 	}
 
+	if f.Validator != nil {
+		err := f.Validator()
+		if err != nil {
+			f.validationError = err
+			f.validateText.Text = err.Error()
+			f.validateText.Show()
+			f.submitButton.Disable()
+			return
+		} else {
+			f.validationError = nil
+			f.validateText.Hide()
+		}
+	}
+
 	if !f.disabled {
 		f.submitButton.Enable()
 	}
@@ -481,6 +501,11 @@ func (f *Form) updateLabels() {
 		r.Refresh()
 		f.updateHelperText(item)
 	}
+
+	if f.validateText != nil {
+		f.validateText.Color = theme.ColorForWidget(theme.ColorNameError, f)
+		f.validateText.Refresh()
+	}
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -498,7 +523,11 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	} else {
 		f.itemGrid.Layout = layout.NewFormLayout()
 	}
-	content := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{f.itemGrid, f.buttonBox}}
+	f.validateText = canvas.NewText("", theme.ColorForWidget(theme.ColorNameError, f))
+	f.validateText.TextSize = th.Size(theme.SizeNameCaptionText)
+	f.validateText.Hide()
+
+	content := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{f.itemGrid, f.validateText, f.buttonBox}}
 	renderer := NewSimpleRenderer(content)
 	f.ensureRenderItems()
 	f.updateButtons()
