@@ -2,12 +2,20 @@ package repository
 
 import (
 	"errors"
+	"fmt"
+	"net"
 	"net/url"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
+)
+
+var (
+	rxHost = regexp.MustCompile(`^(.*?)(?::[0-9]+)?$`)
+	rxName = regexp.MustCompile(`^([a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62}){1}(\.[a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62})*[\._]?$`)
 )
 
 // NewFileURI implements the back-end logic to storage.NewFileURI, which you
@@ -90,6 +98,28 @@ func ParseURI(s string) (fyne.URI, error) {
 	l, err := url.Parse(s)
 	if err != nil {
 		return nil, err
+	}
+
+	if l.Host == "" {
+		return &uri{*l}, nil
+	}
+
+	// host format checks
+	m := rxHost.FindStringSubmatch(l.Host)
+	if len(m) != 2 {
+		return nil, errors.New("failed to find host")
+	}
+
+	if rxName.MatchString(m[1]) {
+		return &uri{*l}, nil
+	}
+
+	if len(m[1]) > 1 && m[1][0] == '[' && m[1][len(m[1])-1] == ']' {
+		m[1] = m[1][1 : len(m[1])-1]
+	}
+
+	if net.ParseIP(m[1]) == nil {
+		return nil, fmt.Errorf("invalid address: %v", m[1])
 	}
 
 	return &uri{*l}, nil
