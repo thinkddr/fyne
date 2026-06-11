@@ -7,8 +7,6 @@ import (
 	"runtime"
 	"strings"
 
-	uriParser "github.com/fredbi/uri"
-
 	"fyne.io/fyne/v2"
 )
 
@@ -28,10 +26,10 @@ func NewFileURI(path string) fyne.URI {
 		path = filepath.ToSlash(path)
 	}
 
-	return &uri{
-		scheme: "file",
-		path:   path,
-	}
+	return &uri{url.URL{
+		Scheme: "file",
+		Path:   path,
+	}}
 }
 
 // ParseURI implements the back-end logic for storage.ParseURI, which you
@@ -71,6 +69,13 @@ func ParseURI(s string) (fyne.URI, error) {
 		return NewFileURI(p), nil
 	}
 
+	if strings.EqualFold(scheme, "urn") {
+		return &uri{url.URL{
+			Scheme: scheme,
+			Path:   path,
+		}}, nil
+	}
+
 	scheme = strings.ToLower(scheme)
 	repo, err := ForScheme(scheme)
 	if err == nil {
@@ -82,39 +87,10 @@ func ParseURI(s string) (fyne.URI, error) {
 
 	// There was no repository registered, or it did not provide a parser
 
-	l, err := uriParser.Parse(s)
+	l, err := url.Parse(s)
 	if err != nil {
 		return nil, err
 	}
 
-	authority := l.Authority()
-	authBuilder := strings.Builder{}
-	authBuilder.Grow(len(authority.UserInfo()) + len(authority.Host()) + len(authority.Port()) + len("@[]:"))
-
-	if userInfo := authority.UserInfo(); userInfo != "" {
-		authBuilder.WriteString(userInfo)
-		authBuilder.WriteByte('@')
-	}
-
-	// Per RFC 3986, section 3.2.2, IPv6 addresses must be enclosed in square brackets.
-	if host := authority.Host(); strings.Contains(host, ":") {
-		authBuilder.WriteByte('[')
-		authBuilder.WriteString(host)
-		authBuilder.WriteByte(']')
-	} else {
-		authBuilder.WriteString(host)
-	}
-
-	if port := authority.Port(); port != "" {
-		authBuilder.WriteByte(':')
-		authBuilder.WriteString(port)
-	}
-
-	return &uri{
-		scheme:    scheme,
-		authority: authBuilder.String(),
-		path:      authority.Path(),
-		query:     l.Query().Encode(),
-		fragment:  l.Fragment(),
-	}, nil
+	return &uri{*l}, nil
 }
