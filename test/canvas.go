@@ -7,6 +7,11 @@ import (
 	"fyne.io/fyne/v2/driver/software"
 )
 
+// WindowlessCanvas provides functionality for a canvas to operate without a window
+//
+// Deprecated: Use driver/software.WindowlessCanvas instead.
+type WindowlessCanvas = software.WindowlessCanvas
+
 var dummyCanvas software.WindowlessCanvas
 
 // Canvas returns a reusable in-memory canvas used for testing

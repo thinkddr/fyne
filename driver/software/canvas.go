@@ -16,6 +16,8 @@ import (
 )
 
 // WindowlessCanvas provides functionality for a canvas to operate without a window
+//
+// Since: 2.9
 type WindowlessCanvas interface {
 	fyne.Canvas
 

@@ -13,6 +13,11 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
+// SoftwarePainter describes a simple type that can render canvases
+//
+// Deprecated: Use driver.Painter instead.
+type SoftwarePainter = fynedriver.Painter
+
 type driver struct {
 	device       device
 	painter      fynedriver.Painter
