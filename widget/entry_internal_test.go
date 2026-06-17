@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -440,6 +441,30 @@ func TestEntry_Tab(t *testing.T) {
 	w.Resize(fyne.NewSize(86, 86))
 	w.Canvas().Focus(e)
 	test.AssertImageMatches(t, "entry/tab-content.png", w.Canvas().Capture())
+}
+
+func TestEntry_LongLineSplitIntoMultipleVisuals(t *testing.T) {
+	for _, text := range []string{
+		strings.Repeat("0123456789", 300),
+		strings.Repeat("s", 5044),
+	} {
+		e := NewMultiLineEntry()
+		e.SetText(text)
+
+		r := cache.Renderer(e.textProvider()).(*textRenderer)
+		assert.Greater(t, len(r.Objects()), 1)
+
+		var rendered strings.Builder
+		for _, obj := range r.Objects() {
+			txt, ok := obj.(*canvas.Text)
+			if !ok {
+				continue
+			}
+			rendered.WriteString(txt.Text)
+		}
+		assert.Equal(t, e.Text, rendered.String())
+		cache.DestroyRenderer(e.textProvider())
+	}
 }
 
 func TestEntry_TabSelection(t *testing.T) {
