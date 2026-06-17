@@ -548,12 +548,15 @@ type textRenderer struct {
 	obj *RichText
 }
 
-const maxTextVisualWidth = 1024
+const maxTextVisualRunes = 256
 
 type renderItem struct {
-	seg    RichTextSegment
-	inline bool
-	text   string
+	seg         RichTextSegment
+	inline      bool
+	text        string
+	isText      bool
+	isHyperlink bool
+	hyperlink   *HyperlinkSegment
 }
 
 // codeInlineText returns the text inside an inline-code container, identified by
@@ -575,8 +578,8 @@ func (r *textRenderer) renderItems(bound rowBoundary) []renderItem {
 	items := make([]renderItem, 0, len(bound.segments))
 	for i, seg := range bound.segments {
 		inline := i < len(bound.segments)-1
-		textSeg, isText := seg.(*TextSegment)
-		_, isHyperlink := seg.(*HyperlinkSegment)
+		_, isText := seg.(*TextSegment)
+		hlSeg, isHyperlink := seg.(*HyperlinkSegment)
 		if !isText && !isHyperlink {
 			items = append(items, renderItem{seg: seg, inline: inline})
 			continue
@@ -604,16 +607,23 @@ func (r *textRenderer) renderItems(bound rowBoundary) []renderItem {
 		}
 
 		if !isText {
-			items = append(items, renderItem{seg: seg, inline: inline, text: txt})
+			items = append(items, renderItem{
+				seg:         seg,
+				inline:      inline,
+				text:        txt,
+				isHyperlink: true,
+				hyperlink:   hlSeg,
+			})
 			continue
 		}
 
-		chunks := splitTextVisuals(txt, textSeg.size(), textSeg.Style.TextStyle)
+		chunks := splitTextVisuals(txt)
 		for chunkIndex, chunk := range chunks {
 			items = append(items, renderItem{
 				seg:    seg,
 				inline: inline || chunkIndex < len(chunks)-1,
 				text:   chunk,
+				isText: true,
 			})
 		}
 	}
@@ -621,29 +631,19 @@ func (r *textRenderer) renderItems(bound rowBoundary) []renderItem {
 	return items
 }
 
-func splitTextVisuals(text string, textSize float32, textStyle fyne.TextStyle) []string {
+func splitTextVisuals(text string) []string {
 	runes := []rune(text)
-	if len(runes) <= 1 {
+	if len(runes) <= maxTextVisualRunes {
 		return []string{text}
 	}
 
-	charWidth := fyne.MeasureText("z", textSize, textStyle).Width
-	measurer := func(text []rune) fyne.Size {
-		return fyne.MeasureText(string(text), textSize, textStyle)
-	}
-
-	if measurer(runes).Width <= maxTextVisualWidth {
-		return []string{text}
-	}
-
-	chunks := make([]string, 0, len(runes)/64+1)
-	for low := 0; low < len(runes); {
-		fitCount := howManyRunesFit(runes[low:], maxTextVisualWidth, charWidth, measurer)
-		if fitCount < 1 {
-			fitCount = 1
+	chunks := make([]string, 0, len(runes)/maxTextVisualRunes+1)
+	for low := 0; low < len(runes); low += maxTextVisualRunes {
+		high := low + maxTextVisualRunes
+		if high > len(runes) {
+			high = len(runes)
 		}
-		chunks = append(chunks, string(runes[low:low+fitCount]))
-		low += fitCount
+		chunks = append(chunks, string(runes[low:high]))
 	}
 
 	return chunks
@@ -827,9 +827,7 @@ func (r *textRenderer) Refresh() {
 	for _, bound := range bounds {
 		for itemIndex, item := range r.renderItems(bound) {
 			seg := item.seg
-			_, isText := seg.(*TextSegment)
-			hlSeg, isHyperlink := seg.(*HyperlinkSegment)
-			if !isText && !isHyperlink {
+			if !item.isText && !item.isHyperlink {
 				obj := r.obj.cachedSegmentVisual(seg, 0)
 				seg.Update(obj)
 				objs = append(objs, obj)
@@ -848,13 +846,13 @@ func (r *textRenderer) Refresh() {
 			}
 			seg.Update(obj)
 
-			if isText {
+			if item.isText {
 				to, _ := codeInlineText(obj)
 				to.Text = item.text
-			} else if isHyperlink {
+			} else if item.isHyperlink {
 				hl := obj.(*fyne.Container).Objects[0].(*Hyperlink)
 				hl.Text = item.text
-				r.associateSiblings(hl, hlSeg, reuse)
+				r.associateSiblings(hl, item.hyperlink, reuse)
 				hl.Refresh()
 			}
 			objs = append(objs, obj)
