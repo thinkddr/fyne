@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	paint "fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/theme"
 )
 
 const edgeSoftness = 0.5
@@ -697,7 +698,11 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	size.Height = roundToPixel(size.Height, p.pixScale)
 	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale) // italic overspill to the right
 	size.Height += roundToPixel(paint.TextVectorPad, p.pixScale)  // space below for descenders / underline
-	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
+	if int(math.Ceil(float64(size.Width*p.pixScale))) <= paint.MaxTextTileWidth {
+		p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
+	} else {
+		p.drawTiledText(text, pos, size, frame)
+	}
 
 	if decorated {
 		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
@@ -712,6 +717,57 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 			p.drawLine(line, strikePos, frame)
 		}
 	}
+}
+
+func (p *painter) drawTiledText(text *canvas.Text, pos fyne.Position, size, frame fyne.Size) {
+	color := text.Color
+	if color == nil {
+		color = theme.Color(theme.ColorNameForeground)
+	}
+
+	width := int(math.Ceil(float64(size.Width * p.pixScale)))
+	height := int(math.Ceil(float64(size.Height * p.pixScale)))
+	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
+	tiles := paint.DrawStringTiled(text.Text, color, face.Fonts, text.TextSize, p.pixScale, text.TextStyle, width, height, paint.MaxTextTileWidth)
+
+	for _, tile := range tiles {
+		texture := p.imgToTexture(tile.Image, canvas.ImageScaleSmooth)
+		if texture == noTexture {
+			continue
+		}
+
+		tileSize := fyne.NewSize(float32(tile.Width)/p.pixScale, size.Height)
+		tilePos := fyne.NewPos(pos.X+float32(tile.OffsetX)/p.pixScale, pos.Y)
+		p.drawTextureRegion(texture, tilePos, tileSize, frame, float32(tile.SourceX)/float32(tile.Image.Bounds().Dx()), float32(tile.SourceX+tile.Width)/float32(tile.Image.Bounds().Dx()))
+		p.ctx.DeleteTexture(texture)
+		p.logError()
+	}
+}
+
+func (p *painter) drawTextureRegion(texture Texture, pos fyne.Position, size, frame fyne.Size, insetLeft, insetRight float32) {
+	points, insets := p.rectCoords(size, pos, frame, canvas.ImageFillStretch, 1, 0)
+	inner, _ := rectInnerCoords(size, pos, canvas.ImageFillStretch, 1)
+	insets[0], insets[2] = insetLeft, insetRight
+
+	p.ctx.UseProgram(p.program.ref)
+	p.updateBuffer(p.program.buff, points)
+	p.UpdateVertexArray(p.program, "vert", 3, 5, 0)
+	p.UpdateVertexArray(p.program, "vertTexCoord", 2, 5, 3)
+
+	p.SetUniform1f(p.program, "cornerRadius", 0)
+	p.SetUniform2f(p.program, "size", inner.Width*p.pixScale, inner.Height*p.pixScale)
+	p.SetUniform4f(p.program, "inset", insets[0], insets[1], insets[2], insets[3])
+	p.SetUniform1f(p.program, "alpha", 1.0)
+
+	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
+	p.logError()
+
+	p.ctx.ActiveTexture(texture0)
+	p.ctx.BindTexture(texture2D, texture)
+	p.logError()
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
 }
 
 func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,

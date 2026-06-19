@@ -548,17 +548,6 @@ type textRenderer struct {
 	obj *RichText
 }
 
-const maxTextVisualRunes = 256
-
-type renderItem struct {
-	seg         RichTextSegment
-	inline      bool
-	text        string
-	isText      bool
-	isHyperlink bool
-	hyperlink   *HyperlinkSegment
-}
-
 // codeInlineText returns the text inside an inline-code container, identified by
 // its codeInlineLayout, or a bare *canvas.Text as-is. It returns false for any
 // other object.
@@ -572,81 +561,6 @@ func codeInlineText(obj fyne.CanvasObject) (*canvas.Text, bool) {
 		}
 	}
 	return nil, false
-}
-
-func (r *textRenderer) renderItems(bound rowBoundary) []renderItem {
-	items := make([]renderItem, 0, len(bound.segments))
-	for i, seg := range bound.segments {
-		inline := i < len(bound.segments)-1
-		_, isText := seg.(*TextSegment)
-		hlSeg, isHyperlink := seg.(*HyperlinkSegment)
-		if !isText && !isHyperlink {
-			items = append(items, renderItem{seg: seg, inline: inline})
-			continue
-		}
-
-		runes := []rune(seg.Textual())
-		var txt string
-		if i == 0 {
-			if len(bound.segments) == 1 {
-				txt = string(runes[bound.begin:bound.end])
-			} else {
-				txt = string(runes[bound.begin:])
-			}
-		} else if i == len(bound.segments)-1 && len(bound.segments) > 1 {
-			txt = string(runes[:bound.end])
-		} else {
-			txt = string(runes)
-		}
-		if bound.ellipsis && i == len(bound.segments)-1 {
-			txt += "…"
-		}
-
-		if concealed(seg) {
-			txt = strings.Repeat(passwordChar, len([]rune(txt)))
-		}
-
-		if !isText {
-			items = append(items, renderItem{
-				seg:         seg,
-				inline:      inline,
-				text:        txt,
-				isHyperlink: true,
-				hyperlink:   hlSeg,
-			})
-			continue
-		}
-
-		chunks := splitTextVisuals(txt)
-		for chunkIndex, chunk := range chunks {
-			items = append(items, renderItem{
-				seg:    seg,
-				inline: inline || chunkIndex < len(chunks)-1,
-				text:   chunk,
-				isText: true,
-			})
-		}
-	}
-
-	return items
-}
-
-func splitTextVisuals(text string) []string {
-	runes := []rune(text)
-	if len(runes) <= maxTextVisualRunes {
-		return []string{text}
-	}
-
-	chunks := make([]string, 0, len(runes)/maxTextVisualRunes+1)
-	for low := 0; low < len(runes); low += maxTextVisualRunes {
-		high := low + maxTextVisualRunes
-		if high > len(runes) {
-			high = len(runes)
-		}
-		chunks = append(chunks, string(runes[low:high]))
-	}
-
-	return chunks
 }
 
 func (r *textRenderer) Layout(size fyne.Size) {
@@ -672,16 +586,16 @@ func (r *textRenderer) Layout(size fyne.Size) {
 	for row, bound := range bounds {
 		leftPad, align := rowPaddingAndAlign(bound, lineSpacing, rowAlign)
 		rowAlign = align
-		items := r.renderItems(bound)
 
-		for _, item := range items {
+		for segI := range bound.segments {
 			if i == len(objs) {
 				break // Refresh may not have created all objects for all rows yet...
 			}
+			inline := segI < len(bound.segments)-1
 			obj := objs[i]
 			i++
 			_, isText := codeInlineText(obj) // code-inline containers are text-like, not blocks
-			if !isText && !item.inline {
+			if !isText && !inline {
 				if len(rowItems) != 0 {
 					width, _ := r.layoutRow(rowItems, rowAlign, left+leftPad, yPos, lineWidth-leftPad)
 					left += width
@@ -696,7 +610,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 				continue
 			}
 			rowItems = append(rowItems, obj)
-			if item.inline {
+			if inline {
 				continue
 			}
 
@@ -776,7 +690,7 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 
 	i := 0
 	for row, bound := range bounds {
-		for range r.renderItems(bound) {
+		for range bound.segments {
 			if i == len(objs) {
 				break // Refresh may not have created all objects for all rows yet...
 			}
@@ -825,9 +739,10 @@ func (r *textRenderer) Refresh() {
 
 	var objs []fyne.CanvasObject
 	for _, bound := range bounds {
-		for itemIndex, item := range r.renderItems(bound) {
-			seg := item.seg
-			if !item.isText && !item.isHyperlink {
+		for i, seg := range bound.segments {
+			_, isText := seg.(*TextSegment)
+			hlSeg, isHyperlink := seg.(*HyperlinkSegment)
+			if !isText && !isHyperlink {
 				obj := r.obj.cachedSegmentVisual(seg, 0)
 				seg.Update(obj)
 				objs = append(objs, obj)
@@ -835,24 +750,40 @@ func (r *textRenderer) Refresh() {
 			}
 
 			reuse := 0
-			if itemIndex == 0 {
+			if i == 0 {
 				reuse = bound.firstSegmentReuse
 			}
-			var obj fyne.CanvasObject
-			if itemIndex == 0 {
-				obj = r.obj.cachedSegmentVisual(seg, reuse)
-			} else {
-				obj = seg.Visual()
-			}
+			obj := r.obj.cachedSegmentVisual(seg, reuse)
 			seg.Update(obj)
+			var txt string
+			runes := []rune(seg.Textual())
 
-			if item.isText {
+			if i == 0 {
+				if len(bound.segments) == 1 {
+					txt = string(runes[bound.begin:bound.end])
+				} else {
+					txt = string(runes[bound.begin:])
+				}
+			} else if i == len(bound.segments)-1 && len(bound.segments) > 1 {
+				txt = string(runes[:bound.end])
+			} else {
+				txt = string(runes)
+			}
+			if bound.ellipsis && i == len(bound.segments)-1 {
+				txt = txt + "…"
+			}
+
+			if concealed(seg) {
+				txt = strings.Repeat(passwordChar, len(runes))
+			}
+
+			if isText {
 				to, _ := codeInlineText(obj)
-				to.Text = item.text
-			} else if item.isHyperlink {
+				to.Text = txt
+			} else if isHyperlink {
 				hl := obj.(*fyne.Container).Objects[0].(*Hyperlink)
-				hl.Text = item.text
-				r.associateSiblings(hl, item.hyperlink, reuse)
+				hl.Text = txt
+				r.associateSiblings(hl, hlSeg, reuse)
 				hl.Refresh()
 			}
 			objs = append(objs, obj)

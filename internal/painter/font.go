@@ -2,6 +2,7 @@ package painter
 
 import (
 	"bytes"
+	"image"
 	"image/color"
 	"image/draw"
 	"math"
@@ -30,6 +31,8 @@ const (
 	StrikethroughToBaselineFactor = 0.75
 
 	fontTabSpaceSize = 10
+	// MaxTextTileWidth is the maximum raster width of a single text tile.
+	MaxTextTileWidth = 1024
 )
 
 var (
@@ -356,6 +359,88 @@ func shapeCallback(in shaping.Input, x, scale float32, cb func(shaping.Output, f
 
 type FontCacheItem struct {
 	Fonts shaping.Fontmap
+}
+
+type positionedRun struct {
+	Output shaping.Output
+	X      int
+}
+
+// TextTile stores one rasterized section of a shaped text run.
+type TextTile struct {
+	Image   *image.RGBA
+	OffsetX int
+	SourceX int
+	Width   int
+}
+
+func shapeTextRuns(f shaping.Fontmap, s string, fontSize, scale float32, style fyne.TextStyle) []positionedRun {
+	runs := make([]positionedRun, 0)
+	walkString(f, s, float32ToFixed266(fontSize), style, new(float32), scale, func(run shaping.Output, x float32) {
+		runs = append(runs, positionedRun{Output: run, X: int(x)})
+	})
+	return runs
+}
+
+func drawPositionedRuns(dst draw.Image, runs []positionedRun, color color.Color, f shaping.Fontmap, fontSize, scale float32, tileOffset int) {
+	r := render.Renderer{
+		FontSize: fontSize,
+		PixScale: scale,
+		Color:    color,
+	}
+
+	for _, run := range runs {
+		if len(run.Output.Glyphs) == 1 && run.Output.Glyphs[0].GlyphID == 0 {
+			r.DrawStringAt(string([]rune{0xfffd}), dst, run.X-tileOffset, int(math.Ceil(float64(fixed266ToFloat32(run.Output.LineBounds.Ascent)*scale))), f.ResolveFace(0xfffd))
+			continue
+		}
+
+		r.DrawShapedRunAt(run.Output, dst, run.X-tileOffset, int(math.Ceil(float64(fixed266ToFloat32(run.Output.LineBounds.Ascent)*scale))))
+	}
+}
+
+// DrawStringTiled draws a string as a set of raster tiles, preserving the shaper output.
+func DrawStringTiled(s string, color color.Color, f shaping.Fontmap, fontSize, scale float32, style fyne.TextStyle, width, height, maxTileWidth int) []TextTile {
+	if width <= 0 || height <= 0 {
+		return nil
+	}
+	if maxTileWidth <= 0 {
+		maxTileWidth = MaxTextTileWidth
+	}
+	if width <= maxTileWidth {
+		img := image.NewRGBA(image.Rect(0, 0, width, height))
+		drawPositionedRuns(img, shapeTextRuns(f, s, fontSize, scale, style), color, f, fontSize, scale, 0)
+		return []TextTile{{Image: img, OffsetX: 0, Width: width}}
+	}
+
+	runs := shapeTextRuns(f, s, fontSize, scale, style)
+	overlap := 1
+	usableTileWidth := maxTileWidth - overlap*2
+	if usableTileWidth < 1 {
+		usableTileWidth = 1
+		overlap = 0
+	}
+
+	tiles := make([]TextTile, 0, width/usableTileWidth+1)
+	for start := 0; start < width; start += usableTileWidth {
+		tileWidth := usableTileWidth
+		if remaining := width - start; remaining < tileWidth {
+			tileWidth = remaining
+		}
+		leftOverlap := 0
+		if start > 0 {
+			leftOverlap = overlap
+		}
+		rightOverlap := 0
+		if start+tileWidth < width {
+			rightOverlap = overlap
+		}
+		img := image.NewRGBA(image.Rect(0, 0, tileWidth+leftOverlap+rightOverlap, height))
+		drawPositionedRuns(img, runs, color, f, fontSize, scale, start-leftOverlap)
+		tiles = append(tiles, TextTile{Image: img, OffsetX: start, SourceX: leftOverlap, Width: tileWidth})
+	}
+
+	return tiles
 }
 
 type cacheID struct {
