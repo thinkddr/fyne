@@ -742,3 +742,30 @@ func TestPainter_paintArbitraryPolygon(t *testing.T) {
 	poly.NormalizedPoints = true
 	test.AssertImageMatches(t, "draw_arbitrary_polygon_stroke_fill_rounded.png", p.Paint(c))
 }
+
+func TestPainter_paintEllipse(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	obj := canvas.NewEllipse(color.Black)
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_circle.png", p.Paint(c))
+
+	obj.Resize(fyne.NewSize(70, 35))
+	test.AssertImageMatches(t, "draw_ellipse_wide.png", p.Paint(c))
+
+	obj.StrokeColor = color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
+	obj.StrokeWidth = 4
+	test.AssertImageMatches(t, "draw_ellipse_wide_stroke.png", p.Paint(c))
+
+	obj.Resize(fyne.NewSize(35, 70))
+	obj.StrokeWidth = 0
+	test.AssertImageMatches(t, "draw_ellipse_narrow.png", p.Paint(c))
+
+	obj.StrokeWidth = 4
+	test.AssertImageMatches(t, "draw_ellipse_narrow_stroke.png", p.Paint(c))
+}
