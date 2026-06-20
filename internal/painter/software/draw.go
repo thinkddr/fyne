@@ -241,15 +241,7 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	}
 
 	face := painter.CachedFontFace(text.TextStyle, text.FontSource, text)
-	if width <= painter.MaxTextTileWidth {
-		painter.DrawString(txtImg, text.Text, color, face.Fonts, text.TextSize, c.Scale(), text.TextStyle)
-	} else {
-		tiles := painter.DrawStringTiled(text.Text, color, face.Fonts, text.TextSize, c.Scale(), text.TextStyle, width, height, painter.MaxTextTileWidth)
-		for _, tile := range tiles {
-			tileBounds := image.Rect(tile.OffsetX, 0, tile.OffsetX+tile.Width, tile.Image.Bounds().Dy())
-			draw.Draw(txtImg, tileBounds, tile.Image, image.Point{X: tile.SourceX}, draw.Over)
-		}
-	}
+	painter.DrawString(txtImg, text.Text, color, face.Fonts, text.TextSize, c.Scale(), text.TextStyle)
 
 	size := text.Size()
 	offsetX := float32(0)

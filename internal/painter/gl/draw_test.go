@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
 )
 
 func TestGetFragmentColor(t *testing.T) {
@@ -86,4 +87,22 @@ func TestInnerRect_Original(t *testing.T) {
 
 	assert.Equal(t, innerSize2, innerSize1)
 	assert.Equal(t, innerPos2, innerPos1)
+}
+
+func TestVisibleTextPixels(t *testing.T) {
+	frame := fyne.NewSize(400, 100)
+
+	offset, width := visibleTextPixels(fyne.NewPos(10, 0), fyne.NewSize(100, 20), frame, nil, 1)
+	assert.Equal(t, 0, offset)
+	assert.Equal(t, 100, width)
+
+	stack := &internal.ClipStack{}
+	clip := stack.Push(fyne.NewPos(100, 0), fyne.NewSize(200, 100))
+	offset, width = visibleTextPixels(fyne.NewPos(50, 0), fyne.NewSize(1000, 20), frame, clip, 1)
+	assert.Equal(t, 50, offset)
+	assert.Equal(t, 200, width)
+
+	offset, width = visibleTextPixels(fyne.NewPos(-500, 0), fyne.NewSize(1000, 20), frame, nil, 2)
+	assert.Equal(t, 1000, offset)
+	assert.Equal(t, 800, width)
 }

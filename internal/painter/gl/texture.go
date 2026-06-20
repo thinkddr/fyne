@@ -18,6 +18,13 @@ const floatEqualityThreshold = 1e-9
 
 var noTexture = Texture(cache.NoTexture)
 
+type clippedTextTexture struct {
+	texture       Texture
+	offset        int
+	width, height int
+	scale         float32
+}
+
 // Texture represents an uploaded GL texture
 type Texture cache.TextureType
 
@@ -176,6 +183,41 @@ func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
 	paint.DrawString(img, text.Text, color, face.Fonts, text.TextSize, p.pixScale, text.TextStyle)
 	return p.imgToTexture(img, canvas.ImageScaleSmooth)
+}
+
+func (p *painter) clippedTextTexture(text *canvas.Text, offset, width, height int) Texture {
+	if cached, ok := p.clippedTextTextures[text]; ok {
+		if cached.offset == offset && cached.width == width && cached.height == height && cached.scale == p.pixScale {
+			return cached.texture
+		}
+		p.ctx.DeleteTexture(cached.texture)
+		p.logError()
+	}
+
+	color := text.Color
+	if color == nil {
+		color = theme.Color(theme.ColorNameForeground)
+	}
+	img := image.NewRGBA(image.Rect(0, 0, width, height))
+	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
+	paint.DrawStringOffset(img, text.Text, color, face.Fonts, text.TextSize, p.pixScale, text.TextStyle, offset)
+	texture := p.imgToTexture(img, canvas.ImageScaleSmooth)
+
+	if p.clippedTextTextures == nil {
+		p.clippedTextTextures = make(map[*canvas.Text]clippedTextTexture)
+	}
+	p.clippedTextTextures[text] = clippedTextTexture{texture: texture, offset: offset, width: width, height: height, scale: p.pixScale}
+	return texture
+}
+
+func (p *painter) freeClippedTextTexture(text *canvas.Text) {
+	cached, ok := p.clippedTextTextures[text]
+	if !ok {
+		return
+	}
+	p.ctx.DeleteTexture(cached.texture)
+	p.logError()
+	delete(p.clippedTextTextures, text)
 }
 
 func (p *painter) newTexture(textureFilter canvas.ImageScale) Texture {

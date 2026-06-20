@@ -7,9 +7,9 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 	paint "fyne.io/fyne/v2/internal/painter"
-	"fyne.io/fyne/v2/theme"
 )
 
 const edgeSoftness = 0.5
@@ -319,7 +319,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	p.logError()
 }
 
-func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
+func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
 	switch obj := o.(type) {
 	case *canvas.Blur:
 		p.drawBlur(obj, pos, frame)
@@ -334,7 +334,7 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 	case *canvas.Rectangle:
 		p.drawRectangle(obj, pos, frame)
 	case *canvas.Text:
-		p.drawText(obj, pos, frame)
+		p.drawText(obj, pos, frame, clip)
 	case *canvas.LinearGradient:
 		p.drawGradient(obj, p.newGlLinearGradientTexture, pos, frame)
 	case *canvas.RadialGradient:
@@ -671,7 +671,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	p.logError()
 }
 
-func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
+func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
 	if text.Text == "" {
 		return
 	}
@@ -698,10 +698,19 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	size.Height = roundToPixel(size.Height, p.pixScale)
 	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale) // italic overspill to the right
 	size.Height += roundToPixel(paint.TextVectorPad, p.pixScale)  // space below for descenders / underline
-	if int(math.Ceil(float64(size.Width*p.pixScale))) <= paint.MaxTextTileWidth {
+	offset, width := visibleTextPixels(pos, size, frame, clip, p.pixScale)
+	fullWidth := int(math.Ceil(float64(size.Width * p.pixScale)))
+	if offset == 0 && width >= fullWidth {
+		p.freeClippedTextTexture(text)
 		p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
-	} else {
-		p.drawTiledText(text, pos, size, frame)
+	} else if width > 0 {
+		height := int(math.Ceil(float64(size.Height * p.pixScale)))
+		texture := p.clippedTextTexture(text, offset, width, height)
+		if texture != noTexture {
+			clipPos := fyne.NewPos(pos.X+float32(offset)/p.pixScale, pos.Y)
+			clipSize := fyne.NewSize(float32(width)/p.pixScale, size.Height)
+			p.drawTextureRegion(texture, clipPos, clipSize, frame)
+		}
 	}
 
 	if decorated {
@@ -719,35 +728,27 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	}
 }
 
-func (p *painter) drawTiledText(text *canvas.Text, pos fyne.Position, size, frame fyne.Size) {
-	color := text.Color
-	if color == nil {
-		color = theme.Color(theme.ColorNameForeground)
+func visibleTextPixels(pos fyne.Position, size, frame fyne.Size, clip *internal.ClipItem, scale float32) (int, int) {
+	clipPos := fyne.Position{}
+	clipSize := frame
+	if clip != nil {
+		clipPos, clipSize = clip.Rect()
 	}
 
-	width := int(math.Ceil(float64(size.Width * p.pixScale)))
-	height := int(math.Ceil(float64(size.Height * p.pixScale)))
-	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
-	tiles := paint.DrawStringTiled(text.Text, color, face.Fonts, text.TextSize, p.pixScale, text.TextStyle, width, height, paint.MaxTextTileWidth)
-
-	for _, tile := range tiles {
-		texture := p.imgToTexture(tile.Image, canvas.ImageScaleSmooth)
-		if texture == noTexture {
-			continue
-		}
-
-		tileSize := fyne.NewSize(float32(tile.Width)/p.pixScale, size.Height)
-		tilePos := fyne.NewPos(pos.X+float32(tile.OffsetX)/p.pixScale, pos.Y)
-		p.drawTextureRegion(texture, tilePos, tileSize, frame, float32(tile.SourceX)/float32(tile.Image.Bounds().Dx()), float32(tile.SourceX+tile.Width)/float32(tile.Image.Bounds().Dx()))
-		p.ctx.DeleteTexture(texture)
-		p.logError()
+	left := fyne.Max(pos.X, clipPos.X)
+	right := fyne.Min(pos.X+size.Width, clipPos.X+clipSize.Width)
+	if right <= left {
+		return 0, 0
 	}
+
+	offset := int(math.Floor(float64((left - pos.X) * scale)))
+	end := int(math.Ceil(float64((right - pos.X) * scale)))
+	return offset, end - offset
 }
 
-func (p *painter) drawTextureRegion(texture Texture, pos fyne.Position, size, frame fyne.Size, insetLeft, insetRight float32) {
+func (p *painter) drawTextureRegion(texture Texture, pos fyne.Position, size, frame fyne.Size) {
 	points, insets := p.rectCoords(size, pos, frame, canvas.ImageFillStretch, 1, 0)
 	inner, _ := rectInnerCoords(size, pos, canvas.ImageFillStretch, 1)
-	insets[0], insets[2] = insetLeft, insetRight
 
 	p.ctx.UseProgram(p.program.ref)
 	p.updateBuffer(p.program.buff, points)

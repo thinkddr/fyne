@@ -3,7 +3,6 @@ package painter_test
 import (
 	"image"
 	"image/color"
-	"image/draw"
 	"strings"
 	"testing"
 
@@ -88,7 +87,7 @@ func TestDrawString(t *testing.T) {
 	}
 }
 
-func TestDrawStringTiled(t *testing.T) {
+func TestDrawStringOffset(t *testing.T) {
 	for _, tc := range []struct {
 		name string
 		text string
@@ -105,26 +104,27 @@ func TestDrawStringTiled(t *testing.T) {
 			textSize, _ := painter.MeasureString(fontMap, tc.text, size, style)
 			width := int(textSize.Width) + 32
 			height := int(textSize.Height) + 32
+			offset := width / 3
+			cropWidth := width / 4
 
 			full := image.NewNRGBA(image.Rect(0, 0, width, height))
 			painter.DrawString(full, tc.text, color, fontMap, size, 1, style)
 
-			tiled := image.NewNRGBA(image.Rect(0, 0, width, height))
-			tiles := painter.DrawStringTiled(tc.text, color, fontMap, size, 1, style, width, height, painter.MaxTextTileWidth)
-			for _, tile := range tiles {
-				assert.LessOrEqual(t, tile.Image.Bounds().Dx(), painter.MaxTextTileWidth)
-				draw.Draw(tiled, image.Rect(tile.OffsetX, 0, tile.OffsetX+tile.Width, tile.Image.Bounds().Dy()), tile.Image, image.Point{X: tile.SourceX}, draw.Over)
-			}
+			cropped := image.NewNRGBA(image.Rect(0, 0, cropWidth, height))
+			painter.DrawStringOffset(cropped, tc.text, color, fontMap, size, 1, style, offset)
 
-			assert.Len(t, full.Pix, len(tiled.Pix))
 			maxDiff := 0
-			for i := range full.Pix {
-				diff := int(full.Pix[i]) - int(tiled.Pix[i])
-				if diff < 0 {
-					diff = -diff
-				}
-				if diff > maxDiff {
-					maxDiff = diff
+			for y := 0; y < height; y++ {
+				fullStart := full.PixOffset(offset, y)
+				croppedStart := cropped.PixOffset(0, y)
+				for x := 0; x < cropWidth*4; x++ {
+					diff := int(full.Pix[fullStart+x]) - int(cropped.Pix[croppedStart+x])
+					if diff < 0 {
+						diff = -diff
+					}
+					if diff > maxDiff {
+						maxDiff = diff
+					}
 				}
 			}
 			assert.LessOrEqual(t, maxDiff, 8)
