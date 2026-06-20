@@ -140,7 +140,7 @@ func (p *painter) Init() {
 			attributes: make(map[string]Attribute),
 		}
 
-		compiled = []ProgramState{
+		compiled = []programState{
 			p.program,
 			p.blurProgram,
 			p.lineProgram,
