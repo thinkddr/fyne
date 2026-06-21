@@ -1034,7 +1034,7 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 }
 
 func (p *painter) vecSquareCoords(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size, shadow canvas.Shadow) ([4]float32, []float32) {
-	return p.vecRectCoordsWithPad(pos, rect, frame, 0, 0, shadow)
+	return p.vecRectCoords(pos, rect, frame, 1, shadow)
 }
 
 func roundToPixel(v float32, pixScale float32) float32 {
