@@ -14,6 +14,6 @@ func TestStore_RootURI(t *testing.T) {
 	w, err := d.Create("test")
 	if assert.NoError(t, err) {
 		assert.NoError(t, w.Close())
-		assert.NoError(t, d.Remove("test"))
 	}
+	assert.NoError(t, d.Remove("test"))
 }
