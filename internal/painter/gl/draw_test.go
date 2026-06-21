@@ -106,3 +106,37 @@ func TestVisibleTextPixels(t *testing.T) {
 	assert.Equal(t, 1000, offset)
 	assert.Equal(t, 800, width)
 }
+
+func TestVecRectCoordsWithPad_Shadow(t *testing.T) {
+	p := &painter{pixScale: 1.0}
+	rect := &canvas.Rectangle{}
+	pos := fyne.NewPos(5, 5)
+	frame := fyne.NewSize(100, 100)
+
+	bounds, coords := p.vecRectCoordsWithPad(pos, rect, frame, 0, 0, rect.Shadow)
+	assert.Len(t, coords, 16)
+	assert.Equal(t, [4]float32{5, 5, 5, 5}, bounds)
+	assert.Equal(t, []float32{
+		0, 0, -0.92, 0.92,
+		0, 0, -0.88, 0.92,
+		0, 0, -0.92, 0.88,
+		0, 0, -0.88, 0.88,
+	}, coords)
+
+	rect.Shadow = canvas.Shadow{
+		Color:      color.NRGBA{R: 0, G: 0, B: 0, A: 255},
+		Offset:     fyne.NewPos(30, -20),
+		BlurRadius: 80,
+	}
+
+	bounds, coords = p.vecRectCoordsWithPad(pos, rect, frame, 0, 0, rect.Shadow)
+	assert.Len(t, coords, 16)
+	// Check that shadow paddings affect the normalized coordinates
+	assert.Equal(t, [4]float32{5, 5, 5, 5}, bounds)
+	assert.Equal(t, []float32{
+		0, 0, -1.9200001, 2.92,
+		0, 0, 1.3199999, 2.92,
+		0, 0, -1.9200001, -0.32000005,
+		0, 0, 1.3199999, -0.32000005,
+	}, coords)
+}

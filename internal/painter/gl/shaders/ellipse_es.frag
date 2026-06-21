@@ -20,6 +20,13 @@ uniform float angle;
 /* colors params*/
 uniform vec4 fill_color;
 uniform vec4 stroke_color;
+/* shadow params*/
+uniform float add_shadow;
+uniform float shadow_blur_radius;
+uniform float shadow_spread;
+uniform vec2 shadow_offset;
+uniform vec4 shadow_color;
+uniform float shadow_type;
 
 mat2 rotate(float a)
 {
@@ -34,6 +41,15 @@ float calc_distance(vec2 p, vec2 r)
     r = max(r, eps);
     vec2 f = p / r;
     return (dot(f, f) - 1.0) / max(length(2.0 * f / r), eps);
+}
+
+vec4 blend_shadow(vec4 color, vec4 shadow)
+{
+    float alpha = color.a + shadow.a * (1.0 - color.a);
+    return vec4(
+        (color.rgb * color.a + shadow.rgb * shadow.a * (1.0 - color.a)) / alpha,
+        alpha
+    );
 }
 
 void main()
@@ -65,5 +81,35 @@ void main()
     float final_alpha = smoothstep(edge_softness, -edge_softness, dist);
 
     // apply the final alpha to the combined color
-    gl_FragColor = vec4(final_color.rgb, final_color.a * final_alpha);
+    final_color = vec4(final_color.rgb, final_color.a * final_alpha);
+
+    if (add_shadow == 1.0)
+    {
+        // use ellipse radii by default, expand/contract by spread
+        vec2 shadow_radius = radius;
+        if (shadow_spread != 0.0)
+        {
+            shadow_radius = max(radius + shadow_spread, 0.0);
+        }
+
+        float blur_inset = shadow_blur_radius * 0.5;
+        shadow_radius = max(shadow_radius - blur_inset, 0.0);
+
+        // flip the shadow offset to get the correct shadow position
+        // negative offset-x value places the shadow to the left of the element. Negative offset-y value places the shadow above the element
+        vec2 shadow_offset_corrected = vec2(-shadow_offset.x, shadow_offset.y);
+        float distance_shadow = calc_distance(vec_centered_pos + shadow_offset_corrected, shadow_radius);
+        float shadow_alpha = shadow_color.a * (1.0 - smoothstep(-edge_softness, shadow_blur_radius + edge_softness, distance_shadow));
+
+        if (shadow_type == 0.0)
+        {
+            // remove shadow inside the ellipse
+            float mask = smoothstep(-2.0 * edge_softness, 0.0, dist);
+            shadow_alpha *= mask;
+        }
+
+        final_color = blend_shadow(final_color, vec4(shadow_color.rgb, shadow_alpha));
+    }
+
+    gl_FragColor = final_color;
 }

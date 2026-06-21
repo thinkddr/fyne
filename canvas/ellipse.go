@@ -19,6 +19,7 @@ type Ellipse struct {
 	FillColor   color.Color // The ellipse fill color
 	StrokeColor color.Color // The ellipse stroke color
 	StrokeWidth float32     // The stroke width of the ellipse
+	Shadow      Shadow      // Support shadow configuration
 }
 
 // Hide will set this ellipse to not be visible
