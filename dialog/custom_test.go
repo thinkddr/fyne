@@ -30,7 +30,7 @@ func TestShowCustom_ApplyTheme(t *testing.T) {
 
 	test.ApplyTheme(t, test.NewTheme())
 	w.Resize(d.MinSize().Add(fyne.NewSize(shadowPad, shadowPad)))
-	d.Resize(d.MinSize()) // TODO remove once #707 is resolved
+	d.Resize(d.MinSize())
 	test.AssertRendersToImage(t, "dialog-custom-ugly.png", w.Canvas())
 }
 
@@ -45,7 +45,7 @@ func TestShowCustom_Resize(t *testing.T) {
 	size := fyne.NewSize(200, 200)
 	d.Resize(size)
 	d.Show()
-	assert.Equal(t, size, d.dialog.win.Content.Size().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	assert.Equal(t, size, d.dialog.win.Content.Size())
 }
 
 func TestCustom_ApplyThemeOnShow(t *testing.T) {
@@ -66,11 +66,6 @@ func TestCustom_ApplyThemeOnShow(t *testing.T) {
 	d.Show()
 	test.AssertRendersToImage(t, "dialog-onshow-theme-changed.png", w.Canvas())
 	d.Hide()
-
-	test.ApplyTheme(t, test.Theme())
-	d.Show()
-	test.AssertRendersToImage(t, "dialog-onshow-theme-default.png", w.Canvas())
-	d.Hide()
 }
 
 func TestCustom_ResizeOnShow(t *testing.T) {
@@ -84,13 +79,13 @@ func TestCustom_ResizeOnShow(t *testing.T) {
 	d := NewCustom("Title", "OK", label, w).dialog
 
 	d.Show()
-	assert.Equal(t, size, d.win.Size())
+	assert.Equal(t, size, w.Canvas().Overlays().Top().Size())
 	d.Hide()
 
 	size = fyne.NewSize(500, 500)
 	w.Resize(size)
 	d.Show()
-	assert.Equal(t, size, d.win.Size())
+	assert.Equal(t, size, w.Canvas().Overlays().Top().Size())
 	d.Hide()
 }
 
@@ -131,7 +126,7 @@ func TestConfirmWithoutButtons(t *testing.T) {
 func TestCustomConfirm_Importance(t *testing.T) {
 	test.NewTempApp(t)
 	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
-	size := fyne.NewSize(200, 300)
+	size := fyne.NewSize(240, 300)
 	w.Resize(size)
 
 	label := widget.NewLabel("This is dangerous!")

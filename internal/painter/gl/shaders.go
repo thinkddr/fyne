@@ -2,7 +2,11 @@
 
 package gl
 
-import _ "embed"
+import (
+	_ "embed"
+
+	"fyne.io/fyne/v2/canvas"
+)
 
 var (
 	//go:embed shaders/blur.frag
@@ -43,6 +47,9 @@ var (
 
 	//go:embed shaders/arbitrary_polygon.frag
 	shaderArbitraryPolygonFrag []byte
+
+	//go:embed shaders/ellipse.frag
+	shaderEllipseFrag []byte
 )
 
 func shaderSourceNamed(name string) ([]byte, []byte) {
@@ -65,6 +72,20 @@ func shaderSourceNamed(name string) ([]byte, []byte) {
 		return shaderRectangleVert, shaderBezierCurveFrag
 	case "arbitrary_polygon":
 		return shaderRectangleVert, shaderArbitraryPolygonFrag
+	case "ellipse":
+		return shaderRectangleVert, shaderEllipseFrag
 	}
 	return nil, nil
+}
+
+// rectangleVertexSource returns the standard vertex shader used to fill a vector
+// shape's bounding box. User shaders reuse it, just like the built in shapes.
+func rectangleVertexSource() []byte {
+	return shaderRectangleVert
+}
+
+// userShaderFragment returns the fragment shader source to use for the given
+// shader object on this build target.
+func userShaderFragment(s *canvas.Shader) []byte {
+	return s.Source
 }

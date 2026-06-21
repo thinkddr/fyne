@@ -121,9 +121,14 @@ func NewTheme() fyne.Theme {
 			theme.SizeNameCaptionText:        float32(15),
 			theme.SizeNameInputBorder:        float32(5),
 			theme.SizeNameInputRadius:        float32(2),
+			theme.SizeNameButtonRadius:       float32(2),
 			theme.SizeNameModalBlurRadius:    float32(3),
 			theme.SizeNameSelectionRadius:    float32(6),
 			theme.SizeNameScrollBarRadius:    float32(2),
+			theme.SizeNameCardRadius:         float32(6),
+			theme.SizeNameDialogRadius:       float32(12),
+			theme.SizeNamePopupRadius:        float32(5),
+			theme.SizeNameMenuRadius:         float32(4),
 		},
 	}
 }
@@ -189,6 +194,7 @@ func Theme() fyne.Theme {
 				theme.SizeNameInnerWindowRadius:    float32(5),
 				theme.SizeNameInputBorder:          float32(2),
 				theme.SizeNameInputRadius:          float32(4),
+				theme.SizeNameButtonRadius:         float32(4),
 				theme.SizeNameModalBlurRadius:      float32(1.5),
 				theme.SizeNameSelectionRadius:      float32(4),
 				theme.SizeNameScrollBarRadius:      float32(3),
@@ -196,6 +202,10 @@ func Theme() fyne.Theme {
 				theme.SizeNameWindowButtonHeight:   float32(10),
 				theme.SizeNameWindowButtonIcon:     float32(8),
 				theme.SizeNameWindowButtonRadius:   float32(5),
+				theme.SizeNameCardRadius:           float32(6),
+				theme.SizeNameDialogRadius:         float32(12),
+				theme.SizeNamePopupRadius:          float32(5),
+				theme.SizeNameMenuRadius:           float32(4),
 			},
 		}
 	}

@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -171,7 +172,7 @@ func TestTree_Focus(t *testing.T) {
 	defer window.Close()
 	window.Resize(tree.MinSize().Max(fyne.NewSize(150, 200)))
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	assert.Nil(t, canvas.Focused())
 
 	canvas.FocusNext()
@@ -222,7 +223,7 @@ func TestTree_Keyboard(t *testing.T) {
 	defer window.Close()
 	window.Resize(tree.MinSize().Max(fyne.NewSize(250, 400)))
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	assert.Nil(t, canvas.Focused())
 
 	// Start with a fully collapsed tree
@@ -449,7 +450,7 @@ func TestTree_MinSize(t *testing.T) {
 			opened: []string{"A"},
 			want: fyne.NewSize(
 				templateMinSize.Width+indentation()+2*theme.Padding()+theme.IconInlineSize(),
-				(fyne.Max(templateMinSize.Height, theme.IconInlineSize()))*2+separatorThickness,
+				fyne.Max(templateMinSize.Height, theme.IconInlineSize())*2+separatorThickness,
 			),
 		},
 		"multiple_items": {
@@ -466,7 +467,7 @@ func TestTree_MinSize(t *testing.T) {
 			},
 			want: fyne.NewSize(
 				templateMinSize.Width+2*theme.Padding()+theme.IconInlineSize(),
-				(fyne.Max(templateMinSize.Height, theme.IconInlineSize()))*2+separatorThickness,
+				fyne.Max(templateMinSize.Height, theme.IconInlineSize())*2+separatorThickness,
 			),
 		},
 		"multiple_items_opened": {
@@ -484,7 +485,7 @@ func TestTree_MinSize(t *testing.T) {
 			opened: []string{"A", "B", "C"},
 			want: fyne.NewSize(
 				templateMinSize.Width+2*indentation()+theme.IconInlineSize()+2*theme.Padding(),
-				(fyne.Max(templateMinSize.Height, theme.IconInlineSize()))*6+(5*separatorThickness),
+				fyne.Max(templateMinSize.Height, theme.IconInlineSize())*6+(5*separatorThickness),
 			),
 		},
 	} {
@@ -583,7 +584,7 @@ func TestTree_ScrollTo(t *testing.T) {
 	)
 
 	// Resize tall enough to display two nodes and the separator between them
-	treeHeight := 2*(min.Height) + sep
+	treeHeight := 2*min.Height + sep
 	w.Resize(fyne.Size{
 		Width:  100,
 		Height: treeHeight + 2*theme.Padding(),
@@ -625,7 +626,7 @@ func TestTree_ScrollToBottom(t *testing.T) {
 	)
 
 	// Resize tall enough to display two nodes and the separator between them
-	treeHeight := 2*(min.Height) + sep
+	treeHeight := 2*min.Height + sep
 	w.Resize(fyne.Size{
 		Width:  400,
 		Height: treeHeight + 2*theme.Padding(),

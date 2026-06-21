@@ -239,17 +239,20 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		optionsButton,
 	)
 
-	header := container.NewBorder(nil, nil, nil, optionsbuttons,
+	header := container.NewBorder(
+		nil, nil, nil, optionsbuttons,
 		f.title,
 	)
 
-	footer := container.NewBorder(nil, nil, nil, buttons,
+	footer := container.NewBorder(
+		nil, nil, nil, buttons,
 		container.NewHScroll(f.fileName),
 	)
 
 	body := container.NewHSplit(
 		f.favoritesList,
-		container.NewBorder(f.breadcrumbScroll, nil, nil, nil,
+		container.NewBorder(
+			f.breadcrumbScroll, nil, nil, nil,
 			f.filesScroll,
 		),
 	)
@@ -749,11 +752,11 @@ func (f *FileDialog) Refresh() {
 // Resize dialog to the requested size, if there is sufficient space.
 // If the parent window is not large enough then the size will be reduced to fit.
 func (f *FileDialog) Resize(size fyne.Size) {
-	f.desiredSize = size
+	f.desiredSize = size.Max(f.MinSize())
 	if f.dialog == nil {
 		return
 	}
-	f.dialog.win.Resize(size)
+	f.dialog.win.Resize(size.Max(f.MinSize()))
 }
 
 // Hide hides the file dialog.

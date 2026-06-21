@@ -160,12 +160,13 @@ func (ctx *context) CreateBuffer() Buffer {
 func (ctx *context) CreateProgram() Program {
 	return Program{
 		Init: true,
-		Value: uint32(ctx.enqueue(call{
-			args: fnargs{
-				fn: glfnCreateProgram,
+		Value: uint32(ctx.enqueue(
+			call{
+				args: fnargs{
+					fn: glfnCreateProgram,
+				},
+				blocking: true,
 			},
-			blocking: true,
-		},
 		)),
 	}
 }
@@ -203,6 +204,15 @@ func (ctx *context) DeleteBuffer(v Buffer) {
 		args: fnargs{
 			fn: glfnDeleteBuffer,
 			a0: v.c(),
+		},
+	})
+}
+
+func (ctx *context) DeleteProgram(p Program) {
+	ctx.enqueue(call{
+		args: fnargs{
+			fn: glfnDeleteProgram,
+			a0: p.c(),
 		},
 	})
 }
@@ -502,6 +512,16 @@ func (ctx *context) Uniform1f(dst Uniform, v float32) {
 			fn: glfnUniform1f,
 			a0: dst.c(),
 			a1: uintptr(math.Float32bits(v)),
+		},
+	})
+}
+
+func (ctx *context) Uniform1i(dst Uniform, v int) {
+	ctx.enqueue(call{
+		args: fnargs{
+			fn: glfnUniform1i,
+			a0: dst.c(),
+			a1: uintptr(v),
 		},
 	})
 }

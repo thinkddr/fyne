@@ -401,6 +401,37 @@ func DrawBezierCurve(bezierCurve *canvas.BezierCurve, vectorPad float32, scale f
 	return raw
 }
 
+// DrawEllipse rasterizes the given ellipse object into an image.
+// The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
+// The scale function is used to understand how many pixels are required per unit of size.
+func DrawEllipse(ellipse *canvas.Ellipse, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	size := ellipse.Size()
+	radiusX := size.Width / 2
+	radiusY := size.Height / 2
+
+	width := int(scale(size.Width + vectorPad*2))
+	height := int(scale(size.Height + vectorPad*2))
+	stroke := scale(ellipse.StrokeWidth)
+
+	raw := image.NewRGBA(image.Rect(0, 0, width, height))
+	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
+
+	if ellipse.FillColor != nil {
+		filler := rasterx.NewFiller(width, height, scanner)
+		filler.SetColor(ellipse.FillColor)
+		rasterx.AddEllipse(float64(width/2), float64(height/2), float64(scale(radiusX)), float64(scale(radiusY)), 0, filler)
+		filler.Draw()
+	}
+
+	dasher := rasterx.NewDasher(width, height, scanner)
+	dasher.SetColor(ellipse.StrokeColor)
+	dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
+	rasterx.AddEllipse(float64(width/2), float64(height/2), float64(scale(radiusX)), float64(scale(radiusY)), 0, dasher)
+	dasher.Draw()
+
+	return raw
+}
+
 // drawRegularPolygon draws a regular n-sides centered at (cx,cy) with
 // radius, rounded corners of cornerRadius, rotated by rot degrees.
 func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p rasterx.Adder) {
@@ -493,14 +524,16 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 
 	// start at s0, arc corner 0, then line+arc around, close last edge
 	p.Start(rasterx.ToFixedP(sPts[0].x, sPts[0].y))
-	gf(p,
+	gf(
+		p,
 		rasterx.ToFixedP(cPts[0].x, cPts[0].y),
 		rasterx.ToFixedP(vS[0].x, vS[0].y),
 		rasterx.ToFixedP(vE[0].x, vE[0].y),
 	)
 	for i := 1; i < sides; i++ {
 		p.Line(rasterx.ToFixedP(sPts[i].x, sPts[i].y))
-		gf(p,
+		gf(
+			p,
 			rasterx.ToFixedP(cPts[i].x, cPts[i].y),
 			rasterx.ToFixedP(vS[i].x, vS[i].y),
 			rasterx.ToFixedP(vE[i].x, vE[i].y),
@@ -588,7 +621,8 @@ func drawArbitraryPolygon(xs, ys, radii []float64, p rasterx.Adder) {
 		nxtIdx := (i + 1) % num
 
 		// draw the arc at the current vertex
-		rasterx.RoundGap(p,
+		rasterx.RoundGap(
+			p,
 			rasterx.ToFixedP(centers[i].x, centers[i].y),
 			rasterx.ToFixedP(startPoints[i].x-centers[i].x, startPoints[i].y-centers[i].y),
 			rasterx.ToFixedP(endPoints[i].x-centers[i].x, endPoints[i].y-centers[i].y),
@@ -981,4 +1015,40 @@ func GetMaximumCornerRadii(points []fyne.Position, radii []float32) []float32 {
 	}
 
 	return finalRadii
+}
+
+// GetShadowPaddings calculates the shadow paddings (left, top, right, bottom) based on offset, blur radius and spread
+func GetShadowPaddings(shadow canvas.Shadow) [4]float32 {
+	offsetX := shadow.Offset.X
+	offsetY := shadow.Offset.Y
+	softness := shadow.BlurRadius
+	spread := shadow.Spread
+
+	rightReach := offsetX + softness + spread
+	leftReach := -offsetX + softness + spread
+	topReach := -offsetY + softness + spread
+	bottomReach := offsetY + softness + spread
+
+	var padLeft, padRight, padTop, padBottom float32
+
+	if leftReach > 0 {
+		padLeft = leftReach
+	}
+	if rightReach > 0 {
+		padRight = rightReach
+	}
+	if topReach > 0 {
+		padTop = topReach
+	}
+	if bottomReach > 0 {
+		padBottom = bottomReach
+	}
+
+	// Returns paddings in order: left, top, right, bottom.
+	return [4]float32{padLeft, padTop, padRight, padBottom}
+}
+
+// IsShadowVisible determines if a shadow should be rendered based on its properties
+func IsShadowVisible(shadow canvas.Shadow) bool {
+	return shadow.Color != color.Transparent && shadow.Color != nil && (!shadow.Offset.IsZero() || shadow.BlurRadius > 0.0 || shadow.Variant != canvas.DropShadow || shadow.Spread > 0.0)
 }
