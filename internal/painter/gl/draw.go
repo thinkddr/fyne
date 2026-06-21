@@ -803,18 +803,18 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	size.Height = roundToPixel(size.Height, p.pixScale)
 	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale) // italic overspill to the right
 	size.Height += roundToPixel(paint.TextVectorPad, p.pixScale)  // space below for descenders / underline
-	offset, width := visibleTextPixels(pos, size, frame, clip, p.pixScale)
 	fullWidth := int(math.Ceil(float64(size.Width * p.pixScale)))
-	if offset == 0 && width >= fullWidth {
+	if fullWidth <= p.maxTextureSize || p.maxTextureSize <= 0 {
 		p.freeClippedTextTexture(text)
 		p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
-	} else if width > 0 {
+	} else {
+		visibleOffset, visibleWidth := visibleTextPixels(pos, size, frame, clip, p.pixScale)
 		height := int(math.Ceil(float64(size.Height * p.pixScale)))
-		texture := p.clippedTextTexture(text, offset, width, height)
-		if cache.IsValid(cache.TextureType(texture)) {
-			clipPos := fyne.NewPos(pos.X+float32(offset)/p.pixScale, pos.Y)
-			clipSize := fyne.NewSize(float32(width)/p.pixScale, size.Height)
-			p.drawTextureRegion(texture, clipPos, clipSize, frame)
+		cached := p.clippedTextTexture(text, visibleOffset, visibleWidth, fullWidth, height)
+		if cache.IsValid(cache.TextureType(cached.texture)) {
+			clipPos := fyne.NewPos(pos.X+float32(cached.offset)/p.pixScale, pos.Y)
+			clipSize := fyne.NewSize(float32(cached.width)/p.pixScale, size.Height)
+			p.drawTextureRegion(cached.texture, clipPos, clipSize, frame)
 		}
 	}
 

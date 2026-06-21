@@ -25,6 +25,29 @@ type clippedTextTexture struct {
 	scale         float32
 }
 
+func (t clippedTextTexture) covers(offset, width, height int, scale float32) bool {
+	return t.height == height && t.scale == scale &&
+		t.offset <= offset && t.offset+t.width >= offset+width
+}
+
+func textTextureWindow(visibleOffset, visibleWidth, fullWidth, maxWidth int) (int, int) {
+	width := maxWidth
+	if fullWidth < width {
+		width = fullWidth
+	}
+	if visibleWidth > width {
+		visibleWidth = width
+	}
+	offset := visibleOffset - (width-visibleWidth)/2
+	if offset < 0 {
+		offset = 0
+	}
+	if maxOffset := fullWidth - width; offset > maxOffset {
+		offset = maxOffset
+	}
+	return offset, width
+}
+
 // Texture represents an uploaded GL texture
 type Texture cache.TextureType
 
@@ -185,14 +208,16 @@ func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	return p.imgToTexture(img, canvas.ImageScaleSmooth)
 }
 
-func (p *painter) clippedTextTexture(text *canvas.Text, offset, width, height int) Texture {
+func (p *painter) clippedTextTexture(text *canvas.Text, visibleOffset, visibleWidth, fullWidth, height int) clippedTextTexture {
 	if cached, ok := p.clippedTextTextures[text]; ok {
-		if cached.offset == offset && cached.width == width && cached.height == height && cached.scale == p.pixScale {
-			return cached.texture
+		if cached.covers(visibleOffset, visibleWidth, height, p.pixScale) {
+			return cached
 		}
 		p.ctx.DeleteTexture(cached.texture)
 		p.logError()
 	}
+
+	offset, width := textTextureWindow(visibleOffset, visibleWidth, fullWidth, p.maxTextureSize)
 
 	color := text.Color
 	if color == nil {
@@ -206,8 +231,9 @@ func (p *painter) clippedTextTexture(text *canvas.Text, offset, width, height in
 	if p.clippedTextTextures == nil {
 		p.clippedTextTextures = make(map[*canvas.Text]clippedTextTexture)
 	}
-	p.clippedTextTextures[text] = clippedTextTexture{texture: texture, offset: offset, width: width, height: height, scale: p.pixScale}
-	return texture
+	cached := clippedTextTexture{texture: texture, offset: offset, width: width, height: height, scale: p.pixScale}
+	p.clippedTextTextures[text] = cached
+	return cached
 }
 
 func (p *painter) freeClippedTextTexture(text *canvas.Text) {

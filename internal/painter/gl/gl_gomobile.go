@@ -21,6 +21,7 @@ const (
 	front                 = gl.Front
 	glFalse               = gl.False
 	linkStatus            = gl.LinkStatus
+	maxTextureSizeParam   = gl.MaxTextureSize
 	one                   = gl.One
 	oneMinusConstantAlpha = gl.OneMinusConstantAlpha
 	oneMinusSrcAlpha      = gl.OneMinusSrcAlpha
@@ -66,6 +67,7 @@ func (p *painter) glctx() gl.Context {
 
 func (p *painter) Init() {
 	p.ctx = &mobileContext{glContext: p.contextProvider.Context().(gl.Context)}
+	p.maxTextureSize = p.ctx.GetInteger(maxTextureSizeParam)
 	p.blurSnapTexValid = false // reset on context recreation; old texture IDs are no longer valid
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
@@ -268,6 +270,10 @@ func (c *mobileContext) GetAttribLocation(program Program, name string) Attribut
 
 func (c *mobileContext) GetError() uint32 {
 	return uint32(c.glContext.GetError())
+}
+
+func (c *mobileContext) GetInteger(pname uint32) int {
+	return c.glContext.GetInteger(gl.Enum(pname))
 }
 
 func (c *mobileContext) GetProgrami(program Program, param uint32) int {

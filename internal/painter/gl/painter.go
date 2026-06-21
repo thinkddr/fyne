@@ -63,6 +63,7 @@ type painter struct {
 	blurSnapTexValid        bool    // whether blurSnapTex has been allocated
 	blurSnapW, blurSnapH    int     // size of blurSnapTex in pixels
 	fbHeight                int     // current framebuffer height in pixels
+	maxTextureSize          int
 	clippedTextTextures     map[*canvas.Text]clippedTextTexture
 }
 

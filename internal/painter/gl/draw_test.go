@@ -107,6 +107,24 @@ func TestVisibleTextPixels(t *testing.T) {
 	assert.Equal(t, 800, width)
 }
 
+func TestTextTextureWindow(t *testing.T) {
+	offset, width := textTextureWindow(0, 400, 20000, 4096)
+	assert.Equal(t, 0, offset)
+	assert.Equal(t, 4096, width)
+
+	offset, width = textTextureWindow(5000, 400, 20000, 4096)
+	assert.Equal(t, 3152, offset)
+	assert.Equal(t, 4096, width)
+
+	offset, width = textTextureWindow(19800, 200, 20000, 4096)
+	assert.Equal(t, 15904, offset)
+	assert.Equal(t, 4096, width)
+
+	cached := clippedTextTexture{offset: 3152, width: 4096, height: 40, scale: 1}
+	assert.True(t, cached.covers(5000, 400, 40, 1))
+	assert.False(t, cached.covers(7200, 400, 40, 1))
+}
+
 func TestVecRectCoordsWithPad_Shadow(t *testing.T) {
 	p := &painter{pixScale: 1.0}
 	rect := &canvas.Rectangle{}

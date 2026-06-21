@@ -21,6 +21,7 @@ const (
 	front                 = gl.FRONT
 	glFalse               = gl.FALSE
 	linkStatus            = gl.LINK_STATUS
+	maxTextureSizeParam   = gl.MAX_TEXTURE_SIZE
 	one                   = gl.ONE
 	oneMinusConstantAlpha = gl.ONE_MINUS_CONSTANT_ALPHA
 	oneMinusSrcAlpha      = gl.ONE_MINUS_SRC_ALPHA
@@ -61,6 +62,7 @@ var (
 
 func (p *painter) Init() {
 	p.ctx = &xjsContext{}
+	p.maxTextureSize = p.ctx.GetInteger(maxTextureSizeParam)
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	p.logError()
@@ -234,6 +236,10 @@ func (c *xjsContext) GetAttribLocation(program Program, name string) Attribute {
 
 func (c *xjsContext) GetError() uint32 {
 	return uint32(gl.GetError())
+}
+
+func (c *xjsContext) GetInteger(pname uint32) int {
+	return gl.GetInteger(gl.Enum(pname))
 }
 
 func (c *xjsContext) GetProgrami(program Program, param uint32) int {

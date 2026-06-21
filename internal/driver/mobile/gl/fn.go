@@ -82,6 +82,7 @@ const (
 	glfnCopyTexSubImage2D
 	glfnDeleteProgram
 	glfnUniform1i
+	glfnGetIntegerv
 )
 
 func goString(buf []byte) string {
