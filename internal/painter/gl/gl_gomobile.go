@@ -136,11 +136,11 @@ func (p *painter) Init() {
 		p.ellipseProgram = programState{
 			ref:        p.createProgram("ellipse_es"),
 			buff:       p.createBuffer(16),
-			uniforms:   make(map[string]*UniformState),
+			uniforms:   make(map[string]*uniformState),
 			attributes: make(map[string]Attribute),
 		}
 
-		compiled = []ProgramState{
+		compiled = []programState{
 			p.program,
 			p.blurProgram,
 			p.lineProgram,
