@@ -1016,3 +1016,39 @@ func GetMaximumCornerRadii(points []fyne.Position, radii []float32) []float32 {
 
 	return finalRadii
 }
+
+// GetShadowPaddings calculates the shadow paddings (left, top, right, bottom) based on offset, blur radius and spread
+func GetShadowPaddings(shadow canvas.Shadow) [4]float32 {
+	offsetX := shadow.Offset.X
+	offsetY := shadow.Offset.Y
+	softness := shadow.BlurRadius
+	spread := shadow.Spread
+
+	rightReach := offsetX + softness + spread
+	leftReach := -offsetX + softness + spread
+	topReach := -offsetY + softness + spread
+	bottomReach := offsetY + softness + spread
+
+	var padLeft, padRight, padTop, padBottom float32
+
+	if leftReach > 0 {
+		padLeft = leftReach
+	}
+	if rightReach > 0 {
+		padRight = rightReach
+	}
+	if topReach > 0 {
+		padTop = topReach
+	}
+	if bottomReach > 0 {
+		padBottom = bottomReach
+	}
+
+	// Returns paddings in order: left, top, right, bottom.
+	return [4]float32{padLeft, padTop, padRight, padBottom}
+}
+
+// IsShadowVisible determines if a shadow should be rendered based on its properties
+func IsShadowVisible(shadow canvas.Shadow) bool {
+	return shadow.FillColor != color.Transparent && shadow.FillColor != nil && (!shadow.Offset.IsZero() || shadow.BlurRadius > 0.0 || shadow.Variant != canvas.DropShadow || shadow.Spread > 0.0)
+}
