@@ -69,7 +69,7 @@ func ApplyShadowForLevel(s *canvas.Shadow, level ElevationLevel, shadowColor col
 		// no shadow
 	}
 
-	s.FillColor = shadowColor
+	s.Color = shadowColor
 	s.BlurRadius = blurRadius
 	s.Offset = offset
 	s.Spread = 0

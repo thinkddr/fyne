@@ -328,7 +328,7 @@ func TestPopUp_Layout(t *testing.T) {
 	if bg, ok := r.Objects()[0].(*canvas.Rectangle); assert.True(t, ok, "a background rectangle is rendered before the content") {
 		assert.Equal(t, size, bg.Size())
 		assert.Equal(t, theme.Color(theme.ColorNameOverlayBackground), bg.FillColor)
-		assert.Equal(t, theme.Color(theme.ColorNameShadow), bg.Shadow.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameShadow), bg.Shadow.Color)
 		assert.Equal(t, float32(14), bg.Shadow.BlurRadius)
 	}
 	assert.Equal(t, r.Objects()[1], content)

@@ -413,7 +413,7 @@ func (r *markupRenderer) writeEllipse(e *fynecanvas.Ellipse, attrs map[string]*s
 }
 
 func (r *markupRenderer) setShadowAttrs(attrs map[string]*string, s fynecanvas.Shadow) {
-	r.setColorAttr(attrs, "shadowColor", s.FillColor)
+	r.setColorAttr(attrs, "shadowColor", s.Color)
 	r.setFloatAttr(attrs, "shadowBlurRadius", float64(s.BlurRadius))
 	r.setFloatAttr(attrs, "shadowSpread", float64(s.Spread))
 	r.setPosAttr(attrs, "shadowOffset", s.Offset)

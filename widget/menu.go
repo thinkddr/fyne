@@ -270,7 +270,7 @@ func (r *menuRenderer) Refresh() {
 	th := r.m.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	r.b.FillColor = th.Color(theme.ColorNameMenuBackground, v)
-	r.b.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
+	r.b.Shadow.Color = th.Color(theme.ColorNameShadow, v)
 	r.b.CornerRadius = th.Size(theme.SizeNameMenuRadius)
 
 	for _, i := range r.m.Items {

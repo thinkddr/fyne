@@ -209,7 +209,7 @@ func (r *popUpRenderer) Refresh() {
 	th := r.popUp.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	r.background.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
-	r.background.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
+	r.background.Shadow.Color = th.Color(theme.ColorNameShadow, v)
 	r.background.CornerRadius = th.Size(theme.SizeNamePopupRadius)
 	expectedContentSize := innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
 	shouldRelayout := r.popUp.Content.Size() != expectedContentSize

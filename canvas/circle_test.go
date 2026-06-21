@@ -59,7 +59,7 @@ func TestCircle_shadow(t *testing.T) {
 		StrokeColor: color.NRGBA{R: 255, G: 120, B: 0, A: 255},
 		StrokeWidth: 2.0,
 		Shadow: canvas.Shadow{
-			FillColor:  color.White,
+			Color:      color.White,
 			Offset:     fyne.NewPos(8, 5),
 			BlurRadius: 3,
 			Variant:    canvas.DropShadow,

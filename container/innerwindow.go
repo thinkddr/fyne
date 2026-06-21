@@ -250,7 +250,7 @@ func (i *innerWindowRenderer) Refresh() {
 		}
 	}
 	i.bg.CornerRadius = th.Size(theme.SizeNameInnerWindowRadius)
-	i.bg.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
+	i.bg.Shadow.Color = th.Color(theme.ColorNameShadow, v)
 	i.bg.Refresh()
 	i.contentBG.FillColor = th.Color(theme.ColorNameBackground, v)
 	i.contentBG.Refresh()

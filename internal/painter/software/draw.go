@@ -458,7 +458,7 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 	shadowBlurRadius := shadow.BlurRadius
 	shadowSpread := shadow.Spread
 	shadowVariant := shadow.Variant
-	shadowColor := shadow.FillColor
+	shadowColor := shadow.Color
 
 	var shadowRaw *image.RGBA
 	var maskRaw *image.RGBA

@@ -133,7 +133,7 @@ func TestShadow_ShadowPaddings_Empty(t *testing.T) {
 
 func TestShadow_ShadowPaddings_OffsetOnlyLeft(t *testing.T) {
 	b := canvas.Shadow{
-		FillColor:  color.NRGBA{0, 0, 0, 128},
+		Color:      color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 3,
 		Offset:     fyne.NewPos(-5, 0),
 		Variant:    canvas.BoxShadow,
@@ -148,7 +148,7 @@ func TestShadow_ShadowPaddings_OffsetOnlyLeft(t *testing.T) {
 
 func TestShadow_ShadowPaddings_OffsetOnlyRight(t *testing.T) {
 	b := canvas.Shadow{
-		FillColor:  color.NRGBA{0, 0, 0, 128},
+		Color:      color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 2,
 		Offset:     fyne.NewPos(6, 0),
 		Variant:    canvas.DropShadow,
@@ -163,7 +163,7 @@ func TestShadow_ShadowPaddings_OffsetOnlyRight(t *testing.T) {
 
 func TestShadow_ShadowPaddings_OffsetOnlyTop(t *testing.T) {
 	b := canvas.Shadow{
-		FillColor:  color.NRGBA{0, 0, 0, 128},
+		Color:      color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 5,
 		Offset:     fyne.NewPos(0, -4),
 		Variant:    canvas.BoxShadow,
@@ -178,7 +178,7 @@ func TestShadow_ShadowPaddings_OffsetOnlyTop(t *testing.T) {
 
 func TestShadow_ShadowPaddings_OffsetOnlyBottom(t *testing.T) {
 	b := canvas.Shadow{
-		FillColor:  color.NRGBA{0, 0, 0, 128},
+		Color:      color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 1,
 		Offset:     fyne.NewPos(0, 7),
 		Variant:    canvas.DropShadow,
@@ -193,7 +193,7 @@ func TestShadow_ShadowPaddings_OffsetOnlyBottom(t *testing.T) {
 
 func TestShadow_ShadowPaddings_OffsetLeftTop(t *testing.T) {
 	b := canvas.Shadow{
-		FillColor:  color.NRGBA{0, 0, 0, 128},
+		Color:      color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 4,
 		Offset:     fyne.NewPos(-3, -2),
 		Variant:    canvas.DropShadow,
@@ -208,7 +208,7 @@ func TestShadow_ShadowPaddings_OffsetLeftTop(t *testing.T) {
 
 func TestShadow_ShadowPaddings_OffsetLeftBottom(t *testing.T) {
 	b := canvas.Shadow{
-		FillColor:  color.NRGBA{0, 0, 0, 128},
+		Color:      color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 2,
 		Offset:     fyne.NewPos(-4, 5),
 		Variant:    canvas.BoxShadow,
@@ -223,7 +223,7 @@ func TestShadow_ShadowPaddings_OffsetLeftBottom(t *testing.T) {
 
 func TestShadow_ShadowPaddings_OffsetRightTop(t *testing.T) {
 	b := canvas.Shadow{
-		FillColor:  color.NRGBA{0, 0, 0, 128},
+		Color:      color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 3,
 		Offset:     fyne.NewPos(3, -2),
 	}
@@ -237,7 +237,7 @@ func TestShadow_ShadowPaddings_OffsetRightTop(t *testing.T) {
 
 func TestShadow_ShadowPaddings_OffsetLeftBottom2(t *testing.T) {
 	b := canvas.Shadow{
-		FillColor:  color.NRGBA{0, 0, 0, 128},
+		Color:      color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 4,
 		Offset:     fyne.NewPos(-2, 3),
 		Variant:    canvas.DropShadow,
@@ -252,7 +252,7 @@ func TestShadow_ShadowPaddings_OffsetLeftBottom2(t *testing.T) {
 
 func TestShadow_ShadowPaddings_OffsetRightBottom(t *testing.T) {
 	b := canvas.Shadow{
-		FillColor:  color.NRGBA{0, 0, 0, 128},
+		Color:      color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 2,
 		Offset:     fyne.NewPos(4, 5),
 		Variant:    canvas.DropShadow,
@@ -267,7 +267,7 @@ func TestShadow_ShadowPaddings_OffsetRightBottom(t *testing.T) {
 
 func TestShadow_ShadowPaddings_NoOffsetOnlyBlurRadius(t *testing.T) {
 	b := canvas.Shadow{
-		FillColor:  color.NRGBA{0, 0, 0, 128},
+		Color:      color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 5,
 		Offset:     fyne.NewPos(0, 0),
 		Variant:    canvas.BoxShadow,
@@ -282,7 +282,7 @@ func TestShadow_ShadowPaddings_NoOffsetOnlyBlurRadius(t *testing.T) {
 
 func TestShadow_ShadowPaddings_NoOffsetOnlyBlurRadius2(t *testing.T) {
 	b := canvas.Shadow{
-		FillColor:  color.NRGBA{0, 0, 0, 128},
+		Color:      color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 9,
 		Offset:     fyne.NewPos(0, 0),
 		Variant:    canvas.BoxShadow,
@@ -297,7 +297,7 @@ func TestShadow_ShadowPaddings_NoOffsetOnlyBlurRadius2(t *testing.T) {
 
 func TestShadow_ShadowPaddings_OffsetAndSpread(t *testing.T) {
 	b := canvas.Shadow{
-		FillColor:  color.NRGBA{0, 0, 0, 128},
+		Color:      color.NRGBA{0, 0, 0, 128},
 		BlurRadius: 9,
 		Spread:     10,
 		Offset:     fyne.NewPos(1, -1),

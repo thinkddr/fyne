@@ -245,6 +245,6 @@ func (c *cardRenderer) applyTheme() {
 		c.card.Content.Refresh()
 	}
 	c.background.FillColor = th.Color(theme.ColorNameBackground, v)
-	c.background.Shadow.FillColor = th.Color(theme.ColorNameShadow, v)
+	c.background.Shadow.Color = th.Color(theme.ColorNameShadow, v)
 	c.background.CornerRadius = th.Size(theme.SizeNameCardRadius)
 }
