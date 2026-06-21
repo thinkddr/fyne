@@ -50,23 +50,23 @@ func ApplyShadowForLevel(s *canvas.Shadow, level ElevationLevel, shadowColor col
 	var offset fyne.Position
 
 	switch {
-	case level <= 0: // BaseLevel
-		// no shadow
-	case level <= 1: // MenuBarLevel
+	case level <= MenuBarLevel:
 		blurRadius = 2
 		offset = fyne.NewPos(0, 1)
-	case level <= 4: // MenuLevel
+	case level <= MenuLevel:
 		blurRadius = 6
 		offset = fyne.NewPos(0, 2)
-	case level <= 6: // ButtonLevel, CardLevel
+	case level <= CardLevel:
 		blurRadius = 8
 		offset = fyne.NewPos(0, 2)
-	case level <= 8: // PopUpLevel, SubmergedContentLevel
+	case level <= PopUpLevel:
 		blurRadius = 14
 		offset = fyne.NewPos(0, 4)
-	default: // DialogLevel
+	case level <= DialogLevel:
 		blurRadius = 18
 		offset = fyne.NewPos(0, 6)
+	default:
+		// no shadow
 	}
 
 	s.FillColor = shadowColor
