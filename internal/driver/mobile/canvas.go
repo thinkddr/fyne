@@ -37,7 +37,7 @@ type canvas struct {
 	dragOffset     fyne.Position
 	dragStart      fyne.Position
 	dragging       fyne.Draggable
-	dragging2      fyne.Draggable
+	draggingOuter  fyne.Draggable
 	otherDirection container.ScrollDirection
 
 	onTypedKey  func(event *fyne.KeyEvent)
@@ -229,7 +229,7 @@ func (c *canvas) tapDown(pos fyne.Position, tapID int) {
 	c.lastTapDown[tapID] = time.Now()
 	c.lastTapDownPos[tapID] = pos
 	c.dragging = nil
-	c.dragging2 = nil
+	c.draggingOuter = nil
 
 	co, objPos, layer := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
@@ -314,7 +314,7 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 			c.dragOffset = previousPos.Subtract(objPos)
 			c.dragStart = co.Position()
 			if scrollOtherDirection != nil {
-				c.dragging2 = scrollOtherDirection.(fyne.Draggable)
+				c.draggingOuter = scrollOtherDirection.(fyne.Draggable)
 			}
 		} else {
 			return
@@ -327,13 +327,13 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	ev.Dragged = offset
 
 	dragCallback(c.dragging, ev)
-	if c.dragging2 != nil {
+	if c.draggingOuter != nil {
 		if c.otherDirection == container.ScrollVerticalOnly {
 			ev.Dragged.DX = 0
 		} else {
 			ev.Dragged.DY = 0
 		}
-		dragCallback(c.dragging2, ev)
+		dragCallback(c.draggingOuter, ev)
 	}
 }
 
@@ -350,17 +350,17 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 		ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
 		ev.AbsolutePosition = pos
 		dragCallback(c.dragging, ev)
-		if c.dragging2 != nil {
+		if c.draggingOuter != nil {
 			if c.otherDirection == container.ScrollVerticalOnly {
 				ev.Dragged.DX = 0
 			} else {
 				ev.Dragged.DY = 0
 			}
-			dragCallback(c.dragging2, ev)
+			dragCallback(c.draggingOuter, ev)
 		}
 
 		c.dragging = nil
-		c.dragging2 = nil
+		c.draggingOuter = nil
 		c.otherDirection = container.ScrollBoth
 		return
 	}
