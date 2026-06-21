@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"net"
 	"net/url"
 	"path/filepath"
@@ -14,8 +13,8 @@ import (
 )
 
 var (
-	rxHost = regexp.MustCompile(`^(.*?)(?::[0-9]+)?$`)
-	rxName = regexp.MustCompile(`^([a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62}){1}(\.[a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62})*[\._]?$`)
+	rxHostWithoutPort = regexp.MustCompile(`^(.*?)(?::[0-9]+)?$`)
+	rxHostName        = regexp.MustCompile(`^[a-zA-Z0-9_][a-zA-Z0-9_-]{0,62}(?:\.[a-zA-Z0-9_][a-zA-Z0-9_-]{0,62})*[._]?$`)
 )
 
 // NewFileURI implements the back-end logic to storage.NewFileURI, which you
@@ -104,22 +103,24 @@ func ParseURI(s string) (fyne.URI, error) {
 		return &uri{*l}, nil
 	}
 
-	// host format checks
-	m := rxHost.FindStringSubmatch(l.Host)
-	if len(m) != 2 {
+	// validate host format
+	var host string
+	if m := rxHostWithoutPort.FindStringSubmatch(l.Host); len(m) == 2 {
+		host = m[1]
+	} else {
 		return nil, errors.New("failed to find host")
 	}
 
-	if rxName.MatchString(m[1]) {
+	if rxHostName.MatchString(host) {
 		return &uri{*l}, nil
 	}
 
-	if len(m[1]) > 1 && m[1][0] == '[' && m[1][len(m[1])-1] == ']' {
-		m[1] = m[1][1 : len(m[1])-1]
+	if len(host) > 1 && host[0] == '[' && host[len(host)-1] == ']' {
+		host = host[1 : len(host)-1]
 	}
 
-	if net.ParseIP(m[1]) == nil {
-		return nil, fmt.Errorf("invalid address: %v", m[1])
+	if net.ParseIP(host) == nil {
+		return nil, errors.New("invalid host address")
 	}
 
 	return &uri{*l}, nil
