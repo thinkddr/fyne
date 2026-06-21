@@ -142,6 +142,12 @@ func (l *Label) SelectedText() string {
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
 	l.Text = text
+	if l.Selectable && l.selection != nil {
+		l.selection.cursorRow = 0
+		l.selection.cursorColumn = 0
+		l.selection.selectRow = 0
+		l.selection.selectColumn = 0
+	}
 	l.Refresh()
 }
 
