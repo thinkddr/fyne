@@ -185,7 +185,12 @@ func (a *activityRenderer) stop() {
 // ellipsis. Used when animations are disabled so the widget still indicates
 // something is happening without any motion.
 func (a *activityRenderer) drawStaticEllipsis() {
+	th := a.parent.Theme()
+	innerPad := th.Size(theme.SizeNameInnerPadding)
 	d := fyne.Min(a.bound.Width/4, a.bound.Height)
+	if d > th.Size(theme.SizeNameInlineIcon)/2 {
+		d -= innerPad
+	}
 	if d <= 0 {
 		a.hideDots()
 		return
