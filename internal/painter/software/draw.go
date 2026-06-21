@@ -426,6 +426,10 @@ func drawEllipse(c fyne.Canvas, ellipse *canvas.Ellipse, pos fyne.Position, base
 		xPad = rotPad
 	}
 
+	if painter.IsShadowVisible(ellipse.Shadow) {
+		drawShadow(c, ellipse, ellipse.Size(), ellipse.Shadow, painter.VectorPad(ellipse), base, clip, pos)
+	}
+
 	pos = pos.AddXY(xPad, yPad)
 	pad := painter.VectorPad(ellipse) + rotPad
 
@@ -497,6 +501,17 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 		maskRaw = painter.DrawCircle(maskCircle, vPad+shadowSpread, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
+	case *canvas.Ellipse:
+		shadowEllipse := &canvas.Ellipse{FillColor: shadowColor}
+		shadowEllipse.Resize(objSize.AddWidthHeight(2*shadowSpread, 2*shadowSpread))
+		shadowRaw = painter.DrawEllipse(shadowEllipse, vPad, func(in float32) float32 {
+			return float32(math.Round(float64(in) * float64(c.Scale())))
+		})
+		maskEllipse := &canvas.Ellipse{FillColor: color.Opaque}
+		maskEllipse.Resize(objSize)
+		maskRaw = painter.DrawEllipse(maskEllipse, vPad+shadowSpread, func(in float32) float32 {
+			return float32(math.Round(float64(in) * float64(c.Scale())))
+		})
 	}
 
 	startX := pos.X + float32(shadowOffset.X) - shadowSpread - vPad
@@ -524,6 +539,8 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 		case *canvas.Rectangle:
 			fill, strokeCol, strokeWidth = o.FillColor, o.StrokeColor, o.StrokeWidth
 		case *canvas.Circle:
+			fill, strokeCol, strokeWidth = o.FillColor, o.StrokeColor, o.StrokeWidth
+		case *canvas.Ellipse:
 			fill, strokeCol, strokeWidth = o.FillColor, o.StrokeColor, o.StrokeWidth
 		}
 

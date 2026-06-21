@@ -717,7 +717,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 	}
 
 	// Vertex: BEG
-	bounds, points := p.vecRectCoordsWithPad(pos, ellipse, frame, -xPad, -yPad, canvas.Shadow{})
+	bounds, points := p.vecRectCoordsWithPad(pos, ellipse, frame, -xPad, -yPad, ellipse.Shadow)
 	p.ctx.UseProgram(program.ref)
 	p.updateBuffer(program.buff, points)
 	p.UpdateVertexArray(program, "vert", 2, 4, 0)
@@ -755,6 +755,19 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+
+	var addShadow float32
+	if paint.IsShadowVisible(ellipse.Shadow) {
+		r, g, b, a = getFragmentColor(ellipse.Shadow.FillColor)
+		p.SetUniform4f(program, "shadow_color", r, g, b, a)
+		p.SetUniform2f(program, "shadow_offset", roundToPixel(ellipse.Shadow.Offset.X*p.pixScale, 1.0), roundToPixel(ellipse.Shadow.Offset.Y*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_blur_radius", roundToPixel(ellipse.Shadow.BlurRadius*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_spread", roundToPixel(ellipse.Shadow.Spread*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_type", float32(ellipse.Shadow.Variant))
+		addShadow = 1.0
+	}
+	p.SetUniform1f(program, "add_shadow", addShadow)
+
 	p.logError()
 	// Fragment: END
 
