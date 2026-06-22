@@ -158,7 +158,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	child := path.Clean(u.Path())
 	if child == "." || // Clean ending up empty returns ".".
 		strings.HasSuffix(child, "/") || // Only root has trailing slash.
-		runtime.GOOS == "windows" && len(child) == 2 && child[1] == ':' {
+		runtime.GOOS == "windows" && len(child) == 2 && child[1] == ':' && (child[0] >= 'A' && child[0] <= 'Z' || child[0] >= 'a' && child[0] <= 'z') {
 		return nil, repository.ErrURIRoot
 	}
 

@@ -56,7 +56,7 @@ func ParseURI(s string) (fyne.URI, error) {
 	}
 
 	if strings.EqualFold(scheme, "file") {
-		if len(path) == 0 || len(path) == 2 && path == "//" {
+		if path == "" || path == "//" {
 			return nil, errors.New("invalid file URI, path cannot be empty")
 		}
 		if !strings.HasPrefix(path, "//") {
@@ -78,6 +78,11 @@ func ParseURI(s string) (fyne.URI, error) {
 	l, err := url.Parse(s)
 	if err != nil {
 		return nil, err
+	}
+
+	if l.Scheme == "file" && l.Host != "" {
+		l.Path = l.Host + l.Path
+		l.Host = ""
 	}
 
 	if l.Host == "" {
