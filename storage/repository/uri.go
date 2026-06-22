@@ -77,10 +77,10 @@ func (u *uri) String() string {
 }
 
 func (u *uri) Authority() string {
-	if u.URL.User != nil {
-		return u.URL.User.String() + "@" + u.URL.Host
+	if u.User != nil {
+		return u.User.String() + "@" + u.Host
 	}
-	return u.URL.Host
+	return u.Host
 }
 
 func (u *uri) Path() string {
