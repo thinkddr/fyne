@@ -88,7 +88,7 @@ func (u *uri) Path() string {
 }
 
 func (u *uri) Query() string {
-	return u.URL.RawQuery
+	return u.RawQuery
 }
 
 func (u *uri) Fragment() string {
