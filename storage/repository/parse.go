@@ -55,16 +55,16 @@ func ParseURI(s string) (fyne.URI, error) {
 		}}, nil
 	}
 
+	if strings.EqualFold(scheme, "file") && !(strings.HasPrefix(path, "//") && len(path) > 2) {
+		return nil, errors.New("invalid URI, scheme must be followed by two slashes")
+	}
+
 	scheme = strings.ToLower(scheme)
 	repo, err := ForScheme(scheme)
 	if err == nil {
 		// If the repository registered for this scheme implements a parser
 		if c, ok := repo.(CustomURIRepository); ok {
 			return c.ParseURI(s)
-		}
-	} else {
-		if !(strings.HasPrefix(path, "//") && len(path) > 2) {
-			return nil, errors.New("invalid URI, scheme must be followed by two slashes")
 		}
 	}
 
