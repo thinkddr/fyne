@@ -133,8 +133,6 @@ func (r *Runner) tickAnimation(a *anim) bool {
 	duration := a.a.Duration
 	now := time.Now()
 
-	// If Duration changed since the last tick, pin progress to its current
-	// value so the value passed to Tick stays continuous across the change.
 	if duration != a.lastDuration {
 		a.pinProgress = a.progressFraction(now, a.lastDuration)
 		a.pinTime = now

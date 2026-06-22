@@ -82,9 +82,7 @@ func TestRunner_DurationIncreasedMidAnimation(t *testing.T) {
 		t.Fatal("animation was not ticked")
 	}
 
-	// Extend the duration. The value passed to Tick must not snap backwards
-	// — dividing the same elapsed time by the new (larger) total would yield
-	// a smaller progress and visibly jump a progress bar in reverse.
+	// Extend the duration; progress should not snap backwards.
 	a.Duration = 4 * time.Second
 	run.TickAnimations()
 	var after float32
@@ -96,8 +94,6 @@ func TestRunner_DurationIncreasedMidAnimation(t *testing.T) {
 	assert.InDelta(t, before, after, 0.1,
 		"progress should be preserved when Duration grows: before=%v after=%v", before, after)
 
-	// And from here it should pace against the new longer total — far from
-	// completing within a tiny extra wait.
 	time.Sleep(100 * time.Millisecond)
 	run.TickAnimations()
 	select {
@@ -132,8 +128,7 @@ func TestRunner_DurationDecreasedMidAnimation(t *testing.T) {
 		t.Fatal("animation was not ticked")
 	}
 
-	// Shorten Duration but keep it longer than time already elapsed. Progress
-	// must be preserved at the moment of change and then advance faster.
+	// Shorten Duration but keep it longer than elapsed time.
 	a.Duration = 400 * time.Millisecond
 	run.TickAnimations()
 	var after float32
@@ -145,7 +140,6 @@ func TestRunner_DurationDecreasedMidAnimation(t *testing.T) {
 	assert.InDelta(t, before, after, 0.1,
 		"progress should be preserved when Duration shrinks: before=%v after=%v", before, after)
 
-	// Sleeping past the new total should drive it to 1.0.
 	time.Sleep(300 * time.Millisecond)
 	run.TickAnimations()
 	select {
@@ -176,8 +170,7 @@ func TestRunner_DurationShortenedBelowElapsed(t *testing.T) {
 		t.Fatal("animation was not ticked")
 	}
 
-	// Shorten Duration below the elapsed time — animation must finish on the
-	// next tick rather than overshoot or stall.
+	// Shorten Duration below the elapsed time.
 	a.Duration = 50 * time.Millisecond
 	run.TickAnimations()
 	select {

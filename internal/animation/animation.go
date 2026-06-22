@@ -29,12 +29,6 @@ func newAnim(a *fyne.Animation) *anim {
 	return animate
 }
 
-// progressFraction returns the linear 0..1 position at `now`, interpolating
-// from the pinned snapshot (pinTime, pinProgress) toward 1.0 at start+duration.
-// With an unchanged Duration this is just elapsed/duration. When Duration is
-// changed mid-animation, re-pinning before updating lastDuration keeps the
-// value passed to Tick continuous and lets the new total duration drive the
-// remaining segment to 1.0.
 func (a *anim) progressFraction(now time.Time, duration time.Duration) float32 {
 	remaining := a.start.Add(duration).Sub(a.pinTime)
 	if remaining <= 0 {
