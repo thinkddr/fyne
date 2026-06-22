@@ -48,36 +48,15 @@ func ParseURI(s string) (fyne.URI, error) {
 		return nil, errors.New("invalid URI, scheme must be present")
 	}
 
-	if strings.EqualFold(scheme, "file") {
-		// Does this really deserve to be special? In principle, the
-		// purpose of this check is to pass it to NewFileURI, which
-		// allows platform path seps in the URI (against the RFC, but
-		// easier for people building URIs naively on Windows). Maybe
-		// we should punt this to whoever generated the URI in the
-		// first place?
-
-		if len(path) <= 2 { // I.e. file: and // given we know scheme.
-			return nil, errors.New("not a valid URI")
-		}
-
-		if path[:2] == "//" {
-			path = path[2:]
-		}
-
-		p, err := url.PathUnescape(path)
-		if err != nil {
-			return nil, err
-		}
-
-		// Windows files can break authority checks, so just return the parsed file URI
-		return NewFileURI(p), nil
-	}
-
 	if strings.EqualFold(scheme, "urn") {
 		return &uri{url.URL{
 			Scheme: scheme,
 			Path:   path,
 		}}, nil
+	}
+
+	if !(strings.HasPrefix(path, "//") && len(path) > 2) {
+		return nil, errors.New("invalid URI, scheme must be followed by two slashes")
 	}
 
 	scheme = strings.ToLower(scheme)
