@@ -48,8 +48,7 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 
 	interrupted := false
 	anim := fyne.NewAnimation(time.Second/2, func(f float32) {
-		shouldBeInterrupted := timeNow().Sub(a.lastInterruptTime) <= cursorInterruptDuration
-		if shouldBeInterrupted {
+		if timeNow().Sub(a.lastInterruptTime) < cursorInterruptDuration {
 			if !interrupted {
 				a.cursor.FillColor = opaqueColor
 				a.cursor.Refresh()

@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"runtime"
 	"testing"
 	"time"
 
@@ -56,9 +55,7 @@ func TestEntryCursorAnim(t *testing.T) {
 			return time.Now().Add(300 * time.Millisecond)
 		}
 		a.anim.Tick(0.0)
-		runtime.Gosched()
-		time.Sleep(10 * time.Millisecond) // ensure go routine for restart animation is executed
-		a.anim.Tick(0.0)
+		a.anim.Tick(0.0) // first tick after interruption period creates a new animation which is ticked by the test driver to 1.0 directly
 		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
 		a.anim.Tick(0.4)
 		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
@@ -80,9 +77,7 @@ func TestEntryCursorAnim(t *testing.T) {
 			return time.Now().Add(300 * time.Millisecond)
 		}
 		a.anim.Tick(0.0)
-		runtime.Gosched()
-		time.Sleep(10 * time.Millisecond) // ensure go routine for restart animation is executed
-		a.anim.Tick(0.0)
+		a.anim.Tick(0.0) // first tick after interruption period creates a new animation which is ticked by the test driver to 1.0 directly
 		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
 		a.anim.Tick(1.0)
 		assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
