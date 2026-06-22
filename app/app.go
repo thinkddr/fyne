@@ -165,10 +165,7 @@ func makeStoreDocs(id string, s *store) *internal.Docs {
 			}
 		}
 
-		root, err := s.docRootURI()
-		if err != nil {
-			fyne.LogError("Failed to get docRootURI", err)
-		}
+		root, _ := s.docRootURI()
 		return &internal.Docs{RootDocURI: root}
 	} else {
 		return &internal.Docs{} // an empty impl to avoid crashes
