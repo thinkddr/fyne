@@ -55,8 +55,13 @@ func ParseURI(s string) (fyne.URI, error) {
 		}}, nil
 	}
 
-	if strings.EqualFold(scheme, "file") && !(strings.HasPrefix(path, "//") && len(path) > 2) {
-		return nil, errors.New("invalid URI, scheme must be followed by two slashes")
+	if strings.EqualFold(scheme, "file") {
+		if len(path) == 0 || len(path) == 2 && path == "//" {
+			return nil, errors.New("invalid file URI, path cannot be empty")
+		}
+		if !strings.HasPrefix(path, "//") {
+			s = scheme + "://" + path
+		}
 	}
 
 	scheme = strings.ToLower(scheme)
