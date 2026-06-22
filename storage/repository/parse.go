@@ -59,10 +59,10 @@ func ParseURI(s string) (fyne.URI, error) {
 		if path == "" || path == "//" {
 			return nil, errors.New("invalid file URI, path cannot be empty")
 		}
+		if runtime.GOOS == "windows" {
+			path = filepath.ToSlash(path)
+		}
 		if !strings.HasPrefix(path, "//") {
-			if runtime.GOOS == "windows" {
-				path = filepath.ToSlash(path)
-			}
 			s = scheme + "://" + path
 		}
 	}
