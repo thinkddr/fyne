@@ -252,9 +252,11 @@ func TestURI_Parent(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		// Only the Windows version of filepath will know how to handle
 		// backslashes.
-		uri := storage.NewURI("file://C:\\foo\\bar\\baz\\")
-		assert.Equal(t, "file://C:/foo/bar/baz/", uri.String())
-		uri = storage.NewFileURI("C:\\foo\\bar\\baz\\")
+		uri, err := storage.ParseURI(`file://C:\foo\bar\baz\`)
+		if assert.NoError(t, err) {
+			assert.Equal(t, "file://C:/foo/bar/baz/", uri.String())
+		}
+		uri = storage.NewFileURI(`C:\foo\bar\baz\`)
 		assert.Equal(t, "file://C:/foo/bar/baz/", uri.String())
 
 		parent, err = storage.Parent(uri)
