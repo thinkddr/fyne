@@ -28,8 +28,6 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
-type monitor = glfw.Monitor
-
 const (
 	defaultTitle              = "Fyne Application"
 	disableDPIDetectionEnvKey = "FYNE_DISABLE_DPI_DETECTION"
@@ -339,17 +337,6 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 		monitor = glfw.GetPrimaryMonitor()
 	}
 	return monitor
-}
-
-func (w *window) getSecondaryMonitor() *monitor {
-	primary := glfw.GetPrimaryMonitor()
-	for _, m := range glfw.GetMonitors() {
-		if m.GetName() != primary.GetName() {
-			return m
-		}
-	}
-
-	return primary
 }
 
 // findSiblingMonitor returns the monitor of an already-visible window in this app, or nil.

@@ -274,9 +274,10 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	})
 	var scrollOtherDirection fyne.CanvasObject
 	if scr, ok := co.(*container.Scroll); ok {
-		if scr.Direction == container.ScrollHorizontalOnly {
+		switch scr.Direction {
+		case container.ScrollHorizontalOnly:
 			c.otherDirection = container.ScrollVerticalOnly
-		} else if scr.Direction == container.ScrollVerticalOnly {
+		case container.ScrollVerticalOnly:
 			c.otherDirection = container.ScrollHorizontalOnly
 		}
 		if c.otherDirection != container.ScrollBoth {

@@ -270,9 +270,10 @@ func (d *driver) Run() {
 						break // we are getting release/press on backspace during soft backspace
 					}
 
-					if e.Direction == key.DirPress {
+					switch e.Direction {
+					case key.DirPress:
 						d.typeDownCanvas(c, e.Rune, e.Code, e.Modifiers)
-					} else if e.Direction == key.DirRelease {
+					case key.DirRelease:
 						d.typeUpCanvas(c, e.Rune, e.Code, e.Modifiers)
 					}
 				}

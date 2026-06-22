@@ -998,7 +998,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 
 	if !e.MultiLine {
 		// format clipboard content to be compatible with single line entry
-		text = strings.Replace(text, "\n", " ", -1)
+		text = strings.ReplaceAll(text, "\n", " ")
 	}
 
 	if e.sel.selecting {
@@ -2076,20 +2076,7 @@ func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
 		}
 
 		// Don't merge two separate words
-		wordSeparators := func(s []rune) (num int, onlyWordSeparators bool) {
-			onlyWordSeparators = true
-			for _, r := range s {
-				if isWordSeparator(r) {
-					num++
-					onlyWordSeparators = false
-				}
-			}
-			return num, onlyWordSeparators
-		}
-		selfNumWS, _ := wordSeparators(i.Text)
-		otherNumWS, otherOnlyWS := wordSeparators(other.Text)
-		if !((selfNumWS == 0 && otherNumWS == 0) ||
-			(selfNumWS > 0 && otherOnlyWS)) {
+		if strings.IndexFunc(string(other.Text), isWordSeparator) >= 0 {
 			return false
 		}
 

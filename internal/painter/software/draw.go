@@ -103,26 +103,9 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 	height := scale.ToScreenCoordinate(c, bounds.Height)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 
-	origImg := img.Image
-	if img.FillMode != canvas.ImageFillCover {
-		origImg = painter.PaintImage(img, c, width, height)
-	}
-
-	if img.FillMode == canvas.ImageFillContain {
-		imgAspect := img.Aspect()
-		objAspect := float32(width) / float32(height)
-
-		if objAspect > imgAspect {
-			newWidth := int(float32(height) * imgAspect)
-			scaledX += (width - newWidth) / 2
-			width = newWidth
-		} else if objAspect < imgAspect {
-			newHeight := int(float32(width) / imgAspect)
-			scaledY += (height - newHeight) / 2
-			height = newHeight
-		}
-	} else if img.FillMode == canvas.ImageFillCover {
-		inner := origImg.Bounds()
+	var rawImg image.Image
+	if img.FillMode == canvas.ImageFillCover {
+		inner := img.Image.Bounds()
 		imgAspect := img.Aspect()
 		objAspect := float32(width) / float32(height)
 
@@ -141,12 +124,28 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 		}
 
 		subImg := image.NewRGBA(inner.Bounds())
-		draw.Copy(subImg, inner.Min, origImg, inner, draw.Over, nil)
-		origImg = subImg
+		draw.Copy(subImg, inner.Min, img.Image, inner, draw.Over, nil)
+		rawImg = subImg
+	} else {
+		rawImg = painter.PaintImage(img, c, width, height)
+		if img.FillMode == canvas.ImageFillContain {
+			imgAspect := img.Aspect()
+			objAspect := float32(width) / float32(height)
+
+			if objAspect > imgAspect {
+				newWidth := int(float32(height) * imgAspect)
+				scaledX += (width - newWidth) / 2
+				width = newWidth
+			} else if objAspect < imgAspect {
+				newHeight := int(float32(width) / imgAspect)
+				scaledY += (height - newHeight) / 2
+				height = newHeight
+			}
+		}
 	}
 
 	cornerRadius := fyne.Min(painter.GetMaximumRadius(bounds), img.CornerRadius)
-	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip, img.Alpha(), cornerRadius*c.Scale())
+	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, rawImg, clip, img.Alpha(), cornerRadius*c.Scale())
 }
 
 func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle, alpha float64, radius float32) {

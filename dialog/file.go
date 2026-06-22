@@ -473,9 +473,10 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 	f.filesScroll.Refresh()
 }
 
-func (f *fileDialog) setLocation(dir fyne.URI) error {
+func (f *fileDialog) setLocation(dir fyne.URI) {
 	if dir == nil {
-		return errors.New("failed to open nil directory")
+		fyne.LogError("failed to open nil directory", nil)
+		return
 	}
 
 	if f.selectedID > -1 {
@@ -484,7 +485,8 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 
 	list, err := storage.ListerForURI(dir)
 	if err != nil {
-		return err
+		fyne.LogError("unable to get ListableURI for "+dir.String(), err)
+		return
 	}
 
 	fyne.CurrentApp().Preferences().SetString(lastFolderKey, dir.String())
@@ -508,10 +510,7 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 		currentParent := parent
 		f.breadcrumb.Add(
 			widget.NewButton(currentParent.Name(), func() {
-				err := f.setLocation(currentParent)
-				if err != nil {
-					fyne.LogError("Failed to set directory", err)
-				}
+				f.setLocation(currentParent)
 			}),
 		)
 	}
@@ -531,8 +530,6 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 		f.open.Enable()
 	}
 	f.refreshDir(list)
-
-	return nil
 }
 
 func (f *fileDialog) setSelected(file fyne.URI, id int) {

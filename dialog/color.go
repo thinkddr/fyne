@@ -98,7 +98,7 @@ func (p *ColorPickerDialog) selectColor(c color.Color) {
 	if f := p.callback; f != nil {
 		f(c)
 	}
-	p.dialog.Hide()
+	p.Hide()
 	p.updateUI()
 }
 
@@ -106,9 +106,9 @@ func (p *ColorPickerDialog) updateUI() {
 	if w := p.win; w != nil {
 		w.Hide()
 	}
-	p.dialog.dismiss = &widget.Button{
+	p.dismiss = &widget.Button{
 		Text: lang.L("Cancel"), Icon: theme.CancelIcon(),
-		OnTapped: p.dialog.Hide,
+		OnTapped: p.Hide,
 	}
 	if p.Advanced {
 		p.picker = newColorAdvancedPicker(p.color, func(c color.Color) {
@@ -121,7 +121,7 @@ func (p *ColorPickerDialog) updateUI() {
 		}
 		p.advanced = widget.NewAccordion(advancedItem)
 
-		p.dialog.content = container.NewVBox(
+		p.content = container.NewVBox(
 			container.NewCenter(
 				container.NewVBox(
 					p.createSimplePickers()...,
@@ -137,10 +137,10 @@ func (p *ColorPickerDialog) updateUI() {
 				p.selectColor(p.color)
 			},
 		}
-		p.dialog.create(container.NewGridWithColumns(2, p.dialog.dismiss, confirm))
+		p.create(container.NewGridWithColumns(2, p.dismiss, confirm))
 	} else {
-		p.dialog.content = container.NewVBox(p.createSimplePickers()...)
-		p.dialog.create(container.NewGridWithColumns(1, p.dialog.dismiss))
+		p.content = container.NewVBox(p.createSimplePickers()...)
+		p.create(container.NewGridWithColumns(1, p.dismiss))
 	}
 }
 
