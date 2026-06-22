@@ -18,6 +18,7 @@ func TestParseURI(t *testing.T) {
 
 	uri, err = ParseURI("file:/tmp/foo.txt")
 	assert.Error(t, err)
+	assert.Nil(t, uri)
 
 	uri, err = ParseURI("file://C:/tmp/foo.txt")
 	assert.NoError(t, err)
