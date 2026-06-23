@@ -19,7 +19,7 @@ func EqualURI(t1, t2 fyne.URI) bool {
 // NewFileURI creates a new URI from the given file path.
 // Relative paths will be converted to absolute using filepath.Abs if required.
 func NewFileURI(fpath string) fyne.URI {
-	if runtime.GOOS == "windows" && len(fpath) >= 2 && (fpath[0] >= 'A' && fpath[0] <= 'Z' || fpath[0] >= 'a' && fpath[0] <= 'z') && fpath[1] == ':' {
+	if runtime.GOOS == "windows" && len(fpath) >= 2 && fpath[1] == ':' {
 		return repository.NewFileURI(fpath)
 	}
 
