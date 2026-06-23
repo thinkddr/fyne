@@ -56,7 +56,7 @@ func ParseURI(s string) (fyne.URI, error) {
 	}
 
 	if runtime.GOOS == "windows" && len(scheme) == 1 {
-		path = "/" + scheme + ":" + filepath.ToSlash(path)
+		path = scheme + ":" + filepath.ToSlash(path)
 		scheme = "file"
 	}
 
