@@ -15,7 +15,10 @@ var timeNow = time.Now // used in tests
 const (
 	cursorInterruptDuration = 300 * time.Millisecond
 	cursorFadeAlpha         = uint8(0x16)
-	cursorFadeRatio         = 0.2
+	cursorFadeRatio         = float32(0.2)
+
+	fadeStart = 0.5 - cursorFadeRatio/2
+	fadeStop  = 0.5 + cursorFadeRatio/2
 )
 
 type entryCursorAnimation struct {
@@ -42,10 +45,7 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 	}
 	a.cursor.FillColor = startColor
 
-	deltaA := int(endColor.A) - int(startColor.A)
-	fadeStart := float32(0.5 - cursorFadeRatio/2)
-	fadeStop := float32(0.5 + cursorFadeRatio/2)
-
+	deltaA := float32(int(endColor.A) - int(startColor.A))
 	interrupted := false
 	anim := fyne.NewAnimation(time.Second/2, func(f float32) {
 		if timeNow().Sub(a.lastInterruptTime) < cursorInterruptDuration {
@@ -80,7 +80,7 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 			a.cursor.FillColor = endColor
 		} else {
 			fade := (f - fadeStart) / cursorFadeRatio
-			alpha = startColor.A + uint8(float32(deltaA)*fade)
+			alpha = startColor.A + uint8(deltaA*fade)
 			a.cursor.FillColor = color.NRGBA{R: r, G: g, B: b, A: alpha}
 		}
 
