@@ -353,7 +353,6 @@ var (
 	glGetShaderiv             = libGLESv2.NewProc("glGetShaderiv")
 	glGetTexParameteriv       = libGLESv2.NewProc("glGetTexParameteriv")
 	glGetUniformLocation      = libGLESv2.NewProc("glGetUniformLocation")
-	glPixelStorei             = libGLESv2.NewProc("glPixelStorei")
 	glLinkProgram             = libGLESv2.NewProc("glLinkProgram")
 	glReadPixels              = libGLESv2.NewProc("glReadPixels")
 	glScissor                 = libGLESv2.NewProc("glScissor")
