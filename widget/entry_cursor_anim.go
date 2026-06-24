@@ -32,17 +32,14 @@ func newEntryCursorAnimation(cursor *canvas.Rectangle) *entryCursorAnimation {
 }
 
 // creates fyne animation
-func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
+func (a *entryCursorAnimation) createAnim() *fyne.Animation {
 	ri, gi, bi, ai := col.ToNRGBA(theme.Color(theme.ColorNamePrimary))
 	r := uint8(ri)
 	g := uint8(gi)
 	b := uint8(bi)
 	opaqueColor := color.NRGBA{R: r, G: g, B: b, A: uint8(ai)}
-	startColor := color.NRGBA{R: r, G: g, B: b, A: cursorFadeAlpha}
-	endColor := opaqueColor
-	if inverted {
-		startColor, endColor = endColor, startColor
-	}
+	endColor := color.NRGBA{R: r, G: g, B: b, A: cursorFadeAlpha}
+	startColor := opaqueColor
 	a.cursor.FillColor = startColor
 
 	deltaA := float32(int(endColor.A) - int(startColor.A))
@@ -59,8 +56,8 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 
 		if interrupted {
 			interrupted = false
+			// stop and start effectively restarts animation from the beginning
 			a.anim.Stop()
-			a.anim = a.createAnim(true)
 			a.anim.Start()
 			return
 		}
@@ -94,9 +91,8 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 
 // starts cursor animation.
 func (a *entryCursorAnimation) start() {
-	isStopped := a.anim == nil
-	if isStopped {
-		a.anim = a.createAnim(false)
+	if a.anim == nil {
+		a.anim = a.createAnim()
 		a.anim.Start()
 	}
 }

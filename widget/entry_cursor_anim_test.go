@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	col "fyne.io/fyne/v2/internal/color"
 	_ "fyne.io/fyne/v2/test"
@@ -25,19 +26,22 @@ func TestEntryCursorAnim(t *testing.T) {
 
 	cursor := canvas.NewRectangle(color.Black)
 	a := newEntryCursorAnimation(cursor)
+	a.start()
 
-	t.Run("animation changes from dimmed to opaque fading only a small time in between", func(t *testing.T) {
-		a.start()
+	assert.True(t, a.anim.AutoReverse)
+	assert.Equal(t, fyne.AnimationRepeatForever, a.anim.RepeatCount)
+
+	t.Run("animation changes from opaque to dimmed fading only a small time in between", func(t *testing.T) {
 		a.anim.Tick(0.0)
-		assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
+		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
 		a.anim.Tick(0.4)
-		assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
+		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
 		a.anim.Tick(0.5)
 		assert.InDelta(t, (alpha(cursorOpaque)-alpha(cursorDim))/2+alpha(cursorDim), alpha(a.cursor.FillColor), 1)
 		a.anim.Tick(0.6)
-		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
+		assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
 		a.anim.Tick(1.0)
-		assert.Equal(t, alpha(cursorOpaque), alpha(a.cursor.FillColor))
+		assert.Equal(t, alpha(cursorDim), alpha(a.cursor.FillColor))
 	})
 
 	t.Run("interrupted animation is always opaque", func(t *testing.T) {
