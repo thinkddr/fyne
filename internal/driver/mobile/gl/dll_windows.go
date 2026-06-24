@@ -127,11 +127,11 @@ func containsDLLs(dir string) bool {
 
 		switch file.Machine {
 		case pe.IMAGE_FILE_MACHINE_AMD64:
-			return "amd64" == runtime.GOARCH
+			return runtime.GOARCH == "amd64"
 		case pe.IMAGE_FILE_MACHINE_ARM:
-			return "arm" == runtime.GOARCH
+			return runtime.GOARCH == "arm"
 		case pe.IMAGE_FILE_MACHINE_I386:
-			return "386" == runtime.GOARCH
+			return runtime.GOARCH == "386"
 		}
 		return false
 	}
