@@ -143,7 +143,7 @@ func watchTheme(s *settings) {
 
 		err := portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
 			if changed.Namespace == appearance.Namespace && changed.Key == "color-scheme" {
-				themeVariant := colorSchemeToThemeVariant(appearance.ColorScheme(changed.Value.(uint32)))
+				themeVariant := colorSchemeToThemeVariant(appearance.ColorScheme(changed.Value.(uint32))) //gosec:disable G115 -- Probably okay to cast uint32 to uint8 here.
 				internalapp.CurrentVariant.Store(uint64(themeVariant))
 				fyne.Do(func() { s.applyVariant(themeVariant) })
 			}
