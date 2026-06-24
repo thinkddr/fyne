@@ -1,0 +1,32 @@
+version: "2"
+
+linters:
+  enable:
+    - gocyclo
+    - govet
+    - nolintlint
+    - staticcheck
+    - unused
+  exclusions:
+    presets:
+      - std-error-handling
+    rules:
+      - path: cmd/fyne/ # The whole tool is deprecated
+        linters:
+          - staticcheck
+          - errcheck
+      - path: cmd/fyne_demo/ # The whole tool is deprecated
+        linters:
+          - errcheck
+      - path: test/ # In tests, the usage of deprecated stuff is valid to check for compatibility.
+        linters:
+          - staticcheck
+        text: "SA1019"
+      - path: _test\.go # TODO: Clarify whether we should explicitly handle errors in tests (e.g., using require.NoError()).
+        linters:
+          - errcheck
+  settings:
+    staticcheck:
+      checks:
+        - all
+        - -ST1000

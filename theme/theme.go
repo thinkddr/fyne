@@ -107,13 +107,14 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	}
 
 	primary := fyne.CurrentApp().Settings().PrimaryColor()
-	if n == ColorNamePrimary || n == ColorNameHyperlink {
+	switch n {
+	case ColorNamePrimary, ColorNameHyperlink:
 		return internaltheme.PrimaryColorNamed(primary)
-	} else if n == ColorNameForegroundOnPrimary {
+	case ColorNameForegroundOnPrimary:
 		return internaltheme.ForegroundOnPrimaryColorNamed(primary)
-	} else if n == ColorNameFocus {
+	case ColorNameFocus:
 		return focusColorNamed(primary)
-	} else if n == ColorNameSelection {
+	case ColorNameSelection:
 		return selectionColorNamed(primary)
 	}
 

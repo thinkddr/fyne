@@ -22,10 +22,10 @@ func TestColorDialog_Resize(t *testing.T) {
 	d.Resize(fyne.NewSize(800, 600))
 	d.Show()
 
-	size := d.dialog.content.Size()
+	size := d.content.Size()
 
 	d.Resize(fyne.NewSize(900, 600))
-	newSize := d.dialog.content.Size()
+	newSize := d.content.Size()
 
 	assert.Equal(t, float32(100), newSize.Width-size.Width)
 }
