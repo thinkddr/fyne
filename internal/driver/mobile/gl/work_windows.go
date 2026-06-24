@@ -37,7 +37,7 @@ func NewContext() (Context, Worker) {
 		retvalue:      make(chan uintptr),
 		cStrings:      make(map[int]unsafe.Pointer),
 	}
-	return glctx, glctx
+	return context3{glctx}, glctx
 }
 
 func (ctx *context) enqueue(c call) uintptr {
