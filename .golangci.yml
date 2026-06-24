@@ -33,10 +33,11 @@ linters:
     gosec:
       excludes:
         - G104 # gosec does not have a sophisticated ignore for unchecked errors; we rely on errcheck, instead
-        - G301 # temporarily
-        - G302 # temporarily
-        - G304 # temporarily
-        - G306 # temporarily
+        # 3**: gosec is quite pedantic about permissions … even the standard library does not fulfil the tests
+        - G301
+        - G302
+        - G304
+        - G306
         - G601 # temporarily
     staticcheck:
       checks:
