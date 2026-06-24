@@ -35,7 +35,6 @@ linters:
         - G103 # temporarily
         - G104 # gosec does not have a sophisticated ignore for unchecked errors; we rely on errcheck, instead
         - G107 # temporarily
-        - G204 # temporarily
         - G301 # temporarily
         - G302 # temporarily
         - G304 # temporarily

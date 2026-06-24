@@ -32,7 +32,7 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 		return err
 	}
 
-	cmd := exec.Command("xdg-open", url.String())
+	cmd := exec.Command("xdg-open", url.String()) //gosec:disable G204 -- It’s the callers responsibility to validate the input.
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Start()
 }
