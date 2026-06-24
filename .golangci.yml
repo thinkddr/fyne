@@ -15,11 +15,13 @@ linters:
     rules:
       - path: cmd/fyne/ # The whole tool is deprecated
         linters:
-          - staticcheck
           - errcheck
+          - gosec
+          - staticcheck
       - path: cmd/fyne_demo/ # The whole tool is deprecated
         linters:
           - errcheck
+          - gosec
       - path: test/ # In tests, the usage of deprecated stuff is valid to check for compatibility.
         linters:
           - staticcheck
@@ -30,22 +32,15 @@ linters:
   settings:
     gosec:
       excludes:
-        - G101 # temporarily
         - G103 # temporarily
         - G104 # gosec does not have a sophisticated ignore for unchecked errors; we rely on errcheck, instead
         - G107 # temporarily
-        - G110 # temporarily
-        - G114 # temporarily
-        - G115 # temporarily
         - G204 # temporarily
         - G301 # temporarily
         - G302 # temporarily
         - G304 # temporarily
         - G306 # temporarily
-        - G401 # temporarily
-        - G505 # temporarily
         - G601 # temporarily
-        - G703 # temporarily
     staticcheck:
       checks:
         - all
