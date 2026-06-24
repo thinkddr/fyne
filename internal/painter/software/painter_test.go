@@ -122,8 +122,7 @@ func TestPainter_paintCircleStroke(t *testing.T) {
 
 func TestPainter_paintCircle_shadow(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	r, g, b, _ := color.Black.RGBA()
-	obj := canvas.NewCircle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
+	obj := canvas.NewCircle(color.NRGBA{A: 150})
 	obj.Shadow.Color = color.White
 	obj.Shadow.Offset = fyne.NewPos(-10, -5)
 	obj.Shadow.BlurRadius = 3
@@ -643,8 +642,7 @@ func TestPainter_paintRectangle_perCornerRadius(t *testing.T) {
 
 func TestPainter_paintRectangle_shadow(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	r, g, b, _ := color.Black.RGBA()
-	obj := canvas.NewRectangle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
+	obj := canvas.NewRectangle(color.NRGBA{A: 150})
 	obj.Shadow.Color = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
 	obj.Shadow.Offset = fyne.NewPos(3, -4)
 	obj.Shadow.BlurRadius = 8
@@ -675,8 +673,7 @@ func TestPainter_paintRectangle_shadow(t *testing.T) {
 
 func TestPainter_paintRectangle_stroke_shadow(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	r, g, b, _ := color.Black.RGBA()
-	obj := canvas.NewRectangle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
+	obj := canvas.NewRectangle(color.NRGBA{A: 150})
 	obj.StrokeWidth = 2
 	obj.StrokeColor = color.White
 	obj.Shadow.Color = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
@@ -709,8 +706,7 @@ func TestPainter_paintRectangle_stroke_shadow(t *testing.T) {
 
 func TestPainter_paintRectangle_shadow_spread(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	r, g, b, _ := color.Black.RGBA()
-	obj := canvas.NewRectangle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
+	obj := canvas.NewRectangle(color.NRGBA{A: 150})
 	obj.Shadow.Color = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
 	obj.Shadow.Offset = fyne.NewPos(-5, 5)
 	obj.Shadow.BlurRadius = 5
@@ -739,8 +735,7 @@ func TestPainter_paintRectangle_shadow_spread(t *testing.T) {
 
 func TestPainter_paintCircle_shadow_spread(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	r, g, b, _ := color.Black.RGBA()
-	obj := canvas.NewCircle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
+	obj := canvas.NewCircle(color.NRGBA{A: 150})
 	obj.Shadow.Color = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
 	obj.Shadow.Offset = fyne.NewPos(5, -5)
 	obj.Shadow.BlurRadius = 7
