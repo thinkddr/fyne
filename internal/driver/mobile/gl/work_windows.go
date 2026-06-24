@@ -11,7 +11,7 @@ import (
 
 // context is described in work.go.
 type context struct {
-	debug         int32
+	debug         int32 //nolint:unused // TODO: currently unused, can this be removed?
 	workAvailable chan struct{}
 	work          chan call
 	retvalue      chan uintptr
