@@ -87,9 +87,9 @@ func (ctx *context) BlendFunc(sfactor, dfactor Enum) {
 }
 
 func (ctx *context) BufferData(target Enum, src []byte, usage Enum) {
-	parg := unsafe.Pointer(nil)
+	parg := unsafe.Pointer(nil) //gosec:disable G103
 	if len(src) > 0 {
-		parg = unsafe.Pointer(&src[0])
+		parg = unsafe.Pointer(&src[0]) //gosec:disable G103
 	}
 	ctx.enqueue(call{
 		args: fnargs{
@@ -103,9 +103,9 @@ func (ctx *context) BufferData(target Enum, src []byte, usage Enum) {
 }
 
 func (ctx *context) BufferSubData(target Enum, src []byte) {
-	parg := unsafe.Pointer(nil)
+	parg := unsafe.Pointer(nil) //gosec:disable G103
 	if len(src) > 0 {
-		parg = unsafe.Pointer(&src[0])
+		parg = unsafe.Pointer(&src[0]) //gosec:disable G103
 	}
 	ctx.enqueue(call{
 		args: fnargs{
@@ -319,7 +319,7 @@ func (ctx *context) GetProgramInfoLog(p Program) string {
 			a0: p.c(),
 			a1: uintptr(infoLen),
 		},
-		parg:     unsafe.Pointer(&buf[0]),
+		parg:     unsafe.Pointer(&buf[0]), //gosec:disable G103
 		blocking: true,
 	})
 
@@ -350,7 +350,7 @@ func (ctx *context) GetShaderInfoLog(s Shader) string {
 			a0: s.c(),
 			a1: uintptr(infoLen),
 		},
-		parg:     unsafe.Pointer(&buf[0]),
+		parg:     unsafe.Pointer(&buf[0]), //gosec:disable G103
 		blocking: true,
 	})
 
@@ -370,7 +370,7 @@ func (ctx *context) GetShaderSource(s Shader) string {
 			a0: s.c(),
 			a1: uintptr(sourceLen),
 		},
-		parg:     unsafe.Pointer(&buf[0]),
+		parg:     unsafe.Pointer(&buf[0]), //gosec:disable G103
 		blocking: true,
 	})
 
@@ -438,7 +438,7 @@ func (ctx *context) ReadPixels(dst []byte, x, y, width, height int, format, ty E
 			a4: format.c(),
 			a5: ty.c(),
 		},
-		parg:     unsafe.Pointer(&dst[0]),
+		parg:     unsafe.Pointer(&dst[0]), //gosec:disable G103
 		blocking: true,
 	})
 }
@@ -473,9 +473,9 @@ func (ctx *context) TexImage2D(target Enum, level int, internalFormat int, width
 	// It is common to pass TexImage2D a nil data, indicating that a
 	// bound GL buffer is being used as the source. In that case, it
 	// is not necessary to block.
-	parg := unsafe.Pointer(nil)
+	parg := unsafe.Pointer(nil) //gosec:disable G103
 	if len(data) > 0 {
-		parg = unsafe.Pointer(&data[0])
+		parg = unsafe.Pointer(&data[0]) //gosec:disable G103
 	}
 
 	ctx.enqueue(call{
@@ -533,7 +533,7 @@ func (ctx *context) Uniform1fv(dst Uniform, src []float32) {
 			a0: dst.c(),
 			a1: uintptr(len(src)),
 		},
-		parg:     unsafe.Pointer(&src[0]),
+		parg:     unsafe.Pointer(&src[0]), //gosec:disable G103
 		blocking: true,
 	})
 }
@@ -556,7 +556,7 @@ func (ctx *context) Uniform2fv(dst Uniform, src []float32) {
 			a0: dst.c(),
 			a1: uintptr(len(src) / 2),
 		},
-		parg:     unsafe.Pointer(&src[0]),
+		parg:     unsafe.Pointer(&src[0]), //gosec:disable G103
 		blocking: true,
 	})
 }
@@ -581,7 +581,7 @@ func (ctx *context) Uniform4fv(dst Uniform, src []float32) {
 			a0: dst.c(),
 			a1: uintptr(len(src) / 4),
 		},
-		parg: unsafe.Pointer(&src[0]),
+		parg: unsafe.Pointer(&src[0]), //gosec:disable G103
 	})
 }
 
