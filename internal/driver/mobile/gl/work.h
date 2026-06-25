@@ -102,8 +102,6 @@ struct fnargs {
 	uintptr_t a5;
 	uintptr_t a6;
 	uintptr_t a7;
-	uintptr_t a8;
-	uintptr_t a9;
 };
 
 extern uintptr_t processFn(struct fnargs* args, char* parg);
