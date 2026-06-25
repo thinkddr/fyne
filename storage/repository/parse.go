@@ -12,7 +12,9 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-var rxHostName = regexp.MustCompile(`^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$`)
+const domainLabelPattern = "[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
+
+var rxHostName = regexp.MustCompile("^" + domainLabelPattern + `(?:\.` + domainLabelPattern + ")*$")
 
 // NewFileURI implements the back-end logic to storage.NewFileURI, which you
 // should use instead. This is only here because other functions in repository
