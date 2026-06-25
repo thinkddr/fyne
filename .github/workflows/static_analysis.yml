@@ -36,6 +36,7 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
 
       - name: golangci-lint
+        if: ${{ runner.os != 'Windows' }} # TODO: On Windows the checks all succeed but there is a compiler issue that cannot be ignored using the configuration.
         uses: golangci/golangci-lint-action@v9
         with:
           args: '--verbose'
