@@ -78,7 +78,10 @@ func (u *uri) String() string {
 
 func (u *uri) Authority() string {
 	if u.User != nil {
-		return u.User.String() + "@" + u.Host
+		s := u.User.String()
+		if s != "" {
+			return s + "@" + u.Host
+		}
 	}
 	return u.Host
 }

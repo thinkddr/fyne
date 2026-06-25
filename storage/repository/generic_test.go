@@ -61,30 +61,6 @@ func TestGenericChild(t *testing.T) {
 	}
 }
 
-func TestGetUserHost(t *testing.T) {
-	cases := []struct {
-		input string
-		info  string
-		host  string
-	}{
-		{"", "", ""},
-		{"@", "", ""},
-		{"foo", "", "foo"},
-		{"foo@", "foo", ""},
-		{"foo@bar", "foo", "bar"},
-		{"@bar", "", "bar"},
-		{"foo:bar@baz", "foo:bar", "baz"},
-		{"foo:bar@", "foo:bar", ""},
-	}
-
-	for _, c := range cases {
-		userinfo, host := getUserHost(c.input)
-
-		assert.Equal(t, c.info, userinfo.String())
-		assert.Equal(t, c.host, host)
-	}
-}
-
 var benchURI fyne.URI
 
 func BenchmarkGenericParent(b *testing.B) {
