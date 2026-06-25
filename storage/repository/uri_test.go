@@ -78,6 +78,7 @@ func TestURIAuthority(t *testing.T) {
 		{"http://foo@", "foo@", "foo", "", ""},
 		{"http://foo:bar@", "foo:bar@", "foo", "bar", ""},
 		{"http://foo::bar:@", "foo:%3Abar%3A@", "foo", ":bar:", ""},
+		{"http://foo%3A::bar:@", "foo%3A:%3Abar%3A@", "foo:", ":bar:", ""},
 		{"http://:bar@", ":bar@", "", "bar", ""},
 		{"http://:bar@@", ":bar%40@", "", "bar@", ""},
 		{"http://foo@bar", "foo@bar", "foo", "", "bar"},
