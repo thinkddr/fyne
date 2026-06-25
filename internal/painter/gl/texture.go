@@ -57,8 +57,10 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 		return
 	}
 
-	p.ctx.DeleteTexture(Texture(texture))
-	p.logError()
+	if cache.IsValid(texture) {
+		p.ctx.DeleteTexture(Texture(texture))
+		p.logError()
+	}
 	cache.DeleteTexture(obj)
 }
 
@@ -211,6 +213,7 @@ func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 func (p *painter) clippedTextTexture(text *canvas.Text, visibleOffset, visibleWidth, fullWidth, height int) clippedTextTexture {
 	if cached, ok := p.clippedTextTextures[text]; ok {
 		if cached.covers(visibleOffset, visibleWidth, height, p.pixScale) {
+			cache.GetTexture(text) // Keep the expiry marker alive while this clipped texture is still used.
 			return cached
 		}
 		p.ctx.DeleteTexture(cached.texture)
@@ -233,6 +236,7 @@ func (p *painter) clippedTextTexture(text *canvas.Text, visibleOffset, visibleWi
 	}
 	cached := clippedTextTexture{texture: texture, offset: offset, width: width, height: height, scale: p.pixScale}
 	p.clippedTextTextures[text] = cached
+	cache.SetTexture(text, cache.NoTexture, p.canvas)
 	return cached
 }
 
