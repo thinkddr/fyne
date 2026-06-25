@@ -72,10 +72,6 @@ func (u *uri) Scheme() string {
 	return u.URL.Scheme
 }
 
-func (u *uri) String() string {
-	return u.URL.String()
-}
-
 func (u *uri) Authority() string {
 	if u.User != nil {
 		s := u.User.String()
