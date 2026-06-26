@@ -52,7 +52,7 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	}
 
 	// Cap the kernel samples at 101 (maxKernelRadius = 50.0) per pass to ensure high performance.
-	var kernelRadius = radius
+	kernelRadius := radius
 	var sampleScale float32 = 1.0
 	const maxKernelRadius = 50.0
 	if kernelRadius > maxKernelRadius {

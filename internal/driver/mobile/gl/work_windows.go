@@ -361,7 +361,6 @@ var (
 	glTexParameteri           = libGLESv2.NewProc("glTexParameteri")
 	glUniform1i               = libGLESv2.NewProc("glUniform1i")
 	glUniform1f               = libGLESv2.NewProc("glUniform1f")
-	glUniform1i               = libGLESv2.NewProc("glUniform1i")
 	glUniform1fv              = libGLESv2.NewProc("glUniform1fv")
 	glUniform2f               = libGLESv2.NewProc("glUniform2f")
 	glUniform2fv              = libGLESv2.NewProc("glUniform2fv")
