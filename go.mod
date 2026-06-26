@@ -11,11 +11,11 @@ require (
 	github.com/fredbi/uri v1.1.1
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/fyne-io/gl-js v0.2.1-0.20260315212741-029c47fd27e8
-	github.com/fyne-io/glfw-js v0.3.0
+	github.com/fyne-io/glfw-js v0.4.0
 	github.com/fyne-io/image v0.1.1
 	github.com/fyne-io/oksvg v0.2.0
 	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
+	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1
 	github.com/go-ole/go-ole v1.2.6
 	github.com/go-text/render v0.2.1
 	github.com/go-text/typesetting v0.3.4
