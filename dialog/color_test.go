@@ -84,13 +84,7 @@ func TestColorDialog_SetColor(t *testing.T) {
 	col := color.RGBA{R: 70, G: 210, B: 200, A: 255}
 
 	d := NewColorPicker("pick colour", "select colour", func(c color.Color) {
-		r, g, b, a := c.RGBA()
-		col = color.RGBA{
-			R: uint8((r >> 8) & 0xff),
-			G: uint8((g >> 8) & 0xff),
-			B: uint8((b >> 8) & 0xff),
-			A: uint8((a >> 8) & 0xff),
-		}
+		col = color.RGBAModel.Convert(c).(color.RGBA)
 	}, w)
 	d.Advanced = true
 

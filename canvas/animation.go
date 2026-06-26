@@ -29,26 +29,21 @@ const shaderMaxFrameDelta = 100 * time.Millisecond
 //
 // Since: 2.0
 func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(color.Color)) *fyne.Animation {
-	r1, g1, b1, a1 := start.RGBA()
-	r2, g2, b2, a2 := stop.RGBA()
-
-	rStart := uint8((r1 >> 8) & 0xff)
-	gStart := uint8((g1 >> 8) & 0xff)
-	bStart := uint8((b1 >> 8) & 0xff)
-	aStart := uint8((a1 >> 8) & 0xff)
-	rDelta := int(r2>>8) - int(rStart)
-	gDelta := int(g2>>8) - int(gStart)
-	bDelta := int(b2>>8) - int(bStart)
-	aDelta := int(a2>>8) - int(aStart)
+	c1, _ := color.RGBAModel.Convert(start).(color.RGBA)
+	c2, _ := color.RGBAModel.Convert(stop).(color.RGBA)
+	rDelta := int(c2.R) - int(c1.R)
+	gDelta := int(c2.G) - int(c1.G)
+	bDelta := int(c2.B) - int(c1.B)
+	aDelta := int(c2.A) - int(c1.A)
 
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
 			fn(color.RGBA{
-				R: scaleChannel(rStart, rDelta, done),
-				G: scaleChannel(gStart, gDelta, done),
-				B: scaleChannel(bStart, bDelta, done),
-				A: scaleChannel(aStart, aDelta, done),
+				R: scaleChannel(c1.R, rDelta, done),
+				G: scaleChannel(c1.G, gDelta, done),
+				B: scaleChannel(c1.B, bDelta, done),
+				A: scaleChannel(c1.A, aDelta, done),
 			})
 		},
 	}
