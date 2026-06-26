@@ -73,18 +73,9 @@ func ToNRGBA(c color.Color) (r, g, b, a uint8) {
 		g = 0xff
 		b = 0xff
 		a = uint8(col.A >> 8)
-	default: // RGBA, RGBA64, and unknown implementations of Color: remove the alpha premultiplication
-		red, green, blue, alpha := c.RGBA()
-		if alpha != 0 && alpha != 0xffff {
-			red = (red * 0xffff) / alpha
-			green = (green * 0xffff) / alpha
-			blue = (blue * 0xffff) / alpha
-		}
-		// Convert from range 0-65535 to range 0-255
-		r = uint8((red >> 8) & 0xff)
-		g = uint8((green >> 8) & 0xff)
-		b = uint8((blue >> 8) & 0xff)
-		a = uint8((alpha >> 8) & 0xff)
+	default:
+		n, _ := color.NRGBAModel.Convert(c).(color.NRGBA)
+		r, g, b, a = n.R, n.G, n.B, n.A
 	}
 	return r, g, b, a
 }
