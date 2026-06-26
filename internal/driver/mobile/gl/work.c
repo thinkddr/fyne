@@ -158,6 +158,9 @@ uintptr_t processFn(struct fnargs* args, char* parg) {
 	case glfnTexParameteri:
 		glTexParameteri((GLenum)args->a0, (GLenum)args->a1, (GLint)args->a2);
 		break;
+	case glfnUniform1i:
+		glUniform1i((GLint)args->a0, (GLint)args->a1);
+		break;
 	case glfnUniform1f:
 		glUniform1f((GLint)args->a0, *(GLfloat*)&args->a1);
 		break;

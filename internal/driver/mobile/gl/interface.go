@@ -215,6 +215,11 @@ type Context interface {
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glTexParameter.xhtml
 	TexParameteri(target, pname Enum, param int)
 
+	// Uniform1i writes an int uniform variable.
+	//
+	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
+	Uniform1i(dst Uniform, v int)
+
 	// Uniform1f writes a float uniform variable.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml

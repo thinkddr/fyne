@@ -26,13 +26,16 @@ const (
 	glFalse               = gl.FALSE
 	linkStatus            = gl.LINK_STATUS
 	one                   = gl.ONE
+	zero                  = gl.ZERO
 	oneMinusConstantAlpha = gl.ONE_MINUS_CONSTANT_ALPHA
 	oneMinusSrcAlpha      = gl.ONE_MINUS_SRC_ALPHA
 	scissorTest           = gl.SCISSOR_TEST
 	srcAlpha              = gl.SRC_ALPHA
 	staticDraw            = gl.STATIC_DRAW
 	texture0              = gl.TEXTURE0
+	texture1              = gl.TEXTURE1
 	texture2D             = gl.TEXTURE_2D
+	textureNearest        = gl.NEAREST
 	textureMinFilter      = gl.TEXTURE_MIN_FILTER
 	textureMagFilter      = gl.TEXTURE_MAG_FILTER
 	textureWrapS          = gl.TEXTURE_WRAP_S
@@ -335,12 +338,12 @@ func (c *coreContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(int32(uniform), v)
 }
 
-func (c *coreContext) Uniform1i(uniform Uniform, v int32) {
-	gl.Uniform1i(int32(uniform), v)
-}
-
 func (c *coreContext) Uniform1fv(uniform Uniform, v []float32) {
 	gl.Uniform1fv(int32(uniform), int32(len(v)), &v[0])
+}
+
+func (c *coreContext) Uniform1i(uniform Uniform, v int32) {
+	gl.Uniform1i(int32(uniform), v)
 }
 
 func (c *coreContext) Uniform2f(uniform Uniform, v0, v1 float32) {

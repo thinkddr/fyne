@@ -252,6 +252,10 @@ var glfnFuncs = [...]func(c call) (ret uintptr){
 		_, _, _ = syscall.SyscallN(glTexParameteri.Addr(), c.args.a0, c.args.a1, c.args.a2)
 		return ret
 	},
+	glfnUniform1i: func(c call) (ret uintptr) {
+		syscall.SyscallN(glUniform1i.Addr(), c.args.a0, c.args.a1)
+		return ret
+	},
 	glfnUniform1f: func(c call) (ret uintptr) {
 		_, _, _ = syscall.SyscallN(glUniform1f.Addr(), c.args.a0, c.args.a1)
 		return ret
@@ -359,6 +363,7 @@ var (
 	glShaderSource            = libGLESv2.NewProc("glShaderSource")
 	glTexImage2D              = libGLESv2.NewProc("glTexImage2D")
 	glTexParameteri           = libGLESv2.NewProc("glTexParameteri")
+	glUniform1i               = libGLESv2.NewProc("glUniform1i")
 	glUniform1f               = libGLESv2.NewProc("glUniform1f")
 	glUniform1i               = libGLESv2.NewProc("glUniform1i")
 	glUniform1fv              = libGLESv2.NewProc("glUniform1fv")
