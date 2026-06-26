@@ -260,10 +260,6 @@ var glfnFuncs = [...]func(c call) (ret uintptr){
 		_, _, _ = syscall.SyscallN(glUniform1f.Addr(), c.args.a0, c.args.a1)
 		return ret
 	},
-	glfnUniform1i: func(c call) (ret uintptr) {
-		_, _, _ = syscall.SyscallN(glUniform1i.Addr(), c.args.a0, c.args.a1)
-		return ret
-	},
 	glfnUniform1fv: func(c call) (ret uintptr) {
 		_, _, _ = syscall.SyscallN(glUniform1fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
 		return ret
