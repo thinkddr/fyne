@@ -17,11 +17,11 @@ import (
 func TestEntryCursorAnim(t *testing.T) {
 	cursorOpaque := theme.Color(theme.ColorNamePrimary)
 	r, g, b, _ := col.ToNRGBA(cursorOpaque)
-	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x16}
+	cursorDim := color.NRGBA{R: r, G: g, B: b, A: 0x16}
 
 	alpha := func(c color.Color) uint8 {
 		_, _, _, a := col.ToNRGBA(c)
-		return uint8(a)
+		return a
 	}
 
 	cursor := canvas.NewRectangle(color.Black)

@@ -261,15 +261,9 @@ func stringsToColors(ss ...string) (colors []color.Color) {
 	return colors
 }
 
-func colorToHSLA(c color.Color) (int, int, int, int) {
-	r, g, b, a := col.ToNRGBA(c)
-	h, s, l := rgbToHsl(r, g, b)
-	return h, s, l, a
-}
-
 // https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
 
-func rgbToHsl(r, g, b int) (int, int, int) {
+func rgbToHsl(r, g, b uint8) (int, int, int) {
 	red := float64(r) / 255.0
 	green := float64(g) / 255.0
 	blue := float64(b) / 255.0
@@ -312,14 +306,14 @@ func rgbToHsl(r, g, b int) (int, int, int) {
 	return h, s, l
 }
 
-func hslToRgb(h, s, l int) (int, int, int) {
+func hslToRgb(h, s, l int) (uint8, uint8, uint8) {
 	hue := float64(h) / 360.0
 	saturation := float64(s) / 100.0
 	lightness := float64(l) / 100.0
 
 	if saturation == 0.0 {
 		// Greyscale
-		g := int(lightness * 255.0)
+		g := uint8(lightness * 255.0)
 		return g, g, g
 	}
 
@@ -336,9 +330,9 @@ func hslToRgb(h, s, l int) (int, int, int) {
 	green := hueToChannel(hue, v1, v2)
 	blue := hueToChannel(hue-(1.0/3.0), v1, v2)
 
-	r := int(math.Round(255.0 * red))
-	g := int(math.Round(255.0 * green))
-	b := int(math.Round(255.0 * blue))
+	r := uint8(math.Round(255.0 * red))
+	g := uint8(math.Round(255.0 * green))
+	b := uint8(math.Round(255.0 * blue))
 
 	return r, g, b
 }

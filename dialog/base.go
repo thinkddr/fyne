@@ -215,7 +215,7 @@ func (renderer *themedBackgroundRenderer) Objects() []fyne.CanvasObject {
 
 func (renderer *themedBackgroundRenderer) Refresh() {
 	r, g, b, _ := col.ToNRGBA(theme.Color(theme.ColorNameOverlayBackground))
-	bg := &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
+	bg := &color.NRGBA{R: r, G: g, B: b, A: 230}
 	renderer.rect.FillColor = bg
 }
 
