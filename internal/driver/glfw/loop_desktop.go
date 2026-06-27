@@ -4,6 +4,7 @@ package glfw
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/build"
 
 	"github.com/go-gl/glfw/v3.4/glfw"
 )
@@ -16,6 +17,9 @@ func (d *gLDriver) initGLFW() {
 	}
 
 	initCursors()
+	if glfw.GetPlatform() == glfw.PlatformWayland {
+		build.IsWayland = true
+	}
 }
 
 func (d *gLDriver) pollEvents() {
