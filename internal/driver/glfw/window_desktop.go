@@ -25,7 +25,7 @@ import (
 	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/fyne/v2/storage"
 
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
 const (

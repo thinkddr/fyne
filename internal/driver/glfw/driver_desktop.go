@@ -10,16 +10,16 @@ import (
 	"runtime"
 	"syscall"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/fyne/v2/lang"
-	"fyne.io/systray"
-	"github.com/go-gl/glfw/v3.3/glfw"
-
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/systray"
+
+	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
 const systrayIconSize = 64

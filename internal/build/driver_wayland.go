@@ -2,5 +2,5 @@
 
 package build
 
-// IsWayland is true when compiling for the wayland windowing system.
-const IsWayland = true
+// IsWayland is true when compiling for the wayland windowing system, or auto-detecting and Wayland is loaded.
+var IsWayland = true
