@@ -43,11 +43,47 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 		if p.blurSnapTexValid {
 			p.ctx.DeleteTexture(p.blurSnapTex)
 		}
-		p.blurSnapTex = p.newTexture(canvas.ImageScaleFastest)
+		// Use ImageScaleSmooth to enable bilinear filtering.
+		// It ensures smooth interpolation between samples even when the blur radius is massive.
+		p.blurSnapTex = p.newTexture(canvas.ImageScaleSmooth)
 		p.ctx.TexImage2D(texture2D, 0, bw, bh, colorFormatRGBA, unsignedByte, nil)
 		p.blurSnapTexValid = true
 		p.blurSnapW = bw
 		p.blurSnapH = bh
+	}
+
+	// Cap the kernel samples at 101 (maxKernelRadius = 50.0) per pass to ensure high performance.
+	kernelRadius := radius
+	var sampleScale float32 = 1.0
+	const maxKernelRadius = 50.0
+	if kernelRadius > maxKernelRadius {
+		// When the radius exceeds 50, stretch the 101 samples to cover the larger area.
+		// This performs downsampling, where the GPU skips pixels but uses bilinear
+		// filtering (ImageScaleSmooth, enabled above) to maintain smoothness.
+		sampleScale = kernelRadius / maxKernelRadius
+		kernelRadius = maxKernelRadius
+	}
+
+	values, ok := cache.GetBlurKernel(kernelRadius)
+	if !ok {
+		values = createKernel(kernelRadius)
+		cache.SetBlurKernel(kernelRadius, values)
+	}
+
+	// Upload kernel as a 1D texture if radius changed.
+	if !p.blurKernelTexValid || p.blurKernelRadius != kernelRadius {
+		if !p.blurKernelTexValid {
+			p.blurKernelTex = p.ctx.CreateTexture()
+		}
+		p.ctx.ActiveTexture(texture1)
+		p.ctx.BindTexture(texture2D, p.blurKernelTex)
+		p.ctx.TexParameteri(texture2D, textureMinFilter, textureNearest)
+		p.ctx.TexParameteri(texture2D, textureMagFilter, textureNearest)
+		p.ctx.TexParameteri(texture2D, textureWrapS, clampToEdge)
+		p.ctx.TexParameteri(texture2D, textureWrapT, clampToEdge)
+		p.ctx.TexImage2D(texture2D, 0, len(values), 1, colorFormatRGBA, unsignedByte, kernelToRGBA(values))
+		p.blurKernelTexValid = true
+		p.blurKernelRadius = kernelRadius
 	}
 
 	// Copy the blur region from the framebuffer directly to the texture on the GPU.
@@ -72,17 +108,40 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
 	p.logError()
 
-	p.SetUniform1f(p.blurProgram, "radius", radius)
+	cornerRadius := fyne.Min(paint.GetMaximumRadius(b.Size()), b.CornerRadius)
+	p.SetUniform1f(p.blurProgram, "cornerRadius", roundToPixel(cornerRadius*p.pixScale, 1.0))
 	p.SetUniform2f(p.blurProgram, "size", float32(bw), float32(bh))
 
-	values, ok := cache.GetBlurKernel(radius)
-	if !ok {
-		values = createKernel(radius)
-		cache.SetBlurKernel(radius, values)
-	}
+	p.SetUniform1f(p.blurProgram, "radius", kernelRadius)
+	p.SetUniform1f(p.blurProgram, "sampleScale", sampleScale)
 
-	kernel := p.ctx.GetUniformLocation(p.blurProgram.ref, "kernel")
-	p.ctx.Uniform1fv(kernel, values)
+	// Bind kernel texture to unit 1.
+	p.ctx.ActiveTexture(texture1)
+	p.ctx.BindTexture(texture2D, p.blurKernelTex)
+
+	// Bind source texture to unit 0.
+	p.ctx.ActiveTexture(texture0)
+	p.ctx.BindTexture(texture2D, p.blurSnapTex)
+
+	// Set sampler uniforms.
+	p.SetUniform1i(p.blurProgram, "tex", 0)
+	p.SetUniform1i(p.blurProgram, "kernelTex", 1)
+
+	// Horizontal Blur
+	// Draw horizontal blur over the background. Use gl: one, gl: zero to replace the screen content.
+	p.ctx.BlendFunc(one, zero)
+	p.SetUniform2f(p.blurProgram, "direction", 1.0/float32(bw), 0.0)
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+
+	// Capture the horizontally-blurred result back into blurSnapTex
+	p.ctx.CopyTexSubImage2D(texture2D, 0, 0, 0, int(x), fbY, bw, bh)
+
+	// Vertical Blur
+	// Draw vertical blur using the horizontally-blurred texture.
+	// Use one, zero since it replaces the exact same rect we just copied from.
+	p.ctx.BlendFunc(one, zero)
+	p.SetUniform2f(p.blurProgram, "direction", 0.0, 1.0/float32(bh))
 
 	p.ctx.DrawArrays(triangleStrip, 0, 4)
 	p.logError()
@@ -1169,4 +1228,21 @@ func createKernel(radius float32) []float32 {
 	}
 
 	return values
+}
+
+// kernelToRGBA packs normalised float32 kernel weights into RGBA uint8 pixel
+// data suitable for upload via TexImage2D. Each weight is quantised to [0,255]
+// and written to all four channels (we read .r in the shader; the remaining
+// channels are padding for universal RGBA compatibility across GL backends).
+func kernelToRGBA(values []float32) []uint8 {
+	data := make([]uint8, len(values)*4)
+	for i, v := range values {
+		b := uint8(v*255.0 + 0.5)
+		off := i * 4
+		data[off+0] = b   // R
+		data[off+1] = b   // G
+		data[off+2] = b   // B
+		data[off+3] = 255 // A
+	}
+	return data
 }
