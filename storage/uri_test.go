@@ -134,7 +134,8 @@ func TestURIPath(t *testing.T) {
 	s = "urn:example:animal:ferret:nose"
 	u, err = storage.ParseURI(s)
 	assert.NoError(t, err)
-	assert.Equal(t, "example:animal:ferret:nose", u.Path())
+	assert.Equal(t, "urn:example:animal:ferret:nose", u.String())
+	assert.Equal(t, "", u.Path())
 }
 
 func TestURIQuery(t *testing.T) {
@@ -145,10 +146,10 @@ func TestURIQuery(t *testing.T) {
 	assert.Equal(t, "name=ferret", u.Query())
 
 	// from IETF RFC 3986
-	s = "urn:example:animal:ferret:nose"
+	s = "urn:example:animal:ferret:nose?quux#foo"
 	u, err = storage.ParseURI(s)
 	assert.NoError(t, err)
-	assert.Equal(t, "", u.Query())
+	assert.Equal(t, "quux", u.Query())
 }
 
 func TestURIFragment(t *testing.T) {
@@ -159,10 +160,46 @@ func TestURIFragment(t *testing.T) {
 	assert.Equal(t, "nose", u.Fragment())
 
 	// from IETF RFC 3986
-	s = "urn:example:animal:ferret:nose"
+	s = "urn:example:animal:ferret:nose?quux#foo"
 	u, err = storage.ParseURI(s)
 	assert.NoError(t, err)
+	assert.Equal(t, "foo", u.Fragment())
+}
+
+func TestURN(t *testing.T) {
+	// examples from RFC 8141
+	s := "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk"
+	u, err := storage.ParseURI(s)
+	assert.NoError(t, err)
+	assert.Equal(t, "", u.Path())
 	assert.Equal(t, "", u.Fragment())
+	assert.Equal(t, "+CCResolve:cc=uk", u.Query())
+	assert.Equal(t, s, u.String())
+
+	s = "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z"
+	u, err = storage.ParseURI(s)
+	assert.NoError(t, err)
+	assert.Equal(t, "", u.Path())
+	assert.Equal(t, "", u.Fragment())
+	assert.Equal(t, "=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z", u.Query())
+	assert.Equal(t, s, u.String())
+
+	s = "urn:example:foo-bar-baz-qux#somepart"
+	u, err = storage.ParseURI(s)
+	assert.NoError(t, err)
+	assert.Equal(t, "", u.Path())
+	assert.Equal(t, "somepart", u.Fragment())
+	assert.Equal(t, "", u.Query())
+	assert.Equal(t, s, u.String())
+
+	s = "urn:example:a123%2Cz456"
+	u, err = storage.ParseURI(s)
+	assert.NoError(t, err)
+	assert.Equal(t, "", u.Path())
+	assert.Equal(t, "", u.Fragment())
+	assert.Equal(t, "", u.Query())
+	assert.Equal(t, s, u.String())
+	assert.Equal(t, "", u.Authority())
 }
 
 func TestNewURI(t *testing.T) {

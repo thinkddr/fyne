@@ -51,9 +51,13 @@ func ParseURI(s string) (fyne.URI, error) {
 	}
 
 	if strings.EqualFold(scheme, "urn") {
+		f := append(strings.SplitN(path, "#", 2), "")
+		q := append(strings.SplitN(f[0], "?", 2), "")
 		return &uri{url.URL{
-			Scheme: scheme,
-			Path:   path,
+			Scheme:   scheme,
+			Opaque:   q[0],
+			RawQuery: q[1],
+			Fragment: f[1],
 		}}, nil
 	}
 
