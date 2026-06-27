@@ -1,4 +1,28 @@
-// Package lang introduces a translation and localisation API for Fyne applications
+// Package lang introduces a translation and localisation API for Fyne applications.
+//
+// Translation bundles are JSON files in the format used by
+// github.com/nicksnyder/go-i18n. The simplest form maps each key to its
+// translation directly:
+//
+//	{
+//	    "Open":   "Ouvrir",
+//	    "Cancel": "Annuler"
+//	}
+//
+// For plurals or richer messages a value can be an object that uses the
+// reserved keys "id", "description", "hash", "leftdelim", "rightdelim",
+// "zero", "one", "two", "few", "many", "other" and "translation" (matched
+// case-insensitively).
+//
+// Those reserved words cannot appear as top-level keys in a translation file
+// when other top-level keys are also present — the loader will reject the file
+// with an error such as:
+//
+//	reserved keys [Description] mixed with unreserved keys [Name Type]
+//
+// If you need to translate one of those words on its own, give it a unique
+// key such as "label.description" and look it up via LocalizeKey (lang.X),
+// for example lang.X("label.description", "Description").
 //
 // Since 2.5
 package lang
@@ -112,7 +136,8 @@ func LocalizePluralKey(key, fallback string, count int, data ...any) string {
 
 // AddTranslations allows an app to load a bundle of translations.
 // The language that this relates to will be inferred from the resource name, for example "fr.json".
-// The data should be in json format.
+// The data should be in json format following the structure described in the
+// package documentation.
 func AddTranslations(r fyne.Resource) error {
 	defer updateLocalizer()
 	return addLanguage(r.Content(), r.Name())
@@ -129,6 +154,7 @@ func AddTranslationsForLocale(data []byte, l fyne.Locale) error {
 // The `dir` parameter specifies the name or path of the directory containing translation files
 // inside this embedded filesystem.
 // Each file should be a json file with the name following pattern [prefix.]lang.json.
+// See the package documentation for the expected file structure.
 func AddTranslationsFS(fs embed.FS, dir string) (retErr error) {
 	files, err := fs.ReadDir(dir)
 	if err != nil {
