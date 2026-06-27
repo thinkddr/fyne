@@ -25,6 +25,7 @@ const (
 	back                  = gl.BACK
 	glFalse               = gl.FALSE
 	linkStatus            = gl.LINK_STATUS
+	maxTextureSizeParam   = gl.MAX_TEXTURE_SIZE
 	one                   = gl.ONE
 	zero                  = gl.ZERO
 	oneMinusConstantAlpha = gl.ONE_MINUS_CONSTANT_ALPHA
@@ -74,6 +75,7 @@ func (p *painter) Init() {
 		fyne.LogError("failed to initialise OpenGL", err)
 		return
 	}
+	p.maxTextureSize = p.ctx.GetInteger(maxTextureSizeParam)
 
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
@@ -252,6 +254,12 @@ func (c *coreContext) GetAttribLocation(program Program, name string) Attribute 
 
 func (c *coreContext) GetError() uint32 {
 	return gl.GetError()
+}
+
+func (c *coreContext) GetInteger(pname uint32) int {
+	var value int32
+	gl.GetIntegerv(pname, &value)
+	return int(value)
 }
 
 func (c *coreContext) GetProgrami(program Program, param uint32) int {

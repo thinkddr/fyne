@@ -6,6 +6,7 @@ import (
 	"image"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/theme"
@@ -65,6 +66,8 @@ type painter struct {
 	blurKernelTexValid      bool    // whether blurKernelTex has been allocated
 	blurKernelRadius        float32 // radius the current kernel texture was built for
 	fbHeight                int     // current framebuffer height in pixels
+	maxTextureSize          int
+	clippedTextTextures     map[*canvas.Text]clippedTextTexture
 }
 
 // Declare conformity to Painter interface
@@ -83,6 +86,9 @@ func (p *painter) Free(obj fyne.CanvasObject) {
 	// deliberately not freed here: Free is also called for every object on each
 	// Refresh (see Canvas.FreeDirtyTextures), so freeing would recompile the
 	// program - and reset its animation clock - every single frame.
+	if text, ok := obj.(*canvas.Text); ok {
+		p.freeClippedTextTexture(text)
+	}
 	p.freeTexture(obj)
 }
 
@@ -104,7 +110,7 @@ func (p *painter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Siz
 		return
 	}
 
-	p.drawObject(obj, pos, frame)
+	p.drawObject(obj, pos, frame, clip)
 }
 
 func (p *painter) SetFrameBufferScale(scale float32) {

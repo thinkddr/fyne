@@ -200,6 +200,10 @@ var glfnFuncs = [...]func(c call) (ret uintptr){
 		ret, _, _ = syscall.SyscallN(glGetError.Addr())
 		return ret
 	},
+	glfnGetIntegerv: func(c call) (ret uintptr) {
+		syscall.SyscallN(glGetIntegerv.Addr(), c.args.a0, uintptr(unsafe.Pointer(&ret)))
+		return ret
+	},
 	glfnGetProgramInfoLog: func(c call) (ret uintptr) {
 		_, _, _ = syscall.SyscallN(glGetProgramInfoLog.Addr(), c.args.a0, c.args.a1, 0, uintptr(c.parg))
 		return ret
@@ -346,6 +350,7 @@ var (
 	glGenVertexArrays         = libGLESv2.NewProc("glGenVertexArrays")
 	glGetAttribLocation       = libGLESv2.NewProc("glGetAttribLocation")
 	glGetError                = libGLESv2.NewProc("glGetError")
+	glGetIntegerv             = libGLESv2.NewProc("glGetIntegerv")
 	glGetProgramInfoLog       = libGLESv2.NewProc("glGetProgramInfoLog")
 	glGetProgramiv            = libGLESv2.NewProc("glGetProgramiv")
 	glGetShaderInfoLog        = libGLESv2.NewProc("glGetShaderInfoLog")

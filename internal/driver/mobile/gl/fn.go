@@ -80,6 +80,7 @@ const (
 	glfnViewport
 	glfnCopyTexSubImage2D
 	glfnDeleteProgram
+	glfnGetIntegerv
 )
 
 func goString(buf []byte) string {

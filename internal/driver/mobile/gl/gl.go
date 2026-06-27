@@ -295,6 +295,16 @@ func (ctx *context) GetError() Enum {
 	}))
 }
 
+func (ctx *context) GetInteger(pname Enum) int {
+	return int(ctx.enqueue(call{
+		args: fnargs{
+			fn: glfnGetIntegerv,
+			a0: pname.c(),
+		},
+		blocking: true,
+	}))
+}
+
 func (ctx *context) GetProgrami(p Program, pname Enum) int {
 	return int(ctx.enqueue(call{
 		args: fnargs{

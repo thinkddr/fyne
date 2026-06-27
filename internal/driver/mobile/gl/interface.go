@@ -153,6 +153,9 @@ type Context interface {
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glGetError.xhtml
 	GetError() Enum
 
+	// GetInteger returns an integer OpenGL state value.
+	GetInteger(pname Enum) int
+
 	// GetProgrami returns a parameter value for a shader.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glGetProgramiv.xhtml

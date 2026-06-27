@@ -46,6 +46,7 @@ const (
 	DepthTest        = 0x0B71
 	Blend            = 0x0BE2
 	ScissorTest      = 0x0C11
+	MaxTextureSize   = 0x0D33
 	Texture2D        = 0x0DE1
 
 	UnsignedByte = 0x1401
