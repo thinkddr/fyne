@@ -20,9 +20,11 @@
 //
 //	reserved keys [Description] mixed with unreserved keys [Name Type]
 //
-// If you need to translate one of those words on its own, give it a unique
-// key such as "label.description" and look it up via LocalizeKey (lang.X),
-// for example lang.X("label.description", "Description").
+// If you need to translate one of those words on its own, either pass a more
+// contextual fallback to Localize (lang.L) — for example "Item description"
+// instead of just "Description" — so the derived key avoids the reserved word,
+// or use LocalizeKey (lang.X) with an explicit key, for example
+// lang.X("label.description", "Description").
 //
 // Since 2.5
 package lang
