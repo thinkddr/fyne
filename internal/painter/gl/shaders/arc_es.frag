@@ -21,7 +21,7 @@ uniform float inner_radius;
 uniform float outer_radius;
 uniform float start_angle;
 uniform float end_angle;
-uniform vec4 fill_color;
+uniform vec4 fillColor;
 uniform float corner_radius;
 uniform float stroke_width;
 uniform vec4 stroke_color;
@@ -107,7 +107,7 @@ void main()
         dist = sd_rounded_arc(vec_centered_pos, inner_radius, outer_radius, start_rad, end_rad, corner_radius);
     }
 
-    vec4 final_color = fill_color;
+    vec4 final_color = fillColor;
 
     if (stroke_width > 0.0)
     {
@@ -115,7 +115,7 @@ void main()
         float fill_mask = smoothstep(edgeSoftness, -edgeSoftness, dist + stroke_width);
 
         // combine fill mask and colors (fill + stroke)
-        final_color = mix(stroke_color, fill_color, fill_mask);
+        final_color = mix(stroke_color, fillColor, fill_mask);
     }
 
     // smooth edges

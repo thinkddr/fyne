@@ -8,7 +8,7 @@ uniform float outer_radius;
 uniform float angle;
 uniform float sides;
 
-uniform vec4 fill_color;
+uniform vec4 fillColor;
 uniform float corner_radius;
 uniform float stroke_width;
 uniform vec4 stroke_color;
@@ -40,7 +40,7 @@ void main()
 
     vec_centered_pos = rotate(radians(angle)) * vec_centered_pos;
     float dist = regular_distance(vec_centered_pos, outer_radius - corner_radius, int(sides)) - corner_radius;
-    vec4 final_color = fill_color;
+    vec4 final_color = fillColor;
 
     if (stroke_width > 0.0)
     {
@@ -48,7 +48,7 @@ void main()
         float fill_mask = smoothstep(-stroke_width + edgeSoftness, -stroke_width - edgeSoftness, dist);
 
         // combine fill mask and colors (fill + stroke)
-        final_color = mix(stroke_color, fill_color, fill_mask);
+        final_color = mix(stroke_color, fillColor, fill_mask);
     }
 
     // smooth edges

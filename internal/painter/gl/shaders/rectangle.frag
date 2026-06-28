@@ -5,7 +5,7 @@ uniform vec2 frameSize;
 uniform vec4 rectCoords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
 uniform float stroke_width;
 /* colors params*/
-uniform vec4 fill_color;
+uniform vec4 fillColor;
 uniform vec4 stroke_color;
 /* shadow params*/
 uniform float add_shadow;
@@ -26,7 +26,7 @@ vec4 blend_shadow(vec4 color, vec4 shadow)
 
 void main()
 {
-    vec4 color = fill_color;
+    vec4 color = fillColor;
 
     if (add_shadow == 1.0)
     {

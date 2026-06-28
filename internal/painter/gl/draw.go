@@ -180,7 +180,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	p.SetUniform4f(program, "radius", radiusScaled, radiusScaled, radiusScaled, radiusScaled)
 
 	r, g, b, a := getFragmentColor(circle.FillColor)
-	p.SetUniform4f(program, "fill_color", r, g, b, a)
+	p.SetUniform4f(program, "fillColor", r, g, b, a)
 
 	strokeColor := circle.StrokeColor
 	if strokeColor == nil {
@@ -376,7 +376,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 
 	// Colors and Stroke
 	r, g, b, a := getFragmentColor(polygon.FillColor)
-	p.SetUniform4f(program, "fill_color", r, g, b, a)
+	p.SetUniform4f(program, "fillColor", r, g, b, a)
 
 	r, g, b, a = getFragmentColor(polygon.StrokeColor)
 	p.SetUniform4f(program, "stroke_color", r, g, b, a)
@@ -608,7 +608,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	}
 
 	r, g, b, a := getFragmentColor(fill)
-	p.SetUniform4f(program, "fill_color", r, g, b, a)
+	p.SetUniform4f(program, "fillColor", r, g, b, a)
 
 	strokeColor := stroke
 	if strokeColor == nil {
@@ -679,7 +679,7 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 	p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
 
 	r, g, b, a := getFragmentColor(polygon.FillColor)
-	p.SetUniform4f(program, "fill_color", r, g, b, a)
+	p.SetUniform4f(program, "fillColor", r, g, b, a)
 
 	strokeColor := polygon.StrokeColor
 	if strokeColor == nil {
@@ -742,7 +742,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
 
 	r, g, b, a := getFragmentColor(arc.FillColor)
-	p.SetUniform4f(program, "fill_color", r, g, b, a)
+	p.SetUniform4f(program, "fillColor", r, g, b, a)
 
 	strokeColor := arc.StrokeColor
 	if strokeColor == nil {
@@ -804,7 +804,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 	p.SetUniform1f(program, "angle", 0) // angle of ellipse, in degrees (positive means clockwise, negative means counter-clockwise direction), not yet supported in public API but reserved for future use
 
 	r, g, b, a := getFragmentColor(ellipse.FillColor)
-	p.SetUniform4f(program, "fill_color", r, g, b, a)
+	p.SetUniform4f(program, "fillColor", r, g, b, a)
 
 	strokeColor := ellipse.StrokeColor
 	if strokeColor == nil {

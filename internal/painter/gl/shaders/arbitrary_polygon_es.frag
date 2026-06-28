@@ -20,7 +20,7 @@ uniform vec2 vertices[MAX_VERTICES];
 uniform float cornerRadii[MAX_VERTICES];
 uniform float vertexCount;
 
-uniform vec4 fill_color;
+uniform vec4 fillColor;
 uniform float stroke_width;
 uniform vec4 stroke_color;
 
@@ -172,7 +172,7 @@ void main()
 
     int num = int(vertexCount);
     float dist = arbitrary_polygon_distance(p, num);
-    vec4 final_color = fill_color;
+    vec4 final_color = fillColor;
 
     if (stroke_width > 0.0)
     {
@@ -180,7 +180,7 @@ void main()
         float fill_mask = smoothstep(-stroke_width + edgeSoftness, -stroke_width - edgeSoftness, dist);
 
         // combine fill mask and colors (fill + stroke)
-        final_color = mix(stroke_color, fill_color, fill_mask);
+        final_color = mix(stroke_color, fillColor, fill_mask);
     }
 
     // smooth edges

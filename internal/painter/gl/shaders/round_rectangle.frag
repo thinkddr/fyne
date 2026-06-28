@@ -8,7 +8,7 @@ uniform vec2 rect_size_half;
 uniform vec4 radius;
 uniform float edgeSoftness;
 /* colors params*/
-uniform vec4 fill_color;
+uniform vec4 fillColor;
 uniform vec4 stroke_color;
 /* shadow params*/
 uniform float add_shadow;
@@ -71,7 +71,7 @@ void main()
 
     float distance;
     float max_radius = max(max(radius.x, radius.y), max(radius.z, radius.w));
-    vec4 final_color = fill_color;
+    vec4 final_color = fillColor;
     float final_alpha;
 
     // subtract a small threshold value to avoid calling calc_distance_all_quadrants when the largest corner radius is very close to half the length of the rectangle's shortest edge
@@ -85,7 +85,7 @@ void main()
         if (stroke_width_half > 0.0)
         {
             float color_blend = 1.0 - smoothstep(stroke_width_half * 2.0 - edgeSoftness, stroke_width_half * 2.0 + edgeSoftness, abs(distance));
-            final_color = mix(fill_color, stroke_color, color_blend);
+            final_color = mix(fillColor, stroke_color, color_blend);
         }
     }
     else
@@ -96,7 +96,7 @@ void main()
         if (stroke_width_half > 0.0)
         {
             float color_blend = smoothstep(-stroke_width_half - edgeSoftness, -stroke_width_half + edgeSoftness, distance);
-            final_color = mix(fill_color, stroke_color, color_blend);
+            final_color = mix(fillColor, stroke_color, color_blend);
         }
     }
 

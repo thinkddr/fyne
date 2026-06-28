@@ -8,7 +8,7 @@ uniform vec2 radius;
 uniform float edgeSoftness;
 uniform float angle;
 /* colors params*/
-uniform vec4 fill_color;
+uniform vec4 fillColor;
 uniform vec4 stroke_color;
 /* shadow params*/
 uniform float add_shadow;
@@ -50,7 +50,7 @@ void main()
     vec_centered_pos = rotate(radians(angle)) * vec_centered_pos;
 
     float dist = calc_distance(vec_centered_pos, radius);
-    vec4 final_color = fill_color;
+    vec4 final_color = fillColor;
 
     if (stroke_width > 0.0)
     {
@@ -64,7 +64,7 @@ void main()
         }
 
         // combine fill mask and colors (fill + stroke)
-        final_color = mix(stroke_color, fill_color, fill_mask);
+        final_color = mix(stroke_color, fillColor, fill_mask);
     }
 
     // smooth edges
