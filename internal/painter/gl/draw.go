@@ -187,7 +187,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 		strokeColor = color.Transparent
 	}
 	r, g, b, a = getFragmentColor(strokeColor)
-	p.SetUniform4f(program, "stroke_color", r, g, b, a)
+	p.SetUniform4f(program, "strokeColor", r, g, b, a)
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edgeSoftness", edgeSoftnessScaled)
@@ -299,7 +299,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	p.SetUniform1f(program, "stroke_width_half", strokeWidthScaled*0.5)
 
 	r, g, b, a := getFragmentColor(bezierCurve.StrokeColor)
-	p.SetUniform4f(program, "stroke_color", r, g, b, a)
+	p.SetUniform4f(program, "strokeColor", r, g, b, a)
 
 	p.logError()
 	// Fragment: END
@@ -379,7 +379,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	p.SetUniform4f(program, "fillColor", r, g, b, a)
 
 	r, g, b, a = getFragmentColor(polygon.StrokeColor)
-	p.SetUniform4f(program, "stroke_color", r, g, b, a)
+	p.SetUniform4f(program, "strokeColor", r, g, b, a)
 
 	strokeWidthScaled := roundToPixel(polygon.StrokeWidth*p.pixScale, 1.0)
 	p.SetUniform1f(program, "strokeWidth", strokeWidthScaled)
@@ -615,7 +615,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		strokeColor = color.Transparent
 	}
 	r, g, b, a = getFragmentColor(strokeColor)
-	p.SetUniform4f(program, "stroke_color", r, g, b, a)
+	p.SetUniform4f(program, "strokeColor", r, g, b, a)
 
 	var addShadow float32
 	if paint.IsShadowVisible(shadow) {
@@ -686,7 +686,7 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 		strokeColor = color.Transparent
 	}
 	r, g, b, a = getFragmentColor(strokeColor)
-	p.SetUniform4f(program, "stroke_color", r, g, b, a)
+	p.SetUniform4f(program, "strokeColor", r, g, b, a)
 
 	p.logError()
 	// Fragment: END
@@ -749,7 +749,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 		strokeColor = color.Transparent
 	}
 	r, g, b, a = getFragmentColor(strokeColor)
-	p.SetUniform4f(program, "stroke_color", r, g, b, a)
+	p.SetUniform4f(program, "strokeColor", r, g, b, a)
 
 	p.logError()
 	// Fragment: END
@@ -811,7 +811,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 		strokeColor = color.Transparent
 	}
 	r, g, b, a = getFragmentColor(strokeColor)
-	p.SetUniform4f(program, "stroke_color", r, g, b, a)
+	p.SetUniform4f(program, "strokeColor", r, g, b, a)
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edgeSoftness", edgeSoftnessScaled)

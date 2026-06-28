@@ -14,7 +14,7 @@ uniform vec2 frameSize;
 uniform vec4 rectCoords;
 uniform float edgeSoftness;
 uniform float stroke_width_half;
-uniform vec4 stroke_color;
+uniform vec4 strokeColor;
 
 uniform vec2 start_point;
 uniform vec2 end_point;
@@ -157,5 +157,5 @@ void main() {
     }
 
     float alpha = 1.0 - smoothstep(stroke_width_half - edgeSoftness, stroke_width_half + edgeSoftness, dist);
-    gl_FragColor = vec4(stroke_color.rgb, stroke_color.a * alpha);
+    gl_FragColor = vec4(strokeColor.rgb, strokeColor.a * alpha);
 }

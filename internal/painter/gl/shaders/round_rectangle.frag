@@ -9,7 +9,7 @@ uniform vec4 radius;
 uniform float edgeSoftness;
 /* colors params*/
 uniform vec4 fillColor;
-uniform vec4 stroke_color;
+uniform vec4 strokeColor;
 /* shadow params*/
 uniform float add_shadow;
 uniform float shadow_blur_radius;
@@ -85,7 +85,7 @@ void main()
         if (stroke_width_half > 0.0)
         {
             float color_blend = 1.0 - smoothstep(stroke_width_half * 2.0 - edgeSoftness, stroke_width_half * 2.0 + edgeSoftness, abs(distance));
-            final_color = mix(fillColor, stroke_color, color_blend);
+            final_color = mix(fillColor, strokeColor, color_blend);
         }
     }
     else
@@ -96,7 +96,7 @@ void main()
         if (stroke_width_half > 0.0)
         {
             float color_blend = smoothstep(-stroke_width_half - edgeSoftness, -stroke_width_half + edgeSoftness, distance);
-            final_color = mix(fillColor, stroke_color, color_blend);
+            final_color = mix(fillColor, strokeColor, color_blend);
         }
     }
 

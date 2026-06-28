@@ -19,7 +19,7 @@ uniform float edgeSoftness;
 uniform float angle;
 /* colors params*/
 uniform vec4 fillColor;
-uniform vec4 stroke_color;
+uniform vec4 strokeColor;
 /* shadow params*/
 uniform float add_shadow;
 uniform float shadow_blur_radius;
@@ -74,7 +74,7 @@ void main()
         }
 
         // combine fill mask and colors (fill + stroke)
-        final_color = mix(stroke_color, fillColor, fill_mask);
+        final_color = mix(strokeColor, fillColor, fill_mask);
     }
 
     // smooth edges
