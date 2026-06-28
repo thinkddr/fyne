@@ -20,7 +20,7 @@ uniform vec2 startPoint;
 uniform vec2 endPoint;
 uniform vec2 controlPoint1; // used for quadratic and cubic
 uniform vec2 controlPoint2; // used for cubic only
-uniform float num_control_points; // 0: linear, 1: quadratic, 2: cubic
+uniform float numControlPoints; // 0: linear, 1: quadratic, 2: cubic
 
 const float EPS = 1e-3;
 
@@ -148,9 +148,9 @@ void main() {
     vec2 p = vec2(gl_FragCoord.x, frameSize.y - gl_FragCoord.y) - rectCoords.xz;
 
     float dist;
-    if (int(num_control_points) == 1) {
+    if (int(numControlPoints) == 1) {
         dist = quadratic_distance(p, startPoint, controlPoint1, endPoint);
-    } else if (int(num_control_points) == 2) {
+    } else if (int(numControlPoints) == 2) {
         dist = cubic_distance(p, startPoint, controlPoint1, controlPoint2, endPoint);
     } else {
         dist = linear_distance(p, startPoint, endPoint);

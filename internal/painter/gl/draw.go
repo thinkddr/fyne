@@ -293,7 +293,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 		cp2XScaled, cp2YScaled := roundToPixel(cp[1].X*p.pixScale, 1.0), roundToPixel(cp[1].Y*p.pixScale, 1.0)
 		p.SetUniform2f(program, "controlPoint2", cp2XScaled, cp2YScaled)
 	}
-	p.SetUniform1f(program, "num_control_points", fyne.Min(float32(len(cp)), 2))
+	p.SetUniform1f(program, "numControlPoints", fyne.Min(float32(len(cp)), 2))
 
 	strokeWidthScaled := roundToPixel(strokeWidth*p.pixScale, 1.0)
 	p.SetUniform1f(program, "stroke_width_half", strokeWidthScaled*0.5)
