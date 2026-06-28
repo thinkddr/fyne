@@ -278,7 +278,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	p1, p2, cp := paint.NormalizeBezierCurvePoints(bezierCurve.StartPoint, bezierCurve.EndPoint, bezierCurve.ControlPoints, bezierCurve.Size(), strokeWidth/2.0)
 
 	p1XScaled, p1YScaled := roundToPixel(p1.X*p.pixScale, 1.0), roundToPixel(p1.Y*p.pixScale, 1.0)
-	p.SetUniform2f(program, "start_point", p1XScaled, p1YScaled)
+	p.SetUniform2f(program, "startPoint", p1XScaled, p1YScaled)
 
 	p2XScaled, p2YScaled := roundToPixel(p2.X*p.pixScale, 1.0), roundToPixel(p2.Y*p.pixScale, 1.0)
 	p.SetUniform2f(program, "end_point", p2XScaled, p2YScaled)
