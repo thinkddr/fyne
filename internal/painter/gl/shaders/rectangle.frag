@@ -11,7 +11,7 @@ uniform vec4 strokeColor;
 uniform float addShadow;
 uniform float shadowBlurRadius;
 uniform float shadowSpread;
-uniform vec2 shadow_offset;
+uniform vec2 shadowOffset;
 uniform vec4 shadow_color;
 uniform float shadow_type;
 
@@ -30,7 +30,7 @@ void main()
 
     if (addShadow == 1.0)
     {
-        vec2 frag_pos = gl_FragCoord.xy + vec2(-shadow_offset.x, shadow_offset.y);
+        vec2 frag_pos = gl_FragCoord.xy + vec2(-shadowOffset.x, shadowOffset.y);
         vec2 center = vec2((rectCoords[0] + rectCoords[1]) * 0.5, frameSize.y - (rectCoords[2] + rectCoords[3]) * 0.5);
         // expand/contract rectangle bounds by spread on all sides
         vec2 half_size = vec2(rectCoords[1] - rectCoords[0], rectCoords[3] - rectCoords[2]) * 0.5 + vec2(shadowSpread);

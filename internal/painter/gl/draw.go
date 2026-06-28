@@ -196,7 +196,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	if paint.IsShadowVisible(circle.Shadow) {
 		r, g, b, a = getFragmentColor(circle.Shadow.Color)
 		p.SetUniform4f(program, "shadow_color", r, g, b, a)
-		p.SetUniform2f(program, "shadow_offset", roundToPixel(circle.Shadow.Offset.X*p.pixScale, 1.0), roundToPixel(circle.Shadow.Offset.Y*p.pixScale, 1.0))
+		p.SetUniform2f(program, "shadowOffset", roundToPixel(circle.Shadow.Offset.X*p.pixScale, 1.0), roundToPixel(circle.Shadow.Offset.Y*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadowBlurRadius", roundToPixel(circle.Shadow.BlurRadius*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadowSpread", roundToPixel(circle.Shadow.Spread*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadow_type", float32(circle.Shadow.Variant))
@@ -621,7 +621,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	if paint.IsShadowVisible(shadow) {
 		r, g, b, a = getFragmentColor(shadow.Color)
 		p.SetUniform4f(program, "shadow_color", r, g, b, a)
-		p.SetUniform2f(program, "shadow_offset", roundToPixel(shadow.Offset.X*p.pixScale, 1.0), roundToPixel(shadow.Offset.Y*p.pixScale, 1.0))
+		p.SetUniform2f(program, "shadowOffset", roundToPixel(shadow.Offset.X*p.pixScale, 1.0), roundToPixel(shadow.Offset.Y*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadowBlurRadius", roundToPixel(shadow.BlurRadius*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadowSpread", roundToPixel(shadow.Spread*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadow_type", float32(shadow.Variant))
@@ -820,7 +820,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 	if paint.IsShadowVisible(ellipse.Shadow) {
 		r, g, b, a = getFragmentColor(ellipse.Shadow.Color)
 		p.SetUniform4f(program, "shadow_color", r, g, b, a)
-		p.SetUniform2f(program, "shadow_offset", roundToPixel(ellipse.Shadow.Offset.X*p.pixScale, 1.0), roundToPixel(ellipse.Shadow.Offset.Y*p.pixScale, 1.0))
+		p.SetUniform2f(program, "shadowOffset", roundToPixel(ellipse.Shadow.Offset.X*p.pixScale, 1.0), roundToPixel(ellipse.Shadow.Offset.Y*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadowBlurRadius", roundToPixel(ellipse.Shadow.BlurRadius*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadowSpread", roundToPixel(ellipse.Shadow.Spread*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadow_type", float32(ellipse.Shadow.Variant))
