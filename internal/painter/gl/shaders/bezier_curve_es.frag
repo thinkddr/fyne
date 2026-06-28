@@ -17,7 +17,7 @@ uniform float stroke_width_half;
 uniform vec4 strokeColor;
 
 uniform vec2 startPoint;
-uniform vec2 end_point;
+uniform vec2 endPoint;
 uniform vec2 control_point1; // used for quadratic and cubic
 uniform vec2 control_point2; // used for cubic only
 uniform float num_control_points; // 0: linear, 1: quadratic, 2: cubic
@@ -149,11 +149,11 @@ void main() {
 
     float dist;
     if (int(num_control_points) == 1) {
-        dist = quadratic_distance(p, startPoint, control_point1, end_point);
+        dist = quadratic_distance(p, startPoint, control_point1, endPoint);
     } else if (int(num_control_points) == 2) {
-        dist = cubic_distance(p, startPoint, control_point1, control_point2, end_point);
+        dist = cubic_distance(p, startPoint, control_point1, control_point2, endPoint);
     } else {
-        dist = linear_distance(p, startPoint, end_point);
+        dist = linear_distance(p, startPoint, endPoint);
     }
 
     float alpha = 1.0 - smoothstep(stroke_width_half - edgeSoftness, stroke_width_half + edgeSoftness, dist);
