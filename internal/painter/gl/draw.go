@@ -382,7 +382,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	p.SetUniform4f(program, "stroke_color", r, g, b, a)
 
 	strokeWidthScaled := roundToPixel(polygon.StrokeWidth*p.pixScale, 1.0)
-	p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
+	p.SetUniform1f(program, "strokeWidth", strokeWidthScaled)
 
 	p.logError()
 	// Fragment: END
@@ -604,7 +604,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 		p.SetUniform1f(program, "edgeSoftness", edgeSoftnessScaled)
 	} else {
-		p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
+		p.SetUniform1f(program, "strokeWidth", strokeWidthScaled)
 	}
 
 	r, g, b, a := getFragmentColor(fill)
@@ -676,7 +676,7 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
 
 	strokeWidthScaled := roundToPixel(polygon.StrokeWidth*p.pixScale, 1.0)
-	p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
+	p.SetUniform1f(program, "strokeWidth", strokeWidthScaled)
 
 	r, g, b, a := getFragmentColor(polygon.FillColor)
 	p.SetUniform4f(program, "fillColor", r, g, b, a)
@@ -739,7 +739,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
 
 	strokeWidthScaled := roundToPixel(arc.StrokeWidth*p.pixScale, 1.0)
-	p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
+	p.SetUniform1f(program, "strokeWidth", strokeWidthScaled)
 
 	r, g, b, a := getFragmentColor(arc.FillColor)
 	p.SetUniform4f(program, "fillColor", r, g, b, a)
@@ -795,7 +795,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	strokeWidthScaled := roundToPixel(ellipse.StrokeWidth*p.pixScale, 1.0)
-	p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
+	p.SetUniform1f(program, "strokeWidth", strokeWidthScaled)
 
 	radiusXScaled := roundToPixel(radiusX*p.pixScale, 1.0)
 	radiusYScaled := roundToPixel(radiusY*p.pixScale, 1.0)

@@ -3,7 +3,7 @@
 /* scaled params */
 uniform vec2 frameSize;
 uniform vec4 rectCoords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
-uniform float stroke_width;
+uniform float strokeWidth;
 uniform vec2 radius;
 uniform float edgeSoftness;
 uniform float angle;
@@ -52,9 +52,9 @@ void main()
     float dist = calc_distance(vec_centered_pos, radius);
     vec4 final_color = fillColor;
 
-    if (stroke_width > 0.0)
+    if (strokeWidth > 0.0)
     {
-        vec2 inner_radius = radius - stroke_width;
+        vec2 inner_radius = radius - strokeWidth;
         float fill_mask = 0.0;
         if (inner_radius.x > 1.0 && inner_radius.y > 1.0)
         {

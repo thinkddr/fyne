@@ -23,7 +23,7 @@ uniform float start_angle;
 uniform float end_angle;
 uniform vec4 fillColor;
 uniform float corner_radius;
-uniform float stroke_width;
+uniform float strokeWidth;
 uniform vec4 stroke_color;
 
 const float PI = 3.141592653589793;
@@ -109,10 +109,10 @@ void main()
 
     vec4 final_color = fillColor;
 
-    if (stroke_width > 0.0)
+    if (strokeWidth > 0.0)
     {
         // create a mask for the fill area (inside, shrunk by stroke width)
-        float fill_mask = smoothstep(edgeSoftness, -edgeSoftness, dist + stroke_width);
+        float fill_mask = smoothstep(edgeSoftness, -edgeSoftness, dist + strokeWidth);
 
         // combine fill mask and colors (fill + stroke)
         final_color = mix(stroke_color, fillColor, fill_mask);

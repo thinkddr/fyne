@@ -3,7 +3,7 @@
 /* scaled params */
 uniform vec2 frameSize;
 uniform vec4 rectCoords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
-uniform float stroke_width;
+uniform float strokeWidth;
 /* colors params*/
 uniform vec4 fillColor;
 uniform vec4 stroke_color;
@@ -72,19 +72,19 @@ void main()
     }
     else
     {
-        if (gl_FragCoord.x >= rectCoords[1] - stroke_width)
+        if (gl_FragCoord.x >= rectCoords[1] - strokeWidth)
         {
             color = stroke_color;
         }
-        else if (gl_FragCoord.x <= rectCoords[0] + stroke_width)
+        else if (gl_FragCoord.x <= rectCoords[0] + strokeWidth)
         {
             color = stroke_color;
         }
-        else if (gl_FragCoord.y <= frameSize.y - rectCoords[3] + stroke_width)
+        else if (gl_FragCoord.y <= frameSize.y - rectCoords[3] + strokeWidth)
         {
             color = stroke_color;
         }
-        else if (gl_FragCoord.y >= frameSize.y - rectCoords[2] - stroke_width)
+        else if (gl_FragCoord.y >= frameSize.y - rectCoords[2] - strokeWidth)
         {
             color = stroke_color;
         }

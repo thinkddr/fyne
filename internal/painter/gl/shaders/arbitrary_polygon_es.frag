@@ -21,7 +21,7 @@ uniform float cornerRadii[MAX_VERTICES];
 uniform float vertexCount;
 
 uniform vec4 fillColor;
-uniform float stroke_width;
+uniform float strokeWidth;
 uniform vec4 stroke_color;
 
 const float INF = 1e10;
@@ -174,10 +174,10 @@ void main()
     float dist = arbitrary_polygon_distance(p, num);
     vec4 final_color = fillColor;
 
-    if (stroke_width > 0.0)
+    if (strokeWidth > 0.0)
     {
         // create a mask for the fill area (inside, shrunk by stroke width)
-        float fill_mask = smoothstep(-stroke_width + edgeSoftness, -stroke_width - edgeSoftness, dist);
+        float fill_mask = smoothstep(-strokeWidth + edgeSoftness, -strokeWidth - edgeSoftness, dist);
 
         // combine fill mask and colors (fill + stroke)
         final_color = mix(stroke_color, fillColor, fill_mask);
