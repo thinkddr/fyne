@@ -666,7 +666,7 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 
 	outerRadius := fyne.Min(size.Width, size.Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
-	p.SetUniform1f(program, "outer_radius", outerRadiusScaled)
+	p.SetUniform1f(program, "outerRadius", outerRadiusScaled)
 
 	p.SetUniform1f(program, "angle", polygon.Angle)
 	p.SetUniform1f(program, "sides", float32(polygon.Sides))
@@ -724,7 +724,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 
 	outerRadius := fyne.Min(arc.Size().Width, arc.Size().Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
-	p.SetUniform1f(program, "outer_radius", outerRadiusScaled)
+	p.SetUniform1f(program, "outerRadius", outerRadiusScaled)
 
 	innerRadius := outerRadius * float32(math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio))))
 	innerRadiusScaled := roundToPixel(innerRadius*p.pixScale, 1.0)

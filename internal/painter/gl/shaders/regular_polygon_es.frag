@@ -14,7 +14,7 @@ uniform vec2 frameSize;
 uniform vec4 rectCoords;
 uniform float edgeSoftness;
 
-uniform float outer_radius;
+uniform float outerRadius;
 uniform float angle;
 uniform float sides;
 
@@ -49,7 +49,7 @@ void main()
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
 
     vec_centered_pos = rotate(radians(angle)) * vec_centered_pos;
-    float dist = regular_distance(vec_centered_pos, outer_radius - corner_radius, int(sides)) - corner_radius;
+    float dist = regular_distance(vec_centered_pos, outerRadius - corner_radius, int(sides)) - corner_radius;
     vec4 final_color = fillColor;
 
     if (strokeWidth > 0.0)
