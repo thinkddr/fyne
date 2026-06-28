@@ -372,7 +372,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	}
 
 	p.SetUniform2fv(program, "vertices", verticesScaled)
-	p.SetUniform1fv(program, "corner_radii", cornerRadiiScaled)
+	p.SetUniform1fv(program, "cornerRadii", cornerRadiiScaled)
 
 	// Colors and Stroke
 	r, g, b, a := getFragmentColor(polygon.FillColor)

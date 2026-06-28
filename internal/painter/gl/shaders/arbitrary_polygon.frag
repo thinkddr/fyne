@@ -7,7 +7,7 @@ uniform vec4 rectCoords;
 uniform float edgeSoftness;
 
 uniform vec2 vertices[MAX_VERTICES];
-uniform float corner_radii[MAX_VERTICES];
+uniform float cornerRadii[MAX_VERTICES];
 uniform float vertex_count;
 
 uniform vec4 fill_color;
@@ -43,7 +43,7 @@ float arbitrary_polygon_distance(vec2 p, int num)
         vec2 point1 = vertices[i];
         vec2 point2 = vertices[j];
         vec2 point3 = vertices[k];
-        float radius = corner_radii[j];
+        float radius = cornerRadii[j];
 
         vec2 pos = p - point2;
         vec2 a = normalize(point1 - point2);

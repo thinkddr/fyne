@@ -17,7 +17,7 @@ uniform vec4 rectCoords;
 uniform float edgeSoftness;
 
 uniform vec2 vertices[MAX_VERTICES];
-uniform float corner_radii[MAX_VERTICES];
+uniform float cornerRadii[MAX_VERTICES];
 uniform float vertex_count;
 
 uniform vec4 fill_color;
@@ -51,7 +51,7 @@ float arbitrary_polygon_distance(vec2 p, int num)
         if (m == num - 2) p_prev2 = vertices[m];
         if (m == num - 1) {
             p_prev1 = vertices[m];
-            r_prev = corner_radii[m];
+            r_prev = cornerRadii[m];
             break;
         }
     }
@@ -121,7 +121,7 @@ float arbitrary_polygon_distance(vec2 p, int num)
         // Shift values for the next iteration
         p_prev2 = point2;
         p_prev1 = point3;
-        r_prev = corner_radii[k];
+        r_prev = cornerRadii[k];
     }
 
     // Phase 2: Distance to straight edge segments between tangent points
