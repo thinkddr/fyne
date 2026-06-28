@@ -673,7 +673,7 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 
 	cornerRadius := fyne.Min(paint.GetMaximumRadius(size), polygon.CornerRadius)
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
-	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
+	p.SetUniform1f(program, "cornerRadius", cornerRadiusScaled)
 
 	strokeWidthScaled := roundToPixel(polygon.StrokeWidth*p.pixScale, 1.0)
 	p.SetUniform1f(program, "strokeWidth", strokeWidthScaled)
@@ -736,7 +736,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 
 	cornerRadius := fyne.Min(paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
-	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
+	p.SetUniform1f(program, "cornerRadius", cornerRadiusScaled)
 
 	strokeWidthScaled := roundToPixel(arc.StrokeWidth*p.pixScale, 1.0)
 	p.SetUniform1f(program, "strokeWidth", strokeWidthScaled)

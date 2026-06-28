@@ -22,7 +22,7 @@ uniform float outerRadius;
 uniform float startAngle;
 uniform float endAngle;
 uniform vec4 fillColor;
-uniform float corner_radius;
+uniform float cornerRadius;
 uniform float strokeWidth;
 uniform vec4 strokeColor;
 
@@ -104,7 +104,7 @@ void main()
     }
     else
     {
-        dist = sd_rounded_arc(vec_centered_pos, innerRadius, outerRadius, start_rad, end_rad, corner_radius);
+        dist = sd_rounded_arc(vec_centered_pos, innerRadius, outerRadius, start_rad, end_rad, cornerRadius);
     }
 
     vec4 final_color = fillColor;
