@@ -14,7 +14,7 @@ precision lowp sampler2D;
 
 uniform vec2 frameSize;
 uniform vec4 rectCoords;
-uniform float edge_softness;
+uniform float edgeSoftness;
 
 uniform vec2 vertices[MAX_VERTICES];
 uniform float corner_radii[MAX_VERTICES];
@@ -177,14 +177,14 @@ void main()
     if (stroke_width > 0.0)
     {
         // create a mask for the fill area (inside, shrunk by stroke width)
-        float fill_mask = smoothstep(-stroke_width + edge_softness, -stroke_width - edge_softness, dist);
+        float fill_mask = smoothstep(-stroke_width + edgeSoftness, -stroke_width - edgeSoftness, dist);
 
         // combine fill mask and colors (fill + stroke)
         final_color = mix(stroke_color, fill_color, fill_mask);
     }
 
     // smooth edges
-    float final_alpha = smoothstep(edge_softness, -edge_softness, dist);
+    float final_alpha = smoothstep(edgeSoftness, -edgeSoftness, dist);
 
     // apply the final alpha to the combined color
     gl_FragColor = vec4(final_color.rgb, final_color.a * final_alpha);

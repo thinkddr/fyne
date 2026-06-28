@@ -6,7 +6,7 @@ uniform vec4 rectCoords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_fr
 uniform float stroke_width_half;
 uniform vec2 rect_size_half;
 uniform vec4 radius;
-uniform float edge_softness;
+uniform float edgeSoftness;
 /* colors params*/
 uniform vec4 fill_color;
 uniform vec4 stroke_color;
@@ -80,22 +80,22 @@ void main()
     {
         // at least one corner radius is larger than half of the shorter edge
         distance = calc_distance_all_quadrants(vec_centered_pos, rect_size_half + stroke_width_half, radius);
-        final_alpha = 1.0 - smoothstep(-edge_softness, edge_softness, distance);
+        final_alpha = 1.0 - smoothstep(-edgeSoftness, edgeSoftness, distance);
 
         if (stroke_width_half > 0.0)
         {
-            float color_blend = 1.0 - smoothstep(stroke_width_half * 2.0 - edge_softness, stroke_width_half * 2.0 + edge_softness, abs(distance));
+            float color_blend = 1.0 - smoothstep(stroke_width_half * 2.0 - edgeSoftness, stroke_width_half * 2.0 + edgeSoftness, abs(distance));
             final_color = mix(fill_color, stroke_color, color_blend);
         }
     }
     else
     {
         distance = calc_distance(vec_centered_pos, rect_size_half, radius - stroke_width_half);
-        final_alpha = 1.0 - smoothstep(stroke_width_half - edge_softness, stroke_width_half + edge_softness, distance);
+        final_alpha = 1.0 - smoothstep(stroke_width_half - edgeSoftness, stroke_width_half + edgeSoftness, distance);
 
         if (stroke_width_half > 0.0)
         {
-            float color_blend = smoothstep(-stroke_width_half - edge_softness, -stroke_width_half + edge_softness, distance);
+            float color_blend = smoothstep(-stroke_width_half - edgeSoftness, -stroke_width_half + edgeSoftness, distance);
             final_color = mix(fill_color, stroke_color, color_blend);
         }
     }
@@ -137,7 +137,7 @@ void main()
         {
             distance_shadow = calc_distance(vec_centered_pos + shadow_offset_corrected, shadow_size, shadow_radius);
         }
-        float shadow_alpha = shadow_color.a * (1.0 - smoothstep(-edge_softness, shadow_blur_radius + edge_softness, distance_shadow));
+        float shadow_alpha = shadow_color.a * (1.0 - smoothstep(-edgeSoftness, shadow_blur_radius + edgeSoftness, distance_shadow));
 
         if (shadow_type == 0.0)
         {
@@ -152,7 +152,7 @@ void main()
             {
                 d_shape = calc_distance(vec_centered_pos, rect_size_half + stroke_width_half, radius);
             }
-            float mask = smoothstep(-2.0 * edge_softness, 0.0, d_shape);
+            float mask = smoothstep(-2.0 * edgeSoftness, 0.0, d_shape);
             shadow_alpha *= mask;
         }
 

@@ -15,7 +15,7 @@ uniform vec2 frameSize;
 uniform vec4 rectCoords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
 uniform float stroke_width;
 uniform vec2 radius;
-uniform float edge_softness;
+uniform float edgeSoftness;
 uniform float angle;
 /* colors params*/
 uniform vec4 fill_color;
@@ -70,7 +70,7 @@ void main()
         {
             // create a mask for the fill area (inside, shrunk by stroke width)
             float dist_inner = calc_distance(vec_centered_pos, inner_radius);
-            fill_mask = smoothstep(edge_softness, -edge_softness, dist_inner);
+            fill_mask = smoothstep(edgeSoftness, -edgeSoftness, dist_inner);
         }
 
         // combine fill mask and colors (fill + stroke)
@@ -78,7 +78,7 @@ void main()
     }
 
     // smooth edges
-    float final_alpha = smoothstep(edge_softness, -edge_softness, dist);
+    float final_alpha = smoothstep(edgeSoftness, -edgeSoftness, dist);
 
     // apply the final alpha to the combined color
     final_color = vec4(final_color.rgb, final_color.a * final_alpha);
@@ -99,12 +99,12 @@ void main()
         // negative offset-x value places the shadow to the left of the element. Negative offset-y value places the shadow above the element
         vec2 shadow_offset_corrected = vec2(-shadow_offset.x, shadow_offset.y);
         float distance_shadow = calc_distance(vec_centered_pos + shadow_offset_corrected, shadow_radius);
-        float shadow_alpha = shadow_color.a * (1.0 - smoothstep(-edge_softness, shadow_blur_radius + edge_softness, distance_shadow));
+        float shadow_alpha = shadow_color.a * (1.0 - smoothstep(-edgeSoftness, shadow_blur_radius + edgeSoftness, distance_shadow));
 
         if (shadow_type == 0.0)
         {
             // remove shadow inside the ellipse
-            float mask = smoothstep(-2.0 * edge_softness, 0.0, dist);
+            float mask = smoothstep(-2.0 * edgeSoftness, 0.0, dist);
             shadow_alpha *= mask;
         }
 

@@ -190,7 +190,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	p.SetUniform4f(program, "stroke_color", r, g, b, a)
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
-	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+	p.SetUniform1f(program, "edgeSoftness", edgeSoftnessScaled)
 
 	var addShadow float32
 	if paint.IsShadowVisible(circle.Shadow) {
@@ -268,7 +268,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
-	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+	p.SetUniform1f(program, "edgeSoftness", edgeSoftnessScaled)
 
 	// ensure stroke width is not larger than the size of the object
 	strokeWidth := fyne.Min(bezierCurve.StrokeWidth, fyne.Min(bezierCurve.Size().Width, bezierCurve.Size().Height))
@@ -333,7 +333,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
-	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+	p.SetUniform1f(program, "edgeSoftness", edgeSoftnessScaled)
 
 	numPoints := int(fyne.Min(paint.ArbitraryPolygonVerticesMaximum, float32(len(polygon.Points))))
 	p.SetUniform1f(program, "vertex_count", float32(numPoints))
@@ -602,7 +602,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		p.SetUniform4f(program, "radius", topRightRadiusScaled, bottomRightRadiusScaled, topLeftRadiusScaled, bottomLeftRadiusScaled)
 
 		edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
-		p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+		p.SetUniform1f(program, "edgeSoftness", edgeSoftnessScaled)
 	} else {
 		p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
 	}
@@ -662,7 +662,7 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
-	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+	p.SetUniform1f(program, "edgeSoftness", edgeSoftnessScaled)
 
 	outerRadius := fyne.Min(size.Width, size.Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
@@ -720,7 +720,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
-	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+	p.SetUniform1f(program, "edgeSoftness", edgeSoftnessScaled)
 
 	outerRadius := fyne.Min(arc.Size().Width, arc.Size().Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
@@ -814,7 +814,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 	p.SetUniform4f(program, "stroke_color", r, g, b, a)
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
-	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+	p.SetUniform1f(program, "edgeSoftness", edgeSoftnessScaled)
 
 	var addShadow float32
 	if paint.IsShadowVisible(ellipse.Shadow) {
