@@ -13,7 +13,7 @@ precision lowp sampler2D;
 uniform vec2 frameSize;
 uniform vec4 rectCoords;
 uniform float edgeSoftness;
-uniform float stroke_width_half;
+uniform float strokeWidthHalf;
 uniform vec4 strokeColor;
 
 uniform vec2 startPoint;
@@ -156,6 +156,6 @@ void main() {
         dist = linear_distance(p, startPoint, endPoint);
     }
 
-    float alpha = 1.0 - smoothstep(stroke_width_half - edgeSoftness, stroke_width_half + edgeSoftness, dist);
+    float alpha = 1.0 - smoothstep(strokeWidthHalf - edgeSoftness, strokeWidthHalf + edgeSoftness, dist);
     gl_FragColor = vec4(strokeColor.rgb, strokeColor.a * alpha);
 }

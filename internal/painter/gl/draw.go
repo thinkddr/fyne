@@ -170,7 +170,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	strokeWidthScaled := roundToPixel(circle.StrokeWidth*p.pixScale, 1.0)
-	p.SetUniform1f(program, "stroke_width_half", strokeWidthScaled*0.5)
+	p.SetUniform1f(program, "strokeWidthHalf", strokeWidthScaled*0.5)
 
 	rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
 	rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
@@ -296,7 +296,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	p.SetUniform1f(program, "numControlPoints", fyne.Min(float32(len(cp)), 2))
 
 	strokeWidthScaled := roundToPixel(strokeWidth*p.pixScale, 1.0)
-	p.SetUniform1f(program, "stroke_width_half", strokeWidthScaled*0.5)
+	p.SetUniform1f(program, "strokeWidthHalf", strokeWidthScaled*0.5)
 
 	r, g, b, a := getFragmentColor(bezierCurve.StrokeColor)
 	p.SetUniform4f(program, "strokeColor", r, g, b, a)
@@ -575,7 +575,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 
 	strokeWidthScaled := roundToPixel(strokeWidth*p.pixScale, 1.0)
 	if roundedCorners {
-		p.SetUniform1f(program, "stroke_width_half", strokeWidthScaled*0.5)
+		p.SetUniform1f(program, "strokeWidthHalf", strokeWidthScaled*0.5)
 
 		rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
 		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
