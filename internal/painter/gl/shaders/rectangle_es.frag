@@ -23,7 +23,7 @@ uniform float shadowBlurRadius;
 uniform float shadowSpread;
 uniform vec2 shadowOffset;
 uniform vec4 shadowColor;
-uniform float shadow_type;
+uniform float shadowType;
 
 vec4 blend_shadow(vec4 color, vec4 shadow)
 {
@@ -49,7 +49,7 @@ void main()
         float distance_shadow = smoothstep(-shadowBlurRadius * 0.5, shadowBlurRadius * 0.5, length(max(d, 0.0)) + min(max(d.x, d.y), 0.0));
         float shadow_alpha = shadowColor.a * (1.0 - distance_shadow);
 
-        if (shadow_type == 0.0)
+        if (shadowType == 0.0)
         {
             // remove shadow inside rectangle (uses original rect, not spread rect)
             vec2 frag_pos = gl_FragCoord.xy;

@@ -26,7 +26,7 @@ uniform float shadowBlurRadius;
 uniform float shadowSpread;
 uniform vec2 shadowOffset;
 uniform vec4 shadowColor;
-uniform float shadow_type;
+uniform float shadowType;
 
 mat2 rotate(float a)
 {
@@ -101,7 +101,7 @@ void main()
         float distance_shadow = calc_distance(vec_centered_pos + shadow_offset_corrected, shadow_radius);
         float shadow_alpha = shadowColor.a * (1.0 - smoothstep(-edgeSoftness, shadowBlurRadius + edgeSoftness, distance_shadow));
 
-        if (shadow_type == 0.0)
+        if (shadowType == 0.0)
         {
             // remove shadow inside the ellipse
             float mask = smoothstep(-2.0 * edgeSoftness, 0.0, dist);

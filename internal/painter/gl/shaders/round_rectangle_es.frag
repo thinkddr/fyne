@@ -26,7 +26,7 @@ uniform float shadowBlurRadius;
 uniform float shadowSpread;
 uniform vec2 shadowOffset;
 uniform vec4 shadowColor;
-uniform float shadow_type;
+uniform float shadowType;
 
 // distance is calculated for a single quadrant
 // returns invalid output if corner radius exceed half of the shorter edge
@@ -149,7 +149,7 @@ void main()
         }
         float shadow_alpha = shadowColor.a * (1.0 - smoothstep(-edgeSoftness, shadowBlurRadius + edgeSoftness, distance_shadow));
 
-        if (shadow_type == 0.0)
+        if (shadowType == 0.0)
         {
             // remove shadow inside rectangle
             float d_shape;

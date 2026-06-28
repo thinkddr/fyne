@@ -199,7 +199,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 		p.SetUniform2f(program, "shadowOffset", roundToPixel(circle.Shadow.Offset.X*p.pixScale, 1.0), roundToPixel(circle.Shadow.Offset.Y*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadowBlurRadius", roundToPixel(circle.Shadow.BlurRadius*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadowSpread", roundToPixel(circle.Shadow.Spread*p.pixScale, 1.0))
-		p.SetUniform1f(program, "shadow_type", float32(circle.Shadow.Variant))
+		p.SetUniform1f(program, "shadowType", float32(circle.Shadow.Variant))
 		addShadow = 1.0
 	}
 	p.SetUniform1f(program, "addShadow", addShadow)
@@ -624,7 +624,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		p.SetUniform2f(program, "shadowOffset", roundToPixel(shadow.Offset.X*p.pixScale, 1.0), roundToPixel(shadow.Offset.Y*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadowBlurRadius", roundToPixel(shadow.BlurRadius*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadowSpread", roundToPixel(shadow.Spread*p.pixScale, 1.0))
-		p.SetUniform1f(program, "shadow_type", float32(shadow.Variant))
+		p.SetUniform1f(program, "shadowType", float32(shadow.Variant))
 		addShadow = 1.0
 	}
 	p.SetUniform1f(program, "addShadow", addShadow)
@@ -823,7 +823,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 		p.SetUniform2f(program, "shadowOffset", roundToPixel(ellipse.Shadow.Offset.X*p.pixScale, 1.0), roundToPixel(ellipse.Shadow.Offset.Y*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadowBlurRadius", roundToPixel(ellipse.Shadow.BlurRadius*p.pixScale, 1.0))
 		p.SetUniform1f(program, "shadowSpread", roundToPixel(ellipse.Shadow.Spread*p.pixScale, 1.0))
-		p.SetUniform1f(program, "shadow_type", float32(ellipse.Shadow.Variant))
+		p.SetUniform1f(program, "shadowType", float32(ellipse.Shadow.Variant))
 		addShadow = 1.0
 	}
 	p.SetUniform1f(program, "addShadow", addShadow)
