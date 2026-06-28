@@ -54,12 +54,12 @@ void main()
 
     if (strokeWidth > 0.0)
     {
-        vec2 inner_radius = radius - strokeWidth;
+        vec2 innerRadius = radius - strokeWidth;
         float fill_mask = 0.0;
-        if (inner_radius.x > 1.0 && inner_radius.y > 1.0)
+        if (innerRadius.x > 1.0 && innerRadius.y > 1.0)
         {
             // create a mask for the fill area (inside, shrunk by stroke width)
-            float dist_inner = calc_distance(vec_centered_pos, inner_radius);
+            float dist_inner = calc_distance(vec_centered_pos, innerRadius);
             fill_mask = smoothstep(edgeSoftness, -edgeSoftness, dist_inner);
         }
 

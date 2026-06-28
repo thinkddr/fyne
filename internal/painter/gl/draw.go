@@ -728,7 +728,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 
 	innerRadius := outerRadius * float32(math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio))))
 	innerRadiusScaled := roundToPixel(innerRadius*p.pixScale, 1.0)
-	p.SetUniform1f(program, "inner_radius", innerRadiusScaled)
+	p.SetUniform1f(program, "innerRadius", innerRadiusScaled)
 
 	startAngle, endAngle := paint.NormalizeArcAngles(arc.StartAngle, arc.EndAngle)
 	p.SetUniform1f(program, "start_angle", startAngle)

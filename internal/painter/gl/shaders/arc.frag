@@ -7,7 +7,7 @@ uniform vec2 frameSize;
 uniform vec4 rectCoords;
 uniform float edgeSoftness;
 
-uniform float inner_radius;
+uniform float innerRadius;
 uniform float outer_radius;
 uniform float start_angle;
 uniform float end_angle;
@@ -80,21 +80,21 @@ void main()
         // full circle
         float r = length(vec_centered_pos);
         
-        if (inner_radius < 0.5)
+        if (innerRadius < 0.5)
         {
             // no inner radius
             dist = r - outer_radius;
         }
         else
         {
-            float ring_center_radius = (inner_radius + outer_radius) * 0.5;
-            float ring_thickness = (outer_radius - inner_radius) * 0.5;
+            float ring_center_radius = (innerRadius + outer_radius) * 0.5;
+            float ring_thickness = (outer_radius - innerRadius) * 0.5;
             dist = abs(r - ring_center_radius) - ring_thickness;
         }
     }
     else
     {
-        dist = sd_rounded_arc(vec_centered_pos, inner_radius, outer_radius, start_rad, end_rad, corner_radius);
+        dist = sd_rounded_arc(vec_centered_pos, innerRadius, outer_radius, start_rad, end_rad, corner_radius);
     }
 
     vec4 final_color = fillColor;
