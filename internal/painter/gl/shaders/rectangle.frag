@@ -1,7 +1,7 @@
 #version 110
 
 /* scaled params */
-uniform vec2 frameSize;
+uniform vec2 frame;
 uniform vec4 rectCoords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
 uniform float strokeWidth;
 /* colors params*/
@@ -31,7 +31,7 @@ void main()
     if (addShadow == 1.0)
     {
         vec2 frag_pos = gl_FragCoord.xy + vec2(-shadowOffset.x, shadowOffset.y);
-        vec2 center = vec2((rectCoords[0] + rectCoords[1]) * 0.5, frameSize.y - (rectCoords[2] + rectCoords[3]) * 0.5);
+        vec2 center = vec2((rectCoords[0] + rectCoords[1]) * 0.5, frame.y - (rectCoords[2] + rectCoords[3]) * 0.5);
         // expand/contract rectangle bounds by spread on all sides
         vec2 half_size = vec2(rectCoords[1] - rectCoords[0], rectCoords[3] - rectCoords[2]) * 0.5 + vec2(shadowSpread);
 
@@ -44,7 +44,7 @@ void main()
             // remove shadow inside rectangle (uses original rect, not spread rect)
             vec2 frag_pos = gl_FragCoord.xy;
             float d_h = min(frag_pos.x - rectCoords[0], rectCoords[1] - frag_pos.x);
-            float d_v = min(frag_pos.y - frameSize.y + rectCoords[3], frameSize.y - rectCoords[2] - frag_pos.y);
+            float d_v = min(frag_pos.y - frame.y + rectCoords[3], frame.y - rectCoords[2] - frag_pos.y);
             float mask = smoothstep(0.0, -0.5, min(d_h, d_v));
             shadow_alpha *= mask;
         }
@@ -53,9 +53,9 @@ void main()
             color[3] = 0.0;
         } else if (gl_FragCoord.x < rectCoords[0]){
             color[3] = 0.0;
-        } else if (gl_FragCoord.y < frameSize.y - rectCoords[3]){
+        } else if (gl_FragCoord.y < frame.y - rectCoords[3]){
             color[3] = 0.0;
-        } else if (gl_FragCoord.y > frameSize.y - rectCoords[2]){
+        } else if (gl_FragCoord.y > frame.y - rectCoords[2]){
             color[3] = 0.0;
         }
 
@@ -63,7 +63,7 @@ void main()
     }
 
     // discard if outside rectangle coords, necessary to draw thin stroke and mitigate inconsistent borders issue
-    if (gl_FragCoord.x < rectCoords[0] || gl_FragCoord.x > rectCoords[1] || gl_FragCoord.y < frameSize.y - rectCoords[3] || gl_FragCoord.y > frameSize.y - rectCoords[2])
+    if (gl_FragCoord.x < rectCoords[0] || gl_FragCoord.x > rectCoords[1] || gl_FragCoord.y < frame.y - rectCoords[3] || gl_FragCoord.y > frame.y - rectCoords[2])
     {
         if (addShadow == 0.0)
         {
@@ -80,11 +80,11 @@ void main()
         {
             color = strokeColor;
         }
-        else if (gl_FragCoord.y <= frameSize.y - rectCoords[3] + strokeWidth)
+        else if (gl_FragCoord.y <= frame.y - rectCoords[3] + strokeWidth)
         {
             color = strokeColor;
         }
-        else if (gl_FragCoord.y >= frameSize.y - rectCoords[2] - strokeWidth)
+        else if (gl_FragCoord.y >= frame.y - rectCoords[2] - strokeWidth)
         {
             color = strokeColor;
         }

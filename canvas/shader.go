@@ -16,7 +16,7 @@ var _ fyne.CanvasObject = (*Shader)(nil)
 // The supplied fragment shader must follow the same conventions as Fyne's
 // internal vector shaders. It is provided with the following uniforms:
 //
-//	uniform vec2 frameSize;   // the size of the output frame, in pixels
+//	uniform vec2 frame;   // the size of the output frame, in pixels
 //	uniform vec4 rectCoords;  // this object's bounds (x1, y1, x2, y2), in pixels
 //	uniform float time;       // elapsed animation time in seconds (see NewShaderAnimation)
 //
