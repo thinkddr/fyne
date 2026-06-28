@@ -285,10 +285,10 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 
 	if len(cp) == 1 {
 		cpXScaled, cpYScaled := roundToPixel(cp[0].X*p.pixScale, 1.0), roundToPixel(cp[0].Y*p.pixScale, 1.0)
-		p.SetUniform2f(program, "control_point1", cpXScaled, cpYScaled)
+		p.SetUniform2f(program, "controlPoint1", cpXScaled, cpYScaled)
 	} else if len(cp) == 2 {
 		cp1XScaled, cp1YScaled := roundToPixel(cp[0].X*p.pixScale, 1.0), roundToPixel(cp[0].Y*p.pixScale, 1.0)
-		p.SetUniform2f(program, "control_point1", cp1XScaled, cp1YScaled)
+		p.SetUniform2f(program, "controlPoint1", cp1XScaled, cp1YScaled)
 
 		cp2XScaled, cp2YScaled := roundToPixel(cp[1].X*p.pixScale, 1.0), roundToPixel(cp[1].Y*p.pixScale, 1.0)
 		p.SetUniform2f(program, "control_point2", cp2XScaled, cp2YScaled)
