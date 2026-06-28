@@ -12,7 +12,7 @@ precision lowp sampler2D;
 
 /* scaled params */
 uniform vec2 frame;
-uniform vec4 bounds; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
+uniform vec4 bounds; //x1 [0], y1 [1], x2 [2], y2 [3]; coords in the frame
 uniform float strokeWidth;
 uniform vec2 radius;
 uniform float edgeSoftness;
@@ -54,7 +54,7 @@ vec4 blend_shadow(vec4 color, vec4 shadow)
 
 void main()
 {
-    vec4 frag_rect_coords = vec4(bounds[0], bounds[1], frame.y - bounds[3], frame.y - bounds[2]);
+    vec4 frag_rect_coords = vec4(bounds[0], bounds[2], frame.y - bounds[3], frame.y - bounds[1]);
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
 
     vec_centered_pos = rotate(radians(angle)) * vec_centered_pos;

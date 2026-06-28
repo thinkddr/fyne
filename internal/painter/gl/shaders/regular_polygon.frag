@@ -35,7 +35,7 @@ float regular_distance(vec2 p, float r, int s)
 
 void main()
 {
-    vec4 frag_rect_coords = vec4(bounds[0], bounds[1], frame.y - bounds[3], frame.y - bounds[2]);
+    vec4 frag_rect_coords = vec4(bounds[0], bounds[2], frame.y - bounds[3], frame.y - bounds[1]);
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
 
     vec_centered_pos = rotate(radians(angle)) * vec_centered_pos;

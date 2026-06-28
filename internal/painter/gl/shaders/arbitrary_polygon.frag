@@ -131,7 +131,7 @@ float arbitrary_polygon_distance(vec2 p, int num)
 void main()
 {
     // coordinates: (0.0) at rect top-left, +X right, +Y down
-    vec2 p = vec2(gl_FragCoord.x, frame.y - gl_FragCoord.y) - bounds.xz;
+    vec2 p = vec2(gl_FragCoord.x, frame.y - gl_FragCoord.y) - bounds.xy;
 
     int num = int(vertexCount);
     float dist = arbitrary_polygon_distance(p, num);
