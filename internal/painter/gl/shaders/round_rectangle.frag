@@ -14,7 +14,7 @@ uniform vec4 strokeColor;
 uniform float addShadow;
 uniform float shadowBlurRadius;
 uniform vec2 shadowOffset;
-uniform vec4 shadow_color;
+uniform vec4 shadowColor;
 uniform float shadow_type;
 uniform float shadowSpread;
 
@@ -137,7 +137,7 @@ void main()
         {
             distance_shadow = calc_distance(vec_centered_pos + shadow_offset_corrected, shadow_size, shadow_radius);
         }
-        float shadow_alpha = shadow_color.a * (1.0 - smoothstep(-edgeSoftness, shadowBlurRadius + edgeSoftness, distance_shadow));
+        float shadow_alpha = shadowColor.a * (1.0 - smoothstep(-edgeSoftness, shadowBlurRadius + edgeSoftness, distance_shadow));
 
         if (shadow_type == 0.0)
         {
@@ -156,7 +156,7 @@ void main()
             shadow_alpha *= mask;
         }
 
-        final_color = blend_shadow(final_color, vec4(shadow_color.rgb, shadow_alpha));
+        final_color = blend_shadow(final_color, vec4(shadowColor.rgb, shadow_alpha));
     }
 
     gl_FragColor = final_color;
