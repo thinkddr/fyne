@@ -4,7 +4,7 @@
 // To adapt the arc orientation or coordinate system, adjust the startAngle and endAngle uniforms accordingly.
 
 uniform vec2 frame;
-uniform vec4 rectCoords;
+uniform vec4 bounds;
 uniform float edgeSoftness;
 
 uniform float innerRadius;
@@ -67,7 +67,7 @@ float sd_rounded_arc(vec2 p, float r1, float r2, float a0, float a1, float cr)
 
 void main()
 {
-    vec4 frag_rect_coords = vec4(rectCoords[0], rectCoords[1], frame.y - rectCoords[3], frame.y - rectCoords[2]);
+    vec4 frag_rect_coords = vec4(bounds[0], bounds[1], frame.y - bounds[3], frame.y - bounds[2]);
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
     float start_rad = radians(startAngle);
     float end_rad = radians(endAngle);

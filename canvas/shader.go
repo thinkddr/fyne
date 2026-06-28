@@ -17,8 +17,8 @@ var _ fyne.CanvasObject = (*Shader)(nil)
 // internal vector shaders. It is provided with the following uniforms:
 //
 //	uniform vec2 frame;   // the size of the output frame, in pixels
-//	uniform vec4 rectCoords;  // this object's bounds (x1, y1, x2, y2), in pixels
-//	uniform float time;       // elapsed animation time in seconds (see NewShaderAnimation)
+//	uniform vec4 bounds;  // this object's bounds (x1, y1, x2, y2), in pixels
+//	uniform float time;   // elapsed animation time in seconds (see NewShaderAnimation)
 //
 // and should compute its color from gl_FragCoord, as the built-in shapes do.
 // Any images set in Textures are additionally exposed as "uniform sampler2D"

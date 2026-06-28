@@ -13,7 +13,7 @@ precision lowp sampler2D;
 #define MAX_VERTICES 32
 
 uniform vec2 frame;
-uniform vec4 rectCoords;
+uniform vec4 bounds;
 uniform float edgeSoftness;
 
 uniform vec2 vertices[MAX_VERTICES];
@@ -168,7 +168,7 @@ float arbitrary_polygon_distance(vec2 p, int num)
 void main()
 {
     // coordinates: (0.0) at rect top-left, +X right, +Y down
-    vec2 p = vec2(gl_FragCoord.x, frame.y - gl_FragCoord.y) - rectCoords.xz;
+    vec2 p = vec2(gl_FragCoord.x, frame.y - gl_FragCoord.y) - bounds.xz;
 
     int num = int(vertexCount);
     float dist = arbitrary_polygon_distance(p, num);
