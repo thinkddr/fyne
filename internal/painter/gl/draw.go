@@ -336,7 +336,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	p.SetUniform1f(program, "edgeSoftness", edgeSoftnessScaled)
 
 	numPoints := int(fyne.Min(paint.ArbitraryPolygonVerticesMaximum, float32(len(polygon.Points))))
-	p.SetUniform1f(program, "vertex_count", float32(numPoints))
+	p.SetUniform1f(program, "vertexCount", float32(numPoints))
 
 	size := polygon.Size()
 	clampPoint := func(p fyne.Position) (float32, float32) {

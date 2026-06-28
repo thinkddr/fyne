@@ -18,7 +18,7 @@ uniform float edgeSoftness;
 
 uniform vec2 vertices[MAX_VERTICES];
 uniform float cornerRadii[MAX_VERTICES];
-uniform float vertex_count;
+uniform float vertexCount;
 
 uniform vec4 fill_color;
 uniform float stroke_width;
@@ -170,7 +170,7 @@ void main()
     // coordinates: (0.0) at rect top-left, +X right, +Y down
     vec2 p = vec2(gl_FragCoord.x, frameSize.y - gl_FragCoord.y) - rectCoords.xz;
 
-    int num = int(vertex_count);
+    int num = int(vertexCount);
     float dist = arbitrary_polygon_distance(p, num);
     vec4 final_color = fill_color;
 
