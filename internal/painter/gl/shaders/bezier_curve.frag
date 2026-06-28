@@ -1,6 +1,6 @@
 #version 110
 
-uniform vec2 frame_size;
+uniform vec2 frameSize;
 uniform vec4 rectCoords;
 uniform float edge_softness;
 uniform float stroke_width_half;
@@ -132,7 +132,7 @@ float cubic_distance(vec2 p, vec2 v0, vec2 v1, vec2 v2, vec2 v3)
 
 void main() {
     // coordinates: (0.0) at rect top-left, +X right, +Y down
-    vec2 p = vec2(gl_FragCoord.x, frame_size.y - gl_FragCoord.y) - rectCoords.xz;
+    vec2 p = vec2(gl_FragCoord.x, frameSize.y - gl_FragCoord.y) - rectCoords.xz;
 
     float dist;
     if (int(num_control_points) == 1) {

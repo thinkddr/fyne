@@ -2,7 +2,7 @@
 
 #define MAX_VERTICES 32
 
-uniform vec2 frame_size;
+uniform vec2 frameSize;
 uniform vec4 rectCoords;
 uniform float edge_softness;
 
@@ -131,7 +131,7 @@ float arbitrary_polygon_distance(vec2 p, int num)
 void main()
 {
     // coordinates: (0.0) at rect top-left, +X right, +Y down
-    vec2 p = vec2(gl_FragCoord.x, frame_size.y - gl_FragCoord.y) - rectCoords.xz;
+    vec2 p = vec2(gl_FragCoord.x, frameSize.y - gl_FragCoord.y) - rectCoords.xz;
 
     int num = int(vertex_count);
     float dist = arbitrary_polygon_distance(p, num);

@@ -11,7 +11,7 @@ precision lowp sampler2D;
 #endif
 
 /* scaled params */
-uniform vec2 frame_size;
+uniform vec2 frameSize;
 uniform vec4 rectCoords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
 uniform float stroke_width;
 /* colors params*/
@@ -41,7 +41,7 @@ void main()
     if (add_shadow == 1.0)
     {
         vec2 frag_pos = gl_FragCoord.xy + vec2(-shadow_offset.x, shadow_offset.y);
-        vec2 center = vec2((rectCoords[0] + rectCoords[1]) * 0.5, frame_size.y - (rectCoords[2] + rectCoords[3]) * 0.5);
+        vec2 center = vec2((rectCoords[0] + rectCoords[1]) * 0.5, frameSize.y - (rectCoords[2] + rectCoords[3]) * 0.5);
         // expand/contract rectangle bounds by spread on all sides
         vec2 half_size = vec2(rectCoords[1] - rectCoords[0], rectCoords[3] - rectCoords[2]) * 0.5 + vec2(shadow_spread);
 
@@ -54,7 +54,7 @@ void main()
             // remove shadow inside rectangle (uses original rect, not spread rect)
             vec2 frag_pos = gl_FragCoord.xy;
             float d_h = min(frag_pos.x - rectCoords[0], rectCoords[1] - frag_pos.x);
-            float d_v = min(frag_pos.y - frame_size.y + rectCoords[3], frame_size.y - rectCoords[2] - frag_pos.y);
+            float d_v = min(frag_pos.y - frameSize.y + rectCoords[3], frameSize.y - rectCoords[2] - frag_pos.y);
             float mask = smoothstep(0.0, -0.5, min(d_h, d_v));
             shadow_alpha *= mask;
         }
@@ -63,9 +63,9 @@ void main()
             color[3] = 0.0;
         } else if (gl_FragCoord.x < rectCoords[0]){
             color[3] = 0.0;
-        } else if (gl_FragCoord.y < frame_size.y - rectCoords[3]){
+        } else if (gl_FragCoord.y < frameSize.y - rectCoords[3]){
             color[3] = 0.0;
-        } else if (gl_FragCoord.y > frame_size.y - rectCoords[2]){
+        } else if (gl_FragCoord.y > frameSize.y - rectCoords[2]){
             color[3] = 0.0;
         }
 
@@ -73,7 +73,7 @@ void main()
     }
 
     // discard if outside rectangle coords, necessary to draw thin stroke and mitigate inconsistent borders issue
-    if (gl_FragCoord.x < rectCoords[0] || gl_FragCoord.x > rectCoords[1] || gl_FragCoord.y < frame_size.y - rectCoords[3] || gl_FragCoord.y > frame_size.y - rectCoords[2])
+    if (gl_FragCoord.x < rectCoords[0] || gl_FragCoord.x > rectCoords[1] || gl_FragCoord.y < frameSize.y - rectCoords[3] || gl_FragCoord.y > frameSize.y - rectCoords[2])
     {
         if (add_shadow == 0.0)
         {
@@ -90,11 +90,11 @@ void main()
         {
             color = stroke_color;
         }
-        else if (gl_FragCoord.y <= frame_size.y - rectCoords[3] + stroke_width)
+        else if (gl_FragCoord.y <= frameSize.y - rectCoords[3] + stroke_width)
         {
             color = stroke_color;
         }
-        else if (gl_FragCoord.y >= frame_size.y - rectCoords[2] - stroke_width)
+        else if (gl_FragCoord.y >= frameSize.y - rectCoords[2] - stroke_width)
         {
             color = stroke_color;
         }

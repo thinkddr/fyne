@@ -164,7 +164,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 
 	// Fragment: BEG
 	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
-	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+	p.SetUniform2f(program, "frameSize", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
@@ -262,7 +262,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 
 	// Fragment: BEG
 	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
-	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+	p.SetUniform2f(program, "frameSize", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
@@ -327,7 +327,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 
 	// Fragment: BEG
 	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
-	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+	p.SetUniform2f(program, "frameSize", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
@@ -480,7 +480,7 @@ func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyn
 
 	// Fragment: BEG - the standard uniform contract shared with the built in vector shaders
 	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
-	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+	p.SetUniform2f(program, "frameSize", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
@@ -568,7 +568,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 
 	// Fragment: BEG
 	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
-	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+	p.SetUniform2f(program, "frameSize", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
@@ -656,7 +656,7 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 
 	// Fragment: BEG
 	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
-	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+	p.SetUniform2f(program, "frameSize", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
@@ -714,7 +714,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 
 	// Fragment: BEG
 	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
-	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+	p.SetUniform2f(program, "frameSize", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
@@ -789,7 +789,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 
 	// Fragment: BEG
 	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
-	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+	p.SetUniform2f(program, "frameSize", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
 	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)

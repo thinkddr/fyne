@@ -3,7 +3,7 @@
 // Note: This shader operates in the unit circle coordinate system, where angles are measured from the positive X axis.
 // To adapt the arc orientation or coordinate system, adjust the start_angle and end_angle uniforms accordingly.
 
-uniform vec2 frame_size;
+uniform vec2 frameSize;
 uniform vec4 rectCoords;
 uniform float edge_softness;
 
@@ -67,7 +67,7 @@ float sd_rounded_arc(vec2 p, float r1, float r2, float a0, float a1, float cr)
 
 void main()
 {
-    vec4 frag_rect_coords = vec4(rectCoords[0], rectCoords[1], frame_size.y - rectCoords[3], frame_size.y - rectCoords[2]);
+    vec4 frag_rect_coords = vec4(rectCoords[0], rectCoords[1], frameSize.y - rectCoords[3], frameSize.y - rectCoords[2]);
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
     float start_rad = radians(start_angle);
     float end_rad = radians(end_angle);

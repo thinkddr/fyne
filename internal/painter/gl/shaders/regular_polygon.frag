@@ -1,6 +1,6 @@
 #version 110
 
-uniform vec2 frame_size;
+uniform vec2 frameSize;
 uniform vec4 rectCoords;
 uniform float edge_softness;
 
@@ -35,7 +35,7 @@ float regular_distance(vec2 p, float r, int s)
 
 void main()
 {
-    vec4 frag_rect_coords = vec4(rectCoords[0], rectCoords[1], frame_size.y - rectCoords[3], frame_size.y - rectCoords[2]);
+    vec4 frag_rect_coords = vec4(rectCoords[0], rectCoords[1], frameSize.y - rectCoords[3], frameSize.y - rectCoords[2]);
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
 
     vec_centered_pos = rotate(radians(angle)) * vec_centered_pos;
