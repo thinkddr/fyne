@@ -14,7 +14,7 @@ precision lowp sampler2D;
 #endif
 
 uniform vec2 frame_size;
-uniform vec4 rect_coords;
+uniform vec4 rectCoords;
 uniform float edge_softness;
 
 uniform float inner_radius;
@@ -77,7 +77,7 @@ float sd_rounded_arc(vec2 p, float r1, float r2, float a0, float a1, float cr)
 
 void main()
 {
-    vec4 frag_rect_coords = vec4(rect_coords[0], rect_coords[1], frame_size.y - rect_coords[3], frame_size.y - rect_coords[2]);
+    vec4 frag_rect_coords = vec4(rectCoords[0], rectCoords[1], frame_size.y - rectCoords[3], frame_size.y - rectCoords[2]);
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
     float start_rad = radians(start_angle);
     float end_rad = radians(end_angle);

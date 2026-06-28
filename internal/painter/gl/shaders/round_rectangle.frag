@@ -2,7 +2,7 @@
 
 /* scaled params */
 uniform vec2 frame_size;
-uniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
+uniform vec4 rectCoords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
 uniform float stroke_width_half;
 uniform vec2 rect_size_half;
 uniform vec4 radius;
@@ -66,7 +66,7 @@ vec4 blend_shadow(vec4 color, vec4 shadow)
 
 void main()
 {
-    vec4 frag_rect_coords = vec4(rect_coords[0], rect_coords[1], frame_size.y - rect_coords[3], frame_size.y - rect_coords[2]);
+    vec4 frag_rect_coords = vec4(rectCoords[0], rectCoords[1], frame_size.y - rectCoords[3], frame_size.y - rectCoords[2]);
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
 
     float distance;

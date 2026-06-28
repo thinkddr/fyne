@@ -167,7 +167,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
-	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	strokeWidthScaled := roundToPixel(circle.StrokeWidth*p.pixScale, 1.0)
 	p.SetUniform1f(program, "stroke_width_half", strokeWidthScaled*0.5)
@@ -265,7 +265,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
-	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
@@ -330,7 +330,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
-	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
@@ -483,7 +483,7 @@ func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyn
 	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
-	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	for name, v := range shader.Uniforms {
 		p.SetUniform1f(program, name, v)
@@ -571,7 +571,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
-	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	strokeWidthScaled := roundToPixel(strokeWidth*p.pixScale, 1.0)
 	if roundedCorners {
@@ -659,7 +659,7 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
-	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
@@ -717,7 +717,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
-	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
@@ -792,7 +792,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
-	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+	p.SetUniform4f(program, "rectCoords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	strokeWidthScaled := roundToPixel(ellipse.StrokeWidth*p.pixScale, 1.0)
 	p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
