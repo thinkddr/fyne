@@ -12,7 +12,7 @@ uniform vec4 fillColor;
 uniform vec4 strokeColor;
 /* shadow params*/
 uniform float addShadow;
-uniform float shadow_blur_radius;
+uniform float shadowBlurRadius;
 uniform float shadow_spread;
 uniform vec2 shadow_offset;
 uniform vec4 shadow_color;
@@ -82,14 +82,14 @@ void main()
             shadow_radius = max(radius + shadow_spread, 0.0);
         }
 
-        float blur_inset = shadow_blur_radius * 0.5;
+        float blur_inset = shadowBlurRadius * 0.5;
         shadow_radius = max(shadow_radius - blur_inset, 0.0);
 
         // flip the shadow offset to get the correct shadow position
         // negative offset-x value places the shadow to the left of the element. Negative offset-y value places the shadow above the element
         vec2 shadow_offset_corrected = vec2(-shadow_offset.x, shadow_offset.y);
         float distance_shadow = calc_distance(vec_centered_pos + shadow_offset_corrected, shadow_radius);
-        float shadow_alpha = shadow_color.a * (1.0 - smoothstep(-edgeSoftness, shadow_blur_radius + edgeSoftness, distance_shadow));
+        float shadow_alpha = shadow_color.a * (1.0 - smoothstep(-edgeSoftness, shadowBlurRadius + edgeSoftness, distance_shadow));
 
         if (shadow_type == 0.0)
         {

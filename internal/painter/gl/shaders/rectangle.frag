@@ -9,7 +9,7 @@ uniform vec4 fillColor;
 uniform vec4 strokeColor;
 /* shadow params*/
 uniform float addShadow;
-uniform float shadow_blur_radius;
+uniform float shadowBlurRadius;
 uniform float shadow_spread;
 uniform vec2 shadow_offset;
 uniform vec4 shadow_color;
@@ -36,7 +36,7 @@ void main()
         vec2 half_size = vec2(rectCoords[1] - rectCoords[0], rectCoords[3] - rectCoords[2]) * 0.5 + vec2(shadow_spread);
 
         vec2 d = abs(frag_pos - center) - half_size;
-        float distance_shadow = smoothstep(-shadow_blur_radius * 0.5, shadow_blur_radius * 0.5, length(max(d, 0.0)) + min(max(d.x, d.y), 0.0));
+        float distance_shadow = smoothstep(-shadowBlurRadius * 0.5, shadowBlurRadius * 0.5, length(max(d, 0.0)) + min(max(d.x, d.y), 0.0));
         float shadow_alpha = shadow_color.a * (1.0 - distance_shadow);
 
         if (shadow_type == 0.0)

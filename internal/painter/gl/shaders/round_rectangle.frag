@@ -12,7 +12,7 @@ uniform vec4 fillColor;
 uniform vec4 strokeColor;
 /* shadow params*/
 uniform float addShadow;
-uniform float shadow_blur_radius;
+uniform float shadowBlurRadius;
 uniform vec2 shadow_offset;
 uniform vec4 shadow_color;
 uniform float shadow_type;
@@ -120,7 +120,7 @@ void main()
             shadow_radius = max(radius * min(ratio_x, ratio_y), 0.0);
         }
 
-        float blur_inset = shadow_blur_radius * 0.5;
+        float blur_inset = shadowBlurRadius * 0.5;
         shadow_size = max(shadow_size - blur_inset, 0.0);
         shadow_radius = max(shadow_radius - blur_inset, 0.0);
 
@@ -137,7 +137,7 @@ void main()
         {
             distance_shadow = calc_distance(vec_centered_pos + shadow_offset_corrected, shadow_size, shadow_radius);
         }
-        float shadow_alpha = shadow_color.a * (1.0 - smoothstep(-edgeSoftness, shadow_blur_radius + edgeSoftness, distance_shadow));
+        float shadow_alpha = shadow_color.a * (1.0 - smoothstep(-edgeSoftness, shadowBlurRadius + edgeSoftness, distance_shadow));
 
         if (shadow_type == 0.0)
         {
