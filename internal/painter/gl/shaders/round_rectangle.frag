@@ -11,7 +11,7 @@ uniform float edgeSoftness;
 uniform vec4 fillColor;
 uniform vec4 strokeColor;
 /* shadow params*/
-uniform float add_shadow;
+uniform float addShadow;
 uniform float shadow_blur_radius;
 uniform vec2 shadow_offset;
 uniform vec4 shadow_color;
@@ -103,7 +103,7 @@ void main()
     // final color
     final_color = vec4(final_color.rgb, final_color.a * final_alpha);
 
-    if (add_shadow == 1.0)
+    if (addShadow == 1.0)
     {
         // use rectangle size by default
         vec2 shadow_size = rect_size_half + strokeWidthHalf;

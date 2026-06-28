@@ -18,7 +18,7 @@ uniform float strokeWidth;
 uniform vec4 fillColor;
 uniform vec4 strokeColor;
 /* shadow params*/
-uniform float add_shadow;
+uniform float addShadow;
 uniform float shadow_blur_radius;
 uniform float shadow_spread;
 uniform vec2 shadow_offset;
@@ -38,7 +38,7 @@ void main()
 {
     vec4 color = fillColor;
 
-    if (add_shadow == 1.0)
+    if (addShadow == 1.0)
     {
         vec2 frag_pos = gl_FragCoord.xy + vec2(-shadow_offset.x, shadow_offset.y);
         vec2 center = vec2((rectCoords[0] + rectCoords[1]) * 0.5, frameSize.y - (rectCoords[2] + rectCoords[3]) * 0.5);
@@ -75,7 +75,7 @@ void main()
     // discard if outside rectangle coords, necessary to draw thin stroke and mitigate inconsistent borders issue
     if (gl_FragCoord.x < rectCoords[0] || gl_FragCoord.x > rectCoords[1] || gl_FragCoord.y < frameSize.y - rectCoords[3] || gl_FragCoord.y > frameSize.y - rectCoords[2])
     {
-        if (add_shadow == 0.0)
+        if (addShadow == 0.0)
         {
             discard;
         }

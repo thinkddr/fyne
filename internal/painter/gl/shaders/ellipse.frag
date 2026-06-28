@@ -11,7 +11,7 @@ uniform float angle;
 uniform vec4 fillColor;
 uniform vec4 strokeColor;
 /* shadow params*/
-uniform float add_shadow;
+uniform float addShadow;
 uniform float shadow_blur_radius;
 uniform float shadow_spread;
 uniform vec2 shadow_offset;
@@ -73,7 +73,7 @@ void main()
     // apply the final alpha to the combined color
     final_color = vec4(final_color.rgb, final_color.a * final_alpha);
 
-    if (add_shadow == 1.0)
+    if (addShadow == 1.0)
     {
         // use ellipse radii by default, expand/contract by spread
         vec2 shadow_radius = radius;

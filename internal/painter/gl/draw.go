@@ -202,7 +202,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 		p.SetUniform1f(program, "shadow_type", float32(circle.Shadow.Variant))
 		addShadow = 1.0
 	}
-	p.SetUniform1f(program, "add_shadow", addShadow)
+	p.SetUniform1f(program, "addShadow", addShadow)
 
 	p.logError()
 	// Fragment: END
@@ -627,7 +627,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		p.SetUniform1f(program, "shadow_type", float32(shadow.Variant))
 		addShadow = 1.0
 	}
-	p.SetUniform1f(program, "add_shadow", addShadow)
+	p.SetUniform1f(program, "addShadow", addShadow)
 
 	p.logError()
 	// Fragment: END
@@ -826,7 +826,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 		p.SetUniform1f(program, "shadow_type", float32(ellipse.Shadow.Variant))
 		addShadow = 1.0
 	}
-	p.SetUniform1f(program, "add_shadow", addShadow)
+	p.SetUniform1f(program, "addShadow", addShadow)
 
 	p.logError()
 	// Fragment: END
