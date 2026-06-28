@@ -14,7 +14,7 @@ precision lowp sampler2D;
 uniform vec2 frameSize;
 uniform vec4 rectCoords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
 uniform float strokeWidthHalf;
-uniform vec2 rect_size_half;
+uniform vec2 rectSizeHalf;
 uniform vec4 radius;
 uniform float edgeSoftness;
 /* colors params*/
@@ -85,11 +85,11 @@ void main()
     float final_alpha;
 
     // subtract a small threshold value to avoid calling calc_distance_all_quadrants when the largest corner radius is very close to half the length of the rectangle's shortest edge
-    bool calc_all_quadrants = max_radius - 0.9 > min(rect_size_half.x, rect_size_half.y) + strokeWidthHalf;
+    bool calc_all_quadrants = max_radius - 0.9 > min(rectSizeHalf.x, rectSizeHalf.y) + strokeWidthHalf;
     if (calc_all_quadrants)
     {
         // at least one corner radius is larger than half of the shorter edge
-        distance = calc_distance_all_quadrants(vec_centered_pos, rect_size_half + strokeWidthHalf, radius);
+        distance = calc_distance_all_quadrants(vec_centered_pos, rectSizeHalf + strokeWidthHalf, radius);
         final_alpha = 1.0 - smoothstep(-edgeSoftness, edgeSoftness, distance);
 
         if (strokeWidthHalf > 0.0)
@@ -100,7 +100,7 @@ void main()
     }
     else
     {
-        distance = calc_distance(vec_centered_pos, rect_size_half, radius - strokeWidthHalf);
+        distance = calc_distance(vec_centered_pos, rectSizeHalf, radius - strokeWidthHalf);
         final_alpha = 1.0 - smoothstep(strokeWidthHalf - edgeSoftness, strokeWidthHalf + edgeSoftness, distance);
 
         if (strokeWidthHalf > 0.0)
@@ -116,7 +116,7 @@ void main()
     if (addShadow == 1.0)
     {
         // use rectangle size by default
-        vec2 shadow_size = rect_size_half + strokeWidthHalf;
+        vec2 shadow_size = rectSizeHalf + strokeWidthHalf;
         vec4 shadow_radius = radius;
 
         if (shadowSpread != 0.0)
@@ -160,7 +160,7 @@ void main()
             }
             else
             {
-                d_shape = calc_distance(vec_centered_pos, rect_size_half + strokeWidthHalf, radius);
+                d_shape = calc_distance(vec_centered_pos, rectSizeHalf + strokeWidthHalf, radius);
             }
             float mask = smoothstep(-2.0 * edgeSoftness, 0.0, d_shape);
             shadow_alpha *= mask;

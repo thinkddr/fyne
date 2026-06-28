@@ -174,7 +174,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 
 	rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
 	rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
-	p.SetUniform2f(program, "rect_size_half", rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
+	p.SetUniform2f(program, "rectSizeHalf", rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
 	radiusScaled := roundToPixel(radius*p.pixScale, 1.0)
 	p.SetUniform4f(program, "radius", radiusScaled, radiusScaled, radiusScaled, radiusScaled)
@@ -579,7 +579,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 
 		rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
 		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
-		p.SetUniform2f(program, "rect_size_half", rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
+		p.SetUniform2f(program, "rectSizeHalf", rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
 		// the maximum possible corner radii for a circular shape, calculated taking into account the rect coords with aspect ratio
 		size := fyne.NewSize(bounds[2]-bounds[0], bounds[3]-bounds[1])
