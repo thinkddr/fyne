@@ -20,7 +20,7 @@ uniform vec4 strokeColor;
 /* shadow params*/
 uniform float addShadow;
 uniform float shadowBlurRadius;
-uniform float shadow_spread;
+uniform float shadowSpread;
 uniform vec2 shadow_offset;
 uniform vec4 shadow_color;
 uniform float shadow_type;
@@ -43,7 +43,7 @@ void main()
         vec2 frag_pos = gl_FragCoord.xy + vec2(-shadow_offset.x, shadow_offset.y);
         vec2 center = vec2((rectCoords[0] + rectCoords[1]) * 0.5, frameSize.y - (rectCoords[2] + rectCoords[3]) * 0.5);
         // expand/contract rectangle bounds by spread on all sides
-        vec2 half_size = vec2(rectCoords[1] - rectCoords[0], rectCoords[3] - rectCoords[2]) * 0.5 + vec2(shadow_spread);
+        vec2 half_size = vec2(rectCoords[1] - rectCoords[0], rectCoords[3] - rectCoords[2]) * 0.5 + vec2(shadowSpread);
 
         vec2 d = abs(frag_pos - center) - half_size;
         float distance_shadow = smoothstep(-shadowBlurRadius * 0.5, shadowBlurRadius * 0.5, length(max(d, 0.0)) + min(max(d.x, d.y), 0.0));

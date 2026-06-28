@@ -23,7 +23,7 @@ uniform vec4 strokeColor;
 /* shadow params*/
 uniform float addShadow;
 uniform float shadowBlurRadius;
-uniform float shadow_spread;
+uniform float shadowSpread;
 uniform vec2 shadow_offset;
 uniform vec4 shadow_color;
 uniform float shadow_type;
@@ -119,11 +119,11 @@ void main()
         vec2 shadow_size = rect_size_half + strokeWidthHalf;
         vec4 shadow_radius = radius;
 
-        if (shadow_spread != 0.0)
+        if (shadowSpread != 0.0)
         {
             // expand/contract by spread, adjust radii to match
             vec2 original_size = shadow_size;
-            shadow_size = max(original_size + shadow_spread, 0.0);
+            shadow_size = max(original_size + shadowSpread, 0.0);
             float ratio_x = (original_size.x > 0.0) ? (shadow_size.x / original_size.x) : 1.0;
             float ratio_y = (original_size.y > 0.0) ? (shadow_size.y / original_size.y) : 1.0;
             // scale all corner radii proportionally, use minimum ratio so radius never exceeds the shorter adjacent edge

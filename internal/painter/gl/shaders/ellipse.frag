@@ -13,7 +13,7 @@ uniform vec4 strokeColor;
 /* shadow params*/
 uniform float addShadow;
 uniform float shadowBlurRadius;
-uniform float shadow_spread;
+uniform float shadowSpread;
 uniform vec2 shadow_offset;
 uniform vec4 shadow_color;
 uniform float shadow_type;
@@ -77,9 +77,9 @@ void main()
     {
         // use ellipse radii by default, expand/contract by spread
         vec2 shadow_radius = radius;
-        if (shadow_spread != 0.0)
+        if (shadowSpread != 0.0)
         {
-            shadow_radius = max(radius + shadow_spread, 0.0);
+            shadow_radius = max(radius + shadowSpread, 0.0);
         }
 
         float blur_inset = shadowBlurRadius * 0.5;
