@@ -732,7 +732,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 
 	startAngle, endAngle := paint.NormalizeArcAngles(arc.StartAngle, arc.EndAngle)
 	p.SetUniform1f(program, "startAngle", startAngle)
-	p.SetUniform1f(program, "end_angle", endAngle)
+	p.SetUniform1f(program, "endAngle", endAngle)
 
 	cornerRadius := fyne.Min(paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
