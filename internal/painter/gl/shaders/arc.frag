@@ -1,7 +1,7 @@
 #version 110
 
 // Note: This shader operates in the unit circle coordinate system, where angles are measured from the positive X axis.
-// To adapt the arc orientation or coordinate system, adjust the start_angle and end_angle uniforms accordingly.
+// To adapt the arc orientation or coordinate system, adjust the startAngle and end_angle uniforms accordingly.
 
 uniform vec2 frameSize;
 uniform vec4 rectCoords;
@@ -9,7 +9,7 @@ uniform float edgeSoftness;
 
 uniform float innerRadius;
 uniform float outerRadius;
-uniform float start_angle;
+uniform float startAngle;
 uniform float end_angle;
 uniform vec4 fillColor;
 uniform float corner_radius;
@@ -69,7 +69,7 @@ void main()
 {
     vec4 frag_rect_coords = vec4(rectCoords[0], rectCoords[1], frameSize.y - rectCoords[3], frameSize.y - rectCoords[2]);
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
-    float start_rad = radians(start_angle);
+    float start_rad = radians(startAngle);
     float end_rad = radians(end_angle);
     
     // check if the arc is a full circle (360 degrees or more)
