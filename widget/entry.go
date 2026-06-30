@@ -1710,7 +1710,7 @@ func (r *entryRenderer) Refresh() {
 	r.box.CornerRadius = th.Size(theme.SizeNameInputRadius)
 	r.border.CornerRadius = r.box.CornerRadius
 	if focusedAppearance {
-		r.border.StrokeColor = th.Color(theme.ColorNameFocus, v)
+		r.border.StrokeColor = th.Color(theme.ColorNamePrimary, v)
 	} else {
 		if r.entry.Disabled() {
 			r.border.StrokeColor = th.Color(theme.ColorNameDisabled, v)
@@ -1856,7 +1856,7 @@ func (r *entryContentRenderer) Refresh() {
 		if settings.ShowAnimations() {
 			r.content.entry.cursorAnim.start()
 		} else {
-			r.cursor.FillColor = th.Color(theme.ColorNameFocus, settings.ThemeVariant())
+			r.cursor.FillColor = th.Color(theme.ColorNamePrimary, settings.ThemeVariant())
 		}
 		r.cursor.Show()
 	} else {
