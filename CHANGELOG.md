@@ -27,6 +27,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * Wayland is now supported by default and will automatically be picked at runtime
 * Circle canvas object is now always a circle filling centrally in the space
+* Popups (modal and regular) no longer include padding by default
 * Canvas Polygon renamed to RegularPolygon
 * Follow macOS system setting for scroll bar visibility
 * Handle nested lists and quotes in Markdown renderer
