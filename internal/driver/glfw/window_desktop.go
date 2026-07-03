@@ -53,13 +53,15 @@ var cursors [desktop.HiddenCursor + 1]*glfw.Cursor
 
 func initCursors() {
 	cursors = [desktop.HiddenCursor + 1]*glfw.Cursor{
-		desktop.DefaultCursor:   glfw.CreateStandardCursor(glfw.ArrowCursor),
-		desktop.TextCursor:      glfw.CreateStandardCursor(glfw.IBeamCursor),
-		desktop.CrosshairCursor: glfw.CreateStandardCursor(glfw.CrosshairCursor),
-		desktop.PointerCursor:   glfw.CreateStandardCursor(glfw.HandCursor),
-		desktop.HResizeCursor:   glfw.CreateStandardCursor(glfw.HResizeCursor),
-		desktop.VResizeCursor:   glfw.CreateStandardCursor(glfw.VResizeCursor),
-		desktop.HiddenCursor:    nil,
+		desktop.DefaultCursor:    glfw.CreateStandardCursor(glfw.ArrowCursor),
+		desktop.TextCursor:       glfw.CreateStandardCursor(glfw.IBeamCursor),
+		desktop.CrosshairCursor:  glfw.CreateStandardCursor(glfw.CrosshairCursor),
+		desktop.PointerCursor:    glfw.CreateStandardCursor(glfw.HandCursor),
+		desktop.HResizeCursor:    glfw.CreateStandardCursor(glfw.HResizeCursor),
+		desktop.VResizeCursor:    glfw.CreateStandardCursor(glfw.VResizeCursor),
+		desktop.NESWResizeCursor: glfw.CreateStandardCursor(glfw.ResizeNESWCursor),
+		desktop.NWSEResizeCursor: glfw.CreateStandardCursor(glfw.ResizeNWSECursor),
+		desktop.HiddenCursor:     nil,
 	}
 }
 
