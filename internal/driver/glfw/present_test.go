@@ -7,8 +7,7 @@ func TestNoGateAlwaysReady(t *testing.T) {
 	if !g.ready() {
 		t.Fatal("noGate.ready() = false, want true (off-Wayland must always present)")
 	}
-	// arm/markReady/free must be safe no-ops.
-	g.arm(nil)
+	g.requestFrame()
 	g.markReady()
 	g.free()
 }
@@ -35,8 +34,6 @@ func TestDecideRepaint(t *testing.T) {
 			if got != c.wantRepaint {
 				t.Errorf("decideRepaint = %v, want %v", got, c.wantRepaint)
 			}
-			// When not visible-and-ready, the dirty flag must NOT be consulted
-			// (so CheckDirtyAndClear does not clear it and the frame is deferred).
 			if checked != c.wantDirtyCheck {
 				t.Errorf("dirty checked = %v, want %v (dirty must be preserved when not presentable)", checked, c.wantDirtyCheck)
 			}
@@ -45,11 +42,9 @@ func TestDecideRepaint(t *testing.T) {
 }
 
 func TestNewPresentGateReadyByDefault(t *testing.T) {
-	// On the default (non-Wayland) test build this returns noGate; a freshly
-	// constructed gate must report ready so the first frame draws.
-	g := newPresentGate()
+	g := newPresentGate(nil)
+	defer g.free()
 	if !g.ready() {
 		t.Fatal("newPresentGate().ready() = false, want true")
 	}
-	g.free()
 }

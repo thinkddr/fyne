@@ -56,10 +56,6 @@ func runOnMainWithWait(f func(), wait bool) {
 	}
 }
 
-// decideRepaint reports whether a window should be repainted this frame.
-// checkDirtyAndClear is only called when the window is visible and presentable,
-// so a window that is not yet presentable keeps its dirty flag and the frame is
-// deferred until the compositor is ready (see issue #6080).
 func decideRepaint(visible, ready bool, checkDirtyAndClear func() bool) bool {
 	return visible && ready && checkDirtyAndClear()
 }
@@ -72,12 +68,6 @@ func (d *gLDriver) drawSingleFrame() {
 			continue
 		}
 
-		// Repaint only when the window is visible AND the compositor is ready
-		// to present it (Wayland frame callback). decideRepaint consults the
-		// dirty flag last, so a window that is not yet presentable keeps its
-		// dirty flag and the frame is deferred until the compositor is ready
-		// (issue #6080). When we are not repainting, keep the render caches
-		// alive instead.
 		if decideRepaint(w.visible, w.frame.ready(), w.canvas.CheckDirtyAndClear) {
 			w.RunWithContext(func() {
 				if w.driver.repaintWindow(w) {
@@ -92,15 +82,11 @@ func (d *gLDriver) drawSingleFrame() {
 	cache.Clean(refreshed)
 }
 
-// markCacheAlive keeps a non-drawn window's render caches from expiring without
-// repainting it.
 func (w *window) markCacheAlive() {
 	threshold := time.Now().Add(10*time.Second - cache.ValidDuration)
 	if w.lastWalkedTime.Before(threshold) {
 		w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
-			// marks canvas for object cache entry alive
 			_ = cache.GetCanvasForObject(node.Obj())
-			// marks renderer cache entry alive
 			if wid, ok := node.Obj().(fyne.Widget); ok {
 				_, _ = cache.CachedRenderer(wid)
 			}
@@ -240,11 +226,7 @@ func (d *gLDriver) repaintWindow(w *window) bool {
 	visible := w.visible
 
 	if view != nil && visible {
-		// Request a frame callback for the surface; the SwapBuffers commit
-		// below delivers the request. No-op off Wayland. After this, the gate
-		// reports not-ready until the compositor presents us again, so we will
-		// not issue another (potentially blocking) swap on a suspended surface.
-		w.frame.arm(windowSurface(w))
+		w.frame.requestFrame()
 		view.SwapBuffers()
 	}
 

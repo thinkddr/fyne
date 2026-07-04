@@ -768,12 +768,6 @@ func (w *window) processFocused(focus bool) {
 		curWindow = w
 		w.canvas.FocusGained()
 
-		// Backstop for issue #6080: if a compositor discarded a pending frame
-		// callback while the window was hidden instead of firing it on return,
-		// force the surface presentable again and request a repaint so updates
-		// resume even in that pathological case. Scoped to Wayland: elsewhere
-		// the gate is always ready, so this would just be a needless full redraw
-		// on every focus-gain.
 		if build.IsWayland {
 			w.frame.markReady()
 			w.canvas.SetDirty()
@@ -988,7 +982,8 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 
 	d.init()
 
-	ret = &window{title: title, decorate: decorate, driver: d, frame: newPresentGate()}
+	ret = &window{title: title, decorate: decorate, driver: d}
+	ret.frame = newPresentGate(ret)
 	ret.canvas = newCanvas()
 	ret.canvas.context = ret
 	ret.SetIcon(ret.icon)
