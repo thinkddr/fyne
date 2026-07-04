@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -351,6 +352,10 @@ func (c *draggableCorner) CreateRenderer() fyne.WidgetRenderer {
 	prop := canvas.NewImageFromResource(fyne.CurrentApp().Settings().Theme().Icon(theme.IconNameDragCornerIndicator))
 	prop.SetMinSize(fyne.NewSquareSize(16))
 	return widget.NewSimpleRenderer(prop)
+}
+
+func (c *draggableCorner) Cursor() desktop.Cursor {
+	return desktop.NWSEResizeCursor
 }
 
 func (c *draggableCorner) Dragged(ev *fyne.DragEvent) {

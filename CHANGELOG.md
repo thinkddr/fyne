@@ -22,6 +22,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Add HighlightItem API to collection widgets
 * Secondary cut/copy/paste shortcuts for Unix systems
 * New sizes and colors in theme to support features
+* Added new diagonal resize cursors for desktop
 
 ### Changed
 
@@ -31,6 +32,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Canvas Polygon renamed to RegularPolygon
 * Follow macOS system setting for scroll bar visibility
 * Handle nested lists and quotes in Markdown renderer
+* AppTabs on mobile render with smaller icons and text, in-keeping with the platform
 * Upgrades to RichText rendering and performance including clearer code blocks
 * Apps that have not migrated to the fyne.Do thread handling will warn on app launch
 

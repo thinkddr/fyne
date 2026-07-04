@@ -190,6 +190,7 @@ func newThemedBackground() *themedBackground {
 func (t *themedBackground) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	rect := canvas.NewRectangle(theme.Color(theme.ColorNameOverlayBackground))
+	rect.CornerRadius = theme.Size(theme.SizeNameDialogRadius)
 	return &themedBackgroundRenderer{rect, []fyne.CanvasObject{rect}}
 }
 
