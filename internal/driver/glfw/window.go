@@ -261,6 +261,7 @@ func (w *window) processClosed() {
 // destroy this window and, if it's the last window quit the app
 func (w *window) destroy(d *gLDriver) {
 	cache.CleanCanvas(w.canvas)
+	w.frame.free()
 
 	if w.master {
 		d.Quit()
@@ -766,6 +767,11 @@ func (w *window) processFocused(focus bool) {
 		}
 		curWindow = w
 		w.canvas.FocusGained()
+
+		if build.IsWayland {
+			w.frame.markReady()
+			w.canvas.SetDirty()
+		}
 	} else {
 		w.canvas.FocusLost()
 		w.mousePos = fyne.Position{}
@@ -977,6 +983,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 	d.init()
 
 	ret = &window{title: title, decorate: decorate, driver: d}
+	ret.frame = newPresentGate(ret)
 	ret.canvas = newCanvas()
 	ret.canvas.context = ret
 	ret.SetIcon(ret.icon)

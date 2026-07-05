@@ -70,6 +70,7 @@ var _ fyne.Window = (*window)(nil)
 
 type window struct {
 	viewport  *glfw.Window
+	frame     presentGate
 	created   bool
 	decorate  bool
 	closing   bool
@@ -835,6 +836,10 @@ func (w *window) create() {
 	w.RunWithContext(func() {
 		w.canvas.SetPainter(gl.NewPainter(w.canvas, w))
 		w.canvas.Painter().Init()
+
+		if build.IsWayland {
+			glfw.SwapInterval(0)
+		}
 	})
 
 	w.setDarkMode()
