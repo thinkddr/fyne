@@ -47,11 +47,11 @@ jobs:
       # linking so the test binaries get an LC_UUID and don't abort trap with
       # "missing LC_UUID load command". See golang/go#69987 and #78012.
       - name: Set macOS linker flag (LC_UUID workaround)
-        run: echo "GOFLAGS=-ldflags=-linkmode=external" >> $GITHUB_ENV
+        run: echo "TESTLDFLAGS=-ldflags=-linkmode=external" >> $GITHUB_ENV
         if: ${{ runner.os == 'macOS' && matrix.go-version == '' }}
 
       - name: Tests
-        run: ${{ matrix.runner }} go test -race -tags "${{ matrix.tags }}" ${{ matrix.cover }} ./...
+        run: ${{ matrix.runner }} go test -race -tags "${{ matrix.tags }}" ${{ matrix.cover }} ${{ env.TESTLDFLAGS }} ./...
 
       - name: Upload failed testdata
         uses: actions/upload-artifact@v5
