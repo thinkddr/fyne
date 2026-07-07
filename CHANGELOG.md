@@ -57,13 +57,6 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 **And over 150 other fixes and performance improvements!**
 
-### Known issues:
-
-* Compile issue with arm32, resolve by adding the following line to your go.mod:
-
-    replace github.com/go-gl/glfw/v3.4/glfw => github.com/fyne-io/glfw/v3.4/glfw v0.0.0-20260706095532-8d4617508b00
-
-
 
 ## 2.7.4 - 12 May 2026
 
