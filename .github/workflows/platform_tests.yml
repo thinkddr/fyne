@@ -15,6 +15,7 @@ jobs:
           - os: ubuntu-latest
             runner: xvfb-run
             tags: ci,migrated_fynedo
+            cover: -covermode=atomic -coverprofile=coverage.out
           - os: macos-latest
             tags: no_glfw,ci,migrated_fynedo
           - os: windows-latest
@@ -50,7 +51,7 @@ jobs:
         if: ${{ runner.os == 'macOS' && matrix.go-version == '' }}
 
       - name: Tests
-        run: ${{ matrix.runner }} go test -race -tags "${{ matrix.tags }}" -covermode=atomic -coverprofile=coverage.out ./...
+        run: ${{ matrix.runner }} go test -race -tags "${{ matrix.tags }}" ${{ matrix.cover }} ./...
 
       - name: Upload failed testdata
         uses: actions/upload-artifact@v5
