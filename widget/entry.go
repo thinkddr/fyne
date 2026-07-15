@@ -617,7 +617,7 @@ func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
 		return
 	}
 
-	e.updateMousePointer(ev.Position, false)
+	e.updateMousePointer(ev.Position.Add(e.scroll.Offset), false)
 }
 
 // TouchUp is called when this entry gets a touch up event on mobile device.
