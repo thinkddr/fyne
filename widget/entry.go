@@ -537,7 +537,16 @@ func (e *Entry) Append(text string) {
 // Tapped is called when this entry has been tapped. We update the cursor position in
 // device-specific callbacks (MouseDown() and TouchDown()).
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
-	if fyne.CurrentDevice().IsMobile() && e.sel.selecting {
+	if !fyne.CurrentDevice().IsMobile() {
+		return
+	}
+
+	if e.sel.doubleTappedAtUnixMillis != 0 {
+		e.sel.doubleTappedAtUnixMillis = 0
+		return // this tap is the trailing tap of a triple-tap (TouchDown already selected the row)
+	}
+
+	if e.sel.selecting {
 		e.sel.selecting = false
 	}
 }
