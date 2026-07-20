@@ -27,3 +27,20 @@ func TestEntry_Select_TripleTap_Mobile(t *testing.T) {
 	e.TouchUp(&mobile.TouchEvent{PointEvent: fyne.PointEvent{Position: pos}})
 	assert.Equal(t, "Testing", e.SelectedText())
 }
+
+func TestEntry_Select_TapAfterDoubleTap_Mobile(t *testing.T) {
+	e, _ := setupSelection(t, false)
+	e.MultiLine = true
+
+	// a double tap selects a word - the driver sends DoubleTapped instead of Tapped
+	test.DoubleTap(e)
+	assert.NotEmpty(t, e.SelectedText())
+
+	// a later single tap should just move the cursor, not keep the selection alive
+	time.Sleep(fyne.CurrentApp().Driver().DoubleTapDelay() + 50*time.Millisecond)
+	pos := fyne.NewPos(1, 1)
+	e.TouchDown(&mobile.TouchEvent{PointEvent: fyne.PointEvent{Position: pos}})
+	e.TouchUp(&mobile.TouchEvent{PointEvent: fyne.PointEvent{Position: pos}})
+	test.Tap(e)
+	assert.Equal(t, "", e.SelectedText())
+}
