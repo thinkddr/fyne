@@ -606,6 +606,55 @@ func TestTree_ScrollTo(t *testing.T) {
 	assert.Equal(t, float32(0), tree.scroller.Offset.Y)
 }
 
+func TestTree_ScrollTo_opensClosedParents(t *testing.T) {
+	test.NewTempApp(t)
+
+	data := make(map[string][]string)
+	addTreePath(data, "A", "B", "C")
+	tree := NewTreeWithStrings(data)
+
+	w := test.NewWindow(tree)
+	defer w.Close()
+
+	tree.CloseAllBranches()
+	tree.ScrollTo("C")
+
+	assert.True(t, tree.IsBranchOpen("A"))
+	assert.True(t, tree.IsBranchOpen("B"))
+}
+
+func TestTree_ScrollTo_doesNotSearchWhenAlreadyOpen(t *testing.T) {
+	test.NewTempApp(t)
+
+	data := make(map[string][]string)
+	addTreePath(data, "A", "A1", "A2")
+	addTreePath(data, "B", "B1")
+	tree := NewTreeWithStrings(data)
+
+	// Record which branches get expanded so we can tell whether the whole
+	// tree was searched. A lazily loaded tree (such as a file tree) can be
+	// prohibitively expensive to walk in full.
+	var queried []TreeNodeID
+	childUIDs := tree.ChildUIDs
+	tree.ChildUIDs = func(uid TreeNodeID) []TreeNodeID {
+		queried = append(queried, uid)
+		return childUIDs(uid)
+	}
+
+	w := test.NewWindow(tree)
+	defer w.Close()
+
+	tree.CloseAllBranches()
+	tree.OpenBranch("B")
+
+	queried = nil
+	tree.ScrollTo("B1")
+
+	// "A" sorts before the target's parent, so a full search would descend
+	// into it even though it is closed and unrelated to the target.
+	assert.NotContains(t, queried, TreeNodeID("A"))
+}
+
 func TestTree_ScrollToBottom(t *testing.T) {
 	test.NewTempApp(t)
 	test.ApplyTheme(t, test.NewTheme())

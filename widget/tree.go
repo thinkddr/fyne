@@ -307,11 +307,13 @@ func (t *Tree) ScrollTo(uid TreeNodeID) {
 		return
 	}
 
-	t.openBranches(uid)
-
 	y, size, ok := t.offsetAndSize(uid)
 	if !ok {
-		return
+		t.openBranches(uid)
+
+		if y, size, ok = t.offsetAndSize(uid); !ok {
+			return
+		}
 	}
 
 	newY := t.scroller.Offset.Y
