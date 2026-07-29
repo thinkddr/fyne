@@ -659,8 +659,18 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 		return ret
 	}
 
-	keyName := glfw.GetKeyName(code, scancode)
+	keyName := safeGetKeyName(code, scancode)
 	return keyCodeToKeyName(keyName)
+}
+
+func safeGetKeyName(key glfw.Key, scancode int) string {
+	defer func() {
+		if r := recover(); r != nil {
+			err, _ := r.(error)
+			fyne.LogError("Failed to get GLFW key name", err)
+		}
+	}()
+	return glfw.GetKeyName(key, scancode)
 }
 
 func convertAction(action glfw.Action) action {
