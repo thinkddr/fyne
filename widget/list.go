@@ -882,11 +882,8 @@ func (l *listLayout) updateList(newOnly bool) {
 		}
 	}
 
-	// we don't need wasVisible now until next call to update
-	// nil out all references before truncating slice
-	for i := 0; i < len(l.wasVisible); i++ {
-		l.wasVisible[i].item = nil
-	}
+	// we don't need wasVisible now until next call to update; clear and reset its length
+	clear(l.wasVisible)
 	l.wasVisible = l.wasVisible[:0]
 }
 
@@ -939,9 +936,7 @@ func (l *listLayout) searchVisible(visible []listItemAndID, id ListItemID) (*lis
 func (l *listLayout) nilOldSliceData(objs []fyne.CanvasObject, len, oldLen int) {
 	if oldLen > len {
 		objs = objs[:oldLen] // gain view into old data
-		for i := len; i < oldLen; i++ {
-			objs[i] = nil
-		}
+		clear(objs[len:])
 	}
 }
 
