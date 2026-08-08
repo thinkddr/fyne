@@ -244,6 +244,14 @@ func (t *timeMock) setTime(min, sec int) {
 	timeNow = func() time.Time {
 		return t.now
 	}
+	refreshNow()
+}
+
+// advance moves the mock clock, refreshing the sample setAlive reads (the real
+// app refreshes it once per frame in Clean).
+func (t *timeMock) advance(d time.Duration) {
+	t.now = t.now.Add(d)
+	refreshNow()
 }
 
 func testClearAll() {
@@ -255,4 +263,5 @@ func testClearAll() {
 	renderers.Clear()
 	blurKernels.Clear()
 	timeNow = time.Now
+	refreshNow()
 }
