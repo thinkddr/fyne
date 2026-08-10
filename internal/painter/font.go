@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
+	"slices"
 	"strings"
 	"sync"
 
@@ -393,7 +394,7 @@ func shapeCallback(in shaping.Input, x, scale float32, cb func(shaping.Output, f
 // splitEmojiSequences segments in for the shaper, keeping any emoji sequence
 // whole in a single face.
 func splitEmojiSequences(in shaping.Input, faces shaping.Fontmap, seg *shaping.Segmenter) []shaping.Input {
-	if !hasEmojiSequence(in) {
+	if !slices.Contains(in.Text[in.RunStart:in.RunEnd], emojiVariationSelector) {
 		return seg.Split(in, faces) // by far the common case, split in one pass
 	}
 
@@ -432,17 +433,6 @@ func appendSplit(out []shaping.Input, in shaping.Input, start, end int, faces sh
 ) []shaping.Input {
 	in.RunStart, in.RunEnd = start, end
 	return append(out, seg.Split(in, faces)...)
-}
-
-// hasEmojiSequence reports whether the run holds a variation selector - the
-// marker that some rune may need judging alongside its neighbours.
-func hasEmojiSequence(in shaping.Input) bool {
-	for _, r := range in.Text[in.RunStart:in.RunEnd] {
-		if r == emojiVariationSelector {
-			return true
-		}
-	}
-	return false
 }
 
 // emojiSequenceLen returns the length of the emoji sequence starting at index i,
