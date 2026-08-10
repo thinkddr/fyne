@@ -200,6 +200,9 @@ func (w *window) doCenterOnScreen() {
 	// get window dimensions in pixels
 	monitor := w.getMonitorForWindow()
 	monMode := monitor.GetVideoMode()
+	if monMode == nil { // monitor was disconnected
+		return
+	}
 
 	// these come into play when dealing with multiple monitors
 	monX, monY := monitor.GetPos()
@@ -300,13 +303,21 @@ func getMonitorScale(monitor *glfw.Monitor) float32 {
 	if runtime.GOOS == "linux" && widthMm == 60 && heightMm == 60 { // Steam Deck incorrectly reports 6cm square!
 		return 1.0
 	}
-	widthPx := monitor.GetVideoMode().Width
-	return calculateDetectedScale(widthMm, widthPx)
+
+	videoMode := monitor.GetVideoMode()
+	if videoMode == nil { // monitor was disconnected
+		return 1.0
+	}
+	return calculateDetectedScale(widthMm, videoMode.Width)
 }
 
 // getScaledMonitorSize returns the monitor dimensions adjusted for scaling
 func getScaledMonitorSize(monitor *glfw.Monitor) fyne.Size {
 	videoMode := monitor.GetVideoMode()
+	if videoMode == nil { // monitor was disconnected
+		return fyne.NewSize(0, 0)
+	}
+
 	scale := getMonitorScale(monitor)
 
 	scaledWidth := float32(videoMode.Width) / scale
@@ -838,10 +849,12 @@ func (w *window) create() {
 	// default new windows onto the same monitor as a visible sibling when no position was set.
 	if runtime.GOOS == "darwin" && !build.IsWayland && w.xpos == 0 && w.ypos == 0 {
 		if monitor := w.findSiblingMonitor(); monitor != nil {
-			monX, monY := monitor.GetPos()
 			monMode := monitor.GetVideoMode()
-			w.xpos = monX + (monMode.Width-pixWidth)/2
-			w.ypos = monY + (monMode.Height-pixHeight)/2
+			if monMode != nil { // monitor was disconnected
+				monX, monY := monitor.GetPos()
+				w.xpos = monX + (monMode.Width-pixWidth)/2
+				w.ypos = monY + (monMode.Height-pixHeight)/2
+			}
 		}
 	}
 
