@@ -768,6 +768,10 @@ func (w *window) processFocused(focus bool) {
 		curWindow = w
 		w.canvas.FocusGained()
 
+		if build.HasNativeMenu {
+			setupNativeMenu(w, w.mainmenu)
+		}
+
 		if build.IsWayland {
 			w.frame.markReady()
 			w.canvas.SetDirty()
