@@ -113,6 +113,10 @@ func (c *Container) MinSize() Size {
 
 // Move the container (and all its children) to a new position, relative to its parent.
 func (c *Container) Move(pos Position) {
+	if pos == c.position {
+		return
+	}
+
 	c.position = pos
 	repaint(c)
 }
