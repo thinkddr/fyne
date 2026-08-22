@@ -461,11 +461,7 @@ func (w *window) mouseOut() {
 }
 
 func (w *window) processMouseClicked(button desktop.MouseButton, action action, modifiers fyne.KeyModifier) {
-	// Ensure pending movement is processed first (critical for touch screens).
-	if !w.mousePosUpdateProcessed {
-		w.processMouseMoved(w.newMousePosX, w.newMousePosY)
-		w.mousePosUpdateProcessed = true
-	}
+	w.ensurePositionProcessed()
 
 	w.mouseDragPos = w.mousePos
 	mousePos := w.mousePos
@@ -573,6 +569,13 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 	// Check for double click/tap on left mouse button
 	if action == release && button == desktop.MouseButtonPrimary && !mouseDragStarted {
 		w.mouseClickedHandleTapDoubleTap(co, ev)
+	}
+}
+
+func (w *window) ensurePositionProcessed() {
+	if !w.mousePosUpdateProcessed {
+		w.processMouseMoved(w.newMousePosX, w.newMousePosY)
+		w.mousePosUpdateProcessed = true
 	}
 }
 
