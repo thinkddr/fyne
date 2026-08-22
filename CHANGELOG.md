@@ -7,17 +7,15 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Changed
 
-* Replaced the fredbi/uri dependency with the standard library net/url for URI parsing
-* Support query, fragment and URN forms in ParseURI, with stricter host validation
 * File dialog content is now padded using container.NewPadded (#6451)
 * The "large FyneDo" warning is now delayed unless hints are enabled
-* Reduced allocations when repainting, walking labels and building render object lists (#6449, #6453, #6454)
-* Avoid needlessly descending into large tree structures when calculating size
+* Big performance boost in repainting, walking objects and building render lists (#6449, #6453, #6454)
 
 ### Fixed
 
 * MenuItem.Shortcut was missing from systray menus
 * Fix file path handling for URIs on Windows, including paths without a file scheme
+* Support query, fragment and URN forms in ParseURI, with stricter host validation
 * Android: re-create the surface if the window has changed underneath us (#6408)
 * Android: fix duplicated characters when using a hardware keyboard, and add missing delete key support (#6271)
 * Android: fix typo when checking for NULL in native code (#6402)
@@ -38,6 +36,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Report captured images as opaque so blended output is correct in captures
 * Data binding: handle the edge case where parsing a string as a float fails
 * Fix vendoring of apps using the Wayland build by keeping GLFW include headers
+* Resolve issue where some touch screen Linux taps were missed
 
 
 ## 2.8.0 - 11 Jul 2026
