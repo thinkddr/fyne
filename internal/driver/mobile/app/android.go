@@ -70,6 +70,7 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
 	"fyne.io/fyne/v2/internal/driver/mobile/mobileinit"
+	"fyne.io/fyne/v2/internal/urlhandler"
 )
 
 // mimeMap contains standard mime entries that are missing on Android
@@ -354,6 +355,13 @@ func filePickerReturned(str *C.char) {
 
 	fileCallback(C.GoString(str), nil)
 	fileCallback = nil
+}
+
+//export urlOpened
+func urlOpened(str *C.char) {
+	if str != nil {
+		urlhandler.Deliver(C.GoString(str))
+	}
 }
 
 //export insetsChanged

@@ -286,6 +286,12 @@ void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass
 	filePickerReturned((char*)cstr);
 }
 
+void Java_org_golang_app_GoNativeActivity_urlOpened(JNIEnv *env, jclass clazz, jstring str) {
+	const char* cstr = (*env)->GetStringUTFChars(env, str, JNI_FALSE);
+	urlOpened((char*)cstr);
+	(*env)->ReleaseStringUTFChars(env, str, cstr);
+}
+
 void Java_org_golang_app_GoNativeActivity_insetsChanged(JNIEnv *env, jclass clazz, int top, int bottom, int left, int right) {
     insetsChanged(top, bottom, left, right);
 }

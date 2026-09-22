@@ -50,6 +50,7 @@ public class GoNativeActivity extends NativeActivity {
 	private static final int PASSWORD_KEYBOARD_CODE = 3;
 
     private native void filePickerReturned(String str);
+	private native void urlOpened(String str);
     private native void insetsChanged(int top, int bottom, int left, int right);
     private native void keyboardTyped(String str);
     private native void keyboardDelete();
@@ -393,6 +394,9 @@ public class GoNativeActivity extends NativeActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		load();
 		super.onCreate(savedInstanceState);
+		if (getIntent().getDataString() != null) {
+			urlOpened(getIntent().getDataString());
+		}
 		setupEntry();
 		updateTheme(getResources().getConfiguration());
 
@@ -404,6 +408,15 @@ public class GoNativeActivity extends NativeActivity {
 			}
 		});
     }
+
+	@Override
+	public void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		setIntent(intent);
+		if (intent.getDataString() != null) {
+			urlOpened(intent.getDataString());
+		}
+	}
 
     private void setupEntry() {
         runOnUiThread(new Runnable() {

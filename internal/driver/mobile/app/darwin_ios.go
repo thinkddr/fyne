@@ -45,6 +45,7 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
+	"fyne.io/fyne/v2/internal/urlhandler"
 )
 
 var initThreadID uint64
@@ -216,6 +217,13 @@ func lifecycleFocused() { theApp.sendLifecycle(lifecycle.StageFocused) }
 //export lifecycleMemoryWarning
 func lifecycleMemoryWarning() {
 	cleanCaches()
+}
+
+//export urlOpened
+func urlOpened(raw *C.char) {
+	if raw != nil {
+		urlhandler.Deliver(C.GoString(raw))
+	}
 }
 
 //export drawloop
