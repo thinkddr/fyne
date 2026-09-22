@@ -7,6 +7,34 @@
   <a href='https://coveralls.io/github/fyne-io/fyne?branch=develop'><img src='https://coveralls.io/repos/github/fyne-io/fyne/badge.svg?branch=develop' alt='Coverage Status' /></a>
 </p>
 
+# Sytue fork: incoming URL support
+
+This repository is a public, temporary fork of **Fyne v2.8.1**. It retains the
+upstream source, `AUTHORS`, and BSD 3-Clause `LICENSE` unchanged. The small Sytue
+delta adds support for receiving URLs opened by the operating system; upstream
+Fyne 2.8.1 provides `App.OpenURL` for opening a URL externally but has no API for
+receiving one.
+
+The fork adds the optional `fyne.URLHandler` interface:
+
+```go
+receiver := myApp.(fyne.URLHandler)
+receiver.SetOnOpenURL(func(u *url.URL) {
+	// Handle an incoming custom-scheme URL on the Fyne UI thread.
+})
+```
+
+Incoming URLs are buffered until the callback is registered, so a custom-scheme
+OAuth redirect is not lost when it starts a closed application. Platform bridges
+cover Android launch intents and `onNewIntent`, iOS launch URLs and
+`application:openURL:options:`, macOS `kAEGetURL` Apple Events, plus startup
+arguments on Linux and Windows.
+
+This is not an official Fyne release and is not affiliated with or endorsed by
+Fyne.io. The patch is intended for upstream submission; consumers should move
+back to upstream Fyne when equivalent support becomes available. See
+[`FORK-NOTICE.md`](FORK-NOTICE.md) for attribution and licensing details.
+
 # About
 
 [Fyne](https://fyne.io) is an easy-to-use UI toolkit and app API written in Go.

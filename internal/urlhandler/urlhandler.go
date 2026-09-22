@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Sytue.
+// Use of this source code is governed by a BSD-style license that can be found
+// in the LICENSE file.
+
 // Package urlhandler bridges incoming OS URLs to the application that registered
 // for them. It intentionally has no dependency on the public fyne package so the
 // mobile and desktop drivers can use it without creating an import cycle.
