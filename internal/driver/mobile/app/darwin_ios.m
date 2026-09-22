@@ -51,6 +51,18 @@ static CGFloat keyboardHeight;
 	UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
 	center.delegate = (id) self;
 
+	NSURL *incoming = launchOptions[UIApplicationLaunchOptionsURLKey];
+	if (incoming != nil) {
+		urlOpened((char *)[[incoming absoluteString] UTF8String]);
+	}
+
+	return YES;
+}
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
+	if (url != nil) {
+		urlOpened((char *)[[url absoluteString] UTF8String]);
+	}
 	return YES;
 }
 

@@ -4,6 +4,8 @@
 package app // import "fyne.io/fyne/v2/app"
 
 import (
+	"net/url"
+	"os"
 	"strconv"
 	"time"
 
@@ -14,6 +16,7 @@ import (
 	"fyne.io/fyne/v2/internal/build"
 	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/internal/scheduler"
+	"fyne.io/fyne/v2/internal/urlhandler"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
 )
@@ -71,6 +74,19 @@ func (a *fyneApp) UniqueID() string {
 
 func (a *fyneApp) NewWindow(title string) fyne.Window {
 	return a.driver.CreateWindow(title)
+}
+
+// SetOnOpenURL registers the function called when the operating system opens a
+// URL for this application. It also receives a URL that arrived while the app was
+// starting, which is essential for custom-scheme OAuth redirects on mobile.
+func (a *fyneApp) SetOnOpenURL(handler func(*url.URL)) {
+	urlhandler.Set(handler, func(fn func()) {
+		if a.driver == nil {
+			fn()
+			return
+		}
+		a.driver.DoFromGoroutine(fn, false)
+	})
 }
 
 func (a *fyneApp) Run() {
@@ -174,6 +190,10 @@ func makeStoreDocs(id string, s *store) *internal.Docs {
 func newAppWithDriver(d fyne.Driver, clipboard fyne.Clipboard, id string) fyne.App {
 	newApp := &fyneApp{uniqueID: id, clipboard: clipboard, driver: d}
 	fyne.SetCurrentApp(newApp)
+	for _, arg := range os.Args[1:] {
+		urlhandler.Deliver(arg)
+	}
+	registerIncomingURLs()
 
 	newApp.prefs = newApp.newDefaultPreferences()
 	newApp.lifecycle.InitEventQueue()
