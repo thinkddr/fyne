@@ -13,6 +13,7 @@ import (
 
 // DoubleTap simulates a double left mouse click on the specified object.
 func DoubleTap(obj fyne.DoubleTappable) {
+	synchronise()
 	ev, c := prepareTap(obj, fyne.NewPos(1, 1))
 	handleFocusOnTap(c, obj)
 	obj.DoubleTapped(ev)
@@ -21,6 +22,7 @@ func DoubleTap(obj fyne.DoubleTappable) {
 // Drag drags at an absolute position on the canvas.
 // deltaX/Y is the dragging distance: <0 for dragging up/left, >0 for dragging down/right.
 func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
+	synchronise()
 	matches := func(object fyne.CanvasObject) bool {
 		_, ok := object.(fyne.Draggable)
 		return ok
@@ -61,6 +63,7 @@ func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
 
 // MoveMouse simulates a mouse movement to the given position.
 func MoveMouse(c fyne.Canvas, pos fyne.Position) {
+	synchronise()
 	if fyne.CurrentDevice().IsMobile() {
 		return
 	}
@@ -122,6 +125,7 @@ func RenderToMarkup(c fyne.Canvas) string {
 // Scroll scrolls at an absolute position on the canvas.
 // deltaX/Y is the scrolling distance: <0 for scrolling up/left, >0 for scrolling down/right.
 func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
+	synchronise()
 	matches := func(object fyne.CanvasObject) bool {
 		_, ok := object.(fyne.Scrollable)
 		return ok
@@ -142,12 +146,14 @@ func Tap(obj fyne.Tappable) {
 
 // TapAt simulates a left mouse click on the passed object at a specified place within it.
 func TapAt(obj fyne.Tappable, pos fyne.Position) {
+	synchronise()
 	ev, c := prepareTap(obj, pos)
 	tap(c, obj, ev)
 }
 
 // TapCanvas taps at an absolute position on the canvas.
 func TapCanvas(c fyne.Canvas, pos fyne.Position) {
+	synchronise()
 	if o, p := findTappable(c, pos); o != nil {
 		tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: p})
 	}
@@ -160,6 +166,7 @@ func TapSecondary(obj fyne.SecondaryTappable) {
 
 // TapSecondaryAt simulates a right mouse click on the passed object at a specified place within it.
 func TapSecondaryAt(obj fyne.SecondaryTappable, pos fyne.Position) {
+	synchronise()
 	ev, c := prepareTap(obj, pos)
 	handleFocusOnTap(c, obj)
 	obj.TappedSecondary(ev)
@@ -169,6 +176,7 @@ func TapSecondaryAt(obj fyne.SecondaryTappable, pos fyne.Position) {
 // The focusable object will be focused before typing begins.
 // The chars parameter will be input one rune at a time to the focused object.
 func Type(obj fyne.Focusable, chars string) {
+	synchronise()
 	obj.FocusGained()
 
 	typeChars([]rune(chars), obj.TypedRune)
@@ -177,12 +185,14 @@ func Type(obj fyne.Focusable, chars string) {
 // TypeOnCanvas is like the Type function but it passes the key events to the canvas object
 // rather than a focusable widget.
 func TypeOnCanvas(c fyne.Canvas, chars string) {
+	synchronise()
 	typeChars([]rune(chars), c.OnTypedRune())
 }
 
 // WidgetRenderer allows test scripts to gain access to the current renderer for a widget.
 // This can be used for verifying correctness of rendered components for a widget in unit tests.
 func WidgetRenderer(wid fyne.Widget) fyne.WidgetRenderer {
+	synchronise()
 	return cache.Renderer(wid)
 }
 
