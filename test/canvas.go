@@ -1,6 +1,8 @@
 package test
 
 import (
+	"image"
+
 	"fyne.io/fyne/v2"
 	fynedriver "fyne.io/fyne/v2/driver"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -50,4 +52,10 @@ func wrapCanvas(c software.WindowlessCanvas) *canvas {
 type canvas struct {
 	software.WindowlessCanvas
 	hovered desktop.Hoverable
+}
+
+// Capture runs first what other goroutines queued with fyne.Do, as a real frame would.
+func (c *canvas) Capture() image.Image {
+	synchronise()
+	return c.WindowlessCanvas.Capture()
 }
