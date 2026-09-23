@@ -463,6 +463,7 @@ func (w *window) mouseOut() {
 
 func (w *window) processMouseClicked(button desktop.MouseButton, action action, modifiers fyne.KeyModifier) {
 	w.ensurePositionProcessed()
+	prevOverlay := w.canvas.Overlays().Top()
 
 	w.mouseDragPos = w.mousePos
 	mousePos := w.mousePos
@@ -499,6 +500,15 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 		mev.Position = ev.Position
 		mev.AbsolutePosition = mousePos
 		w.mouseClickedHandleMouseable(mev, action, wid)
+	}
+
+	// If this press dismissed an overlay that lets its dismissing click through (a menu
+	// closes on mouse down and the click carries on to what it covered), the press
+	// belongs to whatever is under the pointer now: dispatch it again from the start.
+	if action == press && driver.PassesTapThrough(prevOverlay) &&
+		!slices.Contains(w.canvas.Overlays().List(), prevOverlay) {
+		w.processMouseClicked(button, action, modifiers)
+		return
 	}
 
 	focused := w.canvas.Focused()
@@ -654,10 +664,20 @@ func (w *window) waitForDoubleTapEnded(co fyne.CanvasObject, ev *fyne.PointEvent
 
 func (w *window) processMouseScrolled(xoff float64, yoff float64) {
 	mousePos := w.mousePos
-	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
+	scrollable := func(object fyne.CanvasObject) bool {
 		_, ok := object.(fyne.Scrollable)
 		return ok
-	})
+	}
+	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, scrollable)
+	top := w.canvas.Overlays().Top()
+	if co == nil && driver.PassesScrollThrough(top) {
+		// A non modal overlay (a menu) does not stop the wheel from scrolling what it
+		// covers; it is told afterwards so it can follow what moved underneath.
+		co, pos, _ = driver.FindObjectAtPositionMatching(mousePos, scrollable, nil, w.canvas.menu, w.canvas.Content())
+		if co != nil {
+			defer top.Refresh()
+		}
+	}
 	switch wid := co.(type) {
 	case fyne.Scrollable:
 		if math.Abs(xoff) >= scrollAccelerateCutoff {

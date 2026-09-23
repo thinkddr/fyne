@@ -412,7 +412,20 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 			go c.waitForDoubleTap(co, ev, tapCallback, doubleTapCallback)
 		} else {
 			if wid, ok := co.(fyne.Tappable); ok {
+				prevOverlay := c.Overlays().Top()
 				tapCallback(wid, ev)
+
+				// if the tap dismissed an overlay that lets it through (a menu, not a
+				// modal dialog), forward it to the widget underneath
+				if intdriver.PassesTapThrough(prevOverlay) && !slices.Contains(c.Overlays().List(), prevOverlay) {
+					co2, objPos2, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+						_, ok := object.(fyne.Tappable)
+						return ok
+					})
+					if tap2, ok := co2.(fyne.Tappable); ok {
+						tapCallback(tap2, &fyne.PointEvent{Position: objPos2, AbsolutePosition: pos})
+					}
+				}
 			}
 		}
 	} else {
