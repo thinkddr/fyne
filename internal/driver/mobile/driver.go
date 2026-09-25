@@ -76,10 +76,6 @@ func init() {
 
 func (d *driver) DoFromGoroutine(fn func(), wait bool) {
 	caller := func() {
-		if d.queuedFuncs == nil {
-			fn() // before the app actually starts
-			return
-		}
 		var done chan struct{}
 		if wait {
 			done = common.DonePool.Get()
@@ -181,7 +177,6 @@ func (d *driver) Run() {
 	app.Main(func(a app.App) {
 		async.SetMainGoroutine()
 		d.app = a
-		d.queuedFuncs = async.NewUnboundedChan[func()]()
 
 		fyne.CurrentApp().Settings().AddListener(func(s fyne.Settings) {
 			painter.ClearFontCache()
@@ -686,6 +681,11 @@ func (d *driver) DoubleTapDelay() time.Duration {
 func NewGoMobileDriver() fyne.Driver {
 	d := &driver{
 		theme: fyne.ThemeVariant(2), // unspecified
+		// Created here and not in Run: a fyne.Do from a goroutine that finishes before the
+		// event loop starts (a request that fails fast at launch) used to run fn on that
+		// goroutine, concurrently with the main thread, and crashed in the text shaper.
+		// Queued now, it runs on the main goroutine once the loop starts.
+		queuedFuncs: async.NewUnboundedChan[func()](),
 	}
 
 	registerRepository(d)
