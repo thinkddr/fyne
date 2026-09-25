@@ -29,6 +29,10 @@ static CGFloat keyboardHeight;
 @property (strong, nonatomic) GoAppAppController *controller;
 @end
 
+@interface GoAppSceneDelegate : UIResponder<UIWindowSceneDelegate>
+@property (strong, nonatomic) UIWindow *window;
+@end
+
 @implementation GoAppAppDelegate
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     int scale = 1;
@@ -39,14 +43,9 @@ static CGFloat keyboardHeight;
     setDisplayMetrics((int)size.width, (int)size.height, scale);
 
 	lifecycleAlive();
-	self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-	self.controller = [[GoAppAppController alloc] initWithNibName:nil bundle:nil];
-	self.window.rootViewController = self.controller;
-	[self.window makeKeyAndVisible];
-
-    // update insets once key window is set
-	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-	updateConfig((int)size.width, (int)size.height, orientation);
+	// The window is created by GoAppSceneDelegate: from the iOS 27 SDK on, UIKit refuses
+	// to launch an app that does not adopt the scene lifecycle (it traps in
+	// _UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption).
 
 	UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
 	center.delegate = (id) self;
@@ -57,6 +56,12 @@ static CGFloat keyboardHeight;
 	}
 
 	return YES;
+}
+
+- (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options {
+	UISceneConfiguration *config = [[UISceneConfiguration alloc] initWithName:@"Default" sessionRole:session.role];
+	config.delegateClass = [GoAppSceneDelegate class];
+	return config;
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
@@ -121,6 +126,58 @@ static CGFloat keyboardHeight;
        willPresentNotification:(UNNotification *)notification
          withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler {
 	completionHandler(UNNotificationPresentationOptionAlert);
+}
+@end
+
+// GoAppSceneDelegate owns the window and receives what the scene lifecycle moves away
+// from the application delegate: incoming URLs, Universal Links and the foreground and
+// background transitions.
+@implementation GoAppSceneDelegate
+- (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions {
+	if (![scene isKindOfClass:[UIWindowScene class]]) {
+		return;
+	}
+	GoAppAppDelegate *app = (GoAppAppDelegate *)[UIApplication sharedApplication].delegate;
+	self.window = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
+	app.controller = [[GoAppAppController alloc] initWithNibName:nil bundle:nil];
+	self.window.rootViewController = app.controller;
+	app.window = self.window;
+	[self.window makeKeyAndVisible];
+
+	// update insets once key window is set
+	CGSize size = [UIScreen mainScreen].nativeBounds.size;
+	updateConfig((int)size.width, (int)size.height, ((UIWindowScene *)scene).interfaceOrientation);
+
+	[self scene:scene openURLContexts:connectionOptions.URLContexts];
+	for (NSUserActivity *activity in connectionOptions.userActivities) {
+		[self scene:scene continueUserActivity:activity];
+	}
+}
+
+- (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)contexts {
+	for (UIOpenURLContext *c in contexts) {
+		if (c.URL != nil) {
+			urlOpened((char *)[[c.URL absoluteString] UTF8String]);
+		}
+	}
+}
+
+- (void)scene:(UIScene *)scene continueUserActivity:(NSUserActivity *)userActivity {
+	if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb] && userActivity.webpageURL != nil) {
+		urlOpened((char *)[[userActivity.webpageURL absoluteString] UTF8String]);
+	}
+}
+
+- (void)sceneDidBecomeActive:(UIScene *)scene {
+	lifecycleFocused();
+}
+
+- (void)sceneWillResignActive:(UIScene *)scene {
+	lifecycleVisible();
+}
+
+- (void)sceneDidEnterBackground:(UIScene *)scene {
+	lifecycleAlive();
 }
 @end
 
