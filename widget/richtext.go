@@ -39,6 +39,7 @@ type RichText struct {
 	Truncation fyne.TextTruncation
 
 	inset     fyne.Size     // this varies due to how the widget works (entry with scroller vs others with padding)
+	spaceRows bool          // line spacing between the rows of one text too (see rowGap)
 	rowBounds []rowBoundary // cache for boundaries
 	scr       *widget.Scroll
 	prop      *canvas.Rectangle // used to apply text minsize to the scroller `scr`, if present - TODO improve #2464
@@ -147,6 +148,17 @@ func (t *RichText) String() string {
 		ret.WriteString(seg.Textual())
 	}
 	return ret.String()
+}
+
+// rowGap is the space between two rows of the same text: the theme's line spacing when
+// the owner asked for it with spaceRows (a multi-line Entry, whose text is one inline
+// segment), none otherwise. Layout, MinSize, the cursor, the selection and hit testing
+// all step rows by charMinSize().Height + rowGap.
+func (t *RichText) rowGap(th fyne.Theme) float32 {
+	if !t.spaceRows {
+		return 0
+	}
+	return th.Size(theme.SizeNameLineSpacing)
 }
 
 // charMinSize returns the average char size to use for internal computation
@@ -622,6 +634,8 @@ func (r *textRenderer) Layout(size fyne.Size) {
 		lastSeg := bound.segments[len(bound.segments)-1]
 		if !lastSeg.Inline() && row < len(bounds)-1 && bounds[row+1].segments[0] != lastSeg { // ignore wrapped lines etc
 			yPos += lineSpacing
+		} else if r.obj.spaceRows && row < len(bounds)-1 {
+			yPos += lineSpacing
 		}
 	}
 }
@@ -723,6 +737,8 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 
 		lastSeg := bound.segments[len(bound.segments)-1]
 		if !lastSeg.Inline() && row < len(bounds)-1 && bounds[row+1].segments[0] != lastSeg { // ignore wrapped lines etc
+			height += lineSpacing
+		} else if r.obj.spaceRows && row < len(bounds)-1 {
 			height += lineSpacing
 		}
 	}
