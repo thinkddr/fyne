@@ -233,7 +233,7 @@ func (e *Entry) CursorPosition() fyne.Position {
 
 	size := provider.lineSizeToColumn(e.CursorColumn, e.CursorRow, textSize, innerPad)
 	xPos := size.Width
-	yPos := size.Height * float32(e.CursorRow)
+	yPos := (size.Height + provider.rowGap(th)) * float32(e.CursorRow)
 
 	return fyne.NewPos(xPos-(inputBorder/2), yPos+innerPad-inputBorder)
 }
@@ -1031,6 +1031,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 
 // placeholderProvider returns the placeholder text handler for this entry
 func (e *Entry) placeholderProvider() *RichText {
+	e.placeholder.spaceRows = e.MultiLine
 	if len(e.placeholder.Segments) > 0 {
 		return &e.placeholder
 	}
@@ -1305,6 +1306,7 @@ func (e *Entry) syncSelectable() {
 
 // textProvider returns the text handler for this entry
 func (e *Entry) textProvider() *RichText {
+	e.text.spaceRows = e.MultiLine
 	if len(e.text.Segments) > 0 {
 		return &e.text
 	}
@@ -1637,7 +1639,8 @@ func (r *entryRenderer) MinSize() fyne.Size {
 				count = multiLineRows
 			}
 
-			minSize.Height = charMin.Height*float32(count) + innerPadding
+			gap := r.entry.placeholderProvider().rowGap(th)
+			minSize.Height = charMin.Height*float32(count) + gap*float32(count-1) + innerPadding
 		}
 
 		minSize = minSize.AddWidthHeight(innerPadding*2, innerPadding)
