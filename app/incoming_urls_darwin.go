@@ -16,8 +16,9 @@ import "C"
 
 import "fyne.io/fyne/v2/internal/urlhandler"
 
-// registerIncomingURLs installs the kAEGetURL handler before the application has
-// a window. macOS sends custom-scheme launches as Apple events, not argv.
+// registerIncomingURLs installs the kAEGetURL and kAEOpenDocuments handlers before
+// the application has a window. macOS sends custom-scheme launches and opened
+// documents as Apple events, not argv; documents arrive as file:// URLs.
 func registerIncomingURLs() { C.watchIncomingURLs() }
 
 //export incomingURL
