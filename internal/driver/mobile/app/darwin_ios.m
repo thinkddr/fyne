@@ -66,6 +66,18 @@ static CGFloat keyboardHeight;
 	return YES;
 }
 
+// Universal Links: an https link the app is associated with (apple-app-site-association
+// plus the associated-domains entitlement) arrives as a browsing-web user activity, not
+// through openURL. iOS calls this both on a cold start (after didFinishLaunching) and
+// while running, so the URL goes to the same handler as a custom scheme.
+- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> *))restorationHandler {
+	if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb] && userActivity.webpageURL != nil) {
+		urlOpened((char *)[[userActivity.webpageURL absoluteString] UTF8String]);
+		return YES;
+	}
+	return NO;
+}
+
 - (void)applicationDidBecomeActive:(UIApplication * )application {
 	lifecycleFocused();
 }
