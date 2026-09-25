@@ -45,7 +45,7 @@ int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 
 void showKeyboard(JNIEnv* env, int keyboardType);
 void hideKeyboard(JNIEnv* env);
-void showFileOpen(JNIEnv* env, char* mimes);
+void showFileOpen(JNIEnv* env, char* mimes, int multiple);
 void showFileSave(JNIEnv* env, char* mimes, char* filename);
 void finish(JNIEnv* env, jobject ctx);
 
@@ -410,7 +410,11 @@ func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter)
 	open := func(vm, jniEnv, ctx uintptr) error {
 		// TODO pass in filter...
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-		C.showFileOpen(env, mimeStr)
+		multiple := C.int(0)
+		if filter.Multiple {
+			multiple = 1
+		}
+		C.showFileOpen(env, mimeStr, multiple)
 		return nil
 	}
 

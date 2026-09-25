@@ -64,6 +64,10 @@ type App interface {
 type FileFilter struct {
 	Extensions []string
 	MimeTypes  []string
+
+	// Multiple asks the picker to allow several files; the callback then receives
+	// their URIs separated by newlines. Only Android honours it, iOS returns one.
+	Multiple bool
 }
 
 // PublishResult is the result of an App.Publish call.

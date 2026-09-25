@@ -2,6 +2,7 @@ package mobile
 
 import (
 	"io"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/driver/mobile/app"
@@ -62,6 +63,41 @@ func ShowFileOpenPicker(callback func(fyne.URIReadCloser, error), filter storage
 			callback(f, err)
 		}, mobileFilter(filter))
 	}
+}
+
+// ShowFileOpenPickerMultiple is ShowFileOpenPicker allowing several files. Where the
+// system picker cannot (iOS today) it returns one. Cancelling calls back with nil.
+func ShowFileOpenPickerMultiple(callback func([]fyne.URIReadCloser, error), filter storage.FileFilter) {
+	drv := fyne.CurrentApp().Driver().(*driver)
+	a, ok := drv.app.(hasOpenPicker)
+	if !ok {
+		return
+	}
+	mf := mobileFilter(filter)
+	mf.Multiple = true
+	a.ShowFileOpenPicker(func(uris string, closer func()) {
+		if uris == "" {
+			callback(nil, nil)
+			return
+		}
+		var files []fyne.URIReadCloser
+		for _, uri := range strings.Split(uris, "\n") {
+			f, err := fileReaderForURI(nativeURI(uri))
+			if err != nil {
+				for _, open := range files {
+					_ = open.Close()
+				}
+				if closer != nil {
+					closer()
+				}
+				callback(nil, err)
+				return
+			}
+			files = append(files, f)
+		}
+		files[len(files)-1].(*fileOpen).done = closer // one security scope for the whole pick
+		callback(files, nil)
+	}, mf)
 }
 
 // ShowFolderOpenPicker loads the native folder open dialog and calls back the chosen directory path as a ListableURI.
