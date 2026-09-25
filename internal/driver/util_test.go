@@ -550,3 +550,32 @@ func (s *scrollable) Size() fyne.Size {
 func (s *scrollable) Visible() bool {
 	return true
 }
+
+// A clip inside a clip keeps only the overlap, as the GL ClipStack does. Replacing the
+// outer one let a scroller nested in a scrolled dialog paint and take taps outside it.
+func TestWalkVisibleObjectTree_NestedClipIntersects(t *testing.T) {
+	top := canvas.NewRectangle(color.White)
+	top.SetMinSize(fyne.NewSize(100, 80))
+	innerChild := canvas.NewRectangle(color.Black)
+	innerChild.SetMinSize(fyne.NewSize(100, 100))
+	inner := internal_widget.NewScroll(innerChild)
+	inner.SetMinSize(fyne.NewSize(100, 100))
+	outer := internal_widget.NewScroll(container.NewWithoutLayout(top, inner))
+	top.Resize(fyne.NewSize(100, 80))
+	inner.Move(fyne.NewPos(0, 84))
+	inner.Resize(fyne.NewSize(100, 100))
+	outer.Content.Resize(fyne.NewSize(100, 184))
+	outer.Resize(fyne.NewSize(100, 100))
+
+	var clipPos fyne.Position
+	var clipSize fyne.Size
+	driver.WalkVisibleObjectTree(outer, func(object fyne.CanvasObject, _ fyne.Position, cp fyne.Position, cs fyne.Size) bool {
+		if object == innerChild {
+			clipPos, clipSize = cp, cs
+		}
+		return false
+	}, nil)
+
+	assert.Equal(t, fyne.NewPos(0, 84), clipPos)
+	assert.Equal(t, fyne.NewSize(100, 16), clipSize)
+}
