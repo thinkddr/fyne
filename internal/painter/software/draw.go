@@ -30,7 +30,7 @@ func drawBlur(c fyne.Canvas, blurObj *canvas.Blur, pos fyne.Position, base *imag
 
 	scaledWidth := scale.ToScreenCoordinate(c, blurObj.Size().Width)
 	scaledHeight := scale.ToScreenCoordinate(c, blurObj.Size().Height)
-	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
+	scaledX, scaledY := toScreenPos(c, pos.X), toScreenPos(c, pos.Y)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	crop := base.SubImage(bounds)
@@ -49,7 +49,7 @@ func drawArc(c fyne.Canvas, arc *canvas.Arc, pos fyne.Position, base *image.NRGB
 	pad := painter.VectorPad(arc)
 	scaledWidth := scale.ToScreenCoordinate(c, arc.Size().Width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, arc.Size().Height+pad*2)
-	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
+	scaledX, scaledY := toScreenPos(c, pos.X-pad), toScreenPos(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	raw := painter.DrawArc(arc, pad, func(in float32) float32 {
@@ -71,7 +71,7 @@ func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *i
 	pad := painter.VectorPad(circle)
 	scaledWidth := scale.ToScreenCoordinate(c, circle.Size().Width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, circle.Size().Height+pad*2)
-	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
+	scaledX, scaledY := toScreenPos(c, pos.X-pad), toScreenPos(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	raw := painter.DrawCircle(circle, pad, func(in float32) float32 {
@@ -98,7 +98,7 @@ func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, base *image.NRGB
 	width := scale.ToScreenCoordinate(c, bounds.Width)
 	height := scale.ToScreenCoordinate(c, bounds.Height)
 	tex := g.Generate(width, height)
-	drawTex(scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y), width, height, base, tex, clip, 1.0)
+	drawTex(toScreenPos(c, pos.X), toScreenPos(c, pos.Y), width, height, base, tex, clip, 1.0)
 }
 
 func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
@@ -108,7 +108,7 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 	}
 	width := scale.ToScreenCoordinate(c, bounds.Width)
 	height := scale.ToScreenCoordinate(c, bounds.Height)
-	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
+	scaledX, scaledY := toScreenPos(c, pos.X), toScreenPos(c, pos.Y)
 
 	var rawImg image.Image
 	if img.FillMode == canvas.ImageFillCover {
@@ -187,7 +187,7 @@ func drawBezierCurve(c fyne.Canvas, bezierCurve *canvas.BezierCurve, pos fyne.Po
 	pad := painter.VectorPad(bezierCurve)
 	scaledWidth := scale.ToScreenCoordinate(c, bezierCurve.Size().Width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, bezierCurve.Size().Height+pad*2)
-	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
+	scaledX, scaledY := toScreenPos(c, pos.X-pad), toScreenPos(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	raw := painter.DrawBezierCurve(bezierCurve, pad, func(in float32) float32 {
@@ -209,7 +209,7 @@ func drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base *image.N
 	pad := painter.VectorPad(line)
 	scaledWidth := scale.ToScreenCoordinate(c, line.Size().Width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, line.Size().Height+pad*2)
-	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
+	scaledX, scaledY := toScreenPos(c, pos.X-pad), toScreenPos(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	raw := painter.DrawLine(line, pad, func(in float32) float32 {
@@ -265,8 +265,8 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	if size.Height > bounds.Height {
 		offsetY = (size.Height - bounds.Height) / 2
 	}
-	scaledX := scale.ToScreenCoordinate(c, pos.X+offsetX)
-	scaledY := scale.ToScreenCoordinate(c, pos.Y+offsetY)
+	scaledX := toScreenPos(c, pos.X+offsetX)
+	scaledY := toScreenPos(c, pos.Y+offsetY)
 	imgBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
 	clippedBounds := clip.Intersect(imgBounds)
 	srcPt := image.Point{X: clippedBounds.Min.X - imgBounds.Min.X, Y: clippedBounds.Min.Y - imgBounds.Min.Y}
@@ -294,7 +294,7 @@ func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *ima
 	}
 	width := scale.ToScreenCoordinate(c, bounds.Width)
 	height := scale.ToScreenCoordinate(c, bounds.Height)
-	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
+	scaledX, scaledY := toScreenPos(c, pos.X), toScreenPos(c, pos.Y)
 
 	pix := rast.Generator(width, height)
 	if pix.Bounds().Bounds().Dx() != width || pix.Bounds().Dy() != height {
@@ -308,7 +308,7 @@ func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float3
 	pad := painter.VectorPad(obj)
 	scaledWidth := scale.ToScreenCoordinate(c, width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, height+pad*2)
-	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
+	scaledX, scaledY := toScreenPos(c, pos.X-pad), toScreenPos(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	raw := painter.DrawRectangle(obj.(*canvas.Rectangle), width, height, pad, func(in float32) float32 {
@@ -334,7 +334,7 @@ func drawPolygon(c fyne.Canvas, polygon *canvas.RegularPolygon, pos fyne.Positio
 	pad := painter.VectorPad(polygon)
 	scaledWidth := scale.ToScreenCoordinate(c, polygon.Size().Width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, polygon.Size().Height+pad*2)
-	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
+	scaledX, scaledY := toScreenPos(c, pos.X-pad), toScreenPos(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	raw := painter.DrawPolygon(polygon, pad, func(in float32) float32 {
@@ -356,7 +356,7 @@ func drawArbitraryPolygon(c fyne.Canvas, polygon *canvas.ArbitraryPolygon, pos f
 	pad := painter.VectorPad(polygon)
 	scaledWidth := scale.ToScreenCoordinate(c, polygon.Size().Width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, polygon.Size().Height+pad*2)
-	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
+	scaledX, scaledY := toScreenPos(c, pos.X-pad), toScreenPos(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	raw := painter.DrawArbitraryPolygon(polygon, pad, func(in float32) float32 {
@@ -408,7 +408,7 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 
 	scaledWidth := scale.ToScreenCoordinate(c, width)
 	scaledHeight := scale.ToScreenCoordinate(c, height)
-	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
+	scaledX, scaledY := toScreenPos(c, pos.X), toScreenPos(c, pos.Y)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	if painter.IsShadowVisible(shadow) {
@@ -441,7 +441,7 @@ func drawEllipse(c fyne.Canvas, ellipse *canvas.Ellipse, pos fyne.Position, base
 
 	scaledWidth := scale.ToScreenCoordinate(c, ellipse.Size().Width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, ellipse.Size().Height+pad*2)
-	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
+	scaledX, scaledY := toScreenPos(c, pos.X-pad), toScreenPos(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	raw := painter.DrawEllipse(ellipse, pad, func(in float32) float32 {
@@ -523,8 +523,8 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 	startX := pos.X + float32(shadowOffset.X) - shadowSpread - vPad
 	startY := pos.Y + float32(shadowOffset.Y) - shadowSpread - vPad
 
-	screenStartX := scale.ToScreenCoordinate(c, startX)
-	screenStartY := scale.ToScreenCoordinate(c, startY)
+	screenStartX := toScreenPos(c, startX)
+	screenStartY := toScreenPos(c, startY)
 
 	blurred := blur.Gaussian(shadowRaw, float64(shadowBlurRadius*c.Scale()))
 	destRect := image.Rect(screenStartX, screenStartY, screenStartX+blurred.Bounds().Dx(), screenStartY+blurred.Bounds().Dy())
@@ -536,8 +536,8 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 
 	// If DropShadow, subtract object from shadow
 	if shadowVariant == canvas.DropShadow {
-		dx := screenStartX - scale.ToScreenCoordinate(c, pos.X-shadowSpread-vPad)
-		dy := screenStartY - scale.ToScreenCoordinate(c, pos.Y-shadowSpread-vPad)
+		dx := screenStartX - toScreenPos(c, pos.X-shadowSpread-vPad)
+		dy := screenStartY - toScreenPos(c, pos.Y-shadowSpread-vPad)
 
 		var fill, strokeCol color.Color
 		var strokeWidth float32
@@ -662,4 +662,13 @@ func minInt(x, y int) int {
 		return x
 	}
 	return y
+}
+
+// toScreenPos is where a position lands on the screen: the nearest pixel, as the GL
+// painter does (roundToPixel). Sizes still round up (scale.ToScreenCoordinate), so an
+// object never loses its last partial pixel. Taking the ceiling of a position too put
+// everything at a fractional coordinate a pixel lower (or righter) than a real window
+// and a browser paint it, which is what the captures are compared against.
+func toScreenPos(c fyne.Canvas, v float32) int {
+	return int(math.Round(float64(v * c.Scale())))
 }

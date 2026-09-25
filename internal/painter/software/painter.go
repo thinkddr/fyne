@@ -28,8 +28,8 @@ func (*Painter) Paint(c fyne.Canvas) image.Image {
 		w := fyne.Min(clipPos.X+clipSize.Width, c.Size().Width)
 		h := fyne.Min(clipPos.Y+clipSize.Height, c.Size().Height)
 		clip := image.Rect(
-			scale.ToScreenCoordinate(c, clipPos.X),
-			scale.ToScreenCoordinate(c, clipPos.Y),
+			toScreenPos(c, clipPos.X),
+			toScreenPos(c, clipPos.Y),
 			scale.ToScreenCoordinate(c, w),
 			scale.ToScreenCoordinate(c, h),
 		)
