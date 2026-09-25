@@ -906,6 +906,26 @@ func ShowFileOpen(callback func(reader fyne.URIReadCloser, err error), parent fy
 	dialog.Show()
 }
 
+// fileOpenMultipleOSOverride is set where the system picker can choose several files.
+var fileOpenMultipleOSOverride func(callback func([]fyne.URIReadCloser, error))
+
+// ShowFileOpenMultiple is ShowFileOpen allowing several files where the system picker
+// can (Android); elsewhere it is ShowFileOpen with the one reader in a slice. The slice
+// is nil when the user cancels, and each reader must be closed by the callback.
+func ShowFileOpenMultiple(callback func(readers []fyne.URIReadCloser, err error), parent fyne.Window) {
+	if fileOpenMultipleOSOverride != nil {
+		fileOpenMultipleOSOverride(callback)
+		return
+	}
+	ShowFileOpen(func(r fyne.URIReadCloser, err error) {
+		if r == nil {
+			callback(nil, err)
+			return
+		}
+		callback([]fyne.URIReadCloser{r}, err)
+	}, parent)
+}
+
 // ShowFileSave creates and shows a file dialog allowing the user to choose a
 // file to save to (new or overwrite). If the user chooses an existing file they
 // will be asked if they are sure.

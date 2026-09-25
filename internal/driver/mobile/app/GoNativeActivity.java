@@ -5,6 +5,7 @@ import android.app.AlarmManager;
 import android.app.NativeActivity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -220,11 +221,11 @@ public class GoNativeActivity extends NativeActivity {
         });
     }
 
-    static void showFileOpen(String mimes) {
-        goNativeActivity.doShowFileOpen(mimes);
+    static void showFileOpen(String mimes, boolean multiple) {
+        goNativeActivity.doShowFileOpen(mimes, multiple);
     }
 
-    void doShowFileOpen(String mimes) {
+    void doShowFileOpen(String mimes, boolean multiple) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         if ("application/x-directory".equals(mimes) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE); // ask for a directory picker if OS supports it
@@ -236,6 +237,9 @@ public class GoNativeActivity extends NativeActivity {
         } else {
             intent.setType(mimes);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
+        }
+        if (multiple && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         }
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }
@@ -453,6 +457,20 @@ public class GoNativeActivity extends NativeActivity {
             return;
         }
 
+        // Several files come in the ClipData, one only in getData. They go back as one
+        // string, one URI per line: a URI cannot hold a raw newline.
+        ClipData clip = data.getClipData();
+        if (clip != null && requestCode == FILE_OPEN_CODE) {
+            StringBuilder uris = new StringBuilder();
+            for (int i = 0; i < clip.getItemCount(); i++) {
+                if (i > 0) {
+                    uris.append('\n');
+                }
+                uris.append(clip.getItemAt(i).getUri().toString());
+            }
+            filePickerReturned(uris.toString());
+            return;
+        }
         Uri uri = data.getData();
         filePickerReturned(uri.toString());
     }
