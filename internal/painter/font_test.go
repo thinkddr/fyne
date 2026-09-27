@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal/painter"
 	intTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
@@ -177,4 +178,28 @@ func TestRenderedTextSize(t *testing.T) {
 	assert.Equal(t, int(size1.Width), int(size2.Width))
 	assert.Equal(t, size1.Height, size2.Height)
 	assert.Equal(t, baseline1, baseline2)
+}
+
+// TestCachedFontFace_SharedAcrossOverrideScopes: two overrides with the same theme are
+// two scopes but the same fonts, so they share the parsed faces; an override whose theme
+// gives another font gets its own. Keyed by scope, every new ThemeOverride parsed and
+// kept a whole set of fonts again.
+func TestCachedFontFace_SharedAcrossOverrideScopes(t *testing.T) {
+	test.NewTempApp(t)
+	first, second := canvas.NewText("a", color.Black), canvas.NewText("b", color.Black)
+	container.NewThemeOverride(container.NewStack(first), test.Theme())
+	container.NewThemeOverride(container.NewStack(second), test.Theme())
+	assert.Same(t, painter.CachedFontFace(fyne.TextStyle{}, nil, first),
+		painter.CachedFontFace(fyne.TextStyle{}, nil, second), "same theme, same fonts")
+
+	other := canvas.NewText("c", color.Black)
+	container.NewThemeOverride(container.NewStack(other), &monoTheme{test.Theme()})
+	assert.NotSame(t, painter.CachedFontFace(fyne.TextStyle{}, nil, first),
+		painter.CachedFontFace(fyne.TextStyle{}, nil, other), "another font, other faces")
+}
+
+type monoTheme struct{ fyne.Theme }
+
+func (m *monoTheme) Font(fyne.TextStyle) fyne.Resource {
+	return m.Theme.Font(fyne.TextStyle{Monospace: true})
 }
