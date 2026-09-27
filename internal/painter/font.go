@@ -135,17 +135,16 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		return val
 	}
 
-	scope := ""
-	if o != nil { // for overridden themes get the cache key right
-		scope = cache.WidgetScopeID(o)
-	}
+	// The faces depend only on the style and on the font the widget's theme gives for it,
+	// so that is the key. Keyed by override scope, every new ThemeOverride parsed the
+	// theme, emoji and symbol fonts again and kept them for good.
+	th := theme.CurrentForWidget(o)
+	font1 := th.Font(style)
+	id := cacheID{style: style, font: font1}
 
-	val, ok := fontCache.Load(cacheID{style: style, scope: scope})
+	val, ok := fontCache.Load(id)
 	if !ok {
 		var faces *dynamicFontMap
-
-		th := theme.CurrentForWidget(o)
-		font1 := th.Font(style)
 
 		// Skip any nil fallback fonts — they can be nil when built with
 		// -tags no_emoji, and the lookupFaces loop expects non-nil entries.
@@ -181,7 +180,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		}
 
 		val = &FontCacheItem{Fonts: faces}
-		fontCache.Store(cacheID{style: style, scope: scope}, val)
+		fontCache.Store(id, val)
 	}
 
 	return val
@@ -500,7 +499,7 @@ type FontCacheItem struct {
 
 type cacheID struct {
 	style fyne.TextStyle
-	scope string
+	font  fyne.Resource
 }
 
 var (
