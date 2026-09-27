@@ -102,6 +102,7 @@ func (d *driver) runQueue() {
 			return
 		}
 		call := d.queue[0]
+		d.queue[0] = queuedCall{} // the backing array must not keep what already ran alive
 		d.queue = d.queue[1:]
 		d.queueLock.Unlock()
 
