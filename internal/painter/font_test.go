@@ -202,3 +202,48 @@ type monoTheme struct{ fyne.Theme }
 func (m *monoTheme) Font(fyne.TextStyle) fyne.Resource {
 	return m.Theme.Font(fyne.TextStyle{Monospace: true})
 }
+
+// TestCachedFontFace_FreshResourceSameBytes: a theme that wraps the same font bytes in a
+// new Resource on every call still reuses the faces parsed before. Keyed by the Resource
+// value, each call missed and parsed the font again, and kept it.
+func TestCachedFontFace_FreshResourceSameBytes(t *testing.T) {
+	test.NewTempApp(t)
+	first, second := canvas.NewText("a", color.Black), canvas.NewText("b", color.Black)
+	container.NewThemeOverride(container.NewStack(first), &freshTheme{test.Theme()})
+	container.NewThemeOverride(container.NewStack(second), &freshTheme{test.Theme()})
+	assert.Same(t, painter.CachedFontFace(fyne.TextStyle{}, nil, first),
+		painter.CachedFontFace(fyne.TextStyle{}, nil, second), "same bytes, same faces")
+}
+
+// TestCachedFontFace_ResourceNotComparable: a Resource whose dynamic type is not
+// comparable must not panic as part of the cache key.
+func TestCachedFontFace_ResourceNotComparable(t *testing.T) {
+	test.NewTempApp(t)
+	text := canvas.NewText("a", color.Black)
+	container.NewThemeOverride(container.NewStack(text), &sliceTheme{test.Theme()})
+	assert.NotPanics(t, func() { painter.CachedFontFace(fyne.TextStyle{}, nil, text) })
+}
+
+// freshTheme returns a new Resource holding the same bytes on every call.
+type freshTheme struct{ fyne.Theme }
+
+func (f *freshTheme) Font(s fyne.TextStyle) fyne.Resource {
+	res := f.Theme.Font(s)
+	return fyne.NewStaticResource(res.Name(), res.Content())
+}
+
+// sliceTheme returns its font as a value whose type holds a slice, so it is not comparable.
+type sliceTheme struct{ fyne.Theme }
+
+func (s *sliceTheme) Font(st fyne.TextStyle) fyne.Resource {
+	res := s.Theme.Font(st)
+	return sliceResource{name: res.Name(), data: res.Content()}
+}
+
+type sliceResource struct {
+	name string
+	data []byte
+}
+
+func (r sliceResource) Name() string    { return r.name }
+func (r sliceResource) Content() []byte { return r.data }

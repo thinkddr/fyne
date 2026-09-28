@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"unsafe"
 
 	"github.com/go-text/render"
 	"github.com/go-text/typesetting/di"
@@ -140,7 +141,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 	// theme, emoji and symbol fonts again and kept them for good.
 	th := theme.CurrentForWidget(o)
 	font1 := th.Font(style)
-	id := cacheID{style: style, font: font1}
+	id := fontCacheID(style, font1)
 
 	val, ok := fontCache.Load(id)
 	if !ok {
@@ -499,7 +500,24 @@ type FontCacheItem struct {
 
 type cacheID struct {
 	style fyne.TextStyle
-	font  fyne.Resource
+	name  string
+	data  *byte // where the font's bytes live, not the Resource: its type may not be comparable
+	size  int
+}
+
+// fontCacheID identifies a font by its name and the bytes it holds rather than by the
+// Resource value. A Resource whose type is not comparable would panic as a map key, and a
+// theme that wraps the same bytes in a new Resource on every call would parse them again.
+// Content returns the slice the Resource holds, so this costs no copy.
+func fontCacheID(style fyne.TextStyle, res fyne.Resource) cacheID {
+	id := cacheID{style: style}
+	if res == nil {
+		return id
+	}
+
+	data := res.Content()
+	id.name, id.data, id.size = res.Name(), unsafe.SliceData(data), len(data)
+	return id
 }
 
 var (
