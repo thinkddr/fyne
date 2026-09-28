@@ -646,14 +646,7 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) bool {
 	if k.Rune >= '0' && k.Rune <= '9' { // GBoard generates key events for numbers, but we see them in textChanged
 		return false
 	}
-	switch C.AKeyEvent_getAction(e) {
-	case C.AKEY_STATE_DOWN:
-		k.Direction = key.DirPress
-	case C.AKEY_STATE_UP:
-		k.Direction = key.DirRelease
-	default:
-		k.Direction = key.DirNone
-	}
+	k.Direction = keyDirection(int32(C.AKeyEvent_getAction(e)))
 	// TODO(crawshaw): set Modifiers.
 	theApp.events.In() <- k
 
