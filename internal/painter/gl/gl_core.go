@@ -176,7 +176,12 @@ func (c *coreContext) BlendColor(r, g, b, a float32) {
 }
 
 func (c *coreContext) BlendFunc(srcFactor, destFactor uint32) {
-	gl.BlendFunc(srcFactor, destFactor)
+	// The alpha channel of the framebuffer must stay opaque: with srcAlpha/oneMinusSrcAlpha
+	// on alpha too, every antialiased edge left alpha below 1 over colours that are not
+	// premultiplied, and a Wayland compositor (KWin), which blends the surface as
+	// premultiplied, showed coloured fringes on every rounded or stroked edge. The colour
+	// keeps the requested factors; alpha always accumulates towards 1.
+	gl.BlendFuncSeparate(srcFactor, destFactor, gl.ONE, destFactor)
 }
 
 func (c *coreContext) BufferData(target uint32, points []float32, usage uint32) {
