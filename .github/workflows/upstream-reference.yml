@@ -47,3 +47,192 @@ jobs:
           name: upstream-reference-${{ matrix.runner }}-${{ github.sha }}
           path: '**/testdata/failed'
           if-no-files-found: ignore
+  fork-golden-differential:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GOMAXPROCS: 2
+      LANG: en_US.UTF-8
+      CC: clang
+      CGO_LDFLAGS: -fuse-ld=lld
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: '1.27.1'
+          cache: false
+      - name: Install desktop test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y clang lld libgl1-mesa-dev libwayland-dev libx11-dev libxkbcommon-dev xorg-dev xvfb language-pack-en fonts-noto-cjk
+      - name: Neutralize only the three intentional rendering changes
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import subprocess
+          from pathlib import Path
+
+          baseline = '3dc06f47137aa3709807f1bb78dacc5daf68d551'
+          visual_commits = (
+              '4d4ebf8908dbfedaa85fa6a7887cdd76227acaa7',
+              'a353ee54948f65485ce8cee7c1c5080f4069db68',
+          )
+
+          def git(*args):
+              return subprocess.check_output(['git', *args])
+
+          patches = {
+              'internal/painter/software/draw.go': [(
+                  'func toScreenPos(c fyne.Canvas, v float32) int {\n'
+                  '\treturn int(math.Round(float64(v * c.Scale())))\n}',
+                  'func toScreenPos(c fyne.Canvas, v float32) int {\n'
+                  '\treturn scale.ToScreenCoordinate(c, v)\n}',
+              )],
+              'widget/entry.go': [
+                  ('\te.placeholder.spaceRows = e.MultiLine', '\te.placeholder.spaceRows = false'),
+                  ('\te.text.spaceRows = e.MultiLine', '\te.text.spaceRows = false'),
+              ],
+              'internal/driver/util.go': [(
+                  '\t\tsize := obj.Size()\n'
+                  '\t\tx0, y0 := max(clipPos.X, pos.X), max(clipPos.Y, pos.Y)\n'
+                  '\t\tx1 := min(clipPos.X+clipSize.Width, pos.X+size.Width)\n'
+                  '\t\ty1 := min(clipPos.Y+clipSize.Height, pos.Y+size.Height)\n'
+                  '\t\tclipPos = fyne.NewPos(x0, y0)\n'
+                  '\t\tclipSize = fyne.NewSize(max(x1-x0, 0), max(y1-y0, 0))',
+                  '\t\tclipPos = pos\n\t\tclipSize = obj.Size()',
+              )],
+          }
+          sources = {}
+          for name, replacements in patches.items():
+              original = Path(name).read_text()
+              changed = original
+              for before, after in replacements:
+                  if changed.count(before) != 1:
+                      raise SystemExit(f'Expected exactly one neutralization target in {name}')
+                  changed = changed.replace(before, after, 1)
+              sources[name] = (original, changed)
+
+          # Restore only masters already changed by the intentional visual commits.
+          masters = set()
+          for commit in visual_commits:
+              names = git('diff-tree', '--no-commit-id', '--name-only', '-r', commit).decode().splitlines()
+              masters.update(name for name in names if '/testdata/' in name)
+          if len(masters) != 55:
+              raise SystemExit(f'Expected 55 previously refreshed masters, found {len(masters)}')
+          restored = {name: git('show', f'{baseline}:{name}') for name in sorted(masters)}
+          if any(not name.endswith(('.png', '.xml')) for name in restored):
+              raise SystemExit('Unexpected fixture type in the restored master inventory')
+
+          report_dir = Path('artifacts/differential')
+          report_dir.mkdir(parents=True, exist_ok=True)
+          manifest = {
+              'schema': 1,
+              'forkHead': git('rev-parse', 'HEAD').decode().strip(),
+              'baseline': baseline,
+              'neutralized': {},
+              'restoredMasters': [],
+          }
+          for name, (original, changed) in sources.items():
+              manifest['neutralized'][name] = {
+                  'before': hashlib.sha256(original.encode()).hexdigest(),
+                  'after': hashlib.sha256(changed.encode()).hexdigest(),
+              }
+              Path(name).write_text(changed)
+          for name, content in restored.items():
+              manifest['restoredMasters'].append({
+                  'path': name,
+                  'before': hashlib.sha256(Path(name).read_bytes()).hexdigest(),
+                  'after': hashlib.sha256(content).hexdigest(),
+              })
+              Path(name).write_bytes(content)
+          (report_dir / 'variant.json').write_text(json.dumps(manifest, indent=2) + '\n')
+          (report_dir / 'neutralization.patch').write_bytes(git('diff', '--', *sources))
+          print(f'Neutralized {len(sources)} source files; restored {len(restored)} masters')
+          PY
+      - name: Run all tests with expected failing regression controls
+        shell: bash
+        run: |
+          go mod verify
+          go list -tags ci,migrated_fynedo ./... > artifacts/differential/packages.txt
+          set +e
+          xvfb-run -a go test -json -count=1 -p=2 -race -tags ci,migrated_fynedo ./... 2>&1 | tee artifacts/differential/test.log
+          task_test_status=${PIPESTATUS[0]}
+          set -e
+          printf '%s\n' "$task_test_status" > artifacts/differential/test-status.txt
+      - name: Require the three controls and zero image mismatches
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          report_dir = Path('artifacts/differential')
+          required = ('test.log', 'test-status.txt', 'packages.txt', 'variant.json')
+          missing = [name for name in required if not (report_dir / name).is_file()]
+          if missing:
+              raise SystemExit(f'Differential test did not complete: missing {missing}')
+          expected = {
+              ('fyne.io/fyne/v2/internal/painter/software', 'TestPainter_fractionalPositionRounds'),
+              ('fyne.io/fyne/v2/internal/driver', 'TestWalkVisibleObjectTree_NestedClipIntersects'),
+              ('fyne.io/fyne/v2/widget', 'TestEntry_MultiLineRowsFollowLineSpacing'),
+          }
+          failures = set()
+          terminals = {}
+          outputs = []
+          for line in (report_dir / 'test.log').read_text().splitlines():
+              try:
+                  event = json.loads(line)
+              except json.JSONDecodeError:
+                  outputs.append(line)
+                  continue
+              if not isinstance(event, dict):
+                  raise SystemExit('Unexpected non-object go test event')
+              outputs.append(event.get('Output', ''))
+              if event.get('Action') == 'fail' and event.get('Test'):
+                  failures.add((event['Package'], event['Test']))
+              if event.get('Action') in ('pass', 'fail', 'skip') and not event.get('Test'):
+                  terminals[event['Package']] = event['Action']
+          output = '\n'.join(outputs)
+          packages = set((report_dir / 'packages.txt').read_text().splitlines())
+          expected_failed_packages = {package for package, _ in expected}
+          failed_packages = {package for package, action in terminals.items() if action == 'fail'}
+          image_failures = output.count('Images not equal')
+          status = int((report_dir / 'test-status.txt').read_text().strip())
+          report = {
+              'schema': 1,
+              'testExitStatus': status,
+              'imageMismatchCount': image_failures,
+              'expectedControls': sorted([list(test) for test in expected]),
+              'failedTests': sorted([list(test) for test in failures]),
+              'unexpectedTests': sorted([list(test) for test in failures - expected]),
+              'missingControls': sorted([list(test) for test in expected - failures]),
+              'failedPackages': sorted(failed_packages),
+              'missingPackages': sorted(packages - terminals.keys()),
+              'packageCount': len(packages),
+              'raceDetected': 'DATA RACE' in output,
+          }
+          valid = (
+              status == 1 and image_failures == 0 and failures == expected
+              and failed_packages == expected_failed_packages
+              and packages == terminals.keys() and bool(packages)
+              and not report['raceDetected']
+          )
+          report['allLegacyAssertionsPassed'] = valid
+          (report_dir / 'summary.json').write_text(json.dumps(report, indent=2) + '\n')
+          print(json.dumps(report, indent=2))
+          if not valid:
+              raise SystemExit('Differential result contains an unexplained failure or missing control')
+          PY
+      - name: Retain differential logs and visual fixtures
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: fork-golden-differential-${{ github.sha }}
+          path: |
+            artifacts/differential
+            **/testdata/failed
+          if-no-files-found: error

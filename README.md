@@ -5,12 +5,15 @@ native desktop and mobile applications. This release adds incoming URL handling,
 Android multi-file selection, overlay/focus behavior and targeted rendering,
 cache and lifecycle fixes.
 
-**Release:** `v2.8.1-sytue.15`, based on upstream `v2.8.1`.
+**Latest tagged release:** `v2.8.1-sytue.15`, based on upstream `v2.8.1`.
 The [release delta](https://github.com/thinkddr/fyne/compare/v2.8.1...v2.8.1-sytue.15)
 contains 17 commits. [FORK-NOTICE.md](FORK-NOTICE.md) lists each change and its
 scope. The toolkit code and Sytue additions use Fyne's
 [BSD 3-Clause license](LICENSE). Bundled fonts retain their
 [own license notices](theme/font/).
+
+The development branch includes documentation, regression CI, lint fixes and
+watcher-test synchronization after this tag.
 
 ## Install
 
@@ -92,6 +95,12 @@ the URI; `-1` means unknown and this method is not part of `fyne.URI`.
 The linked tests cover their stated regressions. Headless tests do not prove
 Android/iOS/macOS native integration or compositor behavior. Those paths require
 device or platform validation.
+
+The strict software-image reference uses Linux x86-64. The
+[unchanged upstream 2.8.1 reference run](https://github.com/thinkddr/fyne/actions/runs/37198815282)
+passes in that environment; Linux ARM64 produces image differences with the same
+Go 1.27.1 toolchain. ARM64 browser or native pixel equivalence requires its own
+verification.
 
 Go 1.22/1.23 retain the strong theme-key fallback. Weak keys do not establish a
 bound on all cache metadata. The theme-font cache is **not** content-addressed:
