@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: BSD-3-Clause
+name: Fork conformance
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fork-conformance-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  linux-regressions:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    env:
+      GOMAXPROCS: 2
+      LANG: en_US.UTF-8
+      CC: clang
+      CGO_LDFLAGS: -fuse-ld=lld
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: '1.27.1'
+          cache: false
+      - name: Install desktop test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y clang lld libgl1-mesa-dev libwayland-dev libx11-dev libxkbcommon-dev xorg-dev xvfb language-pack-en fonts-noto-cjk
+      - name: Verify modules and format
+        run: |
+          go mod verify
+          test -z "$(gofmt -l $(git ls-files '*.go'))"
+      - name: Vet
+        run: go vet -tags ci,migrated_fynedo ./...
+      - name: Run runtime and driver regressions
+        run: xvfb-run -a go test -count=1 -p=2 -race -tags ci,migrated_fynedo ./...
+      - name: Retain failed visual fixtures
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: fork-failed-fixtures-${{ github.sha }}
+          path: '**/testdata/failed'
+          if-no-files-found: ignore
