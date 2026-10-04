@@ -86,5 +86,6 @@ jobs:
           go get fyne.io/fyne/v2@v2.8.1
           go mod edit "-replace=fyne.io/fyne/v2=github.com/thinkddr/fyne/v2@${TASK_FORK_VERSION}"
           go mod tidy
+          go mod verify
           go list -m -json fyne.io/fyne/v2
           go build -tags ci .

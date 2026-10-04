@@ -28,23 +28,34 @@ That result identifies the stale fixtures as consequences of the intended
 rendering changes. The temporary diagnostic is retained in Git history and its
 CI evidence; production tests use the real fork implementation.
 
-The maintenance release refreshes 104 PNG masters: 96 desktop fixtures and eight
+The maintenance release refreshes 116 PNG masters: 108 desktop fixtures and eight
 additional mobile fixtures. All 83 shared desktop/mobile captures match exactly
 in RGBA. Dimensions remain unchanged. The
 [fixture inventory](ci/fork-visual-reference.json) records source revisions,
 diagnostic results and every before/after SHA-256 hash.
+
+Twelve menu captures were exposed after correcting an earlier initial image:
+the original test skipped its action steps when that assertion failed. Those
+steps all passed in the rendering diagnostic. The test now always exercises
+every mouse and keyboard action, while retaining each image, markup and callback
+assertion.
 
 The fixture review also exposed stale Entry scroll geometry after undo. The
 [viewport regression](widget/entry_scroll_internal_test.go) verifies that typing
 an overflowing row and then undoing it restores the text, cursor, fitting bounds,
 zero scroll offset and the exact initial capture. Entry refresh now updates the
 active scroll layout before cursor visibility is calculated.
+The initial and five-undo image masters use the corrected fitting viewport;
+their inventory entries retain the earlier capture hashes and correction notes.
 
 ## Release checks
 
 [Fork conformance](.github/workflows/fork-conformance.yml) runs module
 verification, formatting, vet and race-enabled tests against the real source.
 The inherited platform, mobile, web and static-analysis workflows remain active.
+Linux platform tests retain the upstream 62% coverage requirement and archive
+the coverage report. External Coveralls uploads require the repository variable
+`COVERALLS_ENABLED=true` and enrollment of this fork with that service.
 Release tags also build a clean external module using canonical Fyne imports and
 the published fork replacement from the README.
 

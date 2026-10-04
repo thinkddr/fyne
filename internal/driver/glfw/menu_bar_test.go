@@ -306,31 +306,30 @@ func TestMenuBar(t *testing.T) {
 
 					capture = c.Capture()
 				})
-				if test.AssertImageMatches(t, "menu_bar_initial.png", capture) {
-					for i, s := range tt.steps {
-						t.Run("step "+strconv.Itoa(i+1), func(t *testing.T) {
-							lastAction = ""
-							for _, a := range s.actions {
-								switch a.typ {
-								case "move":
-									runOnMain(func() {
-										test.MoveMouse(c, a.pos)
-									})
-								case "tap":
-									runOnMain(func() {
-										test.MoveMouse(c, a.pos)
-										test.TapCanvas(c, a.pos)
-									})
-								}
+				test.AssertImageMatches(t, "menu_bar_initial.png", capture)
+				for i, s := range tt.steps {
+					t.Run("step "+strconv.Itoa(i+1), func(t *testing.T) {
+						lastAction = ""
+						for _, a := range s.actions {
+							switch a.typ {
+							case "move":
+								runOnMain(func() {
+									test.MoveMouse(c, a.pos)
+								})
+							case "tap":
+								runOnMain(func() {
+									test.MoveMouse(c, a.pos)
+									test.TapCanvas(c, a.pos)
+								})
 							}
-							var capture2 image.Image
-							runOnMain(func() {
-								capture2 = c.Capture()
-							})
-							test.AssertImageMatches(t, s.wantImage, capture2)
-							assert.Equal(t, s.wantAction, lastAction, "last action should match expected")
+						}
+						var capture2 image.Image
+						runOnMain(func() {
+							capture2 = c.Capture()
 						})
-					}
+						test.AssertImageMatches(t, s.wantImage, capture2)
+						assert.Equal(t, s.wantAction, lastAction, "last action should match expected")
+					})
 				}
 			})
 		}
@@ -442,18 +441,17 @@ func TestMenuBar(t *testing.T) {
 				runOnMain(func() {
 					captured = c.Capture()
 				})
-				if test.AssertImageMatches(t, "menu_bar_active_file.png", captured) {
-					lastAction = ""
-					runOnMain(func() {
-						for _, key := range tt.keys {
-							c.Focused().TypedKey(&fyne.KeyEvent{
-								Name: key,
-							})
-						}
-					})
-					test.AssertRendersToMarkup(t, "menu_bar_kbdctrl_"+name+".xml", c)
-					assert.Equal(t, tt.wantAction, lastAction, "last action should match expected")
-				}
+				test.AssertImageMatches(t, "menu_bar_active_file.png", captured)
+				lastAction = ""
+				runOnMain(func() {
+					for _, key := range tt.keys {
+						c.Focused().TypedKey(&fyne.KeyEvent{
+							Name: key,
+						})
+					}
+				})
+				test.AssertRendersToMarkup(t, "menu_bar_kbdctrl_"+name+".xml", c)
+				assert.Equal(t, tt.wantAction, lastAction, "last action should match expected")
 			})
 		}
 
