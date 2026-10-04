@@ -42,6 +42,8 @@ jobs:
           fi
       - name: Vet
         run: go vet -tags ci,migrated_fynedo ./...
+      - name: Verify Entry viewport restoration
+        run: go test -v -count=1 -race -tags ci,migrated_fynedo ./widget -run '^TestEntry_UndoRestoresFittingViewport$'
       - name: Run runtime and driver regressions
         run: xvfb-run -a go test -count=1 -p=2 -race -tags ci,migrated_fynedo ./...
       - name: Retain failed visual fixtures
