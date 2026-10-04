@@ -113,6 +113,18 @@ type App interface {
 	Cache() Cache
 }
 
+// URLHandler is implemented by applications that can receive URLs opened by the
+// operating system. It is separate from [App] to preserve compatibility with
+// existing third-party App implementations.
+//
+// The callback always runs in the graphical context. URLs received before this
+// method is called are retained and delivered after registration.
+//
+// Since: 2.8.1-sytue.1
+type URLHandler interface {
+	SetOnOpenURL(func(*url.URL))
+}
+
 var app atomic.Pointer[App]
 
 // SetCurrentApp is an internal function to set the app instance currently running.

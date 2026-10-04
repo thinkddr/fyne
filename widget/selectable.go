@@ -201,6 +201,12 @@ func (s *selectable) getRowCol(p fyne.Position) (int, int) {
 
 	rowHeight := s.provider.charMinSize(false, s.style, textSize).Height // TODO handle Password
 	row := int(math.Floor(float64(p.Y-innerPad+th.Size(theme.SizeNameLineSpacing)) / float64(rowHeight)))
+	if gap := s.provider.rowGap(th); gap > 0 {
+		// Rows start at innerPad-inputBorder, one every rowHeight+gap; a tap in the gap
+		// goes to the nearer row.
+		top := innerPad - th.Size(theme.SizeNameInputBorder)
+		row = int(math.Floor(float64(p.Y-top+gap/2) / float64(rowHeight+gap)))
+	}
 	col := 0
 	if row < 0 {
 		row = 0
@@ -348,7 +354,7 @@ func (r *selectableRenderer) buildSelection() {
 	// Convert column, row into x,y
 	getCoordinates := func(column int, row int) (float32, float32) {
 		sz := provider.lineSizeToColumn(column, row, textSize, innerPad)
-		return sz.Width, sz.Height*float32(row) - th.Size(theme.SizeNameInputBorder) + innerPad
+		return sz.Width, (sz.Height+provider.rowGap(th))*float32(row) - th.Size(theme.SizeNameInputBorder) + innerPad
 	}
 
 	lineHeight := r.sel.provider.charMinSize(r.sel.password, r.sel.style, textSize).Height

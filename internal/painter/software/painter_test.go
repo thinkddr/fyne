@@ -914,3 +914,32 @@ func TestPainter_paintEllipse(t *testing.T) {
 	obj.StrokeWidth = 4
 	test.AssertImageMatches(t, "draw_ellipse_narrow_stroke.png", p.Paint(c))
 }
+
+// A fractional position lands on the nearest pixel, as in the GL painter and a browser:
+// a rectangle at 10.25 starts at row 10, one at 10.75 at row 11. Taking the ceiling put
+// both at 11, so every capture drew things a pixel lower than the window does.
+func TestPainter_fractionalPositionRounds(t *testing.T) {
+	for _, c := range []struct {
+		y     float32
+		first int
+	}{{10.25, 10}, {10.5, 11}, {10.75, 11}} {
+		rect := canvas.NewRectangle(color.NRGBA{R: 0xff, A: 0xff})
+		rect.Move(fyne.NewPos(10, c.y))
+		rect.Resize(fyne.NewSize(10, 5))
+		cv := test.NewCanvas()
+		cv.SetPadded(false)
+		cv.SetContent(container.NewWithoutLayout(rect))
+		cv.Resize(fyne.NewSize(40, 40))
+		img := software.NewPainter().Paint(cv)
+		first := -1
+		for y := 0; y < 40; y++ {
+			if r, g, _, _ := img.At(15, y).RGBA(); r > 0xc000 && g < 0x4000 {
+				first = y
+				break
+			}
+		}
+		if first != c.first {
+			t.Errorf("a rectangle at y=%v starts at row %d, want %d", c.y, first, c.first)
+		}
+	}
+}

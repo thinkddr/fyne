@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal/painter"
 	intTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
@@ -178,3 +179,71 @@ func TestRenderedTextSize(t *testing.T) {
 	assert.Equal(t, size1.Height, size2.Height)
 	assert.Equal(t, baseline1, baseline2)
 }
+
+// Two overrides with the same theme are two scopes but the same fonts, so they share the
+// parsed faces; an override whose theme gives another font gets its own. Keyed by scope,
+// every new ThemeOverride parsed and kept a whole set of fonts again.
+func TestCachedFontFace_SharedAcrossOverrideScopes(t *testing.T) {
+	test.NewTempApp(t)
+	first, second := canvas.NewText("a", color.Black), canvas.NewText("b", color.Black)
+	container.NewThemeOverride(container.NewStack(first), test.Theme())
+	container.NewThemeOverride(container.NewStack(second), test.Theme())
+	assert.Same(t, painter.CachedFontFace(fyne.TextStyle{}, nil, first),
+		painter.CachedFontFace(fyne.TextStyle{}, nil, second), "same theme, same fonts")
+
+	other := canvas.NewText("c", color.Black)
+	container.NewThemeOverride(container.NewStack(other), &monoTheme{test.Theme()})
+	assert.NotSame(t, painter.CachedFontFace(fyne.TextStyle{}, nil, first),
+		painter.CachedFontFace(fyne.TextStyle{}, nil, other), "another font, other faces")
+}
+
+type monoTheme struct{ fyne.Theme }
+
+func (m *monoTheme) Font(fyne.TextStyle) fyne.Resource {
+	return m.Theme.Font(fyne.TextStyle{Monospace: true})
+}
+
+// TestCachedFontFace_FreshResourceSameBytes: a theme that wraps the same font bytes in a
+// new Resource on every call still reuses the faces parsed before. Keyed by the Resource
+// value, each call missed and parsed the font again, and kept it.
+func TestCachedFontFace_FreshResourceSameBytes(t *testing.T) {
+	test.NewTempApp(t)
+	first, second := canvas.NewText("a", color.Black), canvas.NewText("b", color.Black)
+	container.NewThemeOverride(container.NewStack(first), &freshTheme{test.Theme()})
+	container.NewThemeOverride(container.NewStack(second), &freshTheme{test.Theme()})
+	assert.Same(t, painter.CachedFontFace(fyne.TextStyle{}, nil, first),
+		painter.CachedFontFace(fyne.TextStyle{}, nil, second), "same bytes, same faces")
+}
+
+// TestCachedFontFace_ResourceNotComparable: a Resource whose dynamic type is not
+// comparable must not panic as part of the cache key.
+func TestCachedFontFace_ResourceNotComparable(t *testing.T) {
+	test.NewTempApp(t)
+	text := canvas.NewText("a", color.Black)
+	container.NewThemeOverride(container.NewStack(text), &sliceTheme{test.Theme()})
+	assert.NotPanics(t, func() { painter.CachedFontFace(fyne.TextStyle{}, nil, text) })
+}
+
+// freshTheme returns a new Resource holding the same bytes on every call.
+type freshTheme struct{ fyne.Theme }
+
+func (f *freshTheme) Font(s fyne.TextStyle) fyne.Resource {
+	res := f.Theme.Font(s)
+	return fyne.NewStaticResource(res.Name(), res.Content())
+}
+
+// sliceTheme returns its font as a value whose type holds a slice, so it is not comparable.
+type sliceTheme struct{ fyne.Theme }
+
+func (s *sliceTheme) Font(st fyne.TextStyle) fyne.Resource {
+	res := s.Theme.Font(st)
+	return sliceResource{name: res.Name(), data: res.Content()}
+}
+
+type sliceResource struct {
+	name string
+	data []byte
+}
+
+func (r sliceResource) Name() string    { return r.name }
+func (r sliceResource) Content() []byte { return r.data }

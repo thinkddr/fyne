@@ -463,6 +463,7 @@ func (w *window) mouseOut() {
 
 func (w *window) processMouseClicked(button desktop.MouseButton, action action, modifiers fyne.KeyModifier) {
 	w.ensurePositionProcessed()
+	prevOverlay := w.canvas.Overlays().Top()
 
 	w.mouseDragPos = w.mousePos
 	mousePos := w.mousePos
@@ -501,20 +502,11 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 		w.mouseClickedHandleMouseable(mev, action, wid)
 	}
 
-	focused := w.canvas.Focused()
-	if wid, ok := co.(fyne.Focusable); !ok || wid != focused {
-		ignore := false
-		if focusedObj, ok := focused.(fyne.CanvasObject); ok {
-			found, _, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
-				return object == focusedObj
-			})
-			ignore = found != nil
-		}
-
-		if !ignore { // if the currently focused widget is under the mouse then ignore this tap unfocus
-			w.canvas.Unfocus()
-		}
+	if w.mouseClickedRedispatchDismissedOverlay(button, action, modifiers, prevOverlay) {
+		return
 	}
+
+	w.mouseClickedHandleFocus(co, mousePos)
 
 	switch action {
 	case press:
@@ -577,6 +569,33 @@ func (w *window) ensurePositionProcessed() {
 	if !w.mousePosUpdateProcessed {
 		w.processMouseMoved(w.newMousePosX, w.newMousePosY)
 		w.mousePosUpdateProcessed = true
+	}
+}
+
+func (w *window) mouseClickedRedispatchDismissedOverlay(button desktop.MouseButton, action action, modifiers fyne.KeyModifier, prevOverlay fyne.CanvasObject) bool {
+	// Send a dismissing press to the newly uncovered target.
+	if action == press && driver.PassesTapThrough(prevOverlay) &&
+		!slices.Contains(w.canvas.Overlays().List(), prevOverlay) {
+		w.processMouseClicked(button, action, modifiers)
+		return true
+	}
+	return false
+}
+
+func (w *window) mouseClickedHandleFocus(co fyne.CanvasObject, mousePos fyne.Position) {
+	focused := w.canvas.Focused()
+	if wid, ok := co.(fyne.Focusable); !ok || wid != focused {
+		ignore := false
+		if focusedObj, ok := focused.(fyne.CanvasObject); ok {
+			found, _, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
+				return object == focusedObj
+			})
+			ignore = found != nil
+		}
+
+		if !ignore { // Keep focus when the focused widget is under the pointer.
+			w.canvas.Unfocus()
+		}
 	}
 }
 
@@ -654,10 +673,20 @@ func (w *window) waitForDoubleTapEnded(co fyne.CanvasObject, ev *fyne.PointEvent
 
 func (w *window) processMouseScrolled(xoff float64, yoff float64) {
 	mousePos := w.mousePos
-	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
+	scrollable := func(object fyne.CanvasObject) bool {
 		_, ok := object.(fyne.Scrollable)
 		return ok
-	})
+	}
+	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, scrollable)
+	top := w.canvas.Overlays().Top()
+	if co == nil && driver.PassesScrollThrough(top) {
+		// A non modal overlay (a menu) does not stop the wheel from scrolling what it
+		// covers; it is told afterwards so it can follow what moved underneath.
+		co, pos, _ = driver.FindObjectAtPositionMatching(mousePos, scrollable, nil, w.canvas.menu, w.canvas.Content())
+		if co != nil {
+			defer top.Refresh()
+		}
+	}
 	switch wid := co.(type) {
 	case fyne.Scrollable:
 		if math.Abs(xoff) >= scrollAccelerateCutoff {

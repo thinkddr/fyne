@@ -265,3 +265,36 @@ func testClearAll() {
 	timeNow = time.Now
 	refreshNow()
 }
+
+// TestCleanKeepsEntriesMarkedAliveSinceLastFrame: setAlive stamps the sample the
+// previous Clean left behind, so expiry has to be measured against that sample and
+// not the one Clean takes on entry. Otherwise a renderer created after a long gap
+// without frames (a test that captures nothing for over ValidDuration) is expired
+// at birth, destroyed by the very next Clean and re-created by the painter without
+// Layout - which paints nothing.
+func TestCleanKeepsEntriesMarkedAliveSinceLastFrame(t *testing.T) {
+	testClearAll()
+	tm := &timeMock{}
+	tm.setTime(10, 0) // the sample the last frame left behind
+	lastClean = tm.now
+
+	// Two minutes without a frame: the clock moves, the sample does not.
+	tm.now = tm.createTime(12, 0)
+	timeNow = func() time.Time { return tm.now }
+
+	destroyed := 0
+	Renderer(&dummyWidget{onDestroy: func() { destroyed++ }})
+	SetCanvasForObject(&dummyWidget{}, &dummyCanvas{}, nil)
+
+	Clean(true)
+	assert.Equal(t, 1, renderers.Len(), "a renderer created since the last frame must survive the next Clean")
+	assert.Equal(t, 1, canvases.Len())
+	assert.Zero(t, destroyed)
+
+	// Untouched since then, it still expires once ValidDuration of frames go by.
+	tm.setTime(13, 30)
+	Clean(true)
+	assert.Equal(t, 0, renderers.Len())
+	assert.Equal(t, 0, canvases.Len())
+	assert.Equal(t, 1, destroyed)
+}

@@ -1,6 +1,8 @@
 package test
 
 import (
+	"bytes"
+	"runtime"
 	"sync"
 	"time"
 
@@ -23,6 +25,14 @@ type driver struct {
 	painter      fynedriver.Painter
 	windows      []fyne.Window
 	windowsMutex sync.RWMutex
+
+	queue     []queuedCall
+	queueLock sync.Mutex
+}
+
+type queuedCall struct {
+	f    func()
+	done chan struct{}
 }
 
 // Declare conformity with Driver
@@ -49,10 +59,77 @@ func NewDriverWithPainter(painter fynedriver.Painter) fyne.Driver {
 	return &driver{painter: painter}
 }
 
-// DoFromGoroutine on a test driver ignores the wait flag as our threading is simple
-func (d *driver) DoFromGoroutine(f func(), _ bool) {
-	// Tests all run on a single (but potentially different per-test) thread
-	f()
+// DoFromGoroutine runs f straight away when it is called from the test itself, which is
+// what tests have always relied on. From any other goroutine (a timer, a background load)
+// f is queued instead, and the test goroutine runs the queue at its next synchronisation
+// point: a Capture, an input helper of this package or a fyne.DoAndWait of its own. That
+// is the one-goroutine model of the real drivers. Running f on the calling goroutine let
+// a timer left behind by one test touch the renderer cache while the next test was
+// capturing, a data race whose victim changed with every -shuffle seed.
+// A new test App gets a new driver, so it drops whatever was still queued.
+func (d *driver) DoFromGoroutine(f func(), wait bool) {
+	if onTestGoroutine() {
+		if wait {
+			d.runQueue()
+		}
+		f()
+		return
+	}
+
+	call := queuedCall{f: f}
+	if wait {
+		call.done = make(chan struct{})
+	}
+	d.queueLock.Lock()
+	d.queue = append(d.queue, call)
+	d.queueLock.Unlock()
+	if wait {
+		<-call.done
+	}
+}
+
+// runQueue runs, in order, what other goroutines had queued when it was called; what
+// they queue meanwhile waits for the next call, so a goroutine that keeps queueing
+// cannot hold the test forever. Only for the test goroutine.
+func (d *driver) runQueue() {
+	d.queueLock.Lock()
+	n := len(d.queue)
+	d.queueLock.Unlock()
+	for ; n > 0; n-- {
+		d.queueLock.Lock()
+		if len(d.queue) == 0 { // a nested call, from one of the functions run here, got there first
+			d.queueLock.Unlock()
+			return
+		}
+		call := d.queue[0]
+		d.queue[0] = queuedCall{} // the backing array must not keep what already ran alive
+		d.queue = d.queue[1:]
+		d.queueLock.Unlock()
+
+		call.f()
+		if call.done != nil {
+			close(call.done)
+		}
+	}
+}
+
+// synchronise runs the calls queued by other goroutines, if we are on the test goroutine.
+func synchronise() {
+	if d, ok := fyne.CurrentApp().Driver().(*driver); ok && onTestGoroutine() {
+		d.runQueue()
+	}
+}
+
+// onTestGoroutine reports whether the caller runs on a goroutine of the testing package
+// (a test, a subtest, a benchmark, TestMain) rather than on one the code under test started.
+func onTestGoroutine() bool {
+	buf := make([]byte, 8<<10)
+	n := runtime.Stack(buf, false)
+	for n == len(buf) { // the testing frames are at the bottom: never look at a truncated stack
+		buf = make([]byte, 2*len(buf))
+		n = runtime.Stack(buf, false)
+	}
+	return bytes.Contains(buf[:n], []byte("\ntesting.")) || bytes.Contains(buf[:n], []byte("\nmain.main()"))
 }
 
 func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {

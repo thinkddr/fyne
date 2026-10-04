@@ -1,0 +1,1390 @@
+{
+  "schema": 1,
+  "sourceHead": "0fd6c9b82fa0ec062a12b58ca8dd9de68ff65148",
+  "upstream": "3dc06f47137aa3709807f1bb78dacc5daf68d551",
+  "reference": {
+    "os": "ubuntu-24.04",
+    "architecture": "x86_64",
+    "go": "1.27.1"
+  },
+  "diagnosticRun": "https://github.com/thinkddr/fyne/actions/runs/37199895570",
+  "controls": {
+    "desktop": {
+      "schema": 1,
+      "testExitStatus": 1,
+      "imageMismatchCount": 0,
+      "expectedControls": [
+        [
+          "fyne.io/fyne/v2/internal/driver",
+          "TestWalkVisibleObjectTree_NestedClipIntersects"
+        ],
+        [
+          "fyne.io/fyne/v2/internal/painter/software",
+          "TestPainter_fractionalPositionRounds"
+        ],
+        [
+          "fyne.io/fyne/v2/widget",
+          "TestEntry_MultiLineRowsFollowLineSpacing"
+        ]
+      ],
+      "failedTests": [
+        [
+          "fyne.io/fyne/v2/internal/driver",
+          "TestWalkVisibleObjectTree_NestedClipIntersects"
+        ],
+        [
+          "fyne.io/fyne/v2/internal/painter/software",
+          "TestPainter_fractionalPositionRounds"
+        ],
+        [
+          "fyne.io/fyne/v2/widget",
+          "TestEntry_MultiLineRowsFollowLineSpacing"
+        ]
+      ],
+      "unexpectedTests": [],
+      "missingControls": [],
+      "failedPackages": [
+        "fyne.io/fyne/v2/internal/driver",
+        "fyne.io/fyne/v2/internal/painter/software",
+        "fyne.io/fyne/v2/widget"
+      ],
+      "missingPackages": [],
+      "packageCount": 67,
+      "raceDetected": false,
+      "allLegacyAssertionsPassed": true
+    },
+    "mobile": {
+      "schema": 1,
+      "testExitStatus": 1,
+      "imageMismatchCount": 0,
+      "expectedControls": [
+        [
+          "fyne.io/fyne/v2/internal/driver",
+          "TestWalkVisibleObjectTree_NestedClipIntersects"
+        ],
+        [
+          "fyne.io/fyne/v2/internal/painter/software",
+          "TestPainter_fractionalPositionRounds"
+        ],
+        [
+          "fyne.io/fyne/v2/widget",
+          "TestEntry_MultiLineRowsFollowLineSpacing"
+        ]
+      ],
+      "failedTests": [
+        [
+          "fyne.io/fyne/v2/internal/driver",
+          "TestWalkVisibleObjectTree_NestedClipIntersects"
+        ],
+        [
+          "fyne.io/fyne/v2/internal/painter/software",
+          "TestPainter_fractionalPositionRounds"
+        ],
+        [
+          "fyne.io/fyne/v2/widget",
+          "TestEntry_MultiLineRowsFollowLineSpacing"
+        ]
+      ],
+      "unexpectedTests": [],
+      "missingControls": [],
+      "failedPackages": [
+        "fyne.io/fyne/v2/internal/driver",
+        "fyne.io/fyne/v2/internal/painter/software",
+        "fyne.io/fyne/v2/widget"
+      ],
+      "missingPackages": [],
+      "packageCount": 67,
+      "raceDetected": false,
+      "allLegacyAssertionsPassed": true
+    }
+  },
+  "sharedDesktopMobileFrames": 83,
+  "fixtures": [
+    {
+      "path": "canvas/testdata/maximum_rounded_per_corner_rect_aspect.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 90,
+      "height": 60,
+      "beforeSHA256": "90b7a54d2473b740d42e20d2c55d11935f303a7c230b59fafeec0f1cb271e32e",
+      "afterSHA256": "ad26e09fd6d2f32d64bb0a87a12901d9a1247fc28016a0dc18f7dc912a2a7d22"
+    },
+    {
+      "path": "canvas/testdata/text/layout_long_center_large.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 500,
+      "height": 101,
+      "beforeSHA256": "f871d2394903bde1d0fe97a854b904284ddf921f39ee82349f4cafeea509e3ec",
+      "afterSHA256": "f3d60f62b78323d7693d9ce65aa8d3c8ad63deb406e48ff62be64d4a1561e678"
+    },
+    {
+      "path": "canvas/testdata/text/layout_long_trailing_large.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 500,
+      "height": 101,
+      "beforeSHA256": "d9d5fe170b38c5d9d41b4e6a86d505bd35a739a260678163e6290b883efce889",
+      "afterSHA256": "ba4d790931b2782eed5799e22bb422b10ae7bd23c2ad6f82a15b8256dfc2815e"
+    },
+    {
+      "path": "canvas/testdata/text/layout_short_center_large.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 500,
+      "height": 101,
+      "beforeSHA256": "378fa72dbfb2b66a72f1f6d1e73cf7d0906fec123007668d8f8cb7e891a900ac",
+      "afterSHA256": "a76075946768fccd2ded68609d608077ad8dfd3bbd361c24210e0e7c9578b612"
+    },
+    {
+      "path": "container/testdata/clip/button.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 50,
+      "height": 50,
+      "beforeSHA256": "cc54216c9e0e8fe995c03468e59d23d71204c52a709a06c10b0cbf0564947640",
+      "afterSHA256": "077e08834e63577c2e8a414c7c5540d6764751342f6c159fae109d941f9b2ead"
+    },
+    {
+      "path": "container/testdata/doctabs/desktop/single_custom_theme.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 150,
+      "height": 150,
+      "beforeSHA256": "9b4521d102cbf557418e7bc4a05beca489fc7ed6d0bc10217016855b953d7c0b",
+      "afterSHA256": "82e19b653fde40025a661dce4e51c00611c7cc473cf183ddaf4687e746951b30"
+    },
+    {
+      "path": "container/testdata/doctabs/desktop/single_initial.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 150,
+      "height": 150,
+      "beforeSHA256": "d0317bb394cd82cc83a2649dada960980f158f2fc621ca1e93a9723ee8d89165",
+      "afterSHA256": "0c0a24912ca966af2a4353f90d76c4b16cef96555ccb8ff710277fa737c13d02"
+    },
+    {
+      "path": "container/testdata/doctabs/mobile/theme_default.png",
+      "variants": [
+        "mobile"
+      ],
+      "width": 150,
+      "height": 150,
+      "beforeSHA256": "8e6095550d986e00fc0be0b00fcf4929826627d221b6c405ce02649b37e3ffde",
+      "afterSHA256": "00956f5f12d795f6bd2880d1e32749391d82b0804e68ac4ca2ed61ab2603fc5e"
+    },
+    {
+      "path": "container/testdata/doctabs/mobile/theme_ugly.png",
+      "variants": [
+        "mobile"
+      ],
+      "width": 150,
+      "height": 150,
+      "beforeSHA256": "bae9fa3a2bb12ff429cdadcf260e9f656d00dc5d36c6af7bc26a2281873aeb59",
+      "afterSHA256": "b6001042ff1e6e88acfb203abf328bf1506b6d7a548fc7354420448b789b61bf"
+    },
+    {
+      "path": "dialog/testdata/color/channel_layout_foobar_0.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 169,
+      "height": 44,
+      "beforeSHA256": "84b4befe9b7d73a4e49098a4e7efee592376805c2e795342fc54b0ae88ae5d04",
+      "afterSHA256": "da3d4b79072662117210ff13e3db1e31c0359cf735a1214eb604f8b33876bc28"
+    },
+    {
+      "path": "dialog/testdata/color/channel_layout_foobar_100.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 169,
+      "height": 44,
+      "beforeSHA256": "2f3478a41fafe773af15fb4901e37f9b4d6dd92ae9163459c115b0c39de00a79",
+      "afterSHA256": "be2e9318f27ad7a8ee0d918833f1503a19c72cd9a1e4e50d4794fb64b3324202"
+    },
+    {
+      "path": "dialog/testdata/color/channel_layout_foobar_50.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 169,
+      "height": 44,
+      "beforeSHA256": "ca650c3475e8b6bf56e777c7461b20328e29fcaa8ea153f793519b6050cf3619",
+      "afterSHA256": "f444219b5b63e86ea0dafc774e6c1beb8c8c57cc4b2c57140ff92be205355278"
+    },
+    {
+      "path": "dialog/testdata/color/dialog_expanded_theme_default.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 1000,
+      "height": 800,
+      "beforeSHA256": "f45aab2216f601bb9f5f06aefab5d3258c4ecb6265a30541315f18ad58f37f66",
+      "afterSHA256": "5d3bbca6e8c605063a25e0236ff4deefbbd7ebadf7714b1de1fb24ff2b7eeacc"
+    },
+    {
+      "path": "dialog/testdata/color/dialog_expanded_theme_ugly.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 1000,
+      "height": 800,
+      "beforeSHA256": "10d7848b3cf0cea7db41071d6b0eb9a2790861bbfb57194fd5c1cf5963aeb462",
+      "afterSHA256": "521dbba7d8b0d2c0b56f78e8e8424fc96b0e99ca21756ef998e3f988b869b60e"
+    },
+    {
+      "path": "dialog/testdata/color/dialog_recents_theme_default.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 800,
+      "height": 600,
+      "beforeSHA256": "80d2caf6b493300ca0a9f671c92e4e5dc20a88f9392f2026541c3a28fd8f9f8a",
+      "afterSHA256": "f907461a6d3adbe71a7e8a1f25367c6d36986df4ec58f11c6f30911f92e5d8a3"
+    },
+    {
+      "path": "dialog/testdata/color/dialog_recents_theme_ugly.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 800,
+      "height": 600,
+      "beforeSHA256": "8d1df6935ae67bb14e2d8bb62e8b467df580fe0fa902ee1ee35f45f68ce6bba2",
+      "afterSHA256": "0d8253793ef5120254604c16f32fb96bfc4403014d85152b59c87779a7f154f4"
+    },
+    {
+      "path": "dialog/testdata/color/dialog_simple_recents_theme_default.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 600,
+      "height": 400,
+      "beforeSHA256": "b4872104abd223d434536532e665c083e1d4bc90b23a4d9eade61cd8fbad22c1",
+      "afterSHA256": "274ab667b8a21f7f1a72a1689fb6c7a29b4e34644507286f2296c8596ba06474"
+    },
+    {
+      "path": "dialog/testdata/color/dialog_simple_theme_default.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 600,
+      "height": 400,
+      "beforeSHA256": "dce308c3a8e3b46126a6bf1c29a11bdd8e0786113a96419fefec6fcd20fb9258",
+      "afterSHA256": "1c1dc57e80b7804f264052b20039fc5b07bd7f90b89516ee14160570c902ed5e"
+    },
+    {
+      "path": "dialog/testdata/color/dialog_simple_theme_ugly.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 600,
+      "height": 400,
+      "beforeSHA256": "b63ceac7d5dd352ddaf3d1f797b2a5e1c5817d479f17a3099da208d9a224015d",
+      "afterSHA256": "ac701b3c1e41c08b3f09d421ab0f3ff0b7081d83fb3d378ac82d6bf4f886ee8b"
+    },
+    {
+      "path": "dialog/testdata/color/dialog_theme_default.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 1000,
+      "height": 800,
+      "beforeSHA256": "9b5db890ddd3ea0e51825b5866397e325aaaf918fec0528218611e2e3b41162d",
+      "afterSHA256": "d3a9afec947e92dd15a545620ddd7ac472b064b6ea75445b660eef5804e74f29"
+    },
+    {
+      "path": "dialog/testdata/color/dialog_theme_ugly.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 1000,
+      "height": 800,
+      "beforeSHA256": "923be8605a837118f0cd171b1aab7b542452c8b4652b63b25964c1294218d1da",
+      "afterSHA256": "4498446f7fa9635b460fe8058d1a022c90c4f8c5d511e3fc1540cebabfa66309"
+    },
+    {
+      "path": "dialog/testdata/color/picker_layout_advanced.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 424,
+      "height": 200,
+      "beforeSHA256": "790e3e45802b206623fbc745fd36c0157a3e2f9571820be55a0303bb2088dc74",
+      "afterSHA256": "9d50f49df1075cd35cd4d39e0a8c91a55f773f2fec8e96725eb0a6d1b3ee70a8"
+    },
+    {
+      "path": "dialog/testdata/dialog-confirm-blur.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 480,
+      "height": 320,
+      "beforeSHA256": "5b98d07404c71c67cb5ef6d7d5d8126a44bda868d0d0a88efe2934f2adf44476",
+      "afterSHA256": "3d2b2e013c9642dfaaf98b7d4de8484963903bc448c6fdbf31ccf3ba4acbb522"
+    },
+    {
+      "path": "dialog/testdata/dialog-confirm-importance.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 200,
+      "height": 300,
+      "beforeSHA256": "08017ba9072630ae6fb5d9b8a9b685cfc02e9514345203ad4bb71885f57c0d2b",
+      "afterSHA256": "90a7afba00a2a334f2f2c454b28b48f1c7b64fc658445524e0c72f30f6e903c1"
+    },
+    {
+      "path": "dialog/testdata/dialog-custom-confirm-importance.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 240,
+      "height": 300,
+      "beforeSHA256": "21bc0c92dbbba236956b1256222414511e3b6e6c5277807c5fba6ad4968ac6ab",
+      "afterSHA256": "a210eafa31d8593cb7c3330d9b6c7feab2b286fb1ff57e2eadba2f689126870e"
+    },
+    {
+      "path": "dialog/testdata/dialog-custom-default.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 151,
+      "height": 193,
+      "beforeSHA256": "e406b8b6857001d6d636ad24574cf419020dac766ac9b5d875c8fa8b8313010a",
+      "afterSHA256": "9d9f5ea63f4e98036c33e7216c276f0a259a21444ea267545ba0a6cc10d14442"
+    },
+    {
+      "path": "dialog/testdata/dialog-custom-seticon-nil.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 200,
+      "height": 300,
+      "beforeSHA256": "5c989b57276b5da263b7274ce96285c7eba6e0930a9b4b0b16aa5e978dc83d55",
+      "afterSHA256": "36238fb692c7963304e336f37fcd08892a417e011961d7f221010fd94fa1a13f"
+    },
+    {
+      "path": "dialog/testdata/dialog-custom-seticon-success.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 200,
+      "height": 300,
+      "beforeSHA256": "77ed452e760668c621cf298d4b3e1210e401ed476d932e5b32fd7aa43e7f3dce",
+      "afterSHA256": "009bc54f0365850fdf774024ca08bfe541d2d49f987174aad4c4cee9d18443c2"
+    },
+    {
+      "path": "dialog/testdata/dialog-custom-ugly.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 195,
+      "height": 286,
+      "beforeSHA256": "bb2a09b9f0e6375ce794828265973aefdc434fd399a8f6ecc34af3262a83ad13",
+      "afterSHA256": "19d265b4e96b71e9630c64eea68aefb1ea2b19708cd664eb5c7c4510ddc76a00"
+    },
+    {
+      "path": "dialog/testdata/dialog-custom-without-buttons.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 200,
+      "height": 300,
+      "beforeSHA256": "86dcd667d4657d759714e9856ba16c43d0e83ce3a72344944a05b98822d52433",
+      "afterSHA256": "677eb7ebd65191b682ac451db209d695bfc1be1c80de3b1c6d0e824c98a5a81a"
+    },
+    {
+      "path": "dialog/testdata/dialog-onshow-theme-changed.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 200,
+      "height": 300,
+      "beforeSHA256": "ef22af1ca0264364ddff2ce182215b3abb2f322df7daf286354e81f2c3654756",
+      "afterSHA256": "0aed89175089730c6c227650341384e2e7cb7755b985b38be18fe79b3fc0a23f"
+    },
+    {
+      "path": "dialog/testdata/dialog-onshow-theme-default.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 200,
+      "height": 300,
+      "beforeSHA256": "9b78b0be349470eeb982d2a01704aecf685a04eb388c735bde881851f4272ba1",
+      "afterSHA256": "8983dc29274203d2ced17cb3b6529987dcd445f0448e93a25c4be12a3feaee5b"
+    },
+    {
+      "path": "dialog/testdata/form/hint_initial.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 286,
+      "height": 166,
+      "beforeSHA256": "26ea9dcdcffbd83be2d28f421bfbba9177699e0a8f55c56bf146cacbd95a37ed",
+      "afterSHA256": "3f214de01860946b5308b0475fe437bf4050d0defcf609555d63ea9646dccd73"
+    },
+    {
+      "path": "dialog/testdata/form/hint_invalid.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 286,
+      "height": 166,
+      "beforeSHA256": "a66eec4ad4a777febee9f6209fe76b833cefd362e658a453367146173e461545",
+      "afterSHA256": "eface85f486f343e650460ea00873ab67ffcfb0116b63044ba8b249ce2f8f44c"
+    },
+    {
+      "path": "dialog/testdata/form/hint_valid.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 286,
+      "height": 166,
+      "beforeSHA256": "5e188070285b226dcdb7428313953305e241f332802423da4c69ca41c861e430",
+      "afterSHA256": "37494e97491d292fe3ec7d18229665b693a8ab29b69749697b4d82984a902ef1"
+    },
+    {
+      "path": "driver/software/testdata/canvas.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 73,
+      "height": 124,
+      "beforeSHA256": "5f291783d98f85e3dac5b0254608b3f48f17fe4c749bb06d4793d999d4ee0186",
+      "afterSHA256": "e12f7e0b1f3c261ec0179e58d51869d474ce03f306b31cbd09747e9daa3e5277"
+    },
+    {
+      "path": "driver/software/testdata/canvas_mobile.png",
+      "variants": [
+        "mobile"
+      ],
+      "width": 73,
+      "height": 115,
+      "beforeSHA256": "5727f7cf78a683aa65bdd1f09694349c7105f69b492fa8e48191fab8afc25397",
+      "afterSHA256": "bc9509187c73e903c1d2ad7898180ddb95fcb579ba15178c09d0edb9add9b122"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_active_edit.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "1eb974d9d452ec90005a2e37490d7fe45a1135527a5cc5edc21a2dc4107ad5b7",
+      "afterSHA256": "89b7a559d478f7b3971db5d45b15e677339e65954acd362384d2b50c2a05ed79"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_active_file.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "17e888d4db4256a2e8f7373b7a3676bbde7f072d76d02e6adcd87da46c920421",
+      "afterSHA256": "83fa5933f27b01f34a6a0151f5efc40056ca70016ed5ec6a54ee3da5f88a7146"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_active_help.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "657b673e7e4407387660dc740bbad25006b4bfdc78bf156401aa2cc340601e7e",
+      "afterSHA256": "02f4d49e36f924fbe8ee02882448084c84926bc072a9ed4cfb7cfe7df7bd53f4"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_content_not_hoverable_with_active_menu.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "17e888d4db4256a2e8f7373b7a3676bbde7f072d76d02e6adcd87da46c920421",
+      "afterSHA256": "83fa5933f27b01f34a6a0151f5efc40056ca70016ed5ec6a54ee3da5f88a7146"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_content.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "97e87c280b17914ffef4ef795151defc608e44c64ace6f369fb286fc5713652c",
+      "afterSHA256": "e190096b7acd8611abe03b1ca3b2d7f8dadb7af50b7eb4861e585b3d040807f0"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_content_test_theme.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "595c31ee0b21f1b2576258b5327a9fa1e7c25853ea56473e7a196fb891442601",
+      "afterSHA256": "f3f8ee9f9e364f15e1ed9fbac0003dfb543a7a2e8e36efb3b3eb41beccc5fa1b"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_file_new.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "b2b818584872971a5cbea79297f34c76a22bd186c6b31cc7faa15527893552cf",
+      "afterSHA256": "5b0618538abde16dd444f2cd4b8cb22703f416ec2b8e24a99a699cd6cc57a0b2"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_file_open.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "f57398670eae2aab964eae1ff0657fc92eb013a12cca4ffc835987d379dfc093",
+      "afterSHA256": "fe659c767dd349ed95a35aaeb0732bf255b1ca87572c6a982f5ceedc4fea7142"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_file_recent.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "50014f4df9c651443a93da7f4d2aaefb119ccdc5f409b9677ab8b19da12cce8e",
+      "afterSHA256": "1a1f7e1b6135405fa218051f1a3b0109ff3a60f985684ab6b9d965fd82c383dd"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_file_recent_older.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "d65d68b84345c13e61ab29b14cd132b00e0f5d54f87030cce772c0b53f04b13f",
+      "afterSHA256": "5d25134e621718ad0e83bff1d328e9587439a6fb986c81987be764d80ec62ab6"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_file_recent_older_old1.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "e5409572e09e0d255c6fa6c40c2381053aeb2a4e1e5b23d05dad6957234b6c8e",
+      "afterSHA256": "abbd57fd320f79c53f16275551c95d7ce452d37bc8f479c8b98df9f4ae5c903a"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_inactive_file.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "743b5ea711464b22d1efb3b6d702cc55ae28a2f72ee63199ed9493e80d3ed597",
+      "afterSHA256": "33210655d3e0780214bfa3b69a3b7bfdff77b02b709875faeae63736c25a1331"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_initial.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "97e87c280b17914ffef4ef795151defc608e44c64ace6f369fb286fc5713652c",
+      "afterSHA256": "e190096b7acd8611abe03b1ca3b2d7f8dadb7af50b7eb4861e585b3d040807f0"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_tap_content_with_active_menu_does_not_trigger_action_but_dismisses_menu.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "97e87c280b17914ffef4ef795151defc608e44c64ace6f369fb286fc5713652c",
+      "afterSHA256": "e190096b7acd8611abe03b1ca3b2d7f8dadb7af50b7eb4861e585b3d040807f0"
+    },
+    {
+      "path": "internal/painter/software/testdata/draw_ellipse_narrow.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 78,
+      "height": 78,
+      "beforeSHA256": "66bd60c4bb5792c9c44af59acc6e48c2fd4f3ede922b4049cd87f3437be9e93e",
+      "afterSHA256": "3a8650cedb21d1fff3c438ff8c259362f3b68432cbcdcccc17853f7e976f781a"
+    },
+    {
+      "path": "internal/painter/software/testdata/draw_ellipse_narrow_stroke.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 78,
+      "height": 78,
+      "beforeSHA256": "66c82011fcd597a32bb95b11dafb7a20a148347ba0bf357699208e9756b1865b",
+      "afterSHA256": "469017643bebd5eb5246fc1574dd7037d385b6bb2c33e93a1856e73b77e10e4e"
+    },
+    {
+      "path": "internal/painter/software/testdata/draw_ellipse_wide.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 78,
+      "height": 78,
+      "beforeSHA256": "6dc622340f442f3d9bbe9a31e5015b92234f59454803280d0e03aeb9c9467469",
+      "afterSHA256": "a36fc9bdf8f455f99161e4406725af77b1afe833fbc1e3b97882e4dda23a09ce"
+    },
+    {
+      "path": "internal/painter/software/testdata/draw_ellipse_wide_stroke.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 78,
+      "height": 78,
+      "beforeSHA256": "0593f5421712d941de33eef75950f2b59fd8b4d0743a4877eab02f2f16d5e56b",
+      "afterSHA256": "a9e4ae249ad79bbeb1b3cd40394d7bf0803f48ee42785a5f6b8c3f67453a3dde"
+    },
+    {
+      "path": "internal/painter/software/testdata/draw_text_clipped.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 70,
+      "height": 70,
+      "beforeSHA256": "9d705e8f2d26a5deccb9e0ce9673ca20bb95540b1c63db9662f6848c6e6abb0c",
+      "afterSHA256": "f7e3a321688aec9891e981ab05b8686e6433307d9ed76ee1e9f9e427d37d65eb"
+    },
+    {
+      "path": "widget/testdata/accordion/theme_changed.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 130,
+      "height": 160,
+      "beforeSHA256": "a1d17b09a8e220a6bd346c806bf6cfec945916ec5ae51b24c70ccd63e94b72ed",
+      "afterSHA256": "2243baaa7d276a1870b52077a5e233f16ac60f23eb76f5791e9d154f3373e632"
+    },
+    {
+      "path": "widget/testdata/accordion/theme_initial.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 79,
+      "height": 84,
+      "beforeSHA256": "1dc143823c9e43dd934bbdf82b920baaf50bf1781014937c5d2b07dd1b1bb135",
+      "afterSHA256": "1f36fe87db4c2d117d54d4eb536e256248d603e15cd2d81b6f07f6068e1860ae"
+    },
+    {
+      "path": "widget/testdata/button/high_importance.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 77,
+      "height": 44,
+      "beforeSHA256": "d96a741f5d45f09939a1db9c1a92dfdc67f57cca228a83a5ffae5135a162eec1",
+      "afterSHA256": "559ee0068ef7e768516c8b0a101f7f30fe0c0c7169575eb712a5d0dc7a7cd537"
+    },
+    {
+      "path": "widget/testdata/button/high_importance_hovered.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 77,
+      "height": 44,
+      "beforeSHA256": "6adf6a4606400d3f76b88d2572d7a71ae6aaec458b84766a38d745b682da98aa",
+      "afterSHA256": "9da40a45ff98d5e4acee8cfa293fdb39db1f64b06386b707e2ed9c6c6fed245f"
+    },
+    {
+      "path": "widget/testdata/button/hovered.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 77,
+      "height": 44,
+      "beforeSHA256": "cb5eac9f643c18ca39c0c7eed5d425d04af78ea21bf5022f387677b8be536baf",
+      "afterSHA256": "5be0f6bd0dcab5ebd909726909744627f77e58764b29af53ac690de243ad03e4"
+    },
+    {
+      "path": "widget/testdata/button/low_importance.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 78,
+      "height": 44,
+      "beforeSHA256": "044e24a118a703b0d480c7876c3aa1976421358a140a1b6d283a0901598d3f23",
+      "afterSHA256": "2192994c1a202c8395ef1699445082f31ade7c698d5f95abc4ce2c7e186cd187"
+    },
+    {
+      "path": "widget/testdata/button/low_importance_disabled.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 78,
+      "height": 44,
+      "beforeSHA256": "68910d9144eb31f4602f061d2be86649472e0d8f4c608cd06e1c10b1c1253f66",
+      "afterSHA256": "9d24c1d20969ebeb8ca7f6d6ab0a76f9be440d0a22c734f895fd91f9462ceed5"
+    },
+    {
+      "path": "widget/testdata/button/success_importance.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 77,
+      "height": 44,
+      "beforeSHA256": "cebf05afeb8a1a621faca502eac0636a653928ac5f152b229c2c0971d05d2abf",
+      "afterSHA256": "f735fb1274006b981be507307cca94564eb86f6e3339f938e0215f4a27d20c1c"
+    },
+    {
+      "path": "widget/testdata/entry/undo_redo_5undo.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 128,
+      "height": 128,
+      "beforeSHA256": "e4794ddfe4db75a6ec1104440641e9c3bcae03cd8a98537ce9e4d14b1ff26b1e",
+      "afterSHA256": "7154529f3987af0fe2216afe43e2a04b6bdef818cd6a8f97cdde21e188330c13",
+      "capturedAfterSHA256": "01343426376425757ecb25d19826c04f198917710bed45f789d21bac071694d8",
+      "correction": "Clear the stale scroll offset after five undo operations restore fitting text."
+    },
+    {
+      "path": "widget/testdata/entry/undo_redo_initial.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 128,
+      "height": 128,
+      "beforeSHA256": "86dd60cad79608201a8c60fa5b8aa2bb03abdacc06c57352c05e2894465e8d64",
+      "afterSHA256": "a183c3bdcf1e59329a5942350285fc940039a08271555c31999005a93c397f76",
+      "capturedAfterSHA256": "f7ff8811a622f57579230853b6d2cbd5b742bec04da8d6c992f046a400386806",
+      "correction": "Use the initial viewport after fixing stale Entry scroll bounds on undo."
+    },
+    {
+      "path": "widget/testdata/entry/undo_redo_mistake_corrected.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 128,
+      "height": 128,
+      "beforeSHA256": "527efbc80abcaf6cb97019c34bd2dfd0de42ffc07106cce49a55f7d62de55907",
+      "afterSHA256": "8ea80f39194ac669e71e34ae0d3402dc771175a87e4c6af523cd36558c8c6e2f"
+    },
+    {
+      "path": "widget/testdata/entry/undo_redo_mistkaes.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 128,
+      "height": 128,
+      "beforeSHA256": "3f2ba5eb70db400ddcde053e10fde7f3cca0c77d0cfc87d820093f168f25d3dd",
+      "afterSHA256": "d5513458329cfcf72a4a56c1713444971a55107e89e0f079d3278863286982d8"
+    },
+    {
+      "path": "widget/testdata/entry/wrap_multi_line_cursor.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 70,
+      "height": 70,
+      "beforeSHA256": "8db15f6b6a4ce300ba8ebf25eac1019916d61b0000e37ba8b01c41af345ca57e",
+      "afterSHA256": "45242f6c1bd7685bbf60937549e90968b8941a6014bb753f04c7fc708570a13c"
+    },
+    {
+      "path": "widget/testdata/form/disable_disabled.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 84,
+      "beforeSHA256": "bf1024d8fd9df3690eb5f68d28cc1494ba9fdc4f34af1980f884ea28d93d44c1",
+      "afterSHA256": "391f841ae10c81167cabd40ea77f0406a1187c41059189706fda20e3b9ce6f3b"
+    },
+    {
+      "path": "widget/testdata/form/disable_initial.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 84,
+      "beforeSHA256": "ff57e13abe97b9a002e0caf895ad29be12bba9ae0d0f523224bb50a88c9fca6f",
+      "afterSHA256": "0fa9b0e0133f182370301d5a050d2d74bcbfcede27283032f726b0ee4b51bd26"
+    },
+    {
+      "path": "widget/testdata/form/disable_re_enabled.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 84,
+      "beforeSHA256": "ff57e13abe97b9a002e0caf895ad29be12bba9ae0d0f523224bb50a88c9fca6f",
+      "afterSHA256": "0fa9b0e0133f182370301d5a050d2d74bcbfcede27283032f726b0ee4b51bd26"
+    },
+    {
+      "path": "widget/testdata/form/disable_validation_disabled_invalid.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 107,
+      "beforeSHA256": "087ed34e4f0d74616730bdc88c449e3f7061455595b09b97b48a65086bd23cba",
+      "afterSHA256": "896dc53994c56470fdecb4ec126fa0781bae2db32e0b82cc8786688ba5a0d412"
+    },
+    {
+      "path": "widget/testdata/form/disable_validation_disabled_valid.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 84,
+      "beforeSHA256": "7fe91f4beee8120c6a8f069738f06c3bf0dc3858455cdcc0efeb0fe9bfcad95d",
+      "afterSHA256": "4a42164f2bdd2fbbee5cceeebc74a053dbc6adcf4b12acb80379a43894fd9533"
+    },
+    {
+      "path": "widget/testdata/form/disable_validation_enabled_invalid.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 107,
+      "beforeSHA256": "576868147eae89f18511c72c078c0f07600c93b0ea14d92e95ffd3d2ce9098ef",
+      "afterSHA256": "e492c7702b44b9849e6c92a73ace152177a36c6ee1dc7b1c2ab3d7f09d2b7bbd"
+    },
+    {
+      "path": "widget/testdata/form/disable_validation_enabled_valid.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 84,
+      "beforeSHA256": "44dd8d46d1219d9f0b4388ab10c703fd199096b72179871afe0d1a13be07da30",
+      "afterSHA256": "c2761126a440e8df1452e4ffc0a9019a963ce304de6719e484e45d5361bf5a27"
+    },
+    {
+      "path": "widget/testdata/form/disable_validation_initial.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 107,
+      "beforeSHA256": "576868147eae89f18511c72c078c0f07600c93b0ea14d92e95ffd3d2ce9098ef",
+      "afterSHA256": "e492c7702b44b9849e6c92a73ace152177a36c6ee1dc7b1c2ab3d7f09d2b7bbd"
+    },
+    {
+      "path": "widget/testdata/form/disabled.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 151,
+      "height": 83,
+      "beforeSHA256": "2851616c35029651e6a1fdaafed925e7a031926f7ecb2545357345fed5c56e25",
+      "afterSHA256": "939db32844721031c1d55cc5c7e66fe1dc24c9bc28a57e7b1000abfd9d48f04b"
+    },
+    {
+      "path": "widget/testdata/form/hint_initial.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 169,
+      "beforeSHA256": "3a3afa353823e74c81409eb87794ea2a09694bd0006b8fdb08d2873aa04b970c",
+      "afterSHA256": "ac53633627a2613996ff9dbb0afd6eca41bd095846baf06a39568b9464468c78"
+    },
+    {
+      "path": "widget/testdata/form/hint_invalid.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 169,
+      "beforeSHA256": "09cf2532574b9cce2b22568190e608c2a662ece1d2d585761c2821599910451c",
+      "afterSHA256": "ec709208e4fffae12b85b7401db7e12175f4d495148ad818a0ed44aed3117d5a"
+    },
+    {
+      "path": "widget/testdata/form/hint_valid.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 146,
+      "beforeSHA256": "b14ca077ff371c5dc9d5edbd59add7d02dce8c360bb1b93def4d8bed8f261ad4",
+      "afterSHA256": "da9cedbfa41c8810954815b75eed31f9ce549ccad0e7393f9d95b1e19b9e8905"
+    },
+    {
+      "path": "widget/testdata/form/hints_rendered.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 151,
+      "height": 191,
+      "beforeSHA256": "e219e94a1da57b931884f1665de4e73c6c963ca3463ae9929d9b5f2d547a2c15",
+      "afterSHA256": "8ee7e1be3bf240cf75662471840b06ed45d6c014fb931de24f4c7005984e704c"
+    },
+    {
+      "path": "widget/testdata/form/theme_changed.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 301,
+      "height": 234,
+      "beforeSHA256": "bc3cccc8fc19f2c5462e19661504b32d4db1f9bf51104b9a49a8c14c5852c9fd",
+      "afterSHA256": "d53f834a225b81d68fd4e25c3fb3f12b3ca45b2667391b2fdc8fb9ca60fc392b"
+    },
+    {
+      "path": "widget/testdata/form/theme_initial.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 123,
+      "beforeSHA256": "0b9d60a9e3d18e81157ac3920278b3fd85a724df9f90fceb1688d9620d2e1e84",
+      "afterSHA256": "d119a51dbfac9e567a95f6daa5eddc4fce32f55a10f803232daac7efe83f50db"
+    },
+    {
+      "path": "widget/testdata/form/validation_entry_first_type_initial.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 123,
+      "beforeSHA256": "d6fcb47c2758a05a6b2829c9358000ca8ff30f83a5768b1daff7193efbffc656",
+      "afterSHA256": "98b42b17d6732f2f36015fd783cdfb7e151cbc6ad86ddcf0f09698710520386a"
+    },
+    {
+      "path": "widget/testdata/form/validation_entry_first_type_invalid.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 146,
+      "beforeSHA256": "264ba88d9a71ab8135625951da645aa06761482512c778e8b710e26c8c67f505",
+      "afterSHA256": "625d8cc03102c6dd0e01965819eb5564b3115a2c087ee5cde470719f68ce6030"
+    },
+    {
+      "path": "widget/testdata/form/validation_entry_first_type_valid.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 123,
+      "beforeSHA256": "b323bc7fc7da8a6f3c91aee98636d1806404fbb7629bc37579f4c754ad54057c",
+      "afterSHA256": "759bf2a72c2a72154e364e5dd8719e6a189b3662115f45d0faf2cb66094f94c4"
+    },
+    {
+      "path": "widget/testdata/form/validation_initial.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 162,
+      "beforeSHA256": "88f3c2f9e1639a58a5649cceebc57a0be25297c70f5388ef095e644b86aac4ba",
+      "afterSHA256": "fd30ca26dcbe1bfc83fe10b616359a5968e795984b9016a255376d7a58d15761"
+    },
+    {
+      "path": "widget/testdata/form/validation_invalid.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 185,
+      "beforeSHA256": "e536ca3a1156ada2e8344652fd70c6f9a64751974fe3bc0ad8607361913b3e40",
+      "afterSHA256": "bacfcfaa9b4045fc3949c50107e4fcf4a4ba245abcb2413fe77159b4b9ccc185"
+    },
+    {
+      "path": "widget/testdata/form/validation_valid.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 196,
+      "height": 162,
+      "beforeSHA256": "a5cde66ecc3956256856a2568e66eddd55c815e49b8283cdc5755f402a701292",
+      "afterSHA256": "2b27daa64cc0ef212a2c2ef033eb603aeff3e7a5a64be72db4a062f3cd829d0e"
+    },
+    {
+      "path": "widget/testdata/list/list_initial.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 200,
+      "height": 200,
+      "beforeSHA256": "3aca4f6761da61c7f118c289808f28ff17f59997001bff9698cd735c48f04f17",
+      "afterSHA256": "b8ac9fd0ef80b79469c2d52962b9e886c0f2adbc7eec19eaead136c1808db75a"
+    },
+    {
+      "path": "widget/testdata/list/list_theme_changed.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 200,
+      "height": 200,
+      "beforeSHA256": "c5139a4adce00afc3c7cfcae8ff69e41a7cc1406c5be2547f9c776b2162f6788",
+      "afterSHA256": "ae8a29572b4aeba357e47706a64d95500983e2785b8496bd6160b1af442ab970"
+    },
+    {
+      "path": "widget/testdata/menu/desktop/layout_normal.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 500,
+      "height": 300,
+      "beforeSHA256": "9f24ea7833d16e6c3565560cd26e07774f7e4969ab01d94cdec33dd43dc21ea5",
+      "afterSHA256": "48cf62c061eac852e1be92ed69fbf625ec81450b4084876f020f6f2536e4d969"
+    },
+    {
+      "path": "widget/testdata/menu/desktop/layout_shortcuts_other.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 450,
+      "height": 800,
+      "beforeSHA256": "025d2a5a062607ec46886ec9d5072499a9c957c58aae439a22c58bf9574d031c",
+      "afterSHA256": "8f6d43820a5c83a91263e7fd718f7e05132c564a82386a6e6c18f0603df5bda0"
+    },
+    {
+      "path": "widget/testdata/menu/desktop/layout_shortcuts_other_theme_changed.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 450,
+      "height": 800,
+      "beforeSHA256": "12fd31cfb8991e182f87d6457431a1d415ad6b4263807cb9059f2f8d55a7d0d8",
+      "afterSHA256": "dd8fdbabc211a86d98c0dbc20a3e7b1ceec157af4c63ce05c2b74abcda00defd"
+    },
+    {
+      "path": "widget/testdata/menu/desktop/layout_theme_changed.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 500,
+      "height": 300,
+      "beforeSHA256": "5feca5203834ca994a3bf7ff30f96c9389f7b56dc7c4a63925e609528f3f458c",
+      "afterSHA256": "eca8afef85967ed30cd4a2bf27be79f3ebd61504c63cd1ce7f3928992a5289b5"
+    },
+    {
+      "path": "widget/testdata/menu/mobile/layout_normal.png",
+      "variants": [
+        "mobile"
+      ],
+      "width": 500,
+      "height": 300,
+      "beforeSHA256": "ae394b7255bfadf73c3fee5fc28d5d2cca945f05784f6b5b6e6943b1fe6f7afd",
+      "afterSHA256": "6341eea19d2cd339619445c5b8f3074ddb8dfee8cad9943674226135e36370e3"
+    },
+    {
+      "path": "widget/testdata/menu/mobile/layout_theme_changed.png",
+      "variants": [
+        "mobile"
+      ],
+      "width": 500,
+      "height": 300,
+      "beforeSHA256": "1eab7d0dc435d40c3fef2e72a29475a06602507a9eddcce9d130a0dece9c2d24",
+      "afterSHA256": "8e15eab3d5f3c9a2fab8254eb44a2e06e347d29fffc6fe6acd8f313b3620d01d"
+    },
+    {
+      "path": "widget/testdata/popup/modal-onshow-theme-default.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 200,
+      "height": 300,
+      "beforeSHA256": "fa30c14459877885695ef124b3e5b6cfcd99f01b8fcb17983556ad29caa9cca1",
+      "afterSHA256": "4f351f77b9c0c234bc0611fcedfd027fc1854efa6ab17e8894ec7cfc374e3a7d"
+    },
+    {
+      "path": "widget/testdata/popup/normal-onshow-theme-changed.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 200,
+      "height": 300,
+      "beforeSHA256": "f4f4bf24950f4b7412fee5ba3fb560afb56ec94f8565784a8d3b2f83cd80e098",
+      "afterSHA256": "573520dff12a30a1b98b04a3c53ca52161d6958dc7a4d02f310c3fe583ba3ea0"
+    },
+    {
+      "path": "widget/testdata/popup/normal-onshow-theme-default.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 200,
+      "height": 300,
+      "beforeSHA256": "f991c7dd2d870780a524139688498364fcb7492c9b7a1d8c0cf2b83152d205ee",
+      "afterSHA256": "c4dd7022a8c96ff508ffc20e604d2056ef897b14868247e8dcf7bd6ea95d66bc"
+    },
+    {
+      "path": "widget/testdata/progressbar/initial.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 152,
+      "height": 36,
+      "beforeSHA256": "ccee23aa3192e68d2b68803c87a960d3affe02a0eff429a335b4c06ffb28a1e9",
+      "afterSHA256": "d93636051f5a1eeb8c435996689aa2b911f5ab3f10b23235c3232645f8785be1"
+    },
+    {
+      "path": "widget/testdata/richtext/richtext_multiline.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 64,
+      "height": 90,
+      "beforeSHA256": "2826a784ae2b8490d4fc9b64579faec697c6007ff0ac988409b5db8f2f6167f1",
+      "afterSHA256": "284ff3f0e7bd7cf23a1d329a2770aedf3320ac2f22e712217a6aa1a07a136f98"
+    },
+    {
+      "path": "widget/testdata/select/desktop/theme_changed.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 220,
+      "height": 220,
+      "beforeSHA256": "c0c094cc7f082c1cca5349aab0cfeebff166154c97f5d5d8830061e7c3821a3f",
+      "afterSHA256": "95e8689163aa3c8fb3163081e7ce1b80bd410d9c731aab1a785c2c851bc8c36b"
+    },
+    {
+      "path": "widget/testdata/select/desktop/theme_initial.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 220,
+      "height": 220,
+      "beforeSHA256": "727b5b3c43f27e7405630a146da52ccff230c787f4aac680c19e53a54871f996",
+      "afterSHA256": "03084e8fa8d96d2d46d3322b8e140b710bf1ef206562a99ddb457ee2ef0f6768"
+    },
+    {
+      "path": "widget/testdata/select/mobile/tap_animation.png",
+      "variants": [
+        "mobile"
+      ],
+      "width": 219,
+      "height": 75,
+      "beforeSHA256": "b3dd531fc82d379d22a199e0c55427d1fcba99b188f1c2c0b9b99cefcd47fe76",
+      "afterSHA256": "52c095d6052766e1b2192adbbb4a252703d6183672437469f90c09694ee1fea4"
+    },
+    {
+      "path": "widget/testdata/select/mobile/theme_changed.png",
+      "variants": [
+        "mobile"
+      ],
+      "width": 220,
+      "height": 220,
+      "beforeSHA256": "36255b19214f91b441c09cae11a86e9084c5b10dbe9d813c7e12b9a88adeeba1",
+      "afterSHA256": "a78a9e23a0e98275d9e471877b4d11f531e3d076623de1b6e1d7863526f740fe"
+    },
+    {
+      "path": "widget/testdata/select/mobile/theme_initial.png",
+      "variants": [
+        "mobile"
+      ],
+      "width": 220,
+      "height": 220,
+      "beforeSHA256": "88918040cc623c07caaba521ea07c62b05f904f82292abbf8c4cba8cef1e0947",
+      "afterSHA256": "144ad8a57d88c368e8cc385f5ba0dcb1df47131554185aab95cb21c42603d4b9"
+    },
+    {
+      "path": "widget/testdata/table/col_size.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 128,
+      "height": 128,
+      "beforeSHA256": "fb35a0cf88d217cdcd4b538e547e0250fe5d1a27320ef8f368ed6e9547a10bb2",
+      "afterSHA256": "cecc85a5cddae8690b553c9319381a00b234a39240b1b6dd492a61e27c226e8a"
+    },
+    {
+      "path": "widget/testdata/table/row_size.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 128,
+      "height": 128,
+      "beforeSHA256": "efe9800a6ded5a2310afe48989f2de1cf2c33742036af67ab69326b82af3f70a",
+      "afterSHA256": "6ebea4d1fc6a5344047952cccd89accb90f6f70fc223b636eed39ec1d598315d"
+    },
+    {
+      "path": "widget/testdata/table/theme_changed.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 180,
+      "height": 180,
+      "beforeSHA256": "88af2f007d595cd78c9bbbc59a7c7747899fd254bcea1b5351e81e1962bd69c9",
+      "afterSHA256": "958a2e99fddd024695bddee3fbaa3d6dca67273da8bdc76f78b32c71822f67a5"
+    },
+    {
+      "path": "widget/testdata/table/theme_initial.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 180,
+      "height": 180,
+      "beforeSHA256": "94254d92c9625d92bca6c573bf615bf5b49d09ba2f3ce6863d8f1294fb594e71",
+      "afterSHA256": "2e2f49217f2995b30f20d8fa4a9365b7ad369f1f0a7aa288bb5deea3e02bfe13"
+    },
+    {
+      "path": "widget/testdata/tree/refresh_initial.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 220,
+      "height": 220,
+      "beforeSHA256": "cc34fe1d1c6253b17b77a8783412f0833d4a7bf2a0422e15a66d9db9baabe767",
+      "afterSHA256": "bdb2a38642da53418a23597c5f14768248b00cc52d64740ba45b737dc9f2036c"
+    },
+    {
+      "path": "widget/testdata/tree/refresh_replaced.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 220,
+      "height": 220,
+      "beforeSHA256": "e2ed944392f6c9e1b4fc67035b9af6fdb2cef6e9c63469c178c725120a4b7c19",
+      "afterSHA256": "5cd6294ce2e92c00f7076d07584de0963c606625896b57b11f49a240198e9c5e"
+    },
+    {
+      "path": "widget/testdata/tree/theme_changed.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 220,
+      "height": 220,
+      "beforeSHA256": "78c9dddd908400a478240bc1977f040668482d923c55fa5af60bf8748ddb6878",
+      "afterSHA256": "ea51739264786cfb3ea1a502767317a47ad0991e892c9424c49b5fea0b5d9577"
+    },
+    {
+      "path": "widget/testdata/tree/tree_focus_item.png",
+      "variants": [
+        "desktop",
+        "mobile"
+      ],
+      "width": 220,
+      "height": 220,
+      "beforeSHA256": "0888c4fb13facb878cf9e6fb973eb47e9419cf006d401e731a54a949124a1904",
+      "afterSHA256": "8136596b93be7367fcd636216068dab2b5d98163d49ad69b071e1e29e9d6a627"
+    }
+  ],
+  "viewportRegression": {
+    "source": "widget/entry_scroll_internal_test.go",
+    "probeRun": "https://github.com/thinkddr/fyne/actions/runs/37201287574",
+    "before": {
+      "viewportHeight": 116,
+      "restoredMinHeight": 100.3125,
+      "contentHeight": 123.390625,
+      "offsetY": 7.390625
+    },
+    "afterExplicitRefresh": {
+      "contentHeight": 116,
+      "offsetY": 0,
+      "exactInitialCapture": true
+    }
+  },
+  "incrementalReview": {
+    "sourceHead": "e2f3b41d03848489bfec709b8b29568bbd451d73",
+    "captureRun": "https://github.com/thinkddr/fyne/actions/runs/37201578262",
+    "captureJob": "https://github.com/thinkddr/fyne/actions/runs/37201578262/job/111434409188",
+    "menuFixtureCount": 12,
+    "menuAssertionCount": 25,
+    "allAffectedMenuStepsPassedInDiagnostic": true,
+    "menuFixtures": [
+      "internal/driver/glfw/testdata/menu_bar_active_edit.png",
+      "internal/driver/glfw/testdata/menu_bar_active_help.png",
+      "internal/driver/glfw/testdata/menu_bar_content_not_hoverable_with_active_menu.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_content.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_content_test_theme.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_file_new.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_file_open.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_file_recent.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_file_recent_older.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_file_recent_older_old1.png",
+      "internal/driver/glfw/testdata/menu_bar_inactive_file.png",
+      "internal/driver/glfw/testdata/menu_bar_tap_content_with_active_menu_does_not_trigger_action_but_dismisses_menu.png"
+    ],
+    "explanation": "These menu steps were previously skipped after an initial image mismatch. Every affected step passed in the rendering diagnostic. The menu source was unchanged; the refreshed captures use the intended position rounding and clip behavior. Menu tests now run later actions even if the initial image assertion fails.",
+    "viewportCorrection": "The initial and five-undo masters use fitting content with zero vertical offset after the Entry scroll-bounds fix. The original capture hashes are retained in their entries."
+  }
+}

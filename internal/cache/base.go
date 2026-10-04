@@ -43,6 +43,12 @@ func refreshNow() time.Time {
 
 // Clean run cache clean task, it should be called on paint events.
 func Clean(canvasRefreshed bool) {
+	// Everything marked alive since the previous Clean was stamped with the sample
+	// that Clean left behind, so expiry is measured against that sample and not the
+	// one taken now. Otherwise an entry created after a long gap without frames (a
+	// test that captures nothing for over ValidDuration) is expired at birth: the
+	// renderer is destroyed here and re-created by the painter without Layout.
+	then := time.Unix(0, cachedNow.Load())
 	now := refreshNow()
 	// do not run clean task too fast
 	if now.Sub(lastClean) < 10*time.Second {
@@ -58,15 +64,15 @@ func Clean(canvasRefreshed bool) {
 	if !canvasRefreshed && now.Sub(lastClean) < cleanTaskInterval {
 		return
 	}
-	destroyExpiredSvgs(now)
-	destroyExpiredFontMetrics(now)
-	destroyExpiredBlurKernels(now)
+	destroyExpiredSvgs(then)
+	destroyExpiredFontMetrics(then)
+	destroyExpiredBlurKernels(then)
 	if canvasRefreshed {
 		// Destroy renderers on canvas refresh to avoid flickering screen.
-		destroyExpiredRenderers(now)
+		destroyExpiredRenderers(then)
 		// canvases cache should be invalidated only on canvas refresh, otherwise there wouldn't
 		// be a way to recover them later
-		destroyExpiredCanvases(now)
+		destroyExpiredCanvases(then)
 	}
 	lastClean = refreshNow()
 }

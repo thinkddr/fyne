@@ -4,14 +4,22 @@
 			<rectangle fillColor="inputBackground" pos="2,2" radius="4" size="116x96"/>
 			<rectangle pos="1,1" radius="4" size="117x97" strokeColor="primary" strokeWidth="2"/>
 			<widget pos="0,2" size="120x96" type="*widget.Scroll">
-				<widget size="120x96" type="*widget.entryContent">
-					<widget size="120x96" type="*widget.RichText">
+				<widget size="120x100" type="*widget.entryContent">
+					<widget size="120x100" type="*widget.RichText">
 						<text pos="8,6" size="47x19">Testing</text>
-						<text pos="8,25" size="14x19">Te</text>
-						<text pos="8,44" size="17x19">ng</text>
-						<text pos="8,63" size="47x19">Testing</text>
+						<text pos="8,29" size="14x19">Te</text>
+						<text pos="8,52" size="17x19">ng</text>
+						<text pos="8,75" size="47x19">Testing</text>
 					</widget>
-					<rectangle fillColor="primary" pos="7,44" size="2x19"/>
+					<rectangle fillColor="primary" pos="7,52" size="2x19"/>
+				</widget>
+				<widget pos="0,96" size="120x0" type="*widget.Shadow">
+					<linearGradient endColor="shadow" pos="0,-8" size="120x8"/>
+				</widget>
+				<widget pos="114,0" size="6x96" type="*widget.scrollBarArea">
+					<widget pos="3,0" size="3x91" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" radius="3" size="3x91"/>
+					</widget>
 				</widget>
 			</widget>
 		</widget>
