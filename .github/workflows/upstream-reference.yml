@@ -48,6 +48,15 @@ jobs:
           path: '**/testdata/failed'
           if-no-files-found: ignore
   fork-golden-differential:
+    name: fork-golden-differential-${{ matrix.variant }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: desktop
+            tags: ci,migrated_fynedo
+          - variant: mobile
+            tags: mobile,ci,migrated_fynedo
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -55,6 +64,7 @@ jobs:
       LANG: en_US.UTF-8
       CC: clang
       CGO_LDFLAGS: -fuse-ld=lld
+      TEST_TAGS: ${{ matrix.tags }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -157,9 +167,9 @@ jobs:
         shell: bash
         run: |
           go mod verify
-          go list -tags ci,migrated_fynedo ./... > artifacts/differential/packages.txt
+          go list -tags "$TEST_TAGS" ./... > artifacts/differential/packages.txt
           set +e
-          xvfb-run -a go test -json -count=1 -p=2 -race -tags ci,migrated_fynedo ./... 2>&1 | tee artifacts/differential/test.log
+          xvfb-run -a go test -json -count=1 -p=2 -race -tags "$TEST_TAGS" ./... 2>&1 | tee artifacts/differential/test.log
           task_test_status=${PIPESTATUS[0]}
           set -e
           printf '%s\n' "$task_test_status" > artifacts/differential/test-status.txt
@@ -231,7 +241,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: fork-golden-differential-${{ github.sha }}
+          name: fork-golden-differential-${{ matrix.variant }}-${{ github.sha }}
           path: |
             artifacts/differential
             **/testdata/failed
