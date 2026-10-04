@@ -1,0 +1,48 @@
+# Fork validation
+
+The software-image reference uses Linux x86-64, Go 1.27.1 and the repository's
+locked dependencies. It checks the fork's behavior, not browser pixel parity or
+native OS integrations.
+
+## Reference and fixture review
+
+The [unchanged upstream reference](https://github.com/thinkddr/fyne/actions/runs/37198815282)
+at `3dc06f47137aa3709807f1bb78dacc5daf68d551` passes all tests on Linux x86-64.
+Linux ARM64 has image differences even with that unchanged source and toolchain.
+The strict fork reference therefore uses x86-64 without changing pixel tolerance.
+
+The [rendering diagnostic](https://github.com/thinkddr/fyne/actions/runs/37199895570)
+tested the fork with exactly three existing changes reversed: nearest-pixel
+software positions, multiline Entry row spacing and nested clip intersection.
+It restored the 55 masters previously changed by those fixes to upstream bytes.
+
+Both desktop and mobile variants completed all 67 packages with zero legacy
+image mismatches, no races and no unexpected failures. Exactly these three
+regression controls failed, as required by the diagnostic:
+
+- `TestPainter_fractionalPositionRounds`
+- `TestEntry_MultiLineRowsFollowLineSpacing`
+- `TestWalkVisibleObjectTree_NestedClipIntersects`
+
+That result identifies the stale fixtures as consequences of the intended
+rendering changes. The temporary diagnostic is retained in Git history and its
+CI evidence; production tests use the real fork implementation.
+
+The maintenance release refreshes 104 PNG masters: 96 desktop fixtures and eight
+additional mobile fixtures. All 83 shared desktop/mobile captures match exactly
+in RGBA. Dimensions remain unchanged. The
+[fixture inventory](ci/fork-visual-reference.json) records source revisions,
+diagnostic results and every before/after SHA-256 hash.
+
+## Release checks
+
+[Fork conformance](.github/workflows/fork-conformance.yml) runs module
+verification, formatting, vet and race-enabled tests against the real source.
+The inherited platform, mobile, web and static-analysis workflows remain active.
+Release tags also build a clean external module using canonical Fyne imports and
+the published fork replacement from the README.
+
+Platform tests and software captures do not validate native URL callbacks,
+Android/iOS pickers, iOS scenes or GL compositor output. Those require platform
+or device testing. Rendering changes do not establish universal CSS support or
+Chromium glyph equivalence.

@@ -2,8 +2,9 @@
 
 This repository contains a downstream modification of
 [Fyne v2.8.1](https://github.com/fyne-io/fyne/tree/v2.8.1). The documented release
-is `v2.8.1-sytue.15`, source revision `d943ebc7`. It preserves the canonical Go
-module path `fyne.io/fyne/v2` and the upstream dependency declarations.
+is [v2.8.1-sytue.16](https://github.com/thinkddr/fyne/tree/v2.8.1-sytue.16).
+It preserves the canonical Go module path `fyne.io/fyne/v2` and the upstream
+dependency declarations.
 
 ## Attribution and license
 
@@ -19,11 +20,30 @@ required by LICENSE. Fyne.io and its contributors do not endorse this independen
 downstream release. General upstream documentation is preserved in
 [UPSTREAM-README.md](UPSTREAM-README.md).
 
-## Release delta
+## Maintenance release v2.8.1-sytue.16
 
-These are the 17 commits after upstream `v2.8.1`, in chronological order.
-Links identify the exact changes rather than a claim of equivalent behavior on
-every platform.
+The [maintenance comparison](https://github.com/thinkddr/fyne/compare/v2.8.1-sytue.15...v2.8.1-sytue.16)
+records the complete changes since `.15`:
+
+- English fork documentation and the preserved upstream README.
+- Pinned Linux x86-64 regression CI and unchanged upstream reference runs on
+  x86-64 and ARM64, with failed-image artifacts retained for review.
+- Font-cache backing-storage identity recorded without unsafe operations, and a
+  helper extracted from dismissed-overlay dispatch to reduce function complexity.
+- Watcher tests that synchronize background callbacks on the test goroutine and
+  close resources, with production watcher behavior preserved.
+- Reviewed visual fixtures reflecting the existing nearest-pixel position
+  rounding and multiline Entry row-spacing changes.
+
+The fixture refresh does not establish browser pixel parity. The platform and
+cache boundaries below still apply. [FORK-VALIDATION.md](FORK-VALIDATION.md)
+records the reference runs and fixture inventory.
+
+## Initial fork delta v2.8.1-sytue.15
+
+These are the 17 commits after upstream `v2.8.1` through `v2.8.1-sytue.15`
+(`d943ebc7`), in chronological order. Links identify the exact changes rather
+than equivalent behavior on every platform. The `.15` tag remains unchanged.
 
 | Commit | Change |
 | --- | --- |

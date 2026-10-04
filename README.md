@@ -1,19 +1,22 @@
 # Fyne — Sytue fork
 
 A downstream fork of [Fyne](https://github.com/fyne-io/fyne), the Go toolkit for
-native desktop and mobile applications. This release adds incoming URL handling,
+native desktop and mobile applications. The fork adds incoming URL handling,
 Android multi-file selection, overlay/focus behavior and targeted rendering,
 cache and lifecycle fixes.
 
-**Latest tagged release:** `v2.8.1-sytue.15`, based on upstream `v2.8.1`.
-The [release delta](https://github.com/thinkddr/fyne/compare/v2.8.1...v2.8.1-sytue.15)
-contains 17 commits. [FORK-NOTICE.md](FORK-NOTICE.md) lists each change and its
-scope. The toolkit code and Sytue additions use Fyne's
+**Latest tagged release:** `v2.8.1-sytue.16`, based on upstream `v2.8.1`.
+The [initial fork delta](https://github.com/thinkddr/fyne/compare/v2.8.1...v2.8.1-sytue.15)
+contains 17 commits through `v2.8.1-sytue.15`. The
+[maintenance delta](https://github.com/thinkddr/fyne/compare/v2.8.1-sytue.15...v2.8.1-sytue.16)
+covers the changes in `.16`. [FORK-NOTICE.md](FORK-NOTICE.md) records their scope.
+The toolkit code and Sytue additions use Fyne's
 [BSD 3-Clause license](LICENSE). Bundled fonts retain their
 [own license notices](theme/font/).
 
-The development branch includes documentation, regression CI, lint fixes and
-watcher-test synchronization after this tag.
+The `.16` maintenance release updates documentation, pinned regression CI,
+lint-safe refactoring and watcher-test synchronization. Reviewed visual fixtures
+reflect the fork's existing position rounding and multiline Entry row spacing.
 
 ## Install
 
@@ -22,7 +25,7 @@ with a pinned replacement in your application's module:
 
 ```sh
 go get fyne.io/fyne/v2@v2.8.1
-go mod edit -replace=fyne.io/fyne/v2=github.com/thinkddr/fyne/v2@v2.8.1-sytue.15
+go mod edit -replace=fyne.io/fyne/v2=github.com/thinkddr/fyne/v2@v2.8.1-sytue.16
 go mod tidy
 ```
 
@@ -95,6 +98,9 @@ the URI; `-1` means unknown and this method is not part of `fyne.URI`.
 The linked tests cover their stated regressions. Headless tests do not prove
 Android/iOS/macOS native integration or compositor behavior. Those paths require
 device or platform validation.
+
+[FORK-VALIDATION.md](FORK-VALIDATION.md) explains the rendering reference,
+reviewed fixture updates and release checks.
 
 The strict software-image reference uses Linux x86-64. The
 [unchanged upstream 2.8.1 reference run](https://github.com/thinkddr/fyne/actions/runs/37198815282)
