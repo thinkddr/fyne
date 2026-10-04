@@ -502,6 +502,16 @@
       "afterSHA256": "bc9509187c73e903c1d2ad7898180ddb95fcb579ba15178c09d0edb9add9b122"
     },
     {
+      "path": "internal/driver/glfw/testdata/menu_bar_active_edit.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "1eb974d9d452ec90005a2e37490d7fe45a1135527a5cc5edc21a2dc4107ad5b7",
+      "afterSHA256": "89b7a559d478f7b3971db5d45b15e677339e65954acd362384d2b50c2a05ed79"
+    },
+    {
       "path": "internal/driver/glfw/testdata/menu_bar_active_file.png",
       "variants": [
         "desktop"
@@ -512,7 +522,117 @@
       "afterSHA256": "83fa5933f27b01f34a6a0151f5efc40056ca70016ed5ec6a54ee3da5f88a7146"
     },
     {
+      "path": "internal/driver/glfw/testdata/menu_bar_active_help.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "657b673e7e4407387660dc740bbad25006b4bfdc78bf156401aa2cc340601e7e",
+      "afterSHA256": "02f4d49e36f924fbe8ee02882448084c84926bc072a9ed4cfb7cfe7df7bd53f4"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_content_not_hoverable_with_active_menu.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "17e888d4db4256a2e8f7373b7a3676bbde7f072d76d02e6adcd87da46c920421",
+      "afterSHA256": "83fa5933f27b01f34a6a0151f5efc40056ca70016ed5ec6a54ee3da5f88a7146"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_content.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "97e87c280b17914ffef4ef795151defc608e44c64ace6f369fb286fc5713652c",
+      "afterSHA256": "e190096b7acd8611abe03b1ca3b2d7f8dadb7af50b7eb4861e585b3d040807f0"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_content_test_theme.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "595c31ee0b21f1b2576258b5327a9fa1e7c25853ea56473e7a196fb891442601",
+      "afterSHA256": "f3f8ee9f9e364f15e1ed9fbac0003dfb543a7a2e8e36efb3b3eb41beccc5fa1b"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_file_new.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "b2b818584872971a5cbea79297f34c76a22bd186c6b31cc7faa15527893552cf",
+      "afterSHA256": "5b0618538abde16dd444f2cd4b8cb22703f416ec2b8e24a99a699cd6cc57a0b2"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_file_open.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "f57398670eae2aab964eae1ff0657fc92eb013a12cca4ffc835987d379dfc093",
+      "afterSHA256": "fe659c767dd349ed95a35aaeb0732bf255b1ca87572c6a982f5ceedc4fea7142"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_file_recent.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "50014f4df9c651443a93da7f4d2aaefb119ccdc5f409b9677ab8b19da12cce8e",
+      "afterSHA256": "1a1f7e1b6135405fa218051f1a3b0109ff3a60f985684ab6b9d965fd82c383dd"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_file_recent_older.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "d65d68b84345c13e61ab29b14cd132b00e0f5d54f87030cce772c0b53f04b13f",
+      "afterSHA256": "5d25134e621718ad0e83bff1d328e9587439a6fb986c81987be764d80ec62ab6"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_hovered_file_recent_older_old1.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "e5409572e09e0d255c6fa6c40c2381053aeb2a4e1e5b23d05dad6957234b6c8e",
+      "afterSHA256": "abbd57fd320f79c53f16275551c95d7ce452d37bc8f479c8b98df9f4ae5c903a"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_inactive_file.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "743b5ea711464b22d1efb3b6d702cc55ae28a2f72ee63199ed9493e80d3ed597",
+      "afterSHA256": "33210655d3e0780214bfa3b69a3b7bfdff77b02b709875faeae63736c25a1331"
+    },
+    {
       "path": "internal/driver/glfw/testdata/menu_bar_initial.png",
+      "variants": [
+        "desktop"
+      ],
+      "width": 300,
+      "height": 300,
+      "beforeSHA256": "97e87c280b17914ffef4ef795151defc608e44c64ace6f369fb286fc5713652c",
+      "afterSHA256": "e190096b7acd8611abe03b1ca3b2d7f8dadb7af50b7eb4861e585b3d040807f0"
+    },
+    {
+      "path": "internal/driver/glfw/testdata/menu_bar_tap_content_with_active_menu_does_not_trigger_action_but_dismisses_menu.png",
       "variants": [
         "desktop"
       ],
@@ -671,7 +791,9 @@
       "width": 128,
       "height": 128,
       "beforeSHA256": "e4794ddfe4db75a6ec1104440641e9c3bcae03cd8a98537ce9e4d14b1ff26b1e",
-      "afterSHA256": "01343426376425757ecb25d19826c04f198917710bed45f789d21bac071694d8"
+      "afterSHA256": "7154529f3987af0fe2216afe43e2a04b6bdef818cd6a8f97cdde21e188330c13",
+      "capturedAfterSHA256": "01343426376425757ecb25d19826c04f198917710bed45f789d21bac071694d8",
+      "correction": "Clear the stale scroll offset after five undo operations restore fitting text."
     },
     {
       "path": "widget/testdata/entry/undo_redo_initial.png",
@@ -1240,5 +1362,29 @@
       "offsetY": 0,
       "exactInitialCapture": true
     }
+  },
+  "incrementalReview": {
+    "sourceHead": "e2f3b41d03848489bfec709b8b29568bbd451d73",
+    "captureRun": "https://github.com/thinkddr/fyne/actions/runs/37201578262",
+    "captureJob": "https://github.com/thinkddr/fyne/actions/runs/37201578262/job/111434409188",
+    "menuFixtureCount": 12,
+    "menuAssertionCount": 25,
+    "allAffectedMenuStepsPassedInDiagnostic": true,
+    "menuFixtures": [
+      "internal/driver/glfw/testdata/menu_bar_active_edit.png",
+      "internal/driver/glfw/testdata/menu_bar_active_help.png",
+      "internal/driver/glfw/testdata/menu_bar_content_not_hoverable_with_active_menu.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_content.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_content_test_theme.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_file_new.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_file_open.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_file_recent.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_file_recent_older.png",
+      "internal/driver/glfw/testdata/menu_bar_hovered_file_recent_older_old1.png",
+      "internal/driver/glfw/testdata/menu_bar_inactive_file.png",
+      "internal/driver/glfw/testdata/menu_bar_tap_content_with_active_menu_does_not_trigger_action_but_dismisses_menu.png"
+    ],
+    "explanation": "These menu steps were previously skipped after an initial image mismatch. Every affected step passed in the rendering diagnostic. The menu source was unchanged; the refreshed captures use the intended position rounding and clip behavior. Menu tests now run later actions even if the initial image assertion fails.",
+    "viewportCorrection": "The initial and five-undo masters use fitting content with zero vertical offset after the Entry scroll-bounds fix. The original capture hashes are retained in their entries."
   }
 }

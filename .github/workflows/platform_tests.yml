@@ -61,6 +61,36 @@ jobs:
       - name: Tests
         run: ${{ matrix.runner }} go test -race -tags "${{ matrix.tags }}" ${{ matrix.cover }} ${{ env.TESTLDFLAGS }} ./...
 
+      - name: Wayland Tests
+        run: go test -race -tags no_glfw,ci,wayland ./...
+        if: ${{ runner.os == 'Linux' }}
+
+      - name: Update coverage
+        run: |
+          set -e
+          go tool cover -func coverage.out > coverage-summary.txt
+          coverage=$(awk '/^total:/ {gsub(/%/, "", $NF); print $NF}' coverage-summary.txt)
+          test -n "$coverage"
+          if (( $(echo "$coverage < 62" | bc) )); then echo "Test coverage lowered"; exit 1; fi
+        if: ${{ runner.os == 'Linux' && matrix.go-version == 'stable' }}
+
+      - name: Retain coverage report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: ${{ always() && runner.os == 'Linux' && matrix.go-version == 'stable' && hashFiles('coverage.out') != '' }}
+        with:
+          name: fork-coverage-${{ github.sha }}
+          path: |
+            coverage.out
+            coverage-summary.txt
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Update PR Coverage
+        uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: coverage.out
+        if: ${{ runner.os == 'Linux' && matrix.go-version == 'stable' && vars.COVERALLS_ENABLED == 'true' }}
+
       - name: Upload failed testdata
         uses: actions/upload-artifact@v5
         if: failure()
@@ -70,20 +100,3 @@ jobs:
             **/testdata/failed
           retention-days: 1
           if-no-files-found: ignore
-
-      - name: Wayland Tests
-        run: go test -race -tags no_glfw,ci,wayland ./...
-        if: ${{ runner.os == 'Linux' }}
-
-      - name: Update coverage
-        run: |
-          set -e
-          coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
-          if (( $(echo "$coverage < 62" | bc) )); then echo "Test coverage lowered"; exit 1; fi
-        if: ${{ runner.os == 'Linux' && matrix.go-version == 'stable' }}
-
-      - name: Update PR Coverage
-        uses: shogo82148/actions-goveralls@v1
-        with:
-          path-to-profile: coverage.out
-        if: ${{ runner.os == 'Linux' && matrix.go-version == 'stable' }}

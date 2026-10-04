@@ -36,6 +36,8 @@ records the complete changes since `.15`:
   offsets when restored content fits the viewport.
 - Reviewed visual fixtures reflecting the existing nearest-pixel position
   rounding and multiline Entry row-spacing changes.
+- Menu tests exercise later mouse and keyboard actions even if an initial image
+  assertion fails, preserving all image, markup and callback assertions.
 
 The fixture refresh does not establish browser pixel parity. The platform and
 cache boundaries below still apply. [FORK-VALIDATION.md](FORK-VALIDATION.md)
