@@ -83,9 +83,9 @@ func TestFileWatcher_FileDeleted(t *testing.T) {
 	defer watcher.Close()
 	os.Remove(path)
 	f, _ = os.Create(path)
+	defer f.Close()
 
 	waitForFileWatcher(t, called)
-	f.Close()
 }
 
 func waitForFileWatcher(t *testing.T, called <-chan any) {
