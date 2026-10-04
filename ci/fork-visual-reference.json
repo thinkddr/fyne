@@ -682,7 +682,9 @@
       "width": 128,
       "height": 128,
       "beforeSHA256": "86dd60cad79608201a8c60fa5b8aa2bb03abdacc06c57352c05e2894465e8d64",
-      "afterSHA256": "f7ff8811a622f57579230853b6d2cbd5b742bec04da8d6c992f046a400386806"
+      "afterSHA256": "a183c3bdcf1e59329a5942350285fc940039a08271555c31999005a93c397f76",
+      "capturedAfterSHA256": "f7ff8811a622f57579230853b6d2cbd5b742bec04da8d6c992f046a400386806",
+      "correction": "Use the initial viewport after fixing stale Entry scroll bounds on undo."
     },
     {
       "path": "widget/testdata/entry/undo_redo_mistake_corrected.png",
@@ -1223,5 +1225,20 @@
       "beforeSHA256": "0888c4fb13facb878cf9e6fb973eb47e9419cf006d401e731a54a949124a1904",
       "afterSHA256": "8136596b93be7367fcd636216068dab2b5d98163d49ad69b071e1e29e9d6a627"
     }
-  ]
+  ],
+  "viewportRegression": {
+    "source": "widget/entry_scroll_internal_test.go",
+    "probeRun": "https://github.com/thinkddr/fyne/actions/runs/37201287574",
+    "before": {
+      "viewportHeight": 116,
+      "restoredMinHeight": 100.3125,
+      "contentHeight": 123.390625,
+      "offsetY": 7.390625
+    },
+    "afterExplicitRefresh": {
+      "contentHeight": 116,
+      "offsetY": 0,
+      "exactInitialCapture": true
+    }
+  }
 }
