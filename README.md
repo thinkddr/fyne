@@ -17,6 +17,8 @@ The toolkit code and Sytue additions use Fyne's
 The `.16` maintenance release updates documentation, pinned regression CI,
 lint-safe refactoring and watcher-test synchronization. Reviewed visual fixtures
 reflect the fork's existing position rounding and multiline Entry row spacing.
+It also clears stale Entry scrolling when undo restores text that fits the
+viewport.
 
 ## Install
 

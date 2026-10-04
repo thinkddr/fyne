@@ -32,6 +32,8 @@ records the complete changes since `.15`:
   helper extracted from dismissed-overlay dispatch to reduce function complexity.
 - Watcher tests that synchronize background callbacks on the test goroutine and
   close resources, with production watcher behavior preserved.
+- Entry refresh updates its scroll bounds after text shrinks, clearing stale
+  offsets when restored content fits the viewport.
 - Reviewed visual fixtures reflecting the existing nearest-pixel position
   rounding and multiline Entry row-spacing changes.
 

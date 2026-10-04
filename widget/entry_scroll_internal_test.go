@@ -61,21 +61,13 @@ func TestEntry_UndoRestoresFittingViewport(t *testing.T) {
 	assert.Greater(t, e.scroll.Offset.Y, float32(0), "the caret scrolls into view")
 
 	e.TypedShortcut(&fyne.ShortcutUndo{})
-	c.Capture()
+	restored := encode(c.Capture())
 	logState("undo")
 	require.Equal(t, initialText, e.Text)
 	assert.Equal(t, initialRow, e.CursorRow, "undo restores the cursor row")
 	assert.Equal(t, initialColumn, e.CursorColumn, "undo restores the cursor column")
 	assert.LessOrEqual(t, e.scroll.Content.MinSize().Height, e.scroll.Size().Height, "restored text fits vertically")
-	if e.scroll.Content.MinSize().Height <= e.scroll.Size().Height {
-		assert.Zero(t, e.scroll.Offset.Y, "undo must clear scrolling when the restored text fits")
-	}
-
-	// Probe whether refreshing the scroll layout repairs the recorded stale state.
-	e.scroll.Refresh()
-	corrected := encode(c.Capture())
-	logState("undo-after-scroll-refresh")
-	assert.Zero(t, e.scroll.Offset.Y, "refresh clamps the offset of fitting content")
+	assert.Zero(t, e.scroll.Offset.Y, "undo clears scrolling when the restored text fits")
 	assert.Equal(t, e.scroll.Size(), e.scroll.Content.Size(), "fitting content uses the viewport size")
-	assert.True(t, bytes.Equal(initial, corrected), "restored text and cursor paint the original viewport")
+	assert.True(t, bytes.Equal(initial, restored), "restored text and cursor paint the original viewport")
 }

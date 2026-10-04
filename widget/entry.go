@@ -1746,7 +1746,13 @@ func (r *entryRenderer) Refresh() {
 
 	r.entry.sel.Hidden = !r.entry.focused
 
-	cache.Renderer(r.entry.content).Refresh()
+	contentRenderer := cache.Renderer(r.entry.content).(*entryContentRenderer)
+	if r.scroll.Content != nil {
+		contentRenderer.updateScrollDirections()
+		r.scroll.Refresh()
+	} else {
+		contentRenderer.Refresh()
+	}
 	canvas.Refresh(r.entry.super())
 }
 

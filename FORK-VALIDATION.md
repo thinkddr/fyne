@@ -34,6 +34,12 @@ in RGBA. Dimensions remain unchanged. The
 [fixture inventory](ci/fork-visual-reference.json) records source revisions,
 diagnostic results and every before/after SHA-256 hash.
 
+The fixture review also exposed stale Entry scroll geometry after undo. The
+[viewport regression](widget/entry_scroll_internal_test.go) verifies that typing
+an overflowing row and then undoing it restores the text, cursor, fitting bounds,
+zero scroll offset and the exact initial capture. Entry refresh now updates the
+active scroll layout before cursor visibility is calculated.
+
 ## Release checks
 
 [Fork conformance](.github/workflows/fork-conformance.yml) runs module
