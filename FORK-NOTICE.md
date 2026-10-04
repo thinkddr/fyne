@@ -38,6 +38,8 @@ records the complete changes since `.15`:
   rounding and multiline Entry row-spacing changes.
 - Menu tests exercise later mouse and keyboard actions even if an initial image
   assertion fails, preserving all image, markup and callback assertions.
+- Coverage records repository code executed across package integration tests,
+  retains the 62% requirement and archives the report. Coveralls upload is opt-in.
 
 The fixture refresh does not establish browser pixel parity. The platform and
 cache boundaries below still apply. [FORK-VALIDATION.md](FORK-VALIDATION.md)
