@@ -54,7 +54,12 @@ their inventory entries retain the earlier capture hashes and correction notes.
 verification, formatting, vet and race-enabled tests against the real source.
 The inherited platform, mobile, web and static-analysis workflows remain active.
 Linux platform tests retain the upstream 62% coverage requirement and archive
-the coverage report. External Coveralls uploads require the repository variable
+the coverage report. Coverage now instruments every repository package in every
+test with `-coverpkg=./...`, so software-renderer and widget integration tests
+record the library code they exercise across package boundaries. This is a
+module-wide execution metric; Go's default only measures the package under
+test. See the [Go test coverage flags](https://pkg.go.dev/cmd/go#hdr-Testing_flags).
+External Coveralls uploads require the repository variable
 `COVERALLS_ENABLED=true` and enrollment of this fork with that service.
 Release tags also build a clean external module using canonical Fyne imports and
 the published fork replacement from the README.

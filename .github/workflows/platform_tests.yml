@@ -23,7 +23,7 @@ jobs:
           - os: ubuntu-latest
             runner: xvfb-run
             tags: ci,migrated_fynedo
-            cover: -covermode=atomic -coverprofile=coverage.out
+            cover: -covermode=atomic -coverpkg=./... -coverprofile=coverage.out
           - os: macos-latest
             tags: no_glfw,ci,migrated_fynedo
           - os: windows-latest
