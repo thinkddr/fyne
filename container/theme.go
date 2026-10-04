@@ -20,7 +20,7 @@ type ThemeOverride struct {
 
 	holder *fyne.Container
 
-	mobile bool
+	features *themeFeatures
 }
 
 // NewThemeOverride provides a container where the child widgets are themed by the specified theme.
@@ -32,7 +32,7 @@ type ThemeOverride struct {
 //
 // Since: 2.5
 func NewThemeOverride(obj fyne.CanvasObject, th fyne.Theme) *ThemeOverride {
-	t := &ThemeOverride{Content: obj, Theme: th, holder: NewStack(obj)}
+	t := &ThemeOverride{Content: obj, Theme: th, holder: NewStack(obj), features: &themeFeatures{}}
 	t.ExtendBaseWidget(t)
 
 	cache.OverrideTheme(obj, addFeatures(th, t))
@@ -63,18 +63,29 @@ func (t *ThemeOverride) Refresh() {
 //
 // Since: 2.6
 func (t *ThemeOverride) SetDeviceIsMobile(on bool) {
-	t.mobile = on
+	t.features.mobile = on
 	t.Refresh()
+}
+
+// themeFeatures is what a ThemeOverride tells the themed objects about itself. The
+// theme holds this and not the container: the theme is kept against every object it
+// covers, and a pointer back to the container (and so to those same objects) kept them
+// all alive for good.
+type themeFeatures struct {
+	mobile bool
 }
 
 type featureTheme struct {
 	fyne.Theme
 
-	over *ThemeOverride
+	over *themeFeatures
 }
 
 func addFeatures(th fyne.Theme, o *ThemeOverride) fyne.Theme {
-	return &featureTheme{Theme: th, over: o}
+	if o.features == nil {
+		o.features = &themeFeatures{}
+	}
+	return &featureTheme{Theme: th, over: o.features}
 }
 
 func (f *featureTheme) Feature(n intTheme.FeatureName) any {

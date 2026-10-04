@@ -7,8 +7,8 @@
 				<widget size="120x96" type="*widget.entryContent">
 					<widget size="120x96" type="*widget.RichText">
 						<text pos="8,6" size="38x19">MMM</text>
-						<text pos="8,25" size="39x19">WWW</text>
-						<text pos="8,44" size="0x19"></text>
+						<text pos="8,29" size="39x19">WWW</text>
+						<text pos="8,52" size="0x19"></text>
 					</widget>
 					<rectangle fillColor="primary" pos="19,6" size="2x19"/>
 				</widget>

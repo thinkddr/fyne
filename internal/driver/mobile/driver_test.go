@@ -80,3 +80,18 @@ func Test_mobileDriver_AbsolutePositionForObject(t *testing.T) {
 		})
 	}
 }
+
+// A fyne.Do issued before the event loop starts is queued, not run on the caller: run
+// there, it raced the main thread (Sytue CertiPDF crashed in the text shaper on iOS).
+func TestDoFromGoroutineBeforeRunIsQueued(t *testing.T) {
+	d := NewGoMobileDriver().(*driver)
+	ran := false
+	d.DoFromGoroutine(func() { ran = true }, false)
+	if ran {
+		t.Fatal("fn ran on the calling goroutine before the loop started")
+	}
+	(<-d.queuedFuncs.Out())()
+	if !ran {
+		t.Fatal("the queued fn did not run")
+	}
+}

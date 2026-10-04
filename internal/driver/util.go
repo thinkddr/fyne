@@ -168,8 +168,15 @@ func walkObjectTree(
 	}
 
 	if isClipWithRenderer(obj, renderer) {
-		clipPos = pos
-		clipSize = obj.Size()
+		// A clip inside a clip keeps only what both show, as the GL painter's ClipStack
+		// does: replacing the parent's let a scrolled child (an Entry in a scrolling
+		// dialog) paint and take taps outside the dialog.
+		size := obj.Size()
+		x0, y0 := max(clipPos.X, pos.X), max(clipPos.Y, pos.Y)
+		x1 := min(clipPos.X+clipSize.Width, pos.X+size.Width)
+		y1 := min(clipPos.Y+clipSize.Height, pos.Y+size.Height)
+		clipPos = fyne.NewPos(x0, y0)
+		clipSize = fyne.NewSize(max(x1-x0, 0), max(y1-y0, 0))
 	}
 
 	if beforeChildren != nil {

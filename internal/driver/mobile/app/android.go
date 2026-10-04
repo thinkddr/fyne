@@ -45,7 +45,7 @@ int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 
 void showKeyboard(JNIEnv* env, int keyboardType);
 void hideKeyboard(JNIEnv* env);
-void showFileOpen(JNIEnv* env, char* mimes);
+void showFileOpen(JNIEnv* env, char* mimes, int multiple);
 void showFileSave(JNIEnv* env, char* mimes, char* filename);
 void finish(JNIEnv* env, jobject ctx);
 
@@ -70,6 +70,7 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
 	"fyne.io/fyne/v2/internal/driver/mobile/mobileinit"
+	"fyne.io/fyne/v2/internal/urlhandler"
 )
 
 // mimeMap contains standard mime entries that are missing on Android
@@ -356,6 +357,13 @@ func filePickerReturned(str *C.char) {
 	fileCallback = nil
 }
 
+//export urlOpened
+func urlOpened(str *C.char) {
+	if str != nil {
+		urlhandler.Deliver(C.GoString(str))
+	}
+}
+
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
 	currentSize.InsetTopPx = top
@@ -402,7 +410,11 @@ func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter)
 	open := func(vm, jniEnv, ctx uintptr) error {
 		// TODO pass in filter...
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-		C.showFileOpen(env, mimeStr)
+		multiple := C.int(0)
+		if filter.Multiple {
+			multiple = 1
+		}
+		C.showFileOpen(env, mimeStr, multiple)
 		return nil
 	}
 
@@ -634,14 +646,7 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) bool {
 	if k.Rune >= '0' && k.Rune <= '9' { // GBoard generates key events for numbers, but we see them in textChanged
 		return false
 	}
-	switch C.AKeyEvent_getAction(e) {
-	case C.AKEY_STATE_DOWN:
-		k.Direction = key.DirPress
-	case C.AKEY_STATE_UP:
-		k.Direction = key.DirRelease
-	default:
-		k.Direction = key.DirNone
-	}
+	k.Direction = keyDirection(int32(C.AKeyEvent_getAction(e)))
 	// TODO(crawshaw): set Modifiers.
 	theApp.events.In() <- k
 

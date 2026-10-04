@@ -110,7 +110,7 @@ func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 func (f *FocusManager) nextWithWalker(current fyne.Focusable, walker walkerFunc) fyne.Focusable {
 	var next fyne.Focusable
 	found := current == nil // if we have no starting point then pretend we matched already
-	walker(f.content, func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+	walker(driver.FocusScopeOf(f.content), func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
 			// disabled widget cannot receive focus
 			return false

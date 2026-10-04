@@ -33,6 +33,12 @@ func fileOpenOSOverride(f *FileDialog) bool {
 	return true
 }
 
+func init() {
+	fileOpenMultipleOSOverride = func(callback func([]fyne.URIReadCloser, error)) {
+		mobile.ShowFileOpenPickerMultiple(callback, nil)
+	}
+}
+
 func fileSaveOSOverride(f *FileDialog) bool {
 	mobile.ShowFileSavePicker(f.callback.(func(fyne.URIWriteCloser, error)), f.filter, f.initialFileName)
 	return true
