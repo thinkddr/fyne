@@ -502,29 +502,11 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 		w.mouseClickedHandleMouseable(mev, action, wid)
 	}
 
-	// If this press dismissed an overlay that lets its dismissing click through (a menu
-	// closes on mouse down and the click carries on to what it covered), the press
-	// belongs to whatever is under the pointer now: dispatch it again from the start.
-	if action == press && driver.PassesTapThrough(prevOverlay) &&
-		!slices.Contains(w.canvas.Overlays().List(), prevOverlay) {
-		w.processMouseClicked(button, action, modifiers)
+	if w.mouseClickedRedispatchDismissedOverlay(button, action, modifiers, prevOverlay) {
 		return
 	}
 
-	focused := w.canvas.Focused()
-	if wid, ok := co.(fyne.Focusable); !ok || wid != focused {
-		ignore := false
-		if focusedObj, ok := focused.(fyne.CanvasObject); ok {
-			found, _, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
-				return object == focusedObj
-			})
-			ignore = found != nil
-		}
-
-		if !ignore { // if the currently focused widget is under the mouse then ignore this tap unfocus
-			w.canvas.Unfocus()
-		}
-	}
+	w.mouseClickedHandleFocus(co, mousePos)
 
 	switch action {
 	case press:
@@ -587,6 +569,33 @@ func (w *window) ensurePositionProcessed() {
 	if !w.mousePosUpdateProcessed {
 		w.processMouseMoved(w.newMousePosX, w.newMousePosY)
 		w.mousePosUpdateProcessed = true
+	}
+}
+
+func (w *window) mouseClickedRedispatchDismissedOverlay(button desktop.MouseButton, action action, modifiers fyne.KeyModifier, prevOverlay fyne.CanvasObject) bool {
+	// Send a dismissing press to the newly uncovered target.
+	if action == press && driver.PassesTapThrough(prevOverlay) &&
+		!slices.Contains(w.canvas.Overlays().List(), prevOverlay) {
+		w.processMouseClicked(button, action, modifiers)
+		return true
+	}
+	return false
+}
+
+func (w *window) mouseClickedHandleFocus(co fyne.CanvasObject, mousePos fyne.Position) {
+	focused := w.canvas.Focused()
+	if wid, ok := co.(fyne.Focusable); !ok || wid != focused {
+		ignore := false
+		if focusedObj, ok := focused.(fyne.CanvasObject); ok {
+			found, _, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
+				return object == focusedObj
+			})
+			ignore = found != nil
+		}
+
+		if !ignore { // Keep focus when the focused widget is under the pointer.
+			w.canvas.Unfocus()
+		}
 	}
 }
 

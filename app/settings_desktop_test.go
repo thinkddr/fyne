@@ -45,18 +45,21 @@ func TestWatchFile(t *testing.T) {
 	defer os.Remove(path)
 
 	called := make(chan any, 1)
-	watchFile(path, func() {
-		called <- true
+	watcher := watchFile(path, func() {
+		select {
+		case called <- true:
+		default:
+		}
 	})
+	if !assert.NotNil(t, watcher, "Could not start watcher") {
+		return
+	}
+	defer watcher.Close()
 	file, _ := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0o644)
 	file.WriteString(" ")
 	file.Close()
 
-	select {
-	case <-called:
-	case <-time.After(100 * time.Millisecond):
-		t.Error("File watcher callback was not called")
-	}
+	waitForFileWatcher(t, called)
 }
 
 func TestFileWatcher_FileDeleted(t *testing.T) {
@@ -67,7 +70,10 @@ func TestFileWatcher_FileDeleted(t *testing.T) {
 
 	called := make(chan any, 1)
 	watcher := watchFile(path, func() {
-		called <- true
+		select {
+		case called <- true:
+		default:
+		}
 	})
 	if watcher == nil {
 		assert.Fail(t, "Could not start watcher")
@@ -78,12 +84,27 @@ func TestFileWatcher_FileDeleted(t *testing.T) {
 	os.Remove(path)
 	f, _ = os.Create(path)
 
-	select {
-	case <-called:
-	case <-time.After(100 * time.Millisecond):
-		t.Error("File watcher callback was not called")
-	}
+	waitForFileWatcher(t, called)
 	f.Close()
+}
+
+func waitForFileWatcher(t *testing.T, called <-chan any) {
+	t.Helper()
+	deadline := time.NewTimer(2 * time.Second)
+	defer deadline.Stop()
+	tick := time.NewTicker(10 * time.Millisecond)
+	defer tick.Stop()
+	for {
+		// The test driver dispatches background callbacks on the test goroutine.
+		fyne.DoAndWait(func() {})
+		select {
+		case <-called:
+			return
+		case <-deadline.C:
+			t.Fatal("File watcher callback was not called")
+		case <-tick.C:
+		}
+	}
 }
 
 func testPath(child string) string {

@@ -33,7 +33,11 @@ jobs:
       - name: Verify modules and format
         run: |
           go mod verify
-          test -z "$(gofmt -l $(git ls-files '*.go'))"
+          task_unformatted=$(gofmt -l $(git ls-files '*.go'))
+          if [ -n "$task_unformatted" ]; then
+            printf '%s\n' "$task_unformatted"
+            exit 1
+          fi
       - name: Vet
         run: go vet -tags ci,migrated_fynedo ./...
       - name: Run runtime and driver regressions

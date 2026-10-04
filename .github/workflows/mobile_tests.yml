@@ -34,6 +34,15 @@ jobs:
       - name: Tests
         run: xvfb-run go test -race -tags mobile,ci,migrated_fynedo ./...
 
+      - name: Upload failed testdata
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: failure()
+        with:
+          name: failed-mobile-testdata-${{ matrix.go-version }}
+          path: '**/testdata/failed'
+          retention-days: 1
+          if-no-files-found: ignore
+
       - name: Compile
         working-directory: cmd/fyne_demo
         run: go build -tags mobile
