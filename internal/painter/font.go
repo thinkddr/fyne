@@ -8,7 +8,6 @@ import (
 	"slices"
 	"strings"
 	"sync"
-	"unsafe"
 
 	"github.com/go-text/render"
 	"github.com/go-text/typesetting/di"
@@ -516,7 +515,10 @@ func fontCacheID(style fyne.TextStyle, res fyne.Resource) cacheID {
 	}
 
 	data := res.Content()
-	id.name, id.data, id.size = res.Name(), unsafe.SliceData(data), len(data)
+	id.name, id.size = res.Name(), len(data)
+	if len(data) > 0 {
+		id.data = &data[0]
+	}
 	return id
 }
 
