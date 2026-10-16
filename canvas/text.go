@@ -28,6 +28,14 @@ type Text struct {
 	//
 	// Since: 2.5
 	FontSource fyne.Resource
+
+	// Layout supplies an immutable shaped line instead of Fyne's default font
+	// measurement and painting. Only the software painter supports this hook.
+	// The provider must replace it when text, font or shaping policy changes.
+	Layout TextLayout
+
+	layoutMetricsError error
+	layoutPaintError   error
 }
 
 // Hide will set this text to not be visible
@@ -40,6 +48,13 @@ func (t *Text) Hide() {
 // MinSize returns the minimum size of this text object based on its font size and content.
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() fyne.Size {
+	if t.Layout != nil {
+		s, _, err := t.LayoutMetrics()
+		if err != nil {
+			return fyne.Size{}
+		}
+		return s
+	}
 	s, _ := fyne.CurrentApp().Driver().RenderedTextSize(t.Text, t.TextSize, t.TextStyle, t.FontSource)
 	return s
 }

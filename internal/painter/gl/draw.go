@@ -836,6 +836,11 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 }
 
 func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
+	if text.Layout != nil {
+		text.SetTextLayoutError(canvas.ErrTextLayoutUnsupportedGL)
+		fyne.LogError("Failed to paint canvas.Text layout", canvas.ErrTextLayoutUnsupportedGL)
+		return
+	}
 	if text.Text == "" {
 		return
 	}

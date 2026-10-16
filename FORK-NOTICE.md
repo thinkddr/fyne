@@ -1,8 +1,10 @@
 # Fork notice
 
 This repository contains a downstream modification of
-[Fyne v2.8.1](https://github.com/fyne-io/fyne/tree/v2.8.1). The documented release
-is [v2.8.1-sytue.18](https://github.com/thinkddr/fyne/tree/v2.8.1-sytue.18).
+[Fyne v2.8.1](https://github.com/fyne-io/fyne/tree/v2.8.1). This document describes
+source version `v2.8.1-sytue.19`. Published versions are listed in
+[Tags](https://github.com/thinkddr/fyne/tags); the prior release is
+[v2.8.1-sytue.18](https://github.com/thinkddr/fyne/tree/v2.8.1-sytue.18).
 It preserves the canonical Go module path `fyne.io/fyne/v2` and the upstream
 dependency declarations.
 
@@ -19,6 +21,51 @@ Keep the license, copyright notices and disclaimer with redistributions as
 required by LICENSE. Fyne.io and its contributors do not endorse this independent
 downstream release. General upstream documentation is preserved in
 [UPSTREAM-README.md](UPSTREAM-README.md).
+
+## Software shaped-text in v2.8.1-sytue.19
+
+Version `.19` adds an opt-in [`canvas.Text.Layout`](canvas/text_layout.go)
+interface. It supplies immutable line-box metrics and glyph painting into
+the software canvas's accumulated, clipped NRGBA buffer. The provider owns font
+resources and must respect the actual stride, physical clip, logical origin,
+scale and resolved color. Unsupported requests must fail before pixel changes;
+Fyne cannot roll back provider writes. No CGo or font-engine dependency is added.
+
+Metric failures remain visible and never trigger default-font measurement.
+Paint failures remain visible across metric queries. Successful software paint
+clears its paint error; an explicit setter can also clear it. GL rejects supplied
+layouts with `ErrTextLayoutUnsupportedGL`, with no default glyph or opaque tile
+substitution. The nil layout path remains unchanged.
+
+Fyne paints underline and strikethrough after successful glyph paint, using the
+supplied width and baseline with its existing stroke and offsets. Hook-only
+decoration blits account for positive clip offsets. Unsafe coordinate/allocation
+requests are rejected before provider painting, including decoration rasters
+larger than 16 Mi pixels. This does not implement arbitrary CSS decorations or
+establish native-widget, browser, editor, inverse-conversion or GPU parity.
+Regressions exercise metrics, errors, destination/backdrop access,
+clipping, decorations and the default path.
+
+The implementation at `eb30b4793d6eb857ae080acaa24d80a4c4ea6c19` passed all five
+fork workflows, with thirteen successful jobs:
+
+- [Fork conformance](https://github.com/thinkddr/fyne/actions/runs/38930738931):
+  canonical Linux regressions; the tag-only `public-install` job was skipped.
+- [Platform Tests](https://github.com/thinkddr/fyne/actions/runs/38930748038):
+  all six Linux, macOS and Windows jobs.
+- [Static Analysis](https://github.com/thinkddr/fyne/actions/runs/38930756806):
+  all three jobs.
+- [Mobile Tests](https://github.com/thinkddr/fyne/actions/runs/38930766117):
+  declared and stable Go.
+- [Web Tests](https://github.com/thinkddr/fyne/actions/runs/38930774376).
+
+These runs apply to that source commit and do not include a public-install
+result. Release validation reruns all five workflows for the final source and
+tag; the clean public-module install must resolve the actual published `.19`
+module. Consult [Actions](https://github.com/thinkddr/fyne/actions) for the
+corresponding results. Consumers must separately validate any supplied font
+engine and their rendering profile; the `.17` image evidence below does not
+certify this text hook or `.19` pixels.
 
 ## Maintenance release v2.8.1-sytue.18
 
