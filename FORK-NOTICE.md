@@ -2,9 +2,9 @@
 
 This repository contains a downstream modification of
 [Fyne v2.8.1](https://github.com/fyne-io/fyne/tree/v2.8.1). This document describes
-source version `v2.8.1-sytue.19`. Published versions are listed in
+source version `v2.8.1-sytue.20`. Published versions are listed in
 [Tags](https://github.com/thinkddr/fyne/tags); the prior release is
-[v2.8.1-sytue.18](https://github.com/thinkddr/fyne/tree/v2.8.1-sytue.18).
+[v2.8.1-sytue.19](https://github.com/thinkddr/fyne/tree/v2.8.1-sytue.19).
 It preserves the canonical Go module path `fyne.io/fyne/v2` and the upstream
 dependency declarations.
 
@@ -21,6 +21,54 @@ Keep the license, copyright notices and disclaimer with redistributions as
 required by LICENSE. Fyne.io and its contributors do not endorse this independent
 downstream release. General upstream documentation is preserved in
 [UPSTREAM-README.md](UPSTREAM-README.md).
+
+## Supplied rectangle painting in v2.8.1-sytue.20
+
+Version `.20` adds opt-in [`canvas.Rectangle.Painter`](canvas/rectangle_painter.go)
+through `RectanglePainter`. A provider supplies an immutable software paint plan
+and owns its resources. It receives the actual accumulated NRGBA destination,
+original stride, unrounded global logical origin, logical rectangle size, canvas
+scale and physical ancestor clip. The destination also intersects canvas bounds;
+it allows outline outsets beyond the rectangle's own box.
+
+A supplied plan owns the complete rectangle paint, including any fill, stroke,
+corner, aspect and shadow effects. Providers must respect the clip and validate
+unsupported requests before modifying pixels; Fyne cannot roll back partial
+writes. Invalid non-finite or negative geometry fails before calling the provider.
+`PaintError` retains failures across measurement, refresh and fully clipped
+paints. A successful supplied paint or explicit `SetPaintError(nil)` clears the
+error. GL reports `ErrRectanglePainterUnsupportedGL` without calling the software
+provider or drawing a default rectangle. A nil painter preserves the existing
+rectangle path. No CGo or native-engine dependency is added.
+
+Unit and real-canvas regressions cover the accumulated backdrop, original stride,
+global fractional position, ancestor clipping and outsets, and sibling paint order
+at scales 1 and 2. Separate controls exercise invalid geometry, sticky errors,
+recovery and the default path. The GL regression checks explicit refusal.
+These hooks do not implement CSS outlines or establish browser, native-widget,
+editor, inverse-conversion or GPU
+parity. Consumers must reject or explicitly represent custom paint plans when
+exporting a scene.
+
+The implementation at `a82d070eff48adf2845f7887db7c82bb0d4488d2` passed all five
+fork workflows, with thirteen successful jobs:
+
+- [Fork conformance](https://github.com/thinkddr/fyne/actions/runs/38962828156):
+  canonical Linux regressions; the tag-only `public-install` job was skipped.
+- [Platform Tests](https://github.com/thinkddr/fyne/actions/runs/38962831278):
+  all six Linux, macOS and Windows jobs, including Linux Wayland and coverage.
+- [Static Analysis](https://github.com/thinkddr/fyne/actions/runs/38962836187):
+  all three jobs.
+- [Mobile Tests](https://github.com/thinkddr/fyne/actions/runs/38962840493):
+  declared and stable Go.
+- [Web Tests](https://github.com/thinkddr/fyne/actions/runs/38962844104).
+
+These branch runs exclude a public-module install. Release validation reruns all
+five workflows on the final source and tag; the tag-only clean install must
+select the actual published `.20` module and compile the new rectangle API along
+with the existing URL and dialog APIs. Consult
+[Actions](https://github.com/thinkddr/fyne/actions) for those results. Earlier
+release or consumer pixel evidence does not certify this hook or `.20` pixels.
 
 ## Software shaped-text in v2.8.1-sytue.19
 

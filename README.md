@@ -3,10 +3,10 @@
 A downstream fork of [Fyne](https://github.com/fyne-io/fyne), the Go toolkit for
 native desktop and mobile applications. The fork adds incoming URL handling,
 Android multi-file selection, overlay/focus behavior and targeted rendering,
-cache and lifecycle fixes. It also provides an opt-in shaped-text hook for the
-software painter.
+cache and lifecycle fixes. It also provides opt-in shaped-text and rectangle
+hooks for the software painter.
 
-**Version:** `v2.8.1-sytue.19`, based on upstream `v2.8.1`.
+**Version:** `v2.8.1-sytue.20`, based on upstream `v2.8.1`.
 Available releases are listed in [Tags](https://github.com/thinkddr/fyne/tags).
 The [initial fork delta](https://github.com/thinkddr/fyne/compare/v2.8.1...v2.8.1-sytue.15)
 contains 17 commits through `v2.8.1-sytue.15`. The
@@ -15,8 +15,10 @@ covers the changes in `.16`. The
 [software-image delta](https://github.com/thinkddr/fyne/compare/v2.8.1-sytue.16...v2.8.1-sytue.17)
 describes `.17`. The
 [cache maintenance delta](https://github.com/thinkddr/fyne/compare/v2.8.1-sytue.17...v2.8.1-sytue.18)
-describes `.18`. [FORK-NOTICE.md](FORK-NOTICE.md) records their scope and the
-`.19` shaped-text addition.
+describes `.18`. The
+[shaped-text delta](https://github.com/thinkddr/fyne/compare/v2.8.1-sytue.18...v2.8.1-sytue.19)
+describes `.19`. [FORK-NOTICE.md](FORK-NOTICE.md) records their scope and the
+`.20` rectangle-paint addition.
 The toolkit code and Sytue additions use Fyne's
 [BSD 3-Clause license](LICENSE). Bundled fonts retain their
 [own license notices](theme/font/).
@@ -70,11 +72,11 @@ with a pinned replacement in your application's module:
 
 ```sh
 go get fyne.io/fyne/v2@v2.8.1
-go mod edit -replace=fyne.io/fyne/v2=github.com/thinkddr/fyne/v2@v2.8.1-sytue.19
+go mod edit -replace=fyne.io/fyne/v2=github.com/thinkddr/fyne/v2@v2.8.1-sytue.20
 go mod tidy
 ```
 
-These commands require the published `.19` tag; see
+These commands require the published `.20` tag; see
 [Tags](https://github.com/thinkddr/fyne/tags) for available versions.
 Add your Fyne imports before `go mod tidy`, which removes unused dependencies.
 The module requires Go 1.22 or newer; desktop builds also need a C compiler and
@@ -126,7 +128,7 @@ native text proof remains separate: the hook tests do not certify a font engine
 or browser rendering profile. See the
 [evidence and limits](FORK-NOTICE.md#software-shaped-text-in-v281-sytue19).
 
-## Supplied rectangle painting (unreleased)
+## Supplied rectangle painting in .20
 
 `canvas.Rectangle.Painter` lets an application provide an immutable native paint
 plan through `canvas.RectanglePainter`. Software painting receives the actual
@@ -142,6 +144,11 @@ Measurement and refresh retain the error. A successful paint or explicit
 The hook adds no native library dependency to Fyne and does not itself implement
 CSS outlines, browser composition, text shaping or GPU parity.
 
+The implementation at `a82d070eff48adf2845f7887db7c82bb0d4488d2` passed all five
+fork workflows, with thirteen successful jobs and the tag-only public-install
+job skipped. Final-source and published-module checks are recorded separately;
+see the [scope and evidence](FORK-NOTICE.md#supplied-rectangle-painting-in-v281-sytue20).
+
 ## Differences from upstream 2.8.1
 
 | Area | Change | Code and regression tests |
@@ -154,7 +161,7 @@ CSS outlines, browser composition, text shaping or GPU parity.
 | Image enlargement (.17) | Bounded post-prepass Smooth sampling for uniform physical factors 2 and 4; other cases retain the original fallback. | [sampler](internal/painter/software/skia_legacy_enlargement.go), [arithmetic tests](internal/painter/software/skia_legacy_enlargement_test.go), [Image/Raster routing](internal/painter/software/skia_legacy_image_test.go), [declined profiles](internal/painter/software/skia_legacy_scope_test.go) |
 | Cache expiry (.18) | Atomic timestamps synchronize concurrent refresh and expiry checks, preserving the existing clock and strict boundary. | [expiry logic](internal/cache/base.go), [concurrent regression](internal/cache/expiry_concurrent_test.go), [expiry tests](internal/cache/base_test.go) |
 | Shaped text (.19) | Opt-in immutable line metrics and software glyph painting into the real accumulated destination; a nil layout retains the default path and GL rejects supplied layouts explicitly. | [API and errors](canvas/text_layout.go), [metric tests](canvas/text_layout_test.go), [software controls](internal/painter/software/text_layout_test.go), [real canvas/clip tests](internal/painter/software/text_layout_integration_test.go), [GL rejection tests](internal/painter/gl/text_layout_test.go) |
-| Supplied rectangle paint (unreleased) | Opt-in native software plans receive the actual destination and ancestor clip, including outline outsets. Default painting remains available when the provider is nil; GL rejects supplied plans explicitly. | [API](canvas/rectangle_painter.go), [software controls](internal/painter/software/rectangle_painter_test.go), [real tree and order tests](internal/painter/software/rectangle_painter_integration_test.go), [GL rejection](internal/painter/gl/rectangle_painter_test.go) |
+| Supplied rectangle paint (.20) | Opt-in native software plans receive the actual destination and ancestor clip, including outline outsets. Default painting remains available when the provider is nil; GL rejects supplied plans explicitly. | [API](canvas/rectangle_painter.go), [software controls](internal/painter/software/rectangle_painter_test.go), [real tree and order tests](internal/painter/software/rectangle_painter_integration_test.go), [GL rejection](internal/painter/gl/rectangle_painter_test.go) |
 | Theme/font retention | Theme override object keys use weak pointers on Go ≥1.24. Theme-font faces share a cache key based on style, name, backing slice address and length. | [retention test](container/theme_retain_test.go), [font tests](internal/painter/font_test.go) |
 | Scheduling and lifecycle | Fix cache expiry after an idle interval, dispatch background test work on the test goroutine, queue pre-loop mobile work, adopt iOS scenes and correct Android key actions. | [cache tests](internal/cache/base_test.go), [test driver](test/driver_test.go), [mobile queue test](internal/driver/mobile/driver_test.go), [key tests](internal/driver/mobile/app/keydirection_test.go) |
 
