@@ -87,7 +87,7 @@ func skiaLegacyEnlargement(source image.Image, width, height int) (*image.RGBA, 
 }
 
 func skiaLegacyPremultiply8(channel, alpha uint8) uint8 {
-	return uint8((uint32(channel)*uint32(alpha) + 127) / 255)
+	return skiaLegacyRGBA8((uint32(channel)*uint32(alpha) + 127) / 255)
 }
 
 func skiaLegacyCoordinate(destination, factor int) (int, uint32) {
@@ -100,8 +100,15 @@ func skiaLegacyCoordinate(destination, factor int) (int, uint32) {
 func skiaLegacyChannel(tl, tr, bl, br uint8, wx, wy uint32) uint8 {
 	// Skia's NEON/scalar paths accumulate all four Q4*Q4 weights before >>8.
 	// Do not round a horizontal intermediate or add a final half-unit bias.
-	return uint8((uint32(tl)*(16-wx)*(16-wy) +
+	return skiaLegacyRGBA8((uint32(tl)*(16-wx)*(16-wy) +
 		uint32(tr)*wx*(16-wy) +
 		uint32(bl)*(16-wx)*wy +
 		uint32(br)*wx*wy) >> 8)
+}
+
+func skiaLegacyRGBA8(value uint32) uint8 {
+	if value > 255 {
+		panic("software: legacy image sample exceeds the RGBA8 range")
+	}
+	return uint8(value)
 }

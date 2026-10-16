@@ -98,3 +98,17 @@ func TestSkiaLegacyCandidateDeclinesUnsupportedProfiles(t *testing.T) {
 		}
 	}
 }
+
+func TestSkiaLegacyCandidateRejectsOutOfRangeChannel(t *testing.T) {
+	// These invalid Q4 weights produce a channel above 255, which must not wrap.
+	for _, weights := range [][2]uint32{{17, 0}, {0, 17}} {
+		func() {
+			defer func() {
+				if recover() == nil {
+					t.Fatalf("silently narrowed an out-of-range channel for weights %v", weights)
+				}
+			}()
+			skiaLegacyChannel(0, 255, 255, 255, weights[0], weights[1])
+		}()
+	}
+}
