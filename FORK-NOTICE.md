@@ -20,6 +20,51 @@ required by LICENSE. Fyne.io and its contributors do not endorse this independen
 downstream release. General upstream documentation is preserved in
 [UPSTREAM-README.md](UPSTREAM-README.md).
 
+## Unreleased software image enlargement
+
+The candidate preserves the existing image decode/cache/pre-scaling lifecycle,
+identity-size shortcut, clipping and final compositing. Only software
+`canvas.Image` calls using `ImageScaleSmooth`, object alpha exactly 1 and corner
+radius exactly 0 can use the new sampler. `canvas.Raster`, Pixels and Fastest keep
+their existing routes. A declined Smooth Image profile retains the original
+CatmullRom fallback; there is no broad bilinear replacement.
+
+The helper checks the buffer returned by `painter.PaintImage` and its
+`scaleImage` prepass: NRGBA8 or opaque RGBA8, zero bounds origin, positive
+dimensions, uniform physical factor exactly 2 or 4, destination axes at most
+16,384 and area at most 64 Mi pixels. The prepass may normalize original 16-bit,
+nonzero-origin or translucent RGBA sources into eligible NRGBA buffers. These
+checks do not guarantee that those original sources retain their old sampling.
+Direct declined-profile tests exercise the post-prepass boundary.
+
+The interpolation derives from Skia revision
+`9d07e5bad9e3e21da2426946e589daa647218271`. It accumulates four Q4-by-Q4 weights
+before flooring interpolated premultiplied RGB and alpha separately. The
+[sampler](internal/painter/software/skia_legacy_enlargement.go) retains its Google
+LLC and Fyne contributors notices. Keep [LICENSE-Skia.txt](LICENSE-Skia.txt) and
+[LICENSE-Fyne.txt](LICENSE-Fyne.txt) with this code; existing toolkit and bundled
+font notices remain in force.
+
+[Converter run 38893097982](https://github.com/thinkddr/astro-fyne/actions/runs/38893097982)
+at `27168b4c8a21a458542904e345ee86f9fcb8b9e7` passed all six strict RGBA frame
+comparisons for three original 16-by-16 PNG8 assets displayed at 32-by-32 CSS
+pixels, over opaque white, at DPR 1 and 2. Assets include odd RGB values, an
+explicit 1-to-3 rounding control and alpha boundaries. The comparisons cover
+source-only generated native layout, native-to-web export and reconstructed
+native scenes; exported resources retain the original PNG bytes.
+
+The complete `internal/painter/software`, `internal/painter` and `canvas`
+packages passed with the race detector on canonical Linux x86-64 under the
+converter-resolved probe graph and fork-own graph: x/image v0.46.0 and v0.24.0
+respectively. The probe is not a claim of complete native module-graph identity.
+No image fixture was updated. Fixed arithmetic vectors, opt-in/declined-profile
+comparisons and a real Image/Raster routing test remain independent controls.
+
+This evidence is limited to the recorded software-renderer profile. It does not
+certify other physical factors, fractional placement, arbitrary backgrounds,
+color profiles, rounded clips, typography or GPU output. Full fork release checks
+on the exact candidate remain required before publishing a new version.
+
 ## Maintenance release v2.8.1-sytue.16
 
 The [maintenance comparison](https://github.com/thinkddr/fyne/compare/v2.8.1-sytue.15...v2.8.1-sytue.16)
