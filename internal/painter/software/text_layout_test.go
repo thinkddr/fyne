@@ -3,6 +3,7 @@ package software
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -46,7 +47,7 @@ func TestTextLayoutDestinationAndPlacement(t *testing.T) {
 			{"center", fyne.TextAlignCenter, 6.25},
 			{"trailing", fyne.TextAlignTrailing, 9.25},
 		} {
-			t.Run(tc.name+"/"+string(rune('0'+int(scale))), func(t *testing.T) {
+			t.Run(fmt.Sprintf("%s/scale-%g", tc.name, scale), func(t *testing.T) {
 				base := image.NewNRGBA(image.Rect(10, 20, 31, 33))
 				background := color.NRGBA{R: 23, G: 71, B: 113, A: 197}
 				draw.Draw(base, base.Bounds(), image.NewUniform(background), image.Point{}, draw.Src)
