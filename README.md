@@ -5,11 +5,13 @@ native desktop and mobile applications. The fork adds incoming URL handling,
 Android multi-file selection, overlay/focus behavior and targeted rendering,
 cache and lifecycle fixes.
 
-**Latest tagged release:** `v2.8.1-sytue.16`, based on upstream `v2.8.1`.
+**Release:** `v2.8.1-sytue.17`, based on upstream `v2.8.1`.
 The [initial fork delta](https://github.com/thinkddr/fyne/compare/v2.8.1...v2.8.1-sytue.15)
 contains 17 commits through `v2.8.1-sytue.15`. The
 [maintenance delta](https://github.com/thinkddr/fyne/compare/v2.8.1-sytue.15...v2.8.1-sytue.16)
-covers the changes in `.16`. [FORK-NOTICE.md](FORK-NOTICE.md) records their scope.
+covers the changes in `.16`. The
+[software-image delta](https://github.com/thinkddr/fyne/compare/v2.8.1-sytue.16...v2.8.1-sytue.17)
+describes `.17`. [FORK-NOTICE.md](FORK-NOTICE.md) records their scope.
 The toolkit code and Sytue additions use Fyne's
 [BSD 3-Clause license](LICENSE). Bundled fonts retain their
 [own license notices](theme/font/).
@@ -20,9 +22,9 @@ reflect the fork's existing position rounding and multiline Entry row spacing.
 It also clears stale Entry scrolling when undo restores text that fits the
 viewport.
 
-## Unreleased software image enlargement
+## Software image enlargement in .17
 
-An unreleased candidate adds a bounded sampler for Smooth software Image objects.
+The `.17` release adds a bounded sampler for Smooth software Image objects.
 It uses Skia-derived Q4 interpolation with floor quantization of premultiplied
 channels. It preserves Raster, Pixels and Fastest routes and the original
 CatmullRom fallback outside the new predicate. The image prepass is unchanged.
@@ -31,16 +33,21 @@ Eligibility is checked after that prepass: a zero-origin NRGBA8 or opaque RGBA8
 buffer, uniform physical enlargement by exactly 2 or 4, object alpha 1 and no
 corner radius. Original image types or bounds may be normalized by the prepass;
 they are not an original-source exclusion guarantee. See
-[FORK-NOTICE.md](FORK-NOTICE.md#unreleased-software-image-enlargement) for details.
+[FORK-NOTICE.md](FORK-NOTICE.md#software-image-release-v281-sytue17) for details.
 
 [Hosted run 38893097982](https://github.com/thinkddr/astro-fyne/actions/runs/38893097982)
-passed six strict full-frame comparisons for the retained PNG8 corpus at DPR 1
-and 2, covering forward conversion, inverse conversion and native reconstruction.
-The complete selected painter/canvas packages also passed on Linux x86-64 under
-the converter-resolved probe graph and fork-own graph, using x/image v0.46.0
-and v0.24.0 respectively, without fixture updates. This establishes that profile, not universal browser parity. A fresh
-release still requires the fork's complete release checks; `.16` remains the
-latest published version.
+passed six strict full-frame comparisons for an earlier candidate and the
+retained PNG8 corpus at DPR 1 and 2. It covered forward conversion, inverse
+conversion and native reconstruction. The selected painter/canvas packages also
+passed under the converter-resolved probe graph and fork-own graph. That evidence
+belongs to the recorded candidate, rather than the final `.17` package.
+
+Implementation checkpoint `9c0fac5` passed all five fork workflows: Platform,
+Static Analysis, Mobile, Web and Fork conformance. The final release head must
+pass those checks again before publication. A clean install and the six strict
+comparisons against the published `.17` module are still required; neither the
+earlier experiment nor full-platform CI substitutes for that release proof.
+See [the evidence details](FORK-NOTICE.md#release-checks-and-evidence).
 
 ## Install
 
@@ -49,7 +56,7 @@ with a pinned replacement in your application's module:
 
 ```sh
 go get fyne.io/fyne/v2@v2.8.1
-go mod edit -replace=fyne.io/fyne/v2=github.com/thinkddr/fyne/v2@v2.8.1-sytue.16
+go mod edit -replace=fyne.io/fyne/v2=github.com/thinkddr/fyne/v2@v2.8.1-sytue.17
 go mod tidy
 ```
 
@@ -74,7 +81,7 @@ go mod tidy
 | Overlays and focus | Opt-in `TapThrough() bool` and `FocusScope() fyne.CanvasObject` methods; `ScrollThrough() bool` is available in the GLFW desktop path. | [contract](internal/driver/overlay_through.go), [desktop tests](internal/driver/glfw/window_through_test.go), [mobile tap tests](internal/driver/mobile/canvas_through_test.go), [focus tests](internal/app/focus_scope_test.go) |
 | Clipping and text | Nested clips intersect. Multiline Entry layout, selection, caret and hit testing use the theme's line spacing; single-line entries keep their previous spacing. | [clip tests](internal/driver/util_test.go), [Entry tests](widget/entry_linespacing_internal_test.go) |
 | Rendering | Software positions round to the nearest pixel; sizes still round up. GL/ES separate alpha blending avoids translucent framebuffer edges. | [software tests](internal/painter/software/painter_test.go), [GL](internal/painter/gl/gl_core.go), [ES](internal/painter/gl/gl_es.go) |
-| Image enlargement (unreleased) | Bounded post-prepass Smooth sampling for uniform physical factors 2 and 4; other cases retain the original fallback. | [sampler](internal/painter/software/skia_legacy_enlargement.go), [arithmetic tests](internal/painter/software/skia_legacy_enlargement_test.go), [Image/Raster routing](internal/painter/software/skia_legacy_image_test.go), [declined profiles](internal/painter/software/skia_legacy_scope_test.go) |
+| Image enlargement (.17) | Bounded post-prepass Smooth sampling for uniform physical factors 2 and 4; other cases retain the original fallback. | [sampler](internal/painter/software/skia_legacy_enlargement.go), [arithmetic tests](internal/painter/software/skia_legacy_enlargement_test.go), [Image/Raster routing](internal/painter/software/skia_legacy_image_test.go), [declined profiles](internal/painter/software/skia_legacy_scope_test.go) |
 | Theme/font retention | Theme override object keys use weak pointers on Go ≥1.24. Theme-font faces share a cache key based on style, name, backing slice address and length. | [retention test](container/theme_retain_test.go), [font tests](internal/painter/font_test.go) |
 | Scheduling and lifecycle | Fix cache expiry after an idle interval, dispatch background test work on the test goroutine, queue pre-loop mobile work, adopt iOS scenes and correct Android key actions. | [cache tests](internal/cache/base_test.go), [test driver](test/driver_test.go), [mobile queue test](internal/driver/mobile/driver_test.go), [key tests](internal/driver/mobile/app/keydirection_test.go) |
 

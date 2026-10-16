@@ -2,7 +2,7 @@
 
 This repository contains a downstream modification of
 [Fyne v2.8.1](https://github.com/fyne-io/fyne/tree/v2.8.1). The documented release
-is [v2.8.1-sytue.16](https://github.com/thinkddr/fyne/tree/v2.8.1-sytue.16).
+is [v2.8.1-sytue.17](https://github.com/thinkddr/fyne/tree/v2.8.1-sytue.17).
 It preserves the canonical Go module path `fyne.io/fyne/v2` and the upstream
 dependency declarations.
 
@@ -20,9 +20,11 @@ required by LICENSE. Fyne.io and its contributors do not endorse this independen
 downstream release. General upstream documentation is preserved in
 [UPSTREAM-README.md](UPSTREAM-README.md).
 
-## Unreleased software image enlargement
+## Software image release v2.8.1-sytue.17
 
-The candidate preserves the existing image decode/cache/pre-scaling lifecycle,
+The [`.16` to `.17` comparison](https://github.com/thinkddr/fyne/compare/v2.8.1-sytue.16...v2.8.1-sytue.17)
+records this release's changes. The sampler preserves the existing image
+decode/cache/pre-scaling lifecycle,
 identity-size shortcut, clipping and final compositing. Only software
 `canvas.Image` calls using `ImageScaleSmooth`, object alpha exactly 1 and corner
 radius exactly 0 can use the new sampler. `canvas.Raster`, Pixels and Fastest keep
@@ -45,8 +47,15 @@ LLC and Fyne contributors notices. Keep [LICENSE-Skia.txt](LICENSE-Skia.txt) and
 [LICENSE-Fyne.txt](LICENSE-Fyne.txt) with this code; existing toolkit and bundled
 font notices remain in force.
 
+The checked RGBA8 conversion rejects an internal out-of-range result instead of
+silently narrowing it. Valid byte inputs and Q4 weights retain the same sampling
+arithmetic. Arithmetic and invalid-weight regressions cover that boundary.
+
+### Release checks and evidence
+
 [Converter run 38893097982](https://github.com/thinkddr/astro-fyne/actions/runs/38893097982)
-at `27168b4c8a21a458542904e345ee86f9fcb8b9e7` passed all six strict RGBA frame
+at `27168b4c8a21a458542904e345ee86f9fcb8b9e7` tested an earlier sampling candidate.
+It passed all six strict RGBA frame
 comparisons for three original 16-by-16 PNG8 assets displayed at 32-by-32 CSS
 pixels, over opaque white, at DPR 1 and 2. Assets include odd RGB values, an
 explicit 1-to-3 rounding control and alpha boundaries. The comparisons cover
@@ -60,10 +69,32 @@ respectively. The probe is not a claim of complete native module-graph identity.
 No image fixture was updated. Fixed arithmetic vectors, opt-in/declined-profile
 comparisons and a real Image/Raster routing test remain independent controls.
 
+That run predates the final checked-conversion guard and formatting changes; its
+pixel results do not certify the final `.17` package. Implementation checkpoint
+[`9c0fac5896c30008d2958741694ca867eb058fda`](https://github.com/thinkddr/fyne/commit/9c0fac5896c30008d2958741694ca867eb058fda)
+passed all five complete fork workflows:
+
+- [Platform Tests](https://github.com/thinkddr/fyne/actions/runs/38896699563):
+  declared and stable Go on Linux, macOS and Windows, including Linux Wayland
+  checks and the required coverage check.
+- [Static Analysis](https://github.com/thinkddr/fyne/actions/runs/38896699655):
+  all three jobs, including lint and formatting.
+- [Mobile Tests](https://github.com/thinkddr/fyne/actions/runs/38896699472):
+  declared and stable Go.
+- [Web Tests](https://github.com/thinkddr/fyne/actions/runs/38896699732).
+- [Fork conformance](https://github.com/thinkddr/fyne/actions/runs/38896699617):
+  canonical Linux regressions. Its tag-only public-install job was correctly
+  skipped for the pull request.
+
+The final release head must pass these checks before merge and tag publication.
+After publication, a clean public-module install and fresh six-frame strict
+comparison evidence against the actual `.17` module remain required. The earlier
+candidate run and full-platform checks do not transfer a pixel certification to
+that release.
+
 This evidence is limited to the recorded software-renderer profile. It does not
 certify other physical factors, fractional placement, arbitrary backgrounds,
-color profiles, rounded clips, typography or GPU output. Full fork release checks
-on the exact candidate remain required before publishing a new version.
+color profiles, rounded clips, typography or GPU output.
 
 ## Maintenance release v2.8.1-sytue.16
 

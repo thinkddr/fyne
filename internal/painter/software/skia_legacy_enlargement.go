@@ -4,7 +4,7 @@
 //
 // The fixed-point interpolation is derived from Skia's SkBitmapProcState_opts.h
 // at 9d07e5bad9e3e21da2426946e589daa647218271. Retain LICENSE-Skia.txt and
-// LICENSE-Fyne.txt when distributing this experimental candidate.
+// LICENSE-Fyne.txt when redistributing this code.
 
 package software
 
