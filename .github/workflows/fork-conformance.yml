@@ -74,12 +74,33 @@ jobs:
           package main
 
           import (
+            "image"
+
             "fyne.io/fyne/v2"
+            "fyne.io/fyne/v2/canvas"
             "fyne.io/fyne/v2/dialog"
           )
 
+          type rectanglePainter struct{}
+
+          func (rectanglePainter) PaintSoftware(*image.NRGBA, canvas.RectanglePaintContext) error {
+            return nil
+          }
+
           var _ fyne.URLHandler
           var _ func(func([]fyne.URIReadCloser, error), fyne.Window) = dialog.ShowFileOpenMultiple
+          var _ canvas.RectanglePainter = rectanglePainter{}
+          var _ = canvas.Rectangle{Painter: rectanglePainter{}}
+          var _ = canvas.RectanglePaintContext{
+            Origin: fyne.Position{},
+            Size: fyne.Size{},
+            Scale: 1,
+            Clip: image.Rectangle{},
+          }
+          var _ func(*canvas.Rectangle) error = (*canvas.Rectangle).PaintError
+          var _ func(*canvas.Rectangle, error) = (*canvas.Rectangle).SetPaintError
+          var _ error = canvas.ErrRectanglePainterUnsupportedGL
+          var _ error = canvas.ErrRectanglePainterInvalidGeometry
 
           func main() {}
           GO
