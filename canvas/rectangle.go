@@ -13,6 +13,9 @@ var _ fyne.CanvasObject = (*Rectangle)(nil)
 type Rectangle struct {
 	baseObject
 
+	// Painter optionally replaces the default rectangle paint in software.
+	Painter RectanglePainter
+
 	FillColor   color.Color // The rectangle fill color
 	StrokeColor color.Color // The rectangle stroke color
 	StrokeWidth float32     // The stroke width of the rectangle
@@ -51,6 +54,8 @@ type Rectangle struct {
 	//
 	// Since: 2.8
 	Shadow Shadow
+
+	paintError error
 }
 
 // Hide will set this rectangle to not be visible

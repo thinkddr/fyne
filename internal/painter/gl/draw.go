@@ -535,6 +535,11 @@ func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.S
 }
 
 func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
+	if rect.Painter != nil {
+		rect.SetPaintError(canvas.ErrRectanglePainterUnsupportedGL)
+		fyne.LogError("Failed to paint canvas.Rectangle", canvas.ErrRectanglePainterUnsupportedGL)
+		return
+	}
 	topRightRadius := paint.GetCornerRadius(rect.TopRightCornerRadius, rect.CornerRadius)
 	topLeftRadius := paint.GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
 	bottomRightRadius := paint.GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)

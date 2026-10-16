@@ -386,6 +386,10 @@ func drawArbitraryPolygon(c fyne.Canvas, polygon *canvas.ArbitraryPolygon, pos f
 }
 
 func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	if rect.Painter != nil {
+		drawSuppliedRectangle(c, rect, pos, base, clip)
+		return
+	}
 	topRightRadius := painter.GetCornerRadius(rect.TopRightCornerRadius, rect.CornerRadius)
 	topLeftRadius := painter.GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
 	bottomRightRadius := painter.GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
