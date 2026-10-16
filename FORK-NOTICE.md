@@ -2,7 +2,7 @@
 
 This repository contains a downstream modification of
 [Fyne v2.8.1](https://github.com/fyne-io/fyne/tree/v2.8.1). The documented release
-is [v2.8.1-sytue.17](https://github.com/thinkddr/fyne/tree/v2.8.1-sytue.17).
+is [v2.8.1-sytue.18](https://github.com/thinkddr/fyne/tree/v2.8.1-sytue.18).
 It preserves the canonical Go module path `fyne.io/fyne/v2` and the upstream
 dependency declarations.
 
@@ -19,6 +19,32 @@ Keep the license, copyright notices and disclaimer with redistributions as
 required by LICENSE. Fyne.io and its contributors do not endorse this independent
 downstream release. General upstream documentation is preserved in
 [UPSTREAM-README.md](UPSTREAM-README.md).
+
+## Maintenance release v2.8.1-sytue.18
+
+The [`.17` to `.18` comparison](https://github.com/thinkddr/fyne/compare/v2.8.1-sytue.17...v2.8.1-sytue.18)
+records the cache expiry fix and its regression. Each expiry timestamp now uses
+`atomic.Int64`, with matching loads for expiry checks and stores for refreshes.
+The cached clock sample, duration arithmetic and strict `<` comparison are
+unchanged. An entry remains alive exactly at its expiration timestamp.
+
+[Fresh `.17` main CI](https://github.com/thinkddr/fyne/actions/runs/38899942135/job/116969412331)
+reported concurrent expiry reads during renderer cleanup and refresh writes
+during a menu markup assertion. The same-tree `.17` tag jobs passed. The cache
+source involved was unchanged from the `.16` base; neither that provenance nor a
+passing tag run dismisses the observed race.
+
+The new concurrent regression was first tested against the original expiry
+implementation in [run 38901005903](https://github.com/thinkddr/fyne/actions/runs/38901005903).
+It failed under the race detector with both read/write and write/write reports
+in `TestExpiringCacheConcurrentRefresh`. The test also checks that entries stay
+alive immediately before and exactly at expiry, then expire immediately after.
+No test suppression, image fixture update or tolerance change accompanies the fix.
+
+The `.18` final candidate must pass the full fork workflows before publication.
+Clean public installation and strict image comparisons against the actual `.18`
+module remain separate release checks. The `.17` pixel evidence below does not
+transfer a certification to `.18`.
 
 ## Software image release v2.8.1-sytue.17
 
@@ -70,27 +96,31 @@ No image fixture was updated. Fixed arithmetic vectors, opt-in/declined-profile
 comparisons and a real Image/Raster routing test remain independent controls.
 
 That run predates the final checked-conversion guard and formatting changes; its
-pixel results do not certify the final `.17` package. Implementation checkpoint
-[`9c0fac5896c30008d2958741694ca867eb058fda`](https://github.com/thinkddr/fyne/commit/9c0fac5896c30008d2958741694ca867eb058fda)
-passed all five complete fork workflows:
+pixel results do not certify the final `.17` package. The actual published
+`.17` module was then tested in
+[run 38900188638](https://github.com/thinkddr/astro-fyne/actions/runs/38900188638).
+All six strict RGBA comparisons passed with source, license and lock-file
+stability checks. That evidence belongs to the published `.17` module and the
+recorded profile, not another release.
 
-- [Platform Tests](https://github.com/thinkddr/fyne/actions/runs/38896699563):
+The `.17` tag at `46ef36fda23a9e5138bf422505b2ce760746cc20` passed all five
+complete fork workflows:
+
+- [Platform Tests](https://github.com/thinkddr/fyne/actions/runs/38899942393):
   declared and stable Go on Linux, macOS and Windows, including Linux Wayland
   checks and the required coverage check.
-- [Static Analysis](https://github.com/thinkddr/fyne/actions/runs/38896699655):
+- [Static Analysis](https://github.com/thinkddr/fyne/actions/runs/38899942498):
   all three jobs, including lint and formatting.
-- [Mobile Tests](https://github.com/thinkddr/fyne/actions/runs/38896699472):
+- [Mobile Tests](https://github.com/thinkddr/fyne/actions/runs/38899942427):
   declared and stable Go.
-- [Web Tests](https://github.com/thinkddr/fyne/actions/runs/38896699732).
-- [Fork conformance](https://github.com/thinkddr/fyne/actions/runs/38896699617):
-  canonical Linux regressions. Its tag-only public-install job was correctly
-  skipped for the pull request.
+- [Web Tests](https://github.com/thinkddr/fyne/actions/runs/38899942415).
+- [Fork conformance](https://github.com/thinkddr/fyne/actions/runs/38899942413):
+  canonical Linux regressions and a clean public-module install using canonical
+  Fyne imports. The install resolved `github.com/thinkddr/fyne/v2` at `.17`,
+  printed module verification success and built successfully.
 
-The final release head must pass these checks before merge and tag publication.
-After publication, a clean public-module install and fresh six-frame strict
-comparison evidence against the actual `.17` module remain required. The earlier
-candidate run and full-platform checks do not transfer a pixel certification to
-that release.
+The same-tree main stable Linux job exposed the cache race described in the
+`.18` maintenance section above. All failures remain part of the release record.
 
 This evidence is limited to the recorded software-renderer profile. It does not
 certify other physical factors, fractional placement, arbitrary backgrounds,
