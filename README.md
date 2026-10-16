@@ -83,6 +83,33 @@ go mod edit -dropreplace=fyne.io/fyne/v2
 go mod tidy
 ```
 
+## Opt-in shaped text (development)
+
+The development branch adds [`canvas.Text.Layout`](canvas/text_layout.go); this
+API is not part of the published `.18` release above. It keeps text as a real
+canvas primitive while allowing a provider to supply an immutable shaped line.
+Its metrics define the line-box size and baseline. The provider owns the glyph
+snapshot and any font engine; Fyne does not close native resources.
+
+The software painter passes the current accumulated `*image.NRGBA`, restricted
+to the intersected physical clip, with its real stride and backdrop. The context
+contains the aligned, unrounded logical origin, actual canvas scale and resolved
+text color. Providers paint glyphs only, respect the clip and return unsupported
+requests before changing pixels. Fyne cannot undo partial provider writes.
+
+Underline and strikethrough use the supplied advance and baseline with Fyne's
+existing line stroke and offsets. They do not implement general CSS decoration
+rules. Decoration rasters have coordinate checks and a 16 Mi-pixel allocation
+limit, checked before the provider paints.
+
+`LayoutMetrics` validates supplied metrics; invalid metrics return zero size
+without default measurement. `TextLayoutError` exposes metric and paint errors.
+A successful metric query does not clear a paint failure; successful software
+painting or `SetTextLayoutError(nil)` clears the paint error. GL reports
+`ErrTextLayoutUnsupportedGL` and draws no fallback glyphs. A nil layout preserves
+the existing text path on every platform. This hook alone does not establish
+browser typography, editor caret or GPU parity.
+
 ## Differences from upstream 2.8.1
 
 | Area | Change | Code and regression tests |

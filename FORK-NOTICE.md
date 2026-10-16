@@ -20,6 +20,30 @@ required by LICENSE. Fyne.io and its contributors do not endorse this independen
 downstream release. General upstream documentation is preserved in
 [UPSTREAM-README.md](UPSTREAM-README.md).
 
+## Development: software shaped-text hook
+
+This branch adds an opt-in `canvas.Text.Layout` interface, outside the published
+`.18` release. It supplies immutable line-box metrics and glyph painting into
+the software canvas's accumulated, clipped NRGBA buffer. The provider owns font
+resources and must respect the actual stride, physical clip, logical origin,
+scale and resolved color. Unsupported requests must fail before pixel changes;
+Fyne cannot roll back provider writes. No CGo or font-engine dependency is added.
+
+Metric failures remain visible and never trigger default-font measurement.
+Paint failures remain visible across metric queries. Successful software paint
+clears its paint error; an explicit setter can also clear it. GL rejects supplied
+layouts with `ErrTextLayoutUnsupportedGL`, with no default glyph or opaque tile
+substitution. The nil layout path remains unchanged.
+
+Fyne paints underline and strikethrough after successful glyph paint, using the
+supplied width and baseline with its existing stroke and offsets. Hook-only
+decoration blits account for positive clip offsets. Unsafe coordinate/allocation
+requests are rejected before provider painting, including decoration rasters
+larger than 16 Mi pixels. This does not implement arbitrary CSS decorations or
+establish native-widget, browser, editor or GPU parity. Candidate regressions
+exercise metrics, errors, destination/backdrop access, clipping, decorations and
+the default path; hosted checks are required before a release.
+
 ## Maintenance release v2.8.1-sytue.18
 
 The [`.17` to `.18` comparison](https://github.com/thinkddr/fyne/compare/v2.8.1-sytue.17...v2.8.1-sytue.18)

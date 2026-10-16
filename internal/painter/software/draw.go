@@ -247,6 +247,10 @@ func drawTex(x, y, width, height int, base *image.NRGBA, tex image.Image, clip i
 }
 
 func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	if text.Layout != nil {
+		drawTextLayout(c, text, pos, base, clip)
+		return
+	}
 	bounds := text.MinSize()
 	width := scale.ToScreenCoordinate(c, bounds.Width+painter.VectorPad(text)) // potentially italic overspill
 	height := scale.ToScreenCoordinate(c, bounds.Height+painter.TextVectorPad) // space below for descenders / underline
