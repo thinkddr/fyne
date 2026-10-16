@@ -86,8 +86,12 @@ func TestSkiaLegacyCandidateDeclinesUnsupportedProfiles(t *testing.T) {
 		source        image.Image
 		width, height int
 	}{
-		{nil, 4, 2}, {(*image.NRGBA)(nil), 4, 2},
-		{opaque, 2, 1}, {opaque, 6, 3}, {opaque, 4, 1}, {opaque, 0, 0},
+		{nil, 4, 2},
+		{(*image.NRGBA)(nil), 4, 2},
+		{opaque, 2, 1},
+		{opaque, 6, 3},
+		{opaque, 4, 1},
+		{opaque, 0, 0},
 		{opaque, 32768, 16384},
 		{partialRGBA, 4, 2},
 		{image.NewNRGBA(image.Rect(1, 0, 3, 1)), 4, 2},
