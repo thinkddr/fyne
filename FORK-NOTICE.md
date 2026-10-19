@@ -11,10 +11,12 @@ dependency declarations.
 ## Attribution and license
 
 The upstream [LICENSE](LICENSE) and [AUTHORS](AUTHORS) are retained unchanged.
-Original Fyne code remains copyright its contributors. Sytue additions are
-copyright © 2026 Sytue and are also distributed under the same **BSD 3-Clause
-license**. The same terms cover the combined toolkit code and permit public
-redistribution. Bundled fonts retain their separate
+Original Fyne code remains copyright its contributors under the **BSD 3-Clause
+license**. The changes and additions made in this fork are copyright © 2026
+Daniel Delgado Ramos and are licensed under the **MIT License**
+([LICENSE-MODIFICATIONS](LICENSE-MODIFICATIONS)). Both licenses permit public
+redistribution. This fork does not accept external contributions
+([CONTRIBUTING.md](CONTRIBUTING.md)). Bundled fonts retain their separate
 [license notices](theme/font/).
 
 Keep the license, copyright notices and disclaimer with redistributions as
