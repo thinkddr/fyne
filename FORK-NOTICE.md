@@ -13,7 +13,7 @@ dependency declarations.
 The upstream [LICENSE](LICENSE) and [AUTHORS](AUTHORS) are retained unchanged.
 Original Fyne code remains copyright its contributors under the **BSD 3-Clause
 license**. The changes and additions made in this fork are copyright © 2026
-Daniel Delgado Ramos and are licensed under the **MIT License**
+Daniel Delgado Ramos and are licensed under the **Apache License 2.0**
 ([LICENSE-MODIFICATIONS](LICENSE-MODIFICATIONS)). Both licenses permit public
 redistribution. This fork does not accept external contributions
 ([CONTRIBUTING.md](CONTRIBUTING.md)). Bundled fonts retain their separate
