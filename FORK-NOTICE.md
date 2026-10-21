@@ -15,8 +15,8 @@ Original Fyne code remains copyright its contributors under the **BSD 3-Clause
 license**. The changes and additions made in this fork are copyright © 2026
 Daniel Delgado Ramos and are licensed under the **Apache License 2.0**
 ([LICENSE-MODIFICATIONS](LICENSE-MODIFICATIONS)). Both licenses permit public
-redistribution. This fork does not accept external contributions
-([CONTRIBUTING.md](CONTRIBUTING.md)). Bundled fonts retain their separate
+redistribution. Pull requests are welcome; @thinkddr is the sole
+maintainer ([CONTRIBUTING.md](CONTRIBUTING.md)). Bundled fonts retain their separate
 [license notices](theme/font/).
 
 Keep the license, copyright notices and disclaimer with redistributions as
