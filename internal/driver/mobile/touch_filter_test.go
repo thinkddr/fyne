@@ -80,8 +80,10 @@ func TestTouchFilterSecondFingerPreservesUnclaimedMultiTouch(t *testing.T) {
 		received = append(received, e)
 		return mobile.FilterDefer
 	})
-	for _, e := range []mobile.FilterEvent{filterEvent(mobile.FilterBegin, 0, 10, 10), filterEvent(mobile.FilterMove, 0, 11, 10),
-		filterEvent(mobile.FilterBegin, 1, 20, 20), filterEvent(mobile.FilterMove, 1, 21, 21), filterEvent(mobile.FilterEnd, 0, 11, 10), filterEvent(mobile.FilterEnd, 1, 21, 21)} {
+	for _, e := range []mobile.FilterEvent{
+		filterEvent(mobile.FilterBegin, 0, 10, 10), filterEvent(mobile.FilterMove, 0, 11, 10),
+		filterEvent(mobile.FilterBegin, 1, 20, 20), filterEvent(mobile.FilterMove, 1, 21, 21), filterEvent(mobile.FilterEnd, 0, 11, 10), filterEvent(mobile.FilterEnd, 1, 21, 21),
+	} {
 		c.filterTouch(e, func(e mobile.FilterEvent) { delivered = append(delivered, e) })
 	}
 	require.Len(t, received, 3)
@@ -98,8 +100,10 @@ func TestTouchFilterClaimedMultiTouchCancelsUntilAllFingersLift(t *testing.T) {
 		phases = append(phases, e.Phase)
 		return mobile.FilterClaim
 	})
-	for _, e := range []mobile.FilterEvent{filterEvent(mobile.FilterBegin, 0, 10, 10), filterEvent(mobile.FilterBegin, 1, 20, 20),
-		filterEvent(mobile.FilterBegin, 2, 30, 30), filterEvent(mobile.FilterEnd, 0, 10, 10), filterEvent(mobile.FilterEnd, 1, 20, 20), filterEvent(mobile.FilterCancel, 2, 30, 30)} {
+	for _, e := range []mobile.FilterEvent{
+		filterEvent(mobile.FilterBegin, 0, 10, 10), filterEvent(mobile.FilterBegin, 1, 20, 20),
+		filterEvent(mobile.FilterBegin, 2, 30, 30), filterEvent(mobile.FilterEnd, 0, 10, 10), filterEvent(mobile.FilterEnd, 1, 20, 20), filterEvent(mobile.FilterCancel, 2, 30, 30),
+	} {
 		c.filterTouch(e, func(mobile.FilterEvent) { t.Fatal("cancelled claim leaked to ordinary widgets") })
 	}
 	assert.Equal(t, []mobile.FilterPhase{mobile.FilterBegin, mobile.FilterCancel}, phases)
