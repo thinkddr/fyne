@@ -87,6 +87,7 @@ jobs:
           TASK_IOS_TARGET: ${{ matrix.target }}
         run: |
           set -euo pipefail
+          printf '%s\n' /Applications/Xcode*.app
           xcodebuild -version
           export TASK_IOS_SDK_PATH="$(xcrun --sdk "$TASK_IOS_SDK" --show-sdk-path)"
           export TASK_IOS_CLANG="$(xcrun --sdk "$TASK_IOS_SDK" --find clang)"
