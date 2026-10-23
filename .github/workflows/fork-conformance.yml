@@ -26,7 +26,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
         with:
-          go-version: '1.27.1'
+          go-version: '1.27.3'
           cache: false
       - name: Install desktop test dependencies
         run: |
@@ -42,6 +42,10 @@ jobs:
           fi
       - name: Vet
         run: go vet -tags ci,migrated_fynedo ./...
+      - name: Verify iOS view calculations
+        run: |
+          clang -std=c11 -Wall -Wextra -Werror internal/driver/mobile/app/testdata/ios_view_geometry.c -lm -o "$RUNNER_TEMP/ios-view-geometry"
+          "$RUNNER_TEMP/ios-view-geometry"
       - name: Verify Entry viewport restoration
         run: go test -v -count=1 -race -tags ci,migrated_fynedo ./widget -run '^TestEntry_UndoRestoresFittingViewport$'
       - name: Run runtime and driver regressions
@@ -53,6 +57,61 @@ jobs:
           name: fork-failed-fixtures-${{ github.sha }}
           path: '**/testdata/failed'
           if-no-files-found: ignore
+  ios-driver:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - sdk: iphoneos
+            target: arm64-apple-ios15.0
+          - sdk: iphonesimulator
+            target: arm64-apple-ios15.0-simulator
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: '1.27.3'
+          cache: false
+      - name: Verify native view and keyboard calculations
+        run: |
+          clang -std=c11 -Wall -Wextra -Werror internal/driver/mobile/app/testdata/ios_view_geometry.c -lm -o "$RUNNER_TEMP/ios-view-geometry"
+          "$RUNNER_TEMP/ios-view-geometry"
+          go test -v internal/driver/mobile/app/ios_geometry_source_test.go
+      - name: Compile and link the real UIKit driver
+        env:
+          TASK_IOS_SDK: ${{ matrix.sdk }}
+          TASK_IOS_TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          export TASK_IOS_SDK_PATH="$(xcrun --sdk "$TASK_IOS_SDK" --show-sdk-path)"
+          export TASK_IOS_CLANG="$(xcrun --sdk "$TASK_IOS_SDK" --find clang)"
+          task_go_arch=arm64
+          task_main=./cmd/fyne_demo
+          if [ "$TASK_IOS_SDK" = iphonesimulator ]; then
+            task_main=./internal/driver/mobile/app/testdata/geometryapp
+            case "$(uname -m)" in
+              arm64) task_go_arch=arm64 ;;
+              x86_64) task_go_arch=amd64; export TASK_IOS_TARGET=x86_64-apple-ios15.0-simulator ;;
+              *) echo 'Unsupported Apple simulator architecture' >&2; exit 1 ;;
+            esac
+          fi
+          cat > "$RUNNER_TEMP/ios-clang" <<'SH'
+          #!/bin/bash
+          exec "$TASK_IOS_CLANG" -target "$TASK_IOS_TARGET" -isysroot "$TASK_IOS_SDK_PATH" "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/ios-clang"
+          GOOS=ios GOARCH="$task_go_arch" CGO_ENABLED=1 CC="$RUNNER_TEMP/ios-clang" \
+            go build -o "$RUNNER_TEMP/fyne-ios-${TASK_IOS_SDK}" "$task_main"
+      - name: Exercise UIKit rotation, reduced viewports, rendering and real taps
+        if: matrix.sdk == 'iphonesimulator'
+        env:
+          TASK_GEOMETRY_BINARY: ${{ runner.temp }}/fyne-ios-iphonesimulator
+        run: bash .github/ios-geometry/run.sh
   public-install:
     if: github.ref_type == 'tag'
     runs-on: ubuntu-24.04
@@ -63,7 +122,7 @@ jobs:
     steps:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
         with:
-          go-version: '1.27.1'
+          go-version: '1.27.3'
           cache: false
       - name: Build against the published module and canonical imports
         run: |

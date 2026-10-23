@@ -1,0 +1,24 @@
+// !$*UTF8*$!
+{
+ archiveVersion = 1;
+ classes = {};
+ objectVersion = 56;
+ objects = {
+  000000000000000000000001 = {isa = PBXProject; attributes = {LastUpgradeCheck = 2700;}; buildConfigurationList = 000000000000000000000020; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base); mainGroup = 000000000000000000000003; productRefGroup = 000000000000000000000004; projectDirPath = ""; projectRoot = ""; targets = (000000000000000000000002);};
+  000000000000000000000002 = {isa = PBXNativeTarget; buildConfigurationList = 000000000000000000000030; buildPhases = (000000000000000000000007, 000000000000000000000008); buildRules = (); dependencies = (); name = GeometryUITests; productName = GeometryUITests; productReference = 000000000000000000000005; productType = "com.apple.product-type.bundle.ui-testing";};
+  000000000000000000000003 = {isa = PBXGroup; children = (000000000000000000000006, 000000000000000000000004); sourceTree = "<group>";};
+  000000000000000000000004 = {isa = PBXGroup; children = (000000000000000000000005); name = Products; sourceTree = "<group>";};
+  000000000000000000000005 = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GeometryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR;};
+  000000000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GeometryUITests.m; sourceTree = "<group>";};
+  000000000000000000000007 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000000009); runOnlyForDeploymentPostprocessing = 0;};
+  000000000000000000000008 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0;};
+  000000000000000000000009 = {isa = PBXBuildFile; fileRef = 000000000000000000000006;};
+  000000000000000000000020 = {isa = XCConfigurationList; buildConfigurations = (000000000000000000000021, 000000000000000000000022); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug;};
+  000000000000000000000021 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; IPHONEOS_DEPLOYMENT_TARGET = 15.0; SDKROOT = iphoneos;}; name = Debug;};
+  000000000000000000000022 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; IPHONEOS_DEPLOYMENT_TARGET = 15.0; SDKROOT = iphoneos;}; name = Release;};
+  000000000000000000000030 = {isa = XCConfigurationList; buildConfigurations = (000000000000000000000031, 000000000000000000000032); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug;};
+  000000000000000000000031 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; ENABLE_TESTING_SEARCH_PATHS = YES; FRAMEWORK_SEARCH_PATHS = ("$(inherited)", "$(PLATFORM_DIR)/Developer/Library/Frameworks"); GENERATE_INFOPLIST_FILE = YES; OTHER_LDFLAGS = ("$(inherited)", "-framework", XCTest); PRODUCT_BUNDLE_IDENTIFIER = io.fyne.geometry.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = iphonesimulator; TARGETED_DEVICE_FAMILY = "1,2"; TEST_TARGET_NAME = "";}; name = Debug;};
+  000000000000000000000032 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; ENABLE_TESTING_SEARCH_PATHS = YES; FRAMEWORK_SEARCH_PATHS = ("$(inherited)", "$(PLATFORM_DIR)/Developer/Library/Frameworks"); GENERATE_INFOPLIST_FILE = YES; OTHER_LDFLAGS = ("$(inherited)", "-framework", XCTest); PRODUCT_BUNDLE_IDENTIFIER = io.fyne.geometry.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = iphonesimulator; TARGETED_DEVICE_FAMILY = "1,2"; TEST_TARGET_NAME = "";}; name = Release;};
+ };
+ rootObject = 000000000000000000000001;
+}
