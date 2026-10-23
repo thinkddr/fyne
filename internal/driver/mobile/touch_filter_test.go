@@ -210,3 +210,31 @@ func TestTouchFilterDriverDispatchPreservesFocusAndCancellation(t *testing.T) {
 	assert.False(t, content.up, "OS cancellation cannot become a tap")
 	assert.Empty(t, c.lastTapDown)
 }
+
+func TestTouchFilterEndPathDoesNotReuseRemovedView(t *testing.T) {
+	c := newCanvas(fyne.CurrentDevice()).(*canvas)
+	old := widget.NewLabel("old list")
+	root := container.NewStack(old)
+	c.SetContent(root)
+	c.Resize(fyne.NewSize(100, 100))
+	var beginPath, endPath []fyne.CanvasObject
+	c.SetTouchFilter(func(e mobile.FilterEvent) mobile.FilterResult {
+		switch e.Phase {
+		case mobile.FilterBegin:
+			beginPath = append([]fyne.CanvasObject(nil), e.Path...)
+		case mobile.FilterEnd:
+			endPath = append([]fyne.CanvasObject(nil), e.Path...)
+			return mobile.FilterClaim // Discard the tap when its original list has gone.
+		}
+		return mobile.FilterDefer
+	})
+	deliver := func(mobile.FilterEvent) { t.Fatal("removed view gesture retargeted its replacement") }
+	c.filterTouch(filterEvent(mobile.FilterBegin, 0, 10, 10), deliver)
+	replacement := widget.NewLabel("new list")
+	root.Objects = []fyne.CanvasObject{replacement}
+	root.Refresh()
+	c.filterTouch(filterEvent(mobile.FilterEnd, 0, 10, 10), deliver)
+	assert.Contains(t, beginPath, old)
+	assert.NotContains(t, endPath, old)
+	assert.Contains(t, endPath, replacement)
+}
