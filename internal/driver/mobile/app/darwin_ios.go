@@ -171,6 +171,9 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 		}
 	}
 	if id == -1 {
+		if touch.Type(cTouchType) != touch.TypeBegin {
+			return // An orphan move/end/cancel cannot allocate a new finger.
+		}
 		for i, val := range touchIDs {
 			if val == 0 {
 				touchIDs[i] = cTouch
@@ -184,14 +187,10 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 	}
 
 	t := touch.Type(cTouchType)
-	if t == touch.TypeEnd {
-		// Clear all touchIDs when touch ends. The UITouch pointers are unique
-		// at every multi-touch event. See:
-		// https://github.com/fyne-io/fyne/issues/2407
-		// https://developer.apple.com/documentation/uikit/touches_presses_and_gestures?language=objc
-		for idx := range touchIDs {
-			touchIDs[idx] = 0
-		}
+	if t == touch.TypeEnd || t == touch.TypeCancel {
+		// UITouch identifies one finger for its complete lifetime. Releasing
+		// it must not invalidate the IDs of fingers that are still touching.
+		touchIDs[id] = 0
 	}
 
 	theApp.events.In() <- touch.Event{

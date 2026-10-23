@@ -612,11 +612,13 @@ func processEvent(env *C.JNIEnv, e *C.AInputEvent) bool {
 			upDownType = touch.TypeBegin
 		case C.AMOTION_EVENT_ACTION_UP, C.AMOTION_EVENT_ACTION_POINTER_UP:
 			upDownType = touch.TypeEnd
+		case C.AMOTION_EVENT_ACTION_CANCEL:
+			upDownType = touch.TypeCancel
 		}
 
 		for i, n := C.size_t(0), C.AMotionEvent_getPointerCount(e); i < n; i++ {
 			t := touch.TypeMove
-			if i == upDownIndex {
+			if i == upDownIndex || upDownType == touch.TypeCancel {
 				t = upDownType
 			}
 			theApp.events.In() <- touch.Event{

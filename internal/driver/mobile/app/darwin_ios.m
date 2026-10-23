@@ -261,6 +261,7 @@ static CGFloat keyboardHeight;
 #define TOUCH_TYPE_BEGIN 0 // touch.TypeBegin
 #define TOUCH_TYPE_MOVE  1 // touch.TypeMove
 #define TOUCH_TYPE_END   2 // touch.TypeEnd
+#define TOUCH_TYPE_CANCEL 3 // touch.TypeCancel
 
 static void sendTouches(int change, NSSet* touches) {
 	CGFloat scale = [UIScreen mainScreen].nativeScale;
@@ -282,8 +283,8 @@ static void sendTouches(int change, NSSet* touches) {
 	sendTouches(TOUCH_TYPE_END, touches);
 }
 
-- (void)touchesCanceled:(NSSet*)touches withEvent:(UIEvent*)event {
-    sendTouches(TOUCH_TYPE_END, touches);
+- (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
+    sendTouches(TOUCH_TYPE_CANCEL, touches);
 }
 
 - (void) traitCollectionDidChange: (UITraitCollection *) previousTraitCollection {

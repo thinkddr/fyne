@@ -259,6 +259,8 @@ func (d *driver) Run() {
 						d.tapMoveCanvas(current, e.X, e.Y, e.Sequence)
 					case touch.TypeEnd:
 						d.tapUpCanvas(current, e.X, e.Y, e.Sequence)
+					case touch.TypeCancel:
+						d.touchCanvas(current, e.X, e.Y, e.Sequence, mobile.FilterCancel)
 					}
 				case key.Event:
 					if runtime.GOOS == "android" && e.Code == key.CodeDeleteBackspace && e.Rune < 0 && d.device.keyboardShown {
@@ -428,18 +430,33 @@ func (d *driver) setTheme(dark bool) {
 }
 
 func (d *driver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
+	d.touchCanvas(w, x, y, tapID, mobile.FilterBegin)
+}
+
+func (d *driver) touchCanvas(w *window, x, y float32, tapID touch.Sequence, phase mobile.FilterPhase) {
 	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
-
-	w.canvas.tapDown(pos, int(tapID))
+	e := mobile.FilterEvent{Phase: phase, ID: int(tapID), Position: pos, Time: time.Now(), Size: w.canvas.Size()}
+	w.canvas.filterTouch(e, func(event mobile.FilterEvent) {
+		switch event.Phase {
+		case mobile.FilterBegin:
+			w.canvas.tapDownAt(event.Position, event.ID, event.Time)
+		case mobile.FilterMove:
+			d.moveCanvas(w, event.Position, event.ID)
+		case mobile.FilterEnd:
+			d.upCanvas(w, event.Position, event.ID)
+		case mobile.FilterCancel:
+			w.canvas.tapCancel(event.Position, event.ID)
+		}
+	})
 }
 
 func (d *driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
-	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
-	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
-	pos := fyne.NewPos(tapX, tapY+tapYOffset)
+	d.touchCanvas(w, x, y, tapID, mobile.FilterMove)
+}
 
+func (d *driver) moveCanvas(w *window, pos fyne.Position, tapID int) {
 	co, posMovable, _ := w.canvas.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(mobile.Movable); ok {
 			return true
@@ -464,10 +481,10 @@ func (d *driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
 }
 
 func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
-	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
-	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
-	pos := fyne.NewPos(tapX, tapY+tapYOffset)
+	d.touchCanvas(w, x, y, tapID, mobile.FilterEnd)
+}
 
+func (d *driver) upCanvas(w *window, pos fyne.Position, tapID int) {
 	w.canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {

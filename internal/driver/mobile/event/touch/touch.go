@@ -57,6 +57,9 @@ const (
 	// On Android, this is a AMOTION_EVENT_ACTION_UP.
 	// On iOS, this is a call to touchesEnded.
 	TypeEnd
+
+	// TypeCancel terminates a touch without a tap or fling.
+	TypeCancel
 )
 
 func (t Type) String() string {
@@ -67,6 +70,8 @@ func (t Type) String() string {
 		return "move"
 	case TypeEnd:
 		return "end"
+	case TypeCancel:
+		return "cancel"
 	}
 	return fmt.Sprintf("touch.Type(%d)", t)
 }

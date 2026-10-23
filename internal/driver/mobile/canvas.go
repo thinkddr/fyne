@@ -47,6 +47,7 @@ type canvas struct {
 	touchCancelLock sync.Mutex
 	touchLastTapped fyne.CanvasObject
 	touchTapCount   int
+	touchFilter     touchFilterState
 }
 
 func newCanvas(dev fyne.Device) fyne.Canvas {
@@ -162,11 +163,13 @@ func (c *canvas) findObjectAtPositionMatching(pos fyne.Position, test func(objec
 }
 
 func (c *canvas) overlayChanged() {
+	c.cancelTouchFilter()
 	c.device.handleKeyboard(c.Focused())
 	c.SetDirty()
 }
 
 func (c *canvas) setContent(content fyne.CanvasObject) {
+	c.cancelTouchFilter()
 	c.content = content
 	c.SetContentTreeAndFocusMgr(content)
 }
@@ -220,7 +223,11 @@ func (c *canvas) sizeContent(size fyne.Size) {
 }
 
 func (c *canvas) tapDown(pos fyne.Position, tapID int) {
-	c.lastTapDown[tapID] = time.Now()
+	c.tapDownAt(pos, tapID, time.Now())
+}
+
+func (c *canvas) tapDownAt(pos fyne.Position, tapID int, at time.Time) {
+	c.lastTapDown[tapID] = at
 	c.lastTapDownPos[tapID] = pos
 	c.dragging = nil
 	c.draggingOuter = nil
