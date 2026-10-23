@@ -2,7 +2,7 @@
 
 This repository contains a downstream modification of
 [Fyne v2.8.1](https://github.com/fyne-io/fyne/tree/v2.8.1). This document describes
-source version `v2.8.1-sytue.20`. Published versions are listed in
+source version `v2.8.1-sytue.21`. Published versions are listed in
 [Tags](https://github.com/thinkddr/fyne/tags); the prior release is
 [v2.8.1-sytue.19](https://github.com/thinkddr/fyne/tree/v2.8.1-sytue.19).
 It preserves the canonical Go module path `fyne.io/fyne/v2` and the upstream
@@ -300,14 +300,14 @@ than equivalent behavior on every platform. The `.15` tag remains unchanged.
 Native OS callbacks, mobile pickers, iOS lifecycle and GL compositor behavior also
 need platform validation; a headless test alone cannot establish those results.
 
-## Unreleased: optional mobile touch recognition
+## Optional mobile touch recognition in v2.8.1-sytue.21
 
 `driver/mobile.TouchFilterCanvas` exposes an opt-in canvas callback for resolving
 single-finger navigation and refresh gestures before dispatch reaches children.
 It buffers an undecided sequence, replays rejected events in order with their
 original times, and consumes claimed sequences. A second finger cancels pending
 recognition and preserves ordinary multi-touch; after a claim it cancels the
-recognizer and consumes remaining fingers. Root/overlay changes cancel pending
+recognizer and consumes remaining fingers. Root, overlay, geometry and filter changes cancel pending
 recognition. A visible, clipped hit path is available at begin and end so callers
 can verify that their view still owns the gesture. No new method is added to the
 canonical `fyne.Canvas` interface and desktop behavior is unchanged.
@@ -318,3 +318,8 @@ Android forwards `ACTION_CANCEL` for every active pointer. Cancellation does not
 produce a tap or fling. This addition requires native device validation in
 addition to the driver regression tests; a headless pass alone does not validate
 OS gesture arbitration.
+
+This release includes the earlier rectangle-paint source documented as `.20`.
+It does not publish or move that reserved tag. The mobile callback adds no Android
+system-gesture exclusion; consumers must arbitrate any such bounded region with
+the platform separately and preserve the system's mandatory gestures.

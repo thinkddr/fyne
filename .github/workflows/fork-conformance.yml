@@ -79,6 +79,7 @@ jobs:
             "fyne.io/fyne/v2"
             "fyne.io/fyne/v2/canvas"
             "fyne.io/fyne/v2/dialog"
+            "fyne.io/fyne/v2/driver/mobile"
           )
 
           type rectanglePainter struct{}
@@ -101,6 +102,9 @@ jobs:
           var _ func(*canvas.Rectangle, error) = (*canvas.Rectangle).SetPaintError
           var _ error = canvas.ErrRectanglePainterUnsupportedGL
           var _ error = canvas.ErrRectanglePainterInvalidGeometry
+          var _ func(mobile.TouchFilterCanvas, func(mobile.FilterEvent) mobile.FilterResult) = mobile.TouchFilterCanvas.SetTouchFilter
+          var _ = mobile.FilterEvent{Phase: mobile.FilterCancel, Path: []fyne.CanvasObject{}, Size: fyne.Size{}}
+          var _ mobile.FilterResult = mobile.FilterClaim
 
           func main() {}
           GO

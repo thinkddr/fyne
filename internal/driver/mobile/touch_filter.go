@@ -1,5 +1,5 @@
-// Copyright 2026 Sytue. All rights reserved.
-// Use of this source code is governed by the BSD-style license in LICENSE.
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) 2026 Daniel Delgado Ramos
 
 package mobile
 

@@ -4,9 +4,9 @@ A downstream fork of [Fyne](https://github.com/fyne-io/fyne), the Go toolkit for
 native desktop and mobile applications. The fork adds incoming URL handling,
 Android multi-file selection, overlay/focus behavior and targeted rendering,
 cache and lifecycle fixes. It also provides opt-in shaped-text and rectangle
-hooks for the software painter.
+hooks for the software painter and optional mobile touch recognition.
 
-**Version:** `v2.8.1-sytue.20`, based on upstream `v2.8.1`.
+**Version:** `v2.8.1-sytue.21`, based on upstream `v2.8.1`.
 Available releases are listed in [Tags](https://github.com/thinkddr/fyne/tags).
 The [initial fork delta](https://github.com/thinkddr/fyne/compare/v2.8.1...v2.8.1-sytue.15)
 contains 17 commits through `v2.8.1-sytue.15`. The
@@ -18,9 +18,9 @@ describes `.17`. The
 describes `.18`. The
 [shaped-text delta](https://github.com/thinkddr/fyne/compare/v2.8.1-sytue.18...v2.8.1-sytue.19)
 describes `.19`. [FORK-NOTICE.md](FORK-NOTICE.md) records their scope and the
-`.20` rectangle-paint addition.
-The toolkit code and Sytue additions use Fyne's
-[BSD 3-Clause license](LICENSE). Bundled fonts retain their
+`.20` rectangle-paint source and `.21` mobile touch addition.
+The original toolkit uses Fyne's [BSD 3-Clause license](LICENSE). Fork changes
+and additions use [Apache License 2.0](LICENSE-MODIFICATIONS). Bundled fonts retain their
 [own license notices](theme/font/).
 
 The `.16` maintenance release updates documentation, pinned regression CI,
@@ -72,11 +72,11 @@ with a pinned replacement in your application's module:
 
 ```sh
 go get fyne.io/fyne/v2@v2.8.1
-go mod edit -replace=fyne.io/fyne/v2=github.com/thinkddr/fyne/v2@v2.8.1-sytue.20
+go mod edit -replace=fyne.io/fyne/v2=github.com/thinkddr/fyne/v2@v2.8.1-sytue.21
 go mod tidy
 ```
 
-These commands require the published `.20` tag; see
+These commands require the published `.21` tag; see
 [Tags](https://github.com/thinkddr/fyne/tags) for available versions.
 Add your Fyne imports before `go mod tidy`, which removes unused dependencies.
 The module requires Go 1.22 or newer; desktop builds also need a C compiler and
