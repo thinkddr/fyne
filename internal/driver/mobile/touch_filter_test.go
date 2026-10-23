@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
+	fynecanvas "fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/widget"
@@ -138,7 +138,7 @@ func TestTouchFilterRootAndOverlayChangesCancelWithoutReplay(t *testing.T) {
 
 func TestTouchFilterHitPathHonoursClippingAndOverlay(t *testing.T) {
 	c := newCanvas(fyne.CurrentDevice()).(*canvas)
-	child := canvas.NewRectangle(color.White)
+	child := fynecanvas.NewRectangle(color.White)
 	child.SetMinSize(fyne.NewSize(200, 200))
 	scroll := container.NewVScroll(child)
 	c.padded = false
