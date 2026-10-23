@@ -58,8 +58,10 @@ jobs:
           path: '**/testdata/failed'
           if-no-files-found: ignore
   ios-driver:
-    runs-on: macos-latest
+    runs-on: xcode-27
     timeout-minutes: 30
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
     strategy:
       fail-fast: false
       matrix:
