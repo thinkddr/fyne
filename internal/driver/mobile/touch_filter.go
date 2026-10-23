@@ -19,6 +19,7 @@ type touchFilterState struct {
 	last     mobile.FilterEvent
 	mode     mobile.FilterResult
 	blocked  bool
+	revision uint64
 }
 
 func (c *canvas) SetTouchFilter(callback func(mobile.FilterEvent) mobile.FilterResult) {
@@ -27,6 +28,11 @@ func (c *canvas) SetTouchFilter(callback func(mobile.FilterEvent) mobile.FilterR
 }
 
 func (c *canvas) cancelTouchFilter() {
+	c.touchFilter.revision++
+	c.cancelTouchRecognition()
+}
+
+func (c *canvas) cancelTouchRecognition() {
 	s := &c.touchFilter
 	if s.blocked || (s.mode != mobile.FilterDefer && s.mode != mobile.FilterClaim) {
 		return
@@ -56,13 +62,14 @@ func (c *canvas) filterTouch(e mobile.FilterEvent, deliver func(mobile.FilterEve
 			// Cancel recognition before replay, but keep the pending events so
 			// both fingers still reach the ordinary touch implementation.
 			pending := s.pending
-			c.cancelTouchFilter()
-			s.mode = mobile.FilterPass
-			for _, buffered := range pending {
-				deliver(buffered)
+			revision := s.revision
+			c.cancelTouchRecognition()
+			if revision == s.revision {
+				s.mode = mobile.FilterPass
+				c.replayTouches(pending, revision, deliver)
 			}
 		} else if s.mode == mobile.FilterClaim {
-			c.cancelTouchFilter()
+			c.cancelTouchRecognition()
 		}
 		s.active[e.ID] = true
 	} else if !s.active[e.ID] {
@@ -101,15 +108,25 @@ func (c *canvas) filterTouch(e mobile.FilterEvent, deliver func(mobile.FilterEve
 	s.pending = append(s.pending, e)
 	if result != mobile.FilterDefer || terminal || len(s.pending) >= 128 {
 		pending := s.pending
+		revision := s.revision
 		s.pending, s.mode = nil, mobile.FilterPass
 		if result == mobile.FilterDefer && !terminal {
 			// An indecisive filter must not retain an unbounded event stream.
 			e.Phase, e.Path = mobile.FilterCancel, nil
 			s.callback(e)
 		}
-		for _, buffered := range pending {
-			deliver(buffered)
+		c.replayTouches(pending, revision, deliver)
+	}
+}
+
+func (c *canvas) replayTouches(pending []mobile.FilterEvent, revision uint64, deliver func(mobile.FilterEvent)) {
+	s := &c.touchFilter
+	for _, buffered := range pending {
+		if revision != s.revision {
+			s.mode, s.blocked = mobile.FilterClaim, true
+			return
 		}
+		deliver(buffered)
 	}
 }
 

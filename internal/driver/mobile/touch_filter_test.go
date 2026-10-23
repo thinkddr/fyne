@@ -240,3 +240,38 @@ func TestTouchFilterEndPathDoesNotReuseRemovedView(t *testing.T) {
 	assert.NotContains(t, endPath, old)
 	assert.Contains(t, endPath, replacement)
 }
+
+func TestTouchFilterCancelCallbackCannotRetargetReplay(t *testing.T) {
+	for _, trigger := range []string{"second finger", "buffer limit"} {
+		for _, change := range []string{"root", "overlay", "filter"} {
+			t.Run(trigger+"/"+change, func(t *testing.T) {
+				c := newCanvas(fyne.CurrentDevice()).(*canvas)
+				c.SetTouchFilter(func(e mobile.FilterEvent) mobile.FilterResult {
+					if e.Phase == mobile.FilterCancel {
+						switch change {
+						case "root":
+							c.SetContent(widget.NewLabel("replacement"))
+						case "overlay":
+							c.Overlays().Add(widget.NewLabel("modal"))
+						case "filter":
+							c.SetTouchFilter(nil)
+						}
+					}
+					return mobile.FilterDefer
+				})
+				deliver := func(mobile.FilterEvent) { t.Fatal("cancellation callback retargeted an old touch to new content") }
+				c.filterTouch(filterEvent(mobile.FilterBegin, 0, 10, 10), deliver)
+				if trigger == "second finger" {
+					c.filterTouch(filterEvent(mobile.FilterBegin, 1, 20, 20), deliver)
+					c.filterTouch(filterEvent(mobile.FilterEnd, 1, 20, 20), deliver)
+				} else {
+					for i := 0; i < 128; i++ {
+						c.filterTouch(filterEvent(mobile.FilterMove, 0, 10, 10), deliver)
+					}
+				}
+				c.filterTouch(filterEvent(mobile.FilterEnd, 0, 10, 10), deliver)
+				assert.Empty(t, c.touchFilter.active)
+			})
+		}
+	}
+}
