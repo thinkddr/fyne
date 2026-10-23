@@ -8,6 +8,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <sys/utsname.h>
+#include "ios_view_geometry.h"
 
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
@@ -16,9 +17,8 @@
 
 struct utsname sysInfo;
 
-static CGFloat keyboardHeight;
-
 @interface GoAppAppController : GLKViewController<UIContentContainer, GLKViewDelegate>
+- (void)updateGeometry;
 @end
 
 @interface GoInputView : UITextField<UITextFieldDelegate>
@@ -145,8 +145,7 @@ static CGFloat keyboardHeight;
 	[self.window makeKeyAndVisible];
 
 	// update insets once key window is set
-	CGSize size = [UIScreen mainScreen].nativeBounds.size;
-	updateConfig((int)size.width, (int)size.height, ((UIWindowScene *)scene).interfaceOrientation);
+	[app.controller updateGeometry];
 
 	[self scene:scene openURLContexts:connectionOptions.URLContexts];
 	for (NSUserActivity *activity in connectionOptions.userActivities) {
@@ -185,6 +184,7 @@ static CGFloat keyboardHeight;
 @property (strong, nonatomic) EAGLContext *context;
 @property (strong, nonatomic) GLKView *glview;
 @property (strong, nonatomic) GoInputView *inputView;
+@property (nonatomic) CGRect keyboardFrame;
 @end
 
 @implementation GoAppAppController
@@ -194,14 +194,14 @@ static CGFloat keyboardHeight;
 	[super viewWillAppear:animated];
 	self.paused = YES;
 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillChangeFrame:) name:UIKeyboardWillChangeFrameNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
 
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillChangeFrameNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
 }
 
@@ -218,6 +218,7 @@ static CGFloat keyboardHeight;
 	self.glview.multipleTouchEnabled = true; // TODO expose setting to user.
 	self.glview.context = self.context;
 	self.glview.userInteractionEnabled = YES;
+	self.keyboardFrame = CGRectNull;
 	//self.glview.enableSetNeedsDisplay = YES; // only invoked once
 
 	// Do not use the GLKViewController draw loop.
@@ -225,28 +226,60 @@ static CGFloat keyboardHeight;
 	//self.resumeOnDidBecomeActive = NO;
 	//self.preferredFramesPerSecond = 0;
 
-	int scale = 1;
-	if ([[UIScreen mainScreen] respondsToSelector:@selector(displayLinkWithTarget:selector:)]) {
-		scale = (int)[UIScreen mainScreen].scale; // either 1.0, 2.0, or 3.0.
-	}
-	setScreen(scale);
-
-	CGSize size = [UIScreen mainScreen].nativeBounds.size;
-	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-	updateConfig((int)size.width, (int)size.height, orientation);
-
     self.glview.enableSetNeedsDisplay = NO;
     CADisplayLink* displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(render:)];
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
+- (void)updateGeometry {
+	UIWindow *window = self.view.window;
+	UIWindowScene *scene = window.windowScene;
+	if (scene == nil) {
+		return; // viewDidLoad can run before the view has joined its scene.
+	}
+	CGRect bounds = self.view.bounds;
+	CGFloat scale = self.view.contentScaleFactor;
+	int width = ios_view_pixels(bounds.size.width, scale);
+	int height = ios_view_pixels(bounds.size.height, scale);
+	if (width == 0 || height == 0) {
+		return;
+	}
+	UIInterfaceOrientation orientation;
+	if (@available(iOS 16.0, *)) {
+		orientation = scene.effectiveGeometry.interfaceOrientation;
+	} else {
+		orientation = scene.interfaceOrientation;
+	}
+	UIEdgeInsets inset = self.view.safeAreaInsets;
+	if (!CGRectIsNull(self.keyboardFrame)) {
+		CGRect keyboard = [self.view convertRect:self.keyboardFrame fromCoordinateSpace:window.screen.coordinateSpace];
+		CGFloat bottom = ios_keyboard_bottom_inset(bounds.size.width, bounds.size.height,
+			CGRectGetMinX(keyboard) - CGRectGetMinX(bounds), CGRectGetMinY(keyboard) - CGRectGetMinY(bounds),
+			keyboard.size.width, keyboard.size.height);
+		inset.bottom = MAX(inset.bottom, bottom);
+	}
+	setScreen((float)scale);
+	updateConfig(width, height, orientation,
+		ios_view_pixels(inset.top, scale), ios_view_pixels(inset.bottom, scale),
+		ios_view_pixels(inset.left, scale), ios_view_pixels(inset.right, scale));
+}
+
+- (void)viewDidLayoutSubviews {
+	[super viewDidLayoutSubviews];
+	[self updateGeometry];
+}
+
+- (void)viewSafeAreaInsetsDidChange {
+	[super viewSafeAreaInsetsDidChange];
+	[self updateGeometry];
+}
+
 - (void)viewWillTransitionToSize:(CGSize)ptSize withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+	[super viewWillTransitionToSize:ptSize withTransitionCoordinator:coordinator];
 	[coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
 		// TODO(crawshaw): come up with a plan to handle animations.
 	} completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
-		UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-		CGSize size = [UIScreen mainScreen].nativeBounds.size;
-		updateConfig((int)size.width, (int)size.height, orientation);
+		[self updateGeometry];
 	}];
 }
 
@@ -265,53 +298,45 @@ static CGFloat keyboardHeight;
 #define TOUCH_TYPE_END   2 // touch.TypeEnd
 #define TOUCH_TYPE_CANCEL 3 // touch.TypeCancel
 
-static void sendTouches(int change, NSSet* touches) {
-	CGFloat scale = [UIScreen mainScreen].nativeScale;
+static void sendTouches(int change, NSSet* touches, UIView *view) {
+	CGFloat scale = view.contentScaleFactor;
 	for (UITouch* touch in touches) {
-		CGPoint p = [touch locationInView:touch.view];
+		CGPoint p = [touch locationInView:view];
 		sendTouch((GoUintptr)touch, (GoUintptr)change, p.x*scale, p.y*scale);
 	}
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
-	sendTouches(TOUCH_TYPE_BEGIN, touches);
+	sendTouches(TOUCH_TYPE_BEGIN, touches, self.view);
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
-	sendTouches(TOUCH_TYPE_MOVE, touches);
+	sendTouches(TOUCH_TYPE_MOVE, touches, self.view);
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-	sendTouches(TOUCH_TYPE_END, touches);
+	sendTouches(TOUCH_TYPE_END, touches, self.view);
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
-    sendTouches(TOUCH_TYPE_CANCEL, touches);
+    sendTouches(TOUCH_TYPE_CANCEL, touches, self.view);
 }
 
 - (void) traitCollectionDidChange: (UITraitCollection *) previousTraitCollection {
     [super traitCollectionDidChange: previousTraitCollection];
 
-	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-	CGSize size = [UIScreen mainScreen].nativeBounds.size;
-	updateConfig((int)size.width, (int)size.height, orientation);
+	[self updateGeometry];
 }
 
-- (void)keyboardWillShow:(NSNotification *)note {
-    CGSize keyboardSize = [[[note userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
-    keyboardHeight = keyboardSize.height;
-
-    CGSize size = [UIScreen mainScreen].nativeBounds.size;
-	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-	updateConfig((int)size.width, (int)size.height, orientation);
+- (void)keyboardWillChangeFrame:(NSNotification *)note {
+	NSValue *frame = note.userInfo[UIKeyboardFrameEndUserInfoKey];
+	self.keyboardFrame = frame == nil ? CGRectNull : frame.CGRectValue;
+	[self updateGeometry];
 }
 
 - (void)keyboardWillHide:(NSNotification *)note {
-    keyboardHeight = 0;
-
-    CGSize size = [UIScreen mainScreen].nativeBounds.size;
-	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-	updateConfig((int)size.width, (int)size.height, orientation);
+	self.keyboardFrame = CGRectNull;
+	[self updateGeometry];
 }
 
 @end
@@ -375,20 +400,6 @@ uint64_t threadID() {
 		abort();
 	}
 	return id;
-}
-
-UIEdgeInsets getDevicePadding() {
-    if (@available(iOS 11.0, *)) {
-        UIWindow *window = UIApplication.sharedApplication.keyWindow;
-
-        UIEdgeInsets inset = window.safeAreaInsets;
-        if (keyboardHeight != 0) {
-            inset.bottom = keyboardHeight;
-        }
-        return inset;
-    }
-
-    return UIEdgeInsetsZero;
 }
 
 bool isDark() {
