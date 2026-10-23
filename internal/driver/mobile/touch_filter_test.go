@@ -275,3 +275,23 @@ func TestTouchFilterCancelCallbackCannotRetargetReplay(t *testing.T) {
 		}
 	}
 }
+
+func TestTouchFilterReplayStopsIfChildChangesRoot(t *testing.T) {
+	c := newCanvas(fyne.CurrentDevice()).(*canvas)
+	c.SetTouchFilter(func(e mobile.FilterEvent) mobile.FilterResult {
+		if e.Phase == mobile.FilterMove {
+			return mobile.FilterPass
+		}
+		return mobile.FilterDefer
+	})
+	var delivered []mobile.FilterPhase
+	deliver := func(e mobile.FilterEvent) {
+		delivered = append(delivered, e.Phase)
+		c.SetContent(widget.NewLabel("opened from touch down"))
+	}
+	c.filterTouch(filterEvent(mobile.FilterBegin, 0, 10, 10), deliver)
+	c.filterTouch(filterEvent(mobile.FilterMove, 0, 30, 10), deliver)
+	c.filterTouch(filterEvent(mobile.FilterEnd, 0, 30, 10), deliver)
+	assert.Equal(t, []mobile.FilterPhase{mobile.FilterBegin}, delivered)
+	assert.Empty(t, c.touchFilter.active)
+}

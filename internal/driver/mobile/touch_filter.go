@@ -127,6 +127,11 @@ func (c *canvas) replayTouches(pending []mobile.FilterEvent, revision uint64, de
 			return
 		}
 		deliver(buffered)
+		if revision != s.revision {
+			s.mode, s.blocked = mobile.FilterClaim, true
+			c.tapCancel(buffered.Position, buffered.ID)
+			return
+		}
 	}
 }
 
