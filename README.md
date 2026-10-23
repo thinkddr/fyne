@@ -79,7 +79,9 @@ go mod tidy
 These commands require the published `.21` tag; see
 [Tags](https://github.com/thinkddr/fyne/tags) for available versions.
 Add your Fyne imports before `go mod tidy`, which removes unused dependencies.
-The module requires Go 1.22 or newer; desktop builds also need a C compiler and
+The current development head requires Go 1.26 or newer for the updated
+`golang.org/x/image` and `golang.org/x/net` security dependencies. The published
+`.21` tag retains its Go 1.22 minimum. Desktop builds also need a C compiler and
 the platform development libraries described in the
 [Fyne setup guide](https://developer.fyne.io/started/).
 
@@ -220,7 +222,8 @@ passes in that environment; Linux ARM64 produces image differences with the same
 Go 1.27.1 toolchain. ARM64 browser or native pixel equivalence requires its own
 verification.
 
-Go 1.22/1.23 retain the strong theme-key fallback. Weak keys do not establish a
+The published `.21` tag retains the strong theme-key fallback on Go 1.22/1.23;
+the current development head requires Go 1.26 or newer. Weak keys do not establish a
 bound on all cache metadata. The theme-font cache is **not** content-addressed:
 identical bytes in separate allocations do not share its identity. Explicit
 custom font sources still require comparable `fyne.Resource` values.
