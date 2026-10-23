@@ -120,6 +120,7 @@ func (c *canvas) Resize(size fyne.Size) {
 		return
 	}
 
+	c.cancelTouchFilter()
 	c.sizeContent(size)
 }
 

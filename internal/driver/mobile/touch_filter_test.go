@@ -110,7 +110,7 @@ func TestTouchFilterClaimedMultiTouchCancelsUntilAllFingersLift(t *testing.T) {
 }
 
 func TestTouchFilterRootAndOverlayChangesCancelWithoutReplay(t *testing.T) {
-	for _, change := range []string{"root", "overlay", "filter"} {
+	for _, change := range []string{"root", "overlay", "filter", "resize"} {
 		t.Run(change, func(t *testing.T) {
 			c := newCanvas(fyne.CurrentDevice()).(*canvas)
 			var phases []mobile.FilterPhase
@@ -127,6 +127,8 @@ func TestTouchFilterRootAndOverlayChangesCancelWithoutReplay(t *testing.T) {
 				c.Overlays().Add(widget.NewLabel("modal"))
 			case "filter":
 				c.SetTouchFilter(nil)
+			case "resize":
+				c.Resize(fyne.NewSize(200, 100))
 			}
 			c.filterTouch(filterEvent(mobile.FilterEnd, 0, 10, 10), deliver)
 			assert.Equal(t, []mobile.FilterPhase{mobile.FilterBegin, mobile.FilterCancel}, phases)
