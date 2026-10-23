@@ -1,10 +1,10 @@
 # Fork notice
 
 This repository contains a downstream modification of
-[Fyne v2.8.1](https://github.com/fyne-io/fyne/tree/v2.8.1). This document describes
-source version `v2.8.1-sytue.21`. Published versions are listed in
+[Fyne v2.8.2](https://github.com/fyne-io/fyne/tree/v2.8.2). This document describes
+source version `v2.8.2-sytue.1`. Published versions are listed in
 [Tags](https://github.com/thinkddr/fyne/tags); the prior release is
-[v2.8.1-sytue.19](https://github.com/thinkddr/fyne/tree/v2.8.1-sytue.19).
+[v2.8.1-sytue.21](https://github.com/thinkddr/fyne/tree/v2.8.1-sytue.21).
 It preserves the canonical Go module path `fyne.io/fyne/v2` and the upstream
 dependency declarations.
 
@@ -23,6 +23,36 @@ Keep the license, copyright notices and disclaimer with redistributions as
 required by LICENSE. Fyne.io and its contributors do not endorse this independent
 downstream release. General upstream documentation is preserved in
 [UPSTREAM-README.md](UPSTREAM-README.md).
+
+## Upstream 2.8.2 integration in v2.8.2-sytue.1
+
+This source integrates the official stable upstream `v2.8.2` commit
+`77c1fa8e0a50b6cbd04cd6c4454289e55a307a2d` with fork parent
+`bf85664117f0a3acc2cf3388e07fd7dee32a3d38` (`v2.8.1-sytue.21`). Neither published
+tag is changed. The retained fork history and the current upstream release history
+have different commit IDs for their 2.8.1 base. Fork commit
+`1138eac0a9ccaa7daf1e9b9c7236bd32b9abd188` and official upstream 2.8.1 commit
+`3dc06f47137aa3709807f1bb78dacc5daf68d551` have the identical Git tree
+`ba72c7168235d955109a1257c02afe64d93fe2a9`. The merge uses that explicit content
+base and records both release parents; it does not rewrite either history.
+
+The integration preserves incoming URLs, picker behavior, touch arbitration,
+cancellation and all supplied-painter hooks. iOS retains `urlOpened` alongside the
+new demand-driven render loop. Aligned text selection combines upstream's row
+alignment with the fork's row spacing. The fork's coverage threshold remains 62;
+upstream's lower threshold is not adopted without a measured need.
+
+The Android picker applies upstream's persistent-read grant to every selected URI,
+including multi-selection. It requests only read access, retains it only when the
+provider's result grants persistence, and preserves temporary access if that
+provider refuses persistence. It does not log the selected URI.
+
+Go remains 1.22. The canonical module list is unchanged; upstream updates
+`github.com/go-text/typesetting` to `v0.3.5`, `github.com/go-gl/glfw/v3.4/glfw` to
+`v0.1.0-pre.2`, and `github.com/fyne-io/oksvg` to
+`v0.2.1-0.20260918172519-a9af55fa95d9`. Consumers with replacements for those
+modules must validate their actual replacement source separately. Passing this
+fork's tests against canonical dependencies does not certify older replacements.
 
 ## Supplied rectangle painting in v2.8.1-sytue.20
 

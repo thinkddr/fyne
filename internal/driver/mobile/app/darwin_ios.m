@@ -284,7 +284,9 @@ struct utsname sysInfo;
 }
 
 - (void)render:(CADisplayLink*)displayLink {
-    [self.glview display];
+    if (needsDraw()) {
+        [self.glview display];
+    }
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect {

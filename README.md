@@ -6,7 +6,7 @@ Android multi-file selection, overlay/focus behavior and targeted rendering,
 cache and lifecycle fixes. It also provides opt-in shaped-text and rectangle
 hooks for the software painter and optional mobile touch recognition.
 
-**Version:** `v2.8.1-sytue.21`, based on upstream `v2.8.1`.
+**Version:** `v2.8.2-sytue.1`, based on upstream `v2.8.2`.
 Available releases are listed in [Tags](https://github.com/thinkddr/fyne/tags).
 The [initial fork delta](https://github.com/thinkddr/fyne/compare/v2.8.1...v2.8.1-sytue.15)
 contains 17 commits through `v2.8.1-sytue.15`. The
@@ -71,12 +71,12 @@ Keep the canonical module and import path, **`fyne.io/fyne/v2`**. Select this fo
 with a pinned replacement in your application's module:
 
 ```sh
-go get fyne.io/fyne/v2@v2.8.1
-go mod edit -replace=fyne.io/fyne/v2=github.com/thinkddr/fyne/v2@v2.8.1-sytue.21
+go get fyne.io/fyne/v2@v2.8.2
+go mod edit -replace=fyne.io/fyne/v2=github.com/thinkddr/fyne/v2@v2.8.2-sytue.1
 go mod tidy
 ```
 
-These commands require the published `.21` tag; see
+These commands require the published `v2.8.2-sytue.1` tag; see
 [Tags](https://github.com/thinkddr/fyne/tags) for available versions.
 Add your Fyne imports before `go mod tidy`, which removes unused dependencies.
 The current development head requires Go 1.26 or newer for the updated
@@ -151,7 +151,7 @@ fork workflows, with thirteen successful jobs and the tag-only public-install
 job skipped. Final-source and published-module checks are recorded separately;
 see the [scope and evidence](FORK-NOTICE.md#supplied-rectangle-painting-in-v281-sytue20).
 
-## Differences from upstream 2.8.1
+## Retained fork differences
 
 | Area | Change | Code and regression tests |
 | --- | --- | --- |

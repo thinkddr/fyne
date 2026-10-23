@@ -4,7 +4,9 @@ package glfw
 
 import (
 	"image"
+	"os"
 	"strconv"
+	"strings"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -477,8 +479,22 @@ func TestMenuBar(t *testing.T) {
 
 func TestMenuBar_Toggle(t *testing.T) {
 	runOnMain(func() {
-		test.NewTempApp(t)
+		test.NewApp()
 	})
+	t.Cleanup(func() {
+		runOnMain(func() { test.NewApp() })
+	})
+
+	masters := make(map[string]string)
+	for _, name := range []string{
+		"menu_bar_toggle_deactivated.xml",
+		"menu_bar_toggle_first_item_active.xml",
+		"menu_bar_toggle_second_item_active.xml",
+	} {
+		raw, err := os.ReadFile("testdata/" + name)
+		require.NoError(t, err)
+		masters[name] = strings.ReplaceAll(string(raw), "\r", "")
+	}
 
 	m1i1 := fyne.NewMenuItem("New", nil)
 	m1i2 := fyne.NewMenuItem("Open", nil)
@@ -490,68 +506,58 @@ func TestMenuBar_Toggle(t *testing.T) {
 
 	menu := fyne.NewMainMenu(m1, m2)
 
-	t.Run("when menu bar is inactive", func(t *testing.T) {
-		w := test.NewWindow(nil)
-		defer w.Close()
-		w.SetPadded(false)
-		w.Resize(fyne.NewSize(300, 300))
-		c := w.Canvas()
-		menuBar := NewMenuBar(menu, c)
-		w.SetContent(container.NewWithoutLayout(menuBar))
-		w.Resize(fyne.NewSize(300, 300))
-		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
-
-		require.False(t, menuBar.IsActive())
-		test.AssertRendersToMarkup(t, "menu_bar_toggle_deactivated.xml", c)
-
-		menuBar.Toggle()
-		assert.True(t, menuBar.IsActive())
-		assert.Equal(t, c.Focused(), menuBar.Items[0])
-		test.AssertRendersToMarkup(t, "menu_bar_toggle_first_item_active.xml", c)
-	})
-
-	t.Run("when menu bar is active (first menu item active)", func(t *testing.T) {
-		w := test.NewWindow(nil)
-		defer w.Close()
-		w.SetPadded(false)
-		w.Resize(fyne.NewSize(300, 300))
-		c := w.Canvas()
-		menuBar := NewMenuBar(menu, c)
-		w.SetContent(container.NewWithoutLayout(menuBar))
-		w.Resize(fyne.NewSize(300, 300))
-		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
-
-		menuBar.Toggle()
-		require.True(t, menuBar.IsActive())
-		test.AssertRendersToMarkup(t, "menu_bar_toggle_first_item_active.xml", c)
-
-		menuBar.Toggle()
-		assert.False(t, menuBar.IsActive())
-		assert.Nil(t, c.Focused())
-		test.AssertRendersToMarkup(t, "menu_bar_toggle_deactivated.xml", c)
-	})
-
-	t.Run("when menu bar is active (second menu item active)", func(t *testing.T) {
-		w := test.NewWindow(nil)
-		defer w.Close()
-		w.SetPadded(false)
-		w.Resize(fyne.NewSize(300, 300))
-		c := w.Canvas()
-		menuBar := NewMenuBar(menu, c)
-		w.SetContent(container.NewWithoutLayout(menuBar))
-		w.Resize(fyne.NewSize(300, 300))
-		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
-
-		menuBar.Toggle()
-		c.(software.WindowlessCanvas).FocusNext()
-		require.True(t, menuBar.IsActive())
-		test.AssertRendersToMarkup(t, "menu_bar_toggle_second_item_active.xml", c)
-
-		menuBar.Toggle()
-		assert.False(t, menuBar.IsActive())
-		assert.Nil(t, c.Focused())
-		test.AssertRendersToMarkup(t, "menu_bar_toggle_deactivated.xml", c)
-	})
+	for _, tc := range []struct {
+		name        string
+		active      bool
+		second      bool
+		before, end string
+	}{
+		{"when menu bar is inactive", false, false, "menu_bar_toggle_deactivated.xml", "menu_bar_toggle_first_item_active.xml"},
+		{"when menu bar is active (first menu item active)", true, false, "menu_bar_toggle_first_item_active.xml", "menu_bar_toggle_deactivated.xml"},
+		{"when menu bar is active (second menu item active)", true, true, "menu_bar_toggle_second_item_active.xml", "menu_bar_toggle_deactivated.xml"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var beforeActive, endActive bool
+			var beforeMarkup, endMarkup string
+			var focused fyne.Focusable
+			var firstItem fyne.CanvasObject
+			// The GL driver keeps its renderer-cache cleanup running on main even
+			// while these fixtures use a software canvas. Keep their UI work there.
+			runOnMain(func() {
+				w := test.NewWindow(nil)
+				defer w.Close()
+				w.SetPadded(false)
+				w.Resize(fyne.NewSize(300, 300))
+				c := w.Canvas()
+				menuBar := NewMenuBar(menu, c)
+				w.SetContent(container.NewWithoutLayout(menuBar))
+				w.Resize(fyne.NewSize(300, 300))
+				menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
+				if tc.active {
+					menuBar.Toggle()
+				}
+				if tc.second {
+					c.(software.WindowlessCanvas).FocusNext()
+				}
+				beforeActive = menuBar.IsActive()
+				beforeMarkup = test.RenderToMarkup(c)
+				menuBar.Toggle()
+				endActive, focused = menuBar.IsActive(), c.Focused()
+				firstItem = menuBar.Items[0]
+				endMarkup = test.RenderToMarkup(c)
+			})
+			// Assertions remain on the test goroutine: FailNow must not stop GL.
+			require.Equal(t, tc.active, beforeActive)
+			assert.Equal(t, masters[tc.before], beforeMarkup, tc.before)
+			assert.Equal(t, !tc.active, endActive)
+			if tc.active {
+				assert.Nil(t, focused)
+			} else {
+				assert.Same(t, firstItem, focused)
+			}
+			assert.Equal(t, masters[tc.end], endMarkup, tc.end)
+		})
+	}
 }
 
 type notFocusableButton struct {
