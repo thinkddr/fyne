@@ -152,14 +152,21 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 	}
 
 	cornerRadius := fyne.Min(painter.GetMaximumRadius(bounds), img.CornerRadius)
-	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, rawImg, clip, img.Alpha(), cornerRadius*c.Scale())
+	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, rawImg, clip, img.Alpha(), cornerRadius*c.Scale(), true)
 }
 
-func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle, alpha float64, radius float32) {
+func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle, alpha float64, radius float32, imageEnlargement bool) {
 	if origImg.Bounds().Dx() == width && origImg.Bounds().Dy() == height && radius < 0.5 {
 		// do not scale or duplicate image since not needed, draw directly
 		drawTex(x, y, width, height, base, origImg, clip, alpha)
 		return
+	}
+
+	if imageEnlargement && mode == canvas.ImageScaleSmooth && alpha == 1.0 && radius == 0 {
+		if filtered, ok := skiaLegacyEnlargement(origImg, width, height); ok {
+			drawTex(x, y, width, height, base, filtered, clip, alpha)
+			return
+		}
 	}
 
 	scaledBounds := image.Rect(0, 0, width, height)
@@ -240,6 +247,10 @@ func drawTex(x, y, width, height int, base *image.NRGBA, tex image.Image, clip i
 }
 
 func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	if text.Layout != nil {
+		drawTextLayout(c, text, pos, base, clip)
+		return
+	}
 	bounds := text.MinSize()
 	width := scale.ToScreenCoordinate(c, bounds.Width+painter.VectorPad(text)) // potentially italic overspill
 	height := scale.ToScreenCoordinate(c, bounds.Height+painter.TextVectorPad) // space below for descenders / underline
@@ -298,7 +309,7 @@ func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *ima
 
 	pix := rast.Generator(width, height)
 	if pix.Bounds().Bounds().Dx() != width || pix.Bounds().Dy() != height {
-		drawPixels(scaledX, scaledY, width, height, rast.ScaleMode, base, pix, clip, 1.0, 0.0)
+		drawPixels(scaledX, scaledY, width, height, rast.ScaleMode, base, pix, clip, 1.0, 0.0, false)
 	} else {
 		drawTex(scaledX, scaledY, width, height, base, pix, clip, 1.0)
 	}
@@ -375,6 +386,10 @@ func drawArbitraryPolygon(c fyne.Canvas, polygon *canvas.ArbitraryPolygon, pos f
 }
 
 func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	if rect.Painter != nil {
+		drawSuppliedRectangle(c, rect, pos, base, clip)
+		return
+	}
 	topRightRadius := painter.GetCornerRadius(rect.TopRightCornerRadius, rect.CornerRadius)
 	topLeftRadius := painter.GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
 	bottomRightRadius := painter.GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
