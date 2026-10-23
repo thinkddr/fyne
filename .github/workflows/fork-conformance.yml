@@ -40,6 +40,10 @@ jobs:
             printf '%s\n' "$task_unformatted"
             exit 1
           fi
+      - name: Verify Android picker results and persistent grants on JVM
+        run: |
+          test -f "$ANDROID_HOME/platforms/android-36/android.jar"
+          python3 internal/driver/mobile/app/testdata/picker/test_picker.py "$ANDROID_HOME/platforms/android-36/android.jar"
       - name: Vet
         run: go vet -tags ci,migrated_fynedo ./...
       - name: Verify Entry viewport restoration
