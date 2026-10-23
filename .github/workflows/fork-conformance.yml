@@ -80,6 +80,7 @@ jobs:
           cache: false
       - name: Verify native view and keyboard calculations
         run: |
+          go mod tidy -diff
           clang -std=c11 -Wall -Wextra -Werror internal/driver/mobile/app/testdata/ios_view_geometry.c -lm -o "$RUNNER_TEMP/ios-view-geometry"
           "$RUNNER_TEMP/ios-view-geometry"
           go test -v internal/driver/mobile/app/ios_geometry_source_test.go
