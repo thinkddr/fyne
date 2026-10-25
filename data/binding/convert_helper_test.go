@@ -1,12 +1,26 @@
 package binding
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2/storage"
 )
+
+func TestParseIntBounds(t *testing.T) {
+	value, err := parseInt("0x10")
+	assert.NoError(t, err)
+	assert.Equal(t, 16, value)
+
+	tooLarge := "2147483648"
+	if strconv.IntSize == 64 {
+		tooLarge = "9223372036854775808"
+	}
+	_, err = parseInt(tooLarge)
+	assert.Error(t, err)
+}
 
 func TestStripPrecision(t *testing.T) {
 	format := "%2.3f"

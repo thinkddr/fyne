@@ -77,7 +77,7 @@ func parseFloat(in string) (float64, error) {
 }
 
 func parseInt(in string) (int, error) {
-	out, err := strconv.ParseInt(in, 0, 64)
+	out, err := strconv.ParseInt(in, 0, strconv.IntSize)
 	return int(out), err
 }
 
