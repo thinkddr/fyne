@@ -20,7 +20,8 @@
 		double nativeScale = [r[@"viewScale"] doubleValue];
 		double width = [r[@"drawableWidth"] doubleValue];
 		double height = [r[@"drawableHeight"] doubleValue];
-		return r.count != 0 && [r[@"mode"] integerValue] == mode && width > 0 && height > 0 &&
+		return r[@"animationsEnabled"] != nil && ![r[@"animationsEnabled"] boolValue] &&
+			[r[@"mode"] integerValue] == mode && width > 0 && height > 0 &&
 			fabs([r[@"goWidth"] doubleValue] * scale - width) <= 1 &&
 			fabs([r[@"goHeight"] doubleValue] * scale - height) <= 1 &&
 			fabs([r[@"viewWidth"] doubleValue] * nativeScale - width) <= 1 &&
@@ -64,6 +65,8 @@
 			XCTAssertEqualWithAccuracy([r[@"tapX"] doubleValue] * fyneScale, x * nativeScale, 2);
 			// The mobile driver intentionally compensates iOS finger taps by -8 dp.
 			XCTAssertEqualWithAccuracy(([r[@"tapY"] doubleValue] + 8) * fyneScale, y * nativeScale, 2);
+			NSLog(@"FYNE_UIKIT_TAP orientation=%ld mode=%ld taps=%ld", (long)orientation.integerValue,
+				(long)mode.integerValue, (long)[r[@"taps"] integerValue]);
 		}
 	}
 	XCUIDevice.sharedDevice.orientation = UIDeviceOrientationPortrait;

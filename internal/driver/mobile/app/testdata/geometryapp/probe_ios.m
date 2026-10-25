@@ -14,6 +14,10 @@
 
 @implementation GeometryProbeContainer
 - (void)viewDidLoad {
+	// Keep this metrics/touch probe deterministic. XCTest can otherwise spend a
+	// minute waiting for a simulator's missing rotation-animation completion.
+	// The real controller still receives every layout and orientation change.
+	[UIView setAnimationsEnabled:NO];
 	[super viewDidLoad];
 	[self addChildViewController:self.content];
 	[self.view addSubview:self.content.view];
@@ -75,7 +79,8 @@ void geometryProbeUpdate(double width, double height, double scale, int taps, do
 			@"viewScale": @(view.contentScaleFactor),
 			@"drawableWidth": @(view.drawableWidth), @"drawableHeight": @(view.drawableHeight),
 			@"taps": @(taps), @"tapX": @(tapX), @"tapY": @(tapY),
-			@"mode": @(container.viewport.selectedSegmentIndex)
+			@"mode": @(container.viewport.selectedSegmentIndex),
+			@"animationsEnabled": @(UIView.areAnimationsEnabled)
 		};
 		NSData *data = [NSJSONSerialization dataWithJSONObject:report options:0 error:nil];
 		container.report.accessibilityValue = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
