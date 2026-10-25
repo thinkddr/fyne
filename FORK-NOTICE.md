@@ -2,11 +2,11 @@
 
 This repository contains a downstream modification of
 [Fyne v2.8.2](https://github.com/fyne-io/fyne/tree/v2.8.2). This document describes
-source version `v2.8.2-sytue.1`. Published versions are listed in
+source version `v2.8.2-sytue.2`. Published versions are listed in
 [Tags](https://github.com/thinkddr/fyne/tags); the prior release is
-[v2.8.1-sytue.21](https://github.com/thinkddr/fyne/tree/v2.8.1-sytue.21).
+[v2.8.2-sytue.1](https://github.com/thinkddr/fyne/tree/v2.8.2-sytue.1).
 It preserves the canonical Go module path `fyne.io/fyne/v2` and the upstream
-dependency declarations.
+API, with the dependency security updates described below.
 
 ## Attribution and license
 
@@ -23,6 +23,29 @@ Keep the license, copyright notices and disclaimer with redistributions as
 required by LICENSE. Fyne.io and its contributors do not endorse this independent
 downstream release. General upstream documentation is preserved in
 [UPSTREAM-README.md](UPSTREAM-README.md).
+
+## iOS geometry and security maintenance in v2.8.2-sytue.2
+
+The iOS bridge measures the attached view and uses its rendering scale for both
+canvas pixels and touches. Scene orientation describes those dimensions without
+a second rotation in Go. Layout and safe-area changes refresh geometry. Keyboard
+rectangles are converted into view coordinates; only a docked full-width overlap
+reserves the bottom edge, so floating and undocked keyboards do not shrink the
+whole canvas. Existing native touch cancellation remains intact.
+
+This source requires Go 1.26 for stable `golang.org/x/image v0.47.0` and
+`golang.org/x/net v0.61.0`, which fix the five inherited image/network
+vulnerabilities. Their required module graph updates are retained. CI exercises the latest
+supported Go 1.26 patch and stable Go; the Apple gate uses Go 1.27.3 and stable
+Xcode 27.0. The manifest must pass `go mod tidy -diff`.
+
+Before publication, all five fork workflows must pass for the final source.
+Apple CI compiles and links the actual driver for device and simulator, then
+checks real Go/Fyne/UIKit metrics and taps on rotating iPhone and iPad simulators.
+The reduced viewports resize the actual UIKit view; OS Stage Manager gestures
+are not automated. Portable regressions reject the original geometry path and
+wrong-scale/floating-keyboard mutations. A tag also requires the clean published
+module installation check; branch tests alone do not establish that result.
 
 ## Upstream 2.8.2 integration in v2.8.2-sytue.1
 

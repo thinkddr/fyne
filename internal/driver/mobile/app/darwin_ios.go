@@ -8,12 +8,12 @@ package app
 
 /*
 #cgo CFLAGS: -x objective-c -DGL_SILENCE_DEPRECATION
-#cgo LDFLAGS: -framework Foundation -framework UIKit -framework MobileCoreServices -framework GLKit -framework OpenGLES -framework QuartzCore -framework UserNotifications
+#cgo LDFLAGS: -framework Foundation -framework UIKit -framework CoreGraphics -framework MobileCoreServices -framework GLKit -framework OpenGLES -framework QuartzCore -framework UserNotifications
 #include <sys/utsname.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <UIKit/UIDevice.h>
+#include <UIKit/UIKit.h>
 #import <GLKit/GLKit.h>
 
 extern struct utsname sysInfo;
@@ -23,7 +23,6 @@ void makeCurrentContext(GLintptr ctx);
 void swapBuffers(GLintptr ctx);
 uint64_t threadID();
 
-UIEdgeInsets getDevicePadding();
 bool isDark();
 void showKeyboard(int keyboardType);
 void hideKeyboard();
@@ -75,10 +74,7 @@ func main(f func(App)) {
 	panic("unexpected return from app.runApp")
 }
 
-var (
-	pixelsPerPt float32
-	screenScale int // [UIScreen mainScreen].scale, either 1, 2, or 3.
-)
+var pixelsPerPt float32
 
 var DisplayMetrics struct {
 	WidthPx  int
@@ -96,7 +92,7 @@ func setDisplayMetrics(width, height int, scale int) {
 }
 
 //export setScreen
-func setScreen(scale int) {
+func setScreen(scale float32) {
 	C.uname(&C.sysInfo)
 	name := C.GoString(&C.sysInfo.machine[0])
 
@@ -122,31 +118,30 @@ func setScreen(scale int) {
 		v = 163 // emergency fallback
 	}
 
-	pixelsPerPt = v * float32(scale) / 72
-	screenScale = scale
+	pixelsPerPt = v * scale / 72
 }
 
 //export updateConfig
-func updateConfig(width, height, orientation int32) {
+func updateConfig(width, height, orientation, top, bottom, left, right int32) {
+	// UIKit sends the current view pixels, already oriented and scaled.
+	// Orientation describes them; it must not rotate the dimensions again.
 	o := size.OrientationUnknown
 	switch orientation {
-	case C.UIDeviceOrientationPortrait, C.UIDeviceOrientationPortraitUpsideDown:
+	case C.UIInterfaceOrientationPortrait, C.UIInterfaceOrientationPortraitUpsideDown:
 		o = size.OrientationPortrait
-	case C.UIDeviceOrientationLandscapeLeft, C.UIDeviceOrientationLandscapeRight:
+	case C.UIInterfaceOrientationLandscapeLeft, C.UIInterfaceOrientationLandscapeRight:
 		o = size.OrientationLandscape
-		width, height = height, width
 	}
-	insets := C.getDevicePadding()
 
 	theApp.events.In() <- size.Event{
 		WidthPx:       int(width),
 		HeightPx:      int(height),
 		WidthPt:       float32(width) / pixelsPerPt,
 		HeightPt:      float32(height) / pixelsPerPt,
-		InsetTopPx:    int(float32(insets.top) * float32(screenScale)),
-		InsetBottomPx: int(float32(insets.bottom) * float32(screenScale)),
-		InsetLeftPx:   int(float32(insets.left) * float32(screenScale)),
-		InsetRightPx:  int(float32(insets.right) * float32(screenScale)),
+		InsetTopPx:    int(top),
+		InsetBottomPx: int(bottom),
+		InsetLeftPx:   int(left),
+		InsetRightPx:  int(right),
 		PixelsPerPt:   pixelsPerPt,
 		Orientation:   o,
 		DarkMode:      bool(C.isDark()),
