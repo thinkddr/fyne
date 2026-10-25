@@ -32,15 +32,19 @@ cleanup() {
 }
 trap cleanup EXIT
 while read -r kind simulator state; do
+  printf '%s FYNE_UIKIT_DEVICE kind=%s simulator=%s phase=boot\n' "$(date -u +%FT%TZ)" "$kind" "$simulator"
   if [ "$state" != Booted ]; then
     xcrun simctl boot "$simulator"
   fi
   started+=("$simulator")
   xcrun simctl bootstatus "$simulator" -b
+  printf '%s FYNE_UIKIT_DEVICE kind=%s simulator=%s phase=install\n' "$(date -u +%FT%TZ)" "$kind" "$simulator"
   xcrun simctl install "$simulator" "$probe_app"
+  printf '%s FYNE_UIKIT_DEVICE kind=%s simulator=%s phase=test\n' "$(date -u +%FT%TZ)" "$kind" "$simulator"
   xcodebuild test -project "$root/.github/ios-geometry/UIKitGeometry.xcodeproj" \
     -scheme GeometryUITests -destination "id=$simulator" -parallel-testing-enabled NO \
     -derivedDataPath "$RUNNER_TEMP/geometry-ui-$kind" \
     -resultBundlePath "$RUNNER_TEMP/geometry-ui-$kind.xcresult" CODE_SIGNING_ALLOWED=NO
+  printf '%s FYNE_UIKIT_DEVICE kind=%s simulator=%s phase=passed\n' "$(date -u +%FT%TZ)" "$kind" "$simulator"
   xcrun simctl shutdown "$simulator"
 done < "$RUNNER_TEMP/geometry-devices.txt"

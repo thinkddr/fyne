@@ -41,6 +41,8 @@
 	XCTAssertTrue([label waitForExistenceWithTimeout:30]);
 	NSArray *orientations = @[@(UIDeviceOrientationPortrait), @(UIDeviceOrientationLandscapeLeft), @(UIDeviceOrientationPortrait), @(UIDeviceOrientationLandscapeRight)];
 	for (NSNumber *orientation in orientations) {
+		NSLog(@"FYNE_UIKIT_STATE device=%@ orientation=%ld phase=rotate", UIDevice.currentDevice.model,
+			(long)orientation.integerValue);
 		XCUIDevice.sharedDevice.orientation = orientation.integerValue;
 		BOOL landscape = orientation.integerValue == UIDeviceOrientationLandscapeLeft || orientation.integerValue == UIDeviceOrientationLandscapeRight;
 		NSPredicate *rotated = [NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
@@ -48,6 +50,8 @@
 		}];
 		XCTAssertEqual([XCTWaiter waitForExpectations:@[[[XCTNSPredicateExpectation alloc] initWithPredicate:rotated object:app]] timeout:20], XCTWaiterResultCompleted);
 		for (NSNumber *mode in @[@0, @1, @2, @0]) {
+			NSLog(@"FYNE_UIKIT_STATE device=%@ orientation=%ld mode=%ld phase=viewport", UIDevice.currentDevice.model,
+				(long)orientation.integerValue, (long)mode.integerValue);
 			[app.segmentedControls[@"viewport-mode"].buttons[@[@"Full", @"Half", @"Small"][mode.integerValue]] tap];
 			NSDictionary *r = [self stable:label mode:mode.integerValue];
 			NSInteger previous = [r[@"taps"] integerValue];
