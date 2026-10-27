@@ -191,7 +191,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 	return pkg, nil
 }
 
-var nmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(fyne.io/fyne/v2/internal/driver/mobile.*/[^.]*)`)
+var nmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(fyne\.io/fyne/v2/internal/driver/mobile.*/[^.]*)`)
 
 func extractPkgs(nm string, path string) (map[string]bool, error) {
 	if buildN {

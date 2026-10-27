@@ -191,6 +191,41 @@ func TestRawValueByName(t *testing.T) {
 	r.Equal("com.zentus.balloon", pkgname)
 }
 
+func TestPlatformBuildVersionCodeBounds(t *testing.T) {
+	for _, test := range []struct {
+		value string
+		want  uint32
+		err   bool
+	}{
+		{value: "4294967295", want: ^uint32(0)},
+		{value: "4294967296", err: true},
+		{value: "-1", err: true},
+	} {
+		el := new(Element)
+		err := addAttributes(xml.StartElement{Attr: []xml.Attr{{
+			Name:  xml.Name{Local: "platformBuildVersionCode"},
+			Value: test.value,
+		}}}, new(XML), 1, new(Pool), el, nil)
+		if test.err {
+			require.Error(t, err)
+			continue
+		}
+		require.NoError(t, err)
+		require.Equal(t, test.want, el.attrs[0].TypedValue.Value)
+	}
+}
+
+func TestTypedAttributeIntegerBounds(t *testing.T) {
+	tbl, err := OpenTable()
+	require.NoError(t, err)
+
+	for _, value := range []string{"4294967296", "-1"} {
+		attr := xml.Attr{Name: xml.Name{Space: androidSchema, Local: "minSdkVersion"}, Value: value}
+		err := addAttributeNamespace(attr, new(Attribute), tbl, new(Pool))
+		require.Error(t, err)
+	}
+}
+
 type byAttrName []*Attribute
 
 func (a byAttrName) Len() int           { return len(a) }

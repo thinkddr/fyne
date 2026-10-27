@@ -626,7 +626,7 @@ func addAttributes(tkn xml.StartElement, bx *XML, line int, pool *Pool, el *Elem
 			switch attr.Name.Local {
 			case "platformBuildVersionCode":
 				nattr.TypedValue.Type = DataIntDec
-				i, err := strconv.Atoi(attr.Value)
+				i, err := strconv.ParseUint(attr.Value, 10, 32)
 				if err != nil {
 					return err
 				}
@@ -691,7 +691,7 @@ func addAttributeNamespace(attr xml.Attr, nattr *Attribute, tbl *Table, pool *Po
 			// Other use-cases for DataFraction are currently unknown as applicable to manifest generation
 			// but this provides minimum support for writing out minSdkVersion="15" correctly.
 			nattr.TypedValue.Type = DataIntDec
-			i, err := strconv.Atoi(attr.Value)
+			i, err := strconv.ParseUint(attr.Value, 10, 32)
 			if err != nil {
 				return err
 			}
