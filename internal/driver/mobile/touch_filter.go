@@ -14,6 +14,8 @@ import (
 
 type touchFilterState struct {
 	callback func(mobile.FilterEvent) mobile.FilterResult
+	observer func(mobile.FilterEvent, mobile.FilterResult)
+	observed map[int]mobile.FilterEvent
 	active   map[int]bool
 	pending  []mobile.FilterEvent
 	last     mobile.FilterEvent
@@ -27,7 +29,51 @@ func (c *canvas) SetTouchFilter(callback func(mobile.FilterEvent) mobile.FilterR
 	c.touchFilter.callback = callback
 }
 
+func (c *canvas) SetTouchObserver(callback func(mobile.FilterEvent, mobile.FilterResult)) {
+	c.cancelTouchObservations()
+	c.touchFilter.observer = callback
+}
+
+func (c *canvas) observeTouch(e mobile.FilterEvent, result mobile.FilterResult) {
+	s := &c.touchFilter
+	if s.observer == nil {
+		return
+	}
+	if e.Phase != mobile.FilterBegin {
+		if _, active := s.observed[e.ID]; !active {
+			return
+		}
+	}
+	if s.observed == nil {
+		s.observed = make(map[int]mobile.FilterEvent)
+	}
+	if e.Phase == mobile.FilterBegin || e.Phase == mobile.FilterEnd {
+		e.Path = c.touchPath(e.Position)
+	}
+	last := e
+	last.Path = nil // Lifecycle tracking must not retain a removed object tree.
+	s.observed[e.ID] = last
+	if e.Phase == mobile.FilterEnd || e.Phase == mobile.FilterCancel {
+		delete(s.observed, e.ID)
+	}
+	s.observer(e, result)
+}
+
+func (c *canvas) cancelTouchObservations() {
+	s := &c.touchFilter
+	callback, active := s.observer, s.observed
+	s.observed = nil
+	if callback == nil {
+		return
+	}
+	for _, e := range active {
+		e.Phase, e.Path, e.Time = mobile.FilterCancel, nil, time.Now()
+		callback(e, mobile.FilterClaim)
+	}
+}
+
 func (c *canvas) cancelTouchFilter() {
+	c.cancelTouchObservations()
 	c.touchFilter.revision++
 	c.cancelTouchRecognition()
 }
@@ -48,7 +94,7 @@ func (c *canvas) cancelTouchRecognition() {
 
 func (c *canvas) filterTouch(e mobile.FilterEvent, deliver func(mobile.FilterEvent)) {
 	s := &c.touchFilter
-	if s.callback == nil && len(s.active) == 0 {
+	if s.callback == nil && s.observer == nil && len(s.active) == 0 {
 		deliver(e)
 		return
 	}
@@ -58,6 +104,9 @@ func (c *canvas) filterTouch(e mobile.FilterEvent, deliver func(mobile.FilterEve
 	if e.Phase == mobile.FilterBegin {
 		if len(s.active) == 0 {
 			s.mode, s.blocked = mobile.FilterDefer, false
+			if s.callback == nil {
+				s.mode = mobile.FilterPass
+			}
 		} else if s.mode == mobile.FilterDefer {
 			// Cancel recognition before replay, but keep the pending events so
 			// both fingers still reach the ordinary touch implementation.
@@ -85,6 +134,11 @@ func (c *canvas) filterTouch(e mobile.FilterEvent, deliver func(mobile.FilterEve
 		}
 	}()
 	if s.blocked || s.callback == nil || s.mode == mobile.FilterPass {
+		result := mobile.FilterPass
+		if s.mode == mobile.FilterClaim {
+			result = mobile.FilterClaim
+		}
+		c.observeTouch(e, result)
 		if s.mode != mobile.FilterClaim {
 			deliver(e)
 		}
@@ -96,13 +150,16 @@ func (c *canvas) filterTouch(e mobile.FilterEvent, deliver func(mobile.FilterEve
 	s.last = e
 	result := s.callback(e)
 	if s.blocked { // The callback may have replaced the root or opened an overlay.
+		c.observeTouch(e, mobile.FilterClaim)
 		return
 	}
 	if s.mode == mobile.FilterClaim {
+		c.observeTouch(e, mobile.FilterClaim)
 		return
 	}
 	if result == mobile.FilterClaim {
 		s.pending, s.mode = nil, mobile.FilterClaim
+		c.observeTouch(e, mobile.FilterClaim)
 		return
 	}
 	s.pending = append(s.pending, e)
@@ -115,7 +172,10 @@ func (c *canvas) filterTouch(e mobile.FilterEvent, deliver func(mobile.FilterEve
 			e.Phase, e.Path = mobile.FilterCancel, nil
 			s.callback(e)
 		}
+		c.observeTouch(s.last, mobile.FilterPass)
 		c.replayTouches(pending, revision, deliver)
+	} else {
+		c.observeTouch(e, mobile.FilterDefer)
 	}
 }
 

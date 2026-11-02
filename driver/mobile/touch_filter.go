@@ -58,3 +58,15 @@ const (
 type TouchFilterCanvas interface {
 	SetTouchFilter(func(FilterEvent) FilterResult)
 }
+
+// TouchObserverCanvas optionally observes touch lifecycle without deciding dispatch.
+// The callback runs on the UI goroutine once per incoming event, before delivery to
+// ordinary widgets, including after a filter returns FilterPass. The result describes
+// whether the event is delivered, deferred or consumed; the observer cannot change it.
+// Replayed events are not observed twice. Path is populated for Begin and End and must
+// not be modified or retained. Observers must not block or replace content/overlays.
+// Replacing content, overlays, filter or observer cancels active observations before
+// ordinary drag completion. Cancel must restore visual state, never commit an action.
+type TouchObserverCanvas interface {
+	SetTouchObserver(func(FilterEvent, FilterResult))
+}
