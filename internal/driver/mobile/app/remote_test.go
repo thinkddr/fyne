@@ -155,8 +155,8 @@ func TestIOSRemoteNotificationBridge(t *testing.T) {
 		"didFailToRegisterForRemoteNotificationsWithError:(NSError *)error",
 		"remoteTokenReceived(NULL, (char *)[[error localizedDescription] UTF8String]);",
 		"didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler",
-		"CFBridgingRetain([completionHandler copy])",
-		"CFBridgingRelease((CFTypeRef)handle)",
+		"remoteNotificationReceived((uintptr_t)(void *)[completionHandler copy]);",
+		"completion(r);\n\t\t[completion release];",
 		"UIBackgroundFetchResultNewData", "UIBackgroundFetchResultNoData", "UIBackgroundFetchResultFailed",
 	} {
 		if !strings.Contains(m, required) {
@@ -165,12 +165,27 @@ func TestIOSRemoteNotificationBridge(t *testing.T) {
 	}
 	// The payload is never handed to the app, and protected data is asked for before
 	// the handler runs.
-	recv := sourceSection(t, m, "didReceiveRemoteNotification:", "\n}\n")
+	recv := sourceSection(t, m, "didReceiveRemoteNotification:(NSDictionary *)userInfo", "\n}\n")
 	if strings.Contains(recv, "userInfo[") || strings.Contains(recv, "objectForKey") {
 		t.Error("the notification payload must not be read")
 	}
 	if p, r := strings.Index(recv, "protectedDataChanged(application.isProtectedDataAvailable);"), strings.Index(recv, "remoteNotificationReceived("); p < 0 || r < 0 || p > r {
 		t.Error("protected data availability must be refreshed before the handler starts")
+	}
+	// Only an app that declares the mode has the delegate method: UIKit warns about one
+	// that does not and would wake it for nothing. runApp adds it before UIKit starts.
+	if strings.Contains(m, "- (void)application:(UIApplication *)application didReceiveRemoteNotification:") {
+		t.Error("the delegate must not implement didReceiveRemoteNotification for every app")
+	}
+	run := sourceSection(t, m, "void runApp(void) {", "\n}\n")
+	if d, a, u := strings.Index(run, "if (remoteNotificationsDeclared()) {"),
+		strings.Index(run, "class_addMethod([GoAppAppDelegate class], @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:),"),
+		strings.Index(run, "UIApplicationMain("); d < 0 || a < d || u < a {
+		t.Error("runApp must add didReceiveRemoteNotification, only with the background mode, before UIApplicationMain")
+	}
+	if !strings.Contains(m, "@selector(goApplication:didReceiveRemoteNotification:fetchCompletionHandler:)") ||
+		!strings.Contains(m, "- (void)goApplication:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo") {
+		t.Error("the method runApp adds must be the delegate's goApplication:didReceiveRemoteNotification:fetchCompletionHandler:")
 	}
 	// The results Go sends are the order of RemoteResult.
 	if RemoteNewData != 0 || RemoteNoData != 1 || RemoteFailed != 2 {

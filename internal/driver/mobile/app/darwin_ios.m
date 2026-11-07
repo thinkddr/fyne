@@ -15,6 +15,7 @@
 #import <GLKit/GLKit.h>
 #import <UserNotifications/UserNotifications.h>
 #import <BackgroundTasks/BackgroundTasks.h>
+#import <objc/runtime.h>
 
 struct utsname sysInfo;
 
@@ -103,10 +104,11 @@ void registerForRemoteNotifications(void) {
 }
 
 // Called exactly once per notification by Go (remote.go), with RemoteNewData, RemoteNoData
-// or RemoteFailed; it releases the completion handler retained when it arrived.
+// or RemoteFailed; it releases the copy of the completion handler made when it arrived
+// (no ARC in this file: cgo compiles it without).
 void completeRemoteNotification(uintptr_t handle, int result) {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		void (^completion)(UIBackgroundFetchResult) = (void (^)(UIBackgroundFetchResult))CFBridgingRelease((CFTypeRef)handle);
+		void (^completion)(UIBackgroundFetchResult) = (void (^)(UIBackgroundFetchResult))(void *)handle;
 		UIBackgroundFetchResult r = UIBackgroundFetchResultFailed;
 		if (result == 0) {
 			r = UIBackgroundFetchResultNewData;
@@ -114,6 +116,7 @@ void completeRemoteNotification(uintptr_t handle, int result) {
 			r = UIBackgroundFetchResultNoData;
 		}
 		completion(r);
+		[completion release];
 	});
 }
 
@@ -170,9 +173,13 @@ void completeBackgroundRefresh(uintptr_t handle, bool ok, double next) {
 // A background notification: the payload is never read (the app fetches what changed from
 // its own servers). Protected data is asked for here, on the main thread, as the delegate's
 // notifications can reach a suspended app late.
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+// It is application:didReceiveRemoteNotification:fetchCompletionHandler: only in an app
+// that declares the background mode (runApp adds it then): elsewhere UIKit would see the
+// method, warn that the mode is missing and wake the app for nothing.
+- (void)goApplication:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
 	protectedDataChanged(application.isProtectedDataAvailable);
-	remoteNotificationReceived((uintptr_t)CFBridgingRetain([completionHandler copy]));
+	// The copy is the one reference completeRemoteNotification releases.
+	remoteNotificationReceived((uintptr_t)(void *)[completionHandler copy]);
 }
 
 - (void)applicationProtectedDataWillBecomeUnavailable:(UIApplication *)application {
@@ -535,6 +542,12 @@ static void sendTouches(int change, NSSet* touches, UIView *view) {
 void runApp(void) {
 	char * argv[] = {};
 	@autoreleasepool {
+		// Before UIKit looks at the delegate: see goApplication:didReceiveRemoteNotification:.
+		if (remoteNotificationsDeclared()) {
+			Method m = class_getInstanceMethod([GoAppAppDelegate class], @selector(goApplication:didReceiveRemoteNotification:fetchCompletionHandler:));
+			class_addMethod([GoAppAppDelegate class], @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:),
+				method_getImplementation(m), method_getTypeEncoding(m));
+		}
 		UIApplicationMain(0, argv, nil, NSStringFromClass([GoAppAppDelegate class]));
 	}
 }
