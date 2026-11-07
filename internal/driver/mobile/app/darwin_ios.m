@@ -78,7 +78,8 @@ static void scheduleBackgroundRefresh(double seconds) {
 	if (seconds <= 0 || identifier == nil) {
 		return;
 	}
-	BGAppRefreshTaskRequest *request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:identifier];
+	// No ARC in this file (cgo): the request is autoreleased, not leaked on each transition.
+	BGAppRefreshTaskRequest *request = [[[BGAppRefreshTaskRequest alloc] initWithIdentifier:identifier] autorelease];
 	request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:seconds];
 	NSError *error = nil;
 	if (![[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error]) {
@@ -275,15 +276,17 @@ void completeBackgroundRefresh(uintptr_t handle, bool ok, double next) {
 	// UIKit can connect a scene that is not in the foreground (a system request during
 	// background work): nobody is looking, so what waits for a user interface waits
 	// for the scene's first foreground, and its URLs after it.
+	// A regular launch connects the scene still unattached and brings it to the
+	// foreground right after, so it also goes through here.
 	UISceneActivationState state = scene.activationState;
 	if (state != UISceneActivationStateForegroundActive && state != UISceneActivationStateForegroundInactive) {
 		self.pendingConnection = connectionOptions;
 		return;
 	}
-	[self scene:scene connectWithOptions:connectionOptions];
+	[self goScene:scene connectWithOptions:connectionOptions];
 }
 
-- (void)scene:(UIScene *)scene connectWithOptions:(UISceneConnectionOptions *)connectionOptions {
+- (void)goScene:(UIScene *)scene connectWithOptions:(UISceneConnectionOptions *)connectionOptions {
 	// What the app deferred until it had a user interface, before this scene's URLs.
 	sceneWillConnect();
 	[self scene:scene openURLContexts:connectionOptions.URLContexts];
@@ -292,12 +295,21 @@ void completeBackgroundRefresh(uintptr_t handle, bool ok, double next) {
 	}
 }
 
-- (void)sceneWillEnterForeground:(UIScene *)scene {
+// Connects a scene that connected outside the foreground. sceneWillEnterForeground is
+// where it happens; sceneDidBecomeActive only makes sure it does before the scene is used.
+- (void)connectPendingScene:(UIScene *)scene {
 	UISceneConnectionOptions *pending = self.pendingConnection;
-	if (pending != nil) {
-		self.pendingConnection = nil;
-		[self scene:scene connectWithOptions:pending];
+	if (pending == nil) {
+		return;
 	}
+	// cgo compiles this file without ARC, and the property holds the only reference
+	// to the options: they are let go after the connection, never before it.
+	[self goScene:scene connectWithOptions:pending];
+	self.pendingConnection = nil;
+}
+
+- (void)sceneWillEnterForeground:(UIScene *)scene {
+	[self connectPendingScene:scene];
 }
 
 - (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)contexts {
@@ -315,6 +327,7 @@ void completeBackgroundRefresh(uintptr_t handle, bool ok, double next) {
 }
 
 - (void)sceneDidBecomeActive:(UIScene *)scene {
+	[self connectPendingScene:scene];
 	lifecycleFocused();
 }
 

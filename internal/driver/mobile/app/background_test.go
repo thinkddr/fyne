@@ -290,13 +290,30 @@ func TestIOSBackgroundRefreshBridge(t *testing.T) {
 		t.Error("a scene connected outside the foreground must leave sceneWillConnect for its first foreground")
 	}
 	fg := sourceSection(t, m, "- (void)sceneWillEnterForeground:", "\n}\n")
-	if !strings.Contains(fg, "[self scene:scene connectWithOptions:pending];") {
+	if !strings.Contains(fg, "[self connectPendingScene:scene];") {
 		t.Error("sceneWillEnterForeground must connect a scene that connected in the background")
+	}
+	// A regular launch takes that path too (the scene connects unattached): should UIKit
+	// skip sceneWillEnterForeground, the scene still connects before it is used.
+	active := sourceSection(t, m, "- (void)sceneDidBecomeActive:", "\n}\n")
+	if c, f := strings.Index(active, "[self connectPendingScene:scene];"), strings.Index(active, "lifecycleFocused();"); c < 0 || f < 0 || c > f {
+		t.Error("sceneDidBecomeActive must connect a pending scene before the app is focused")
+	}
+	// Without ARC the pending options die with the property: releasing them before the
+	// connection used them crashed every launch (SIGSEGV in the geometry probe).
+	pending := sourceSection(t, m, "- (void)connectPendingScene:", "\n}\n")
+	if c, r := strings.Index(pending, "[self goScene:scene connectWithOptions:pending];"), strings.Index(pending, "self.pendingConnection = nil;"); c < 0 || r < 0 || c > r {
+		t.Error("the pending connection options must be released after the connection, not before")
 	}
 	if strings.Count(m, "scheduleBackgroundRefresh(backgroundRefreshInterval())") < 2 {
 		t.Error("both the scene and the application background transitions must request a refresh")
 	}
 	g := string(iosGeometrySource(t, "darwin_ios.go"))
+	// The bridge manages its references by hand (the scene options, the tasks, the
+	// requests): it is only right compiled the way cgo compiles it, without ARC.
+	if strings.Contains(g, "-fobjc-arc") {
+		t.Error("darwin_ios.m is written for manual reference counting")
+	}
 	for _, required := range []string{
 		"-framework BackgroundTasks", "background.waitsForScene = true",
 		"//export sceneWillConnect", "//export launchFinished", "//export protectedDataChanged",
