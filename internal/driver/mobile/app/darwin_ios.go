@@ -8,7 +8,7 @@ package app
 
 /*
 #cgo CFLAGS: -x objective-c -DGL_SILENCE_DEPRECATION
-#cgo LDFLAGS: -framework Foundation -framework UIKit -framework CoreGraphics -framework MobileCoreServices -framework GLKit -framework OpenGLES -framework QuartzCore -framework UserNotifications
+#cgo LDFLAGS: -framework Foundation -framework UIKit -framework CoreGraphics -framework MobileCoreServices -framework GLKit -framework OpenGLES -framework QuartzCore -framework UserNotifications -framework BackgroundTasks
 #include <sys/utsname.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -30,6 +30,8 @@ void hideKeyboard();
 void showFileOpenPicker(char* mimes, char *exts);
 void showFileSavePicker(char* mimes, char *exts);
 void closeFileResource(void* urlPtr);
+
+void completeBackgroundRefresh(uintptr_t task, bool ok, double next);
 */
 import "C"
 
@@ -38,6 +40,7 @@ import (
 	"runtime"
 	"strings"
 	"sync/atomic"
+	"time"
 	"unsafe"
 
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
@@ -59,6 +62,9 @@ func init() {
 	// https://groups.google.com/forum/#!msg/golang-nuts/IiWZ2hUuLDA/SNKYYZBelsYJ
 	runtime.LockOSThread()
 	initThreadID = uint64(C.threadID())
+	// iOS can launch the app with no scene (an app refresh task, a background
+	// notification): what waits for the first scene waits for UIKit to connect one.
+	background.waitsForScene = true
 }
 
 func main(f func(App)) {
@@ -355,3 +361,30 @@ func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter,
 
 	C.showFileSavePicker(mimeStr, extStr)
 }
+
+//export sceneWillConnect
+func sceneWillConnect() { background.connectScene() }
+
+//export launchFinished
+func launchFinished(inBackground, protectedData C.bool) {
+	background.launchFinished(bool(inBackground), bool(protectedData))
+}
+
+//export protectedDataChanged
+func protectedDataChanged(available C.bool) { background.setProtectedData(bool(available)) }
+
+//export backgroundRefreshInterval
+func backgroundRefreshInterval() C.double { return C.double(background.refreshInterval().Seconds()) }
+
+//export backgroundRefreshReceived
+func backgroundRefreshReceived(task C.uintptr_t) {
+	background.receiveRefresh(uintptr(task), func(ok bool, next time.Duration) {
+		C.completeBackgroundRefresh(task, C.bool(ok), C.double(next.Seconds()))
+	})
+}
+
+//export backgroundRefreshStarted
+func backgroundRefreshStarted(task C.uintptr_t) { background.startRefresh(uintptr(task)) }
+
+//export backgroundRefreshExpired
+func backgroundRefreshExpired(task C.uintptr_t) { background.expireRefresh(uintptr(task)) }

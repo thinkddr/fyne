@@ -14,6 +14,7 @@
 #import <MobileCoreServices/MobileCoreServices.h>
 #import <GLKit/GLKit.h>
 #import <UserNotifications/UserNotifications.h>
+#import <BackgroundTasks/BackgroundTasks.h>
 
 struct utsname sysInfo;
 
@@ -31,7 +32,67 @@ struct utsname sysInfo;
 
 @interface GoAppSceneDelegate : UIResponder<UIWindowSceneDelegate>
 @property (strong, nonatomic) UIWindow *window;
+// The options of a scene that connected without being in the foreground: what waited
+// for a user interface, and the scene's URLs after it, wait for its first foreground.
+@property (strong, nonatomic) UISceneConnectionOptions *pendingConnection;
 @end
+
+// The app refresh task is the first entry of BGTaskSchedulerPermittedIdentifiers; an
+// app that declares none never gets one. See mobile.BackgroundDriver.
+static NSString *backgroundRefreshIdentifier(void) {
+	NSArray *identifiers = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"BGTaskSchedulerPermittedIdentifiers"];
+	if (![identifiers isKindOfClass:[NSArray class]] || identifiers.count == 0 || ![identifiers[0] isKindOfClass:[NSString class]]) {
+		return nil;
+	}
+	return identifiers[0];
+}
+
+// Must run before launching finishes: BGTaskScheduler throws afterwards.
+static void registerBackgroundRefresh(void) {
+	NSString *identifier = backgroundRefreshIdentifier();
+	if (identifier == nil) {
+		return;
+	}
+	[[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:identifier usingQueue:nil launchHandler:^(BGTask *task) {
+		// Retained until completeBackgroundRefresh, which Go calls exactly once.
+		uintptr_t handle = (uintptr_t)CFBridgingRetain(task);
+		// Known to Go before it can expire: a task that expires before its handler starts
+		// (the main thread busy) is completed at once and the handler never runs.
+		backgroundRefreshReceived(handle);
+		task.expirationHandler = ^{
+			backgroundRefreshExpired(handle);
+		};
+		// The launch handler runs on a background queue, and the delegate's protected
+		// data notifications can reach a suspended app late: ask UIKit now, on the main
+		// thread, before the handler reads anything.
+		dispatch_async(dispatch_get_main_queue(), ^{
+			protectedDataChanged([UIApplication sharedApplication].isProtectedDataAvailable);
+			backgroundRefreshStarted(handle);
+		});
+	}];
+}
+
+// A new request replaces the pending one. Zero or less requests nothing.
+static void scheduleBackgroundRefresh(double seconds) {
+	NSString *identifier = backgroundRefreshIdentifier();
+	if (seconds <= 0 || identifier == nil) {
+		return;
+	}
+	BGAppRefreshTaskRequest *request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:identifier];
+	request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:seconds];
+	NSError *error = nil;
+	if (![[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error]) {
+		NSLog(@"fyne: the app refresh task was not scheduled: %@", error);
+	}
+}
+
+void completeBackgroundRefresh(uintptr_t handle, bool ok, double next) {
+	dispatch_async(dispatch_get_main_queue(), ^{
+		BGTask *task = (BGTask *)CFBridgingRelease((CFTypeRef)handle);
+		scheduleBackgroundRefresh(next);
+		[task setTaskCompleted:ok ? YES : NO];
+	});
+}
 
 @implementation GoAppAppDelegate
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -55,7 +116,19 @@ struct utsname sysInfo;
 		urlOpened((char *)[[incoming absoluteString] UTF8String]);
 	}
 
+	registerBackgroundRefresh();
+	// Without a scene yet: UIKit launched the app for background work if the state is
+	// background now. Protected data is unavailable when it launched with the device locked.
+	launchFinished(application.applicationState == UIApplicationStateBackground, application.isProtectedDataAvailable);
 	return YES;
+}
+
+- (void)applicationProtectedDataWillBecomeUnavailable:(UIApplication *)application {
+	protectedDataChanged(false);
+}
+
+- (void)applicationProtectedDataDidBecomeAvailable:(UIApplication *)application {
+	protectedDataChanged(true);
 }
 
 - (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options {
@@ -93,6 +166,7 @@ struct utsname sysInfo;
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
 	lifecycleAlive();
+	scheduleBackgroundRefresh(backgroundRefreshInterval());
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
@@ -147,9 +221,31 @@ struct utsname sysInfo;
 	// update insets once key window is set
 	[app.controller updateGeometry];
 
+	// UIKit can connect a scene that is not in the foreground (a system request during
+	// background work): nobody is looking, so what waits for a user interface waits
+	// for the scene's first foreground, and its URLs after it.
+	UISceneActivationState state = scene.activationState;
+	if (state != UISceneActivationStateForegroundActive && state != UISceneActivationStateForegroundInactive) {
+		self.pendingConnection = connectionOptions;
+		return;
+	}
+	[self scene:scene connectWithOptions:connectionOptions];
+}
+
+- (void)scene:(UIScene *)scene connectWithOptions:(UISceneConnectionOptions *)connectionOptions {
+	// What the app deferred until it had a user interface, before this scene's URLs.
+	sceneWillConnect();
 	[self scene:scene openURLContexts:connectionOptions.URLContexts];
 	for (NSUserActivity *activity in connectionOptions.userActivities) {
 		[self scene:scene continueUserActivity:activity];
+	}
+}
+
+- (void)sceneWillEnterForeground:(UIScene *)scene {
+	UISceneConnectionOptions *pending = self.pendingConnection;
+	if (pending != nil) {
+		self.pendingConnection = nil;
+		[self scene:scene connectWithOptions:pending];
 	}
 }
 
@@ -177,6 +273,7 @@ struct utsname sysInfo;
 
 - (void)sceneDidEnterBackground:(UIScene *)scene {
 	lifecycleAlive();
+	scheduleBackgroundRefresh(backgroundRefreshInterval());
 }
 @end
 
