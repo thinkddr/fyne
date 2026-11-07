@@ -32,10 +32,15 @@ void showFileSavePicker(char* mimes, char *exts);
 void closeFileResource(void* urlPtr);
 
 void completeBackgroundRefresh(uintptr_t task, bool ok, double next);
+
+bool remoteNotificationsDeclared(void);
+void registerForRemoteNotifications(void);
+void completeRemoteNotification(uintptr_t handler, int result);
 */
 import "C"
 
 import (
+	"errors"
 	"log"
 	"runtime"
 	"strings"
@@ -65,6 +70,10 @@ func init() {
 	// iOS can launch the app with no scene (an app refresh task, a background
 	// notification): what waits for the first scene waits for UIKit to connect one.
 	background.waitsForScene = true
+	// Background remote notifications (remote.go): the background mode is read from
+	// Info.plist, which is there before UIKit launches.
+	remote.declared = func() bool { return bool(C.remoteNotificationsDeclared()) }
+	remote.register = func() { C.registerForRemoteNotifications() }
 }
 
 func main(f func(App)) {
@@ -388,3 +397,19 @@ func backgroundRefreshStarted(task C.uintptr_t) { background.startRefresh(uintpt
 
 //export backgroundRefreshExpired
 func backgroundRefreshExpired(task C.uintptr_t) { background.expireRefresh(uintptr(task)) }
+
+//export remoteTokenReceived
+func remoteTokenReceived(token, failure *C.char) {
+	if failure != nil {
+		remote.tokenReceived("", errors.New(C.GoString(failure)))
+		return
+	}
+	remote.tokenReceived(C.GoString(token), nil)
+}
+
+//export remoteNotificationReceived
+func remoteNotificationReceived(handler C.uintptr_t) {
+	remote.receiveNotification(func(r RemoteResult) {
+		C.completeRemoteNotification(handler, C.int(r))
+	})
+}

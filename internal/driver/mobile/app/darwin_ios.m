@@ -86,6 +86,36 @@ static void scheduleBackgroundRefresh(double seconds) {
 	}
 }
 
+// Background remote notifications (mobile.RemoteNotificationDriver): the app declares
+// the mode in UIBackgroundModes, and the bundle is readable before UIKit launches.
+bool remoteNotificationsDeclared(void) {
+	NSArray *modes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIBackgroundModes"];
+	return [modes isKindOfClass:[NSArray class]] && [modes containsObject:@"remote-notification"];
+}
+
+// No permission prompt: a background notification shows nothing. The token arrives in
+// the delegate, as remoteTokenReceived.
+void registerForRemoteNotifications(void) {
+	dispatch_async(dispatch_get_main_queue(), ^{
+		[[UIApplication sharedApplication] registerForRemoteNotifications];
+	});
+}
+
+// Called exactly once per notification by Go (remote.go), with RemoteNewData, RemoteNoData
+// or RemoteFailed; it releases the completion handler retained when it arrived.
+void completeRemoteNotification(uintptr_t handle, int result) {
+	dispatch_async(dispatch_get_main_queue(), ^{
+		void (^completion)(UIBackgroundFetchResult) = (void (^)(UIBackgroundFetchResult))CFBridgingRelease((CFTypeRef)handle);
+		UIBackgroundFetchResult r = UIBackgroundFetchResultFailed;
+		if (result == 0) {
+			r = UIBackgroundFetchResultNewData;
+		} else if (result == 1) {
+			r = UIBackgroundFetchResultNoData;
+		}
+		completion(r);
+	});
+}
+
 void completeBackgroundRefresh(uintptr_t handle, bool ok, double next) {
 	dispatch_async(dispatch_get_main_queue(), ^{
 		BGTask *task = (BGTask *)CFBridgingRelease((CFTypeRef)handle);
@@ -121,6 +151,27 @@ void completeBackgroundRefresh(uintptr_t handle, bool ok, double next) {
 	// background now. Protected data is unavailable when it launched with the device locked.
 	launchFinished(application.applicationState == UIApplicationStateBackground, application.isProtectedDataAvailable);
 	return YES;
+}
+
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+	const unsigned char *bytes = deviceToken.bytes;
+	NSMutableString *hex = [NSMutableString stringWithCapacity:deviceToken.length * 2];
+	for (NSUInteger i = 0; i < deviceToken.length; i++) {
+		[hex appendFormat:@"%02x", bytes[i]];
+	}
+	remoteTokenReceived((char *)[hex UTF8String], NULL);
+}
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+	remoteTokenReceived(NULL, (char *)[[error localizedDescription] UTF8String]);
+}
+
+// A background notification: the payload is never read (the app fetches what changed from
+// its own servers). Protected data is asked for here, on the main thread, as the delegate's
+// notifications can reach a suspended app late.
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+	protectedDataChanged(application.isProtectedDataAvailable);
+	remoteNotificationReceived((uintptr_t)CFBridgingRetain([completionHandler copy]));
 }
 
 - (void)applicationProtectedDataWillBecomeUnavailable:(UIApplication *)application {
