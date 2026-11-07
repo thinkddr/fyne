@@ -1,1 +1,5 @@
 *.go text eol=lf
+# The native sources are read by the source contracts: keep them LF on every checkout.
+*.m text eol=lf
+*.h text eol=lf
+*.c text eol=lf

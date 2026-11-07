@@ -264,8 +264,7 @@ func TestIOSBackgroundRefreshBridge(t *testing.T) {
 	}
 	// Each task asks UIKit whether protected data is available before the handler runs:
 	// the delegate notifications can reach a suspended app late.
-	handler := m[strings.Index(m, "launchHandler:"):]
-	handler = handler[:strings.Index(handler, "}];")]
+	handler := sourceSection(t, m, "launchHandler:", "}];")
 	if p, s := strings.Index(handler, "protectedDataChanged([UIApplication sharedApplication].isProtectedDataAvailable);"), strings.Index(handler, "backgroundRefreshStarted(handle);"); p < 0 || s < 0 || p > s {
 		t.Error("the launch handler must refresh protected data availability before starting the handler")
 	}
@@ -275,24 +274,22 @@ func TestIOSBackgroundRefreshBridge(t *testing.T) {
 		t.Error("the launch handler must record the task before setting its expiration handler")
 	}
 	// Registration must happen before launching finishes, or BGTaskScheduler throws.
-	launch := m[strings.Index(m, "didFinishLaunchingWithOptions"):]
-	launch = launch[:strings.Index(launch, "return YES;")]
+	launch := sourceSection(t, m, "didFinishLaunchingWithOptions", "return YES;")
 	if !strings.Contains(launch, "registerBackgroundRefresh();") {
 		t.Error("the refresh task is not registered during didFinishLaunching")
 	}
 	// The first-scene functions run before the scene's URLs reach the app.
-	connect := m[strings.Index(m, "willConnectToSession"):]
+	connect := sourceSection(t, m, "willConnectToSession", "")
 	if s, u := strings.Index(connect, "sceneWillConnect();"), strings.Index(connect, "openURLContexts:connectionOptions.URLContexts"); s < 0 || u < 0 || s > u {
 		t.Error("sceneWillConnect must run before the connection URLs are delivered")
 	}
 	// A scene connected outside the foreground does not run them until it enters it.
-	will := connect[:strings.Index(connect, "connectWithOptions:(UISceneConnectionOptions *)")]
+	will := sourceSection(t, connect, "willConnectToSession", "connectWithOptions:(UISceneConnectionOptions *)")
 	if !strings.Contains(will, "state != UISceneActivationStateForegroundActive && state != UISceneActivationStateForegroundInactive") ||
 		!strings.Contains(will, "self.pendingConnection = connectionOptions;") || strings.Contains(will, "sceneWillConnect();") {
 		t.Error("a scene connected outside the foreground must leave sceneWillConnect for its first foreground")
 	}
-	fg := m[strings.Index(m, "- (void)sceneWillEnterForeground:"):]
-	fg = fg[:strings.Index(fg, "\n}\n")]
+	fg := sourceSection(t, m, "- (void)sceneWillEnterForeground:", "\n}\n")
 	if !strings.Contains(fg, "[self scene:scene connectWithOptions:pending];") {
 		t.Error("sceneWillEnterForeground must connect a scene that connected in the background")
 	}

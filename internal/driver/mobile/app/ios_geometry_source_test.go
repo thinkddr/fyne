@@ -4,6 +4,7 @@
 package app
 
 import (
+	"bytes"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -26,7 +27,29 @@ func iosGeometrySource(t *testing.T, name string) []byte {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return source
+	// A checkout can turn the native sources into CRLF (Windows with autocrlf): the
+	// contracts are about the code, not its line endings.
+	return bytes.ReplaceAll(source, []byte("\r\n"), []byte("\n"))
+}
+
+// sourceSection is source from the first start to the first end after it (to the end
+// of source when end is empty). A missing marker fails the test instead of slicing
+// with -1.
+func sourceSection(t *testing.T, source, start, end string) string {
+	t.Helper()
+	i := strings.Index(source, start)
+	if i < 0 {
+		t.Fatalf("the native source has no %q", start)
+	}
+	section := source[i:]
+	if end == "" {
+		return section
+	}
+	j := strings.Index(section, end)
+	if j < 0 {
+		t.Fatalf("the native source has no %q after %q", end, start)
+	}
+	return section[:j]
 }
 
 func TestIOSGeometryUsesTheAttachedView(t *testing.T) {

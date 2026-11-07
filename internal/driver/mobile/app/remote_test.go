@@ -165,8 +165,7 @@ func TestIOSRemoteNotificationBridge(t *testing.T) {
 	}
 	// The payload is never handed to the app, and protected data is asked for before
 	// the handler runs.
-	recv := m[strings.Index(m, "didReceiveRemoteNotification:"):]
-	recv = recv[:strings.Index(recv, "\n}\n")]
+	recv := sourceSection(t, m, "didReceiveRemoteNotification:", "\n}\n")
 	if strings.Contains(recv, "userInfo[") || strings.Contains(recv, "objectForKey") {
 		t.Error("the notification payload must not be read")
 	}
