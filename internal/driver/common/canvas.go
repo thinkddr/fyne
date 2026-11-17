@@ -324,7 +324,7 @@ func (c *Canvas) IsDirty() bool {
 	return c.dirty
 }
 
-// WakeHook, when set by a driver, is called every time a canvas is marked dirty so
+// WakeHook is called, when a driver sets it, every time a canvas is marked dirty so
 // that an event loop sleeping until the next input can wake up and paint. It must be
 // cheap: SetDirty runs for every refresh.
 var WakeHook func()
