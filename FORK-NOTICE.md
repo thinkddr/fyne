@@ -24,6 +24,24 @@ required by LICENSE. Fyne.io and its contributors do not endorse this independen
 downstream release. General upstream documentation is preserved in
 [UPSTREAM-README.md](UPSTREAM-README.md).
 
+## Event-driven desktop loop and immediate mobile paint (after v2.8.2-sytue.6)
+
+The GLFW driver no longer polls on a fixed 60 Hz ticker. It waits in
+`glfw.WaitEventsTimeout` and is woken by input, by work sent with `fyne.Do`
+(`glfw.PostEmptyEvent`), by a canvas marked dirty and by a starting animation. When
+the last frame is at least one frame interval old it paints at once; while
+something keeps changing it paints at most once per refresh of the primary monitor
+(60 to 240 Hz). An idle window wakes once per second for cache housekeeping. The
+mobile driver keeps its ticker but asks for a frame as soon as a touch, a key or a
+queued function leaves the canvas dirty. The browser (wasm) loop is unchanged.
+
+Measured under Xvfb with Mesa from a synthetic key press (XTest) to the changed
+pixel read back from the X server, 150 samples: mean 10.5 ms, p90 16.7 ms, max
+18.8 ms before; mean 1.8 ms, p90 2.0 ms after. A `fyne.Do` update went from 10.7 ms
+to 1.6 ms on average, and an idle window's CPU time fell from 35 ms to about 1 ms per
+2 s. `TestRunOnMainWakesIdleLoop` fails (about 950 ms per call) when the wake-up is
+removed.
+
 ## iOS geometry and security maintenance in v2.8.2-sytue.2
 
 The iOS bridge measures the attached view and uses its rendering scale for both

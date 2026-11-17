@@ -23,7 +23,34 @@ type funcData struct {
 var (
 	funcQueue        = async.NewUnboundedChan[funcData]()
 	running, drained atomic.Bool
+
+	// queuedFuncs counts the functions sent to funcQueue that the main loop has not
+	// picked up yet. funcQueue forwards through a goroutine, so its Out channel can
+	// still be empty right after a send: the counter is what tells the loop not to
+	// go to sleep with work on its way.
+	queuedFuncs atomic.Int64
+	// sleeping is set while the main loop waits for events, so that the code that
+	// gives it work only posts a wake-up event when one is needed.
+	sleeping atomic.Bool
 )
+
+// The loop paints at most once per frameInterval while something changes and sleeps
+// until the next event otherwise. idleWakeInterval bounds that sleep so that
+// housekeeping that runs with each frame (texture and cache expiry) still happens
+// on an idle window.
+const (
+	defaultFrameInterval = time.Second / 60
+	minFrameInterval     = time.Second / 240
+	idleWakeInterval     = time.Second
+)
+
+// wakeMainLoop interrupts the main loop if it is waiting for events. Safe to call
+// from any goroutine; cheap when the loop is awake.
+func wakeMainLoop() {
+	if sleeping.Load() {
+		postEmptyEvent()
+	}
+}
 
 // Arrange that main.main runs on main thread.
 func init() {
@@ -45,14 +72,20 @@ func runOnMainWithWait(f func(), wait bool) {
 		return
 	}
 
+	// Count the function BEFORE sending it and check `sleeping` after: with the loop
+	// setting `sleeping` before reading the counter, one of the two always sees the
+	// other and no function waits for the idle timeout.
+	queuedFuncs.Add(1)
 	if wait {
 		done := common.DonePool.Get()
 		defer common.DonePool.Put(done)
 
 		funcQueue.In() <- funcData{f: f, done: done}
+		wakeMainLoop()
 		<-done
 	} else {
 		funcQueue.In() <- funcData{f: f}
+		wakeMainLoop()
 	}
 }
 
@@ -129,67 +162,163 @@ func (d *gLDriver) runGL() {
 		f()
 	}
 
-	eventTick := time.NewTicker(time.Second / 60)
+	// Event driven: wait for input (or work sent with fyne.Do, a refresh or an
+	// animation) and paint right away if the last frame is at least one frame
+	// interval old. A fixed 60 Hz ticker made every key press and every network
+	// result wait for the next tick, 8 ms on average and up to 17 ms, and woke the
+	// process 60 times a second while nothing happened.
+	common.WakeHook = wakeMainLoop
+	defer func() { common.WakeHook = nil }()
+	frameInterval := d.frameInterval()
+	var lastFrame time.Time
 	for {
-		select {
-		case <-d.done:
-			eventTick.Stop()
-			d.Terminate()
-			l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
-			if f := l.OnStopped(); f != nil {
-				l.QueueEvent(f)
+		if d.runQueuedFuncs() {
+			d.shutdown()
+			return
+		}
+
+		d.waitForEvents(d.nextWake(lastFrame, frameInterval))
+
+		if d.runQueuedFuncs() {
+			d.shutdown()
+			return
+		}
+
+		now := time.Now()
+		if now.Sub(lastFrame) < frameInterval {
+			continue
+		}
+		lastFrame = now
+
+		for i := 0; i < len(d.windows); i++ {
+			w := d.windows[i].(*window)
+			w.ensurePositionProcessed()
+
+			if w.viewport == nil {
+				continue
 			}
 
-			// as we are shutting down make sure we drain the pending funcQueue and close it out.
-			for len(funcQueue.Out()) > 0 {
-				f := <-funcQueue.Out()
-				if f.done != nil {
-					f.done <- struct{}{}
+			if w.viewport.ShouldClose() {
+				d.destroyWindow(w, i)
+				i-- // Trailing windows are moved forward one step.
+				continue
+			}
+
+			expand := w.shouldExpand
+			fullScreen := w.fullScreen
+
+			if expand && !fullScreen {
+				w.fitContent()
+				shouldExpand := w.shouldExpand
+				w.shouldExpand = false
+				view := w.viewport
+
+				if shouldExpand && runtime.GOOS != "js" {
+					view.SetSize(w.shouldWidth, w.shouldHeight)
 				}
 			}
-			drained.Store(true)
-			funcQueue.Close()
-			return
+		}
+
+		d.animation.TickAnimations()
+		d.drawSingleFrame()
+	}
+}
+
+// runQueuedFuncs runs the functions queued for the main thread and reports whether
+// the driver is shutting down.
+func (d *gLDriver) runQueuedFuncs() (quit bool) {
+	for queuedFuncs.Load() > 0 {
+		select {
+		case <-d.done:
+			return true
 		case f := <-funcQueue.Out():
+			queuedFuncs.Add(-1)
 			f.f()
 			if f.done != nil {
 				f.done <- struct{}{}
 			}
-		case <-eventTick.C:
-			d.pollEvents()
-			for i := 0; i < len(d.windows); i++ {
-				w := d.windows[i].(*window)
-				w.ensurePositionProcessed()
-
-				if w.viewport == nil {
-					continue
-				}
-
-				if w.viewport.ShouldClose() {
-					d.destroyWindow(w, i)
-					i-- // Trailing windows are moved forward one step.
-					continue
-				}
-
-				expand := w.shouldExpand
-				fullScreen := w.fullScreen
-
-				if expand && !fullScreen {
-					w.fitContent()
-					shouldExpand := w.shouldExpand
-					w.shouldExpand = false
-					view := w.viewport
-
-					if shouldExpand && runtime.GOOS != "js" {
-						view.SetSize(w.shouldWidth, w.shouldHeight)
-					}
-				}
-			}
-
-			d.animation.TickAnimations()
-			d.drawSingleFrame()
 		}
 	}
+
+	select {
+	case <-d.done:
+		return true
+	default:
+		return false
+	}
+}
+
+func (d *gLDriver) shutdown() {
+	d.Terminate()
+	l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
+	if f := l.OnStopped(); f != nil {
+		l.QueueEvent(f)
+	}
+
+	// as we are shutting down make sure we drain the pending funcQueue and close it out.
+	for len(funcQueue.Out()) > 0 {
+		f := <-funcQueue.Out()
+		queuedFuncs.Add(-1)
+		if f.done != nil {
+			f.done <- struct{}{}
+		}
+	}
+	drained.Store(true)
+	funcQueue.Close()
+}
+
+// nextWake is how long the loop may wait for events before it has to run again:
+// until the next frame slot while something is pending, a long idle wait otherwise.
+func (d *gLDriver) nextWake(lastFrame time.Time, frameInterval time.Duration) time.Duration {
+	if queuedFuncs.Load() > 0 {
+		return 0
+	}
+	if d.animation.Running() || d.windowNeedsFrame() {
+		return time.Until(lastFrame.Add(frameInterval))
+	}
+	return idleWakeInterval
+}
+
+// windowNeedsFrame reports whether any window has work for the next frame: a dirty
+// canvas, a pending resize or a mouse move not processed yet.
+func (d *gLDriver) windowNeedsFrame() bool {
+	for _, win := range d.windows {
+		w := win.(*window)
+		if w.closing {
+			continue
+		}
+		if w.shouldExpand || !w.mousePosUpdateProcessed || (w.visible && w.canvas.IsDirty()) {
+			return true
+		}
+		if w.viewport != nil && w.viewport.ShouldClose() {
+			return true
+		}
+	}
+	return false
+}
+
+// waitForEvents processes pending window events, waiting up to timeout for one to
+// arrive. A timeout of zero or less only polls.
+func (d *gLDriver) waitForEvents(timeout time.Duration) {
+	if timeout <= 0 {
+		d.pollEvents()
+		return
+	}
+
+	sleeping.Store(true)
+	select {
+	case <-d.done:
+		sleeping.Store(false)
+		return
+	default:
+	}
+	if queuedFuncs.Load() > 0 {
+		sleeping.Store(false)
+		d.pollEvents()
+		return
+	}
+	d.waitEvents(timeout)
+	sleeping.Store(false)
 }
 
 func (d *gLDriver) destroyWindow(w *window, index int) {

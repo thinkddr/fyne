@@ -53,6 +53,15 @@ func (r *Runner) Start(a *fyne.Animation) {
 	}
 }
 
+// Running reports whether any animation is being ticked or waiting to start. The
+// desktop driver uses it to keep painting at the frame rate while something moves
+// and to sleep until the next event otherwise.
+func (r *Runner) Running() bool {
+	r.animationMutex.RLock()
+	defer r.animationMutex.RUnlock()
+	return r.runnerStarted
+}
+
 // Stop causes an animation to stop ticking (if it was still running) and removes it from the runner.
 func (r *Runner) Stop(a *fyne.Animation) {
 	r.animationMutex.Lock()

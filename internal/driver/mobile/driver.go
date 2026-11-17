@@ -60,6 +60,7 @@ type driver struct {
 	theme           fyne.ThemeVariant
 	onConfigChanged func(*Configuration)
 	painting        bool
+	lastPaintSent   time.Time
 	running         bool
 	queuedFuncs     *async.UnboundedChan[func()]
 }
@@ -212,6 +213,7 @@ func (d *driver) Run() {
 				d.sendPaintEvent()
 			case fn := <-d.queuedFuncs.Out():
 				fn()
+				d.paintIfIdle()
 			case e, ok := <-a.Events():
 				if !ok {
 					return // events channel closed, app done
@@ -274,9 +276,28 @@ func (d *driver) Run() {
 						d.typeUpCanvas(c, e.Rune, e.Code, e.Modifiers)
 					}
 				}
+				d.paintIfIdle()
 			}
 		}
 	})
+}
+
+// paintIfIdle asks for a frame right away when a touch, a key or a function queued
+// with fyne.Do has left the canvas dirty and the last frame is at least one tick
+// old. Without it the change waited for the next tick of the 60 Hz draw ticker,
+// 8 ms on average and up to 17 ms after the finger lifted. The ticker still paces
+// continuous changes, so this never paints faster than it.
+func (d *driver) paintIfIdle() {
+	if d.painting || d.glctx == nil || time.Since(d.lastPaintSent) < time.Second/60 {
+		return
+	}
+	current := d.currentWindow()
+	if current == nil {
+		return
+	}
+	if c, ok := current.Canvas().(*canvas); ok && c.IsDirty() {
+		d.sendPaintEvent()
+	}
 }
 
 func (*driver) SetDisableScreenBlanking(disable bool) {
@@ -421,6 +442,7 @@ func (d *driver) sendPaintEvent() {
 	}
 	d.app.Send(paint.Event{})
 	d.painting = true
+	d.lastPaintSent = time.Now()
 }
 
 func (d *driver) setTheme(dark bool) {

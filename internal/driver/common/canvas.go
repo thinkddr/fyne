@@ -314,7 +314,20 @@ func (c *Canvas) CheckDirtyAndClear() bool {
 // SetDirty sets canvas dirty flag atomically.
 func (c *Canvas) SetDirty() {
 	c.dirty = true
+	if hook := WakeHook; hook != nil {
+		hook()
+	}
 }
+
+// IsDirty reports whether the canvas needs a repaint, without clearing the flag.
+func (c *Canvas) IsDirty() bool {
+	return c.dirty
+}
+
+// WakeHook, when set by a driver, is called every time a canvas is marked dirty so
+// that an event loop sleeping until the next input can wake up and paint. It must be
+// cheap: SetDirty runs for every refresh.
+var WakeHook func()
 
 // SetMenuTreeAndFocusMgr sets menu tree and focus manager.
 //

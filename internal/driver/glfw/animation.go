@@ -4,6 +4,7 @@ import "fyne.io/fyne/v2"
 
 func (d *gLDriver) StartAnimation(a *fyne.Animation) {
 	d.animation.Start(a)
+	wakeMainLoop()
 }
 
 func (d *gLDriver) StopAnimation(a *fyne.Animation) {
