@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"runtime"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -11,7 +12,15 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const scrollEndDelay = 500 * time.Millisecond
+// scrollEndDelay is how long the bars stay after the last scroll, where they only
+// show while scrolling. A variable so that tests can wait less.
+var scrollEndDelay = 500 * time.Millisecond
+
+// mobileScrollBars is true on iOS and Android, where the bars only show while the
+// content moves, as they do in the native lists of both systems. Elsewhere bars
+// follow the desktop rules (scrollBarAlwaysVisible). A variable so that tests can
+// turn it on anywhere.
+var mobileScrollBars = runtime.GOOS == "ios" || runtime.GOOS == "android"
 
 // ScrollDirection represents the directions in which a Scroll can scroll its child content.
 type ScrollDirection = fyne.ScrollDirection
@@ -619,18 +628,41 @@ func (s *Scroll) Scrolled(ev *fyne.ScrollEvent) {
 	}
 	if !scrollBarAlwaysVisible() {
 		s.scrolling = true
-		if s.scrollEndTimer != nil {
-			s.scrollEndTimer.Reset(scrollEndDelay)
-		} else {
-			s.scrollEndTimer = time.AfterFunc(scrollEndDelay, func() {
-				fyne.Do(func() {
-					s.scrolling = false
-					s.refreshBars()
-				})
-			})
-		}
+		s.endScrollingAfterDelay()
 		s.refreshBars()
 	}
+}
+
+// startScrolling shows the bars, where they only show while scrolling, until
+// endScrollingAfterDelay. It is for a drag: the bars stay while the finger is down,
+// even if it rests. It reports whether the bars were hidden and need a refresh.
+func (s *Scroll) startScrolling() bool {
+	if scrollBarAlwaysVisible() {
+		return false
+	}
+	if s.scrollEndTimer != nil {
+		s.scrollEndTimer.Stop()
+	}
+	if s.scrolling {
+		return false
+	}
+	s.scrolling = true
+	return true
+}
+
+// endScrollingAfterDelay hides the bars scrollEndDelay from now, unless scrolling
+// starts again before that.
+func (s *Scroll) endScrollingAfterDelay() {
+	if s.scrollEndTimer != nil {
+		s.scrollEndTimer.Reset(scrollEndDelay)
+		return
+	}
+	s.scrollEndTimer = time.AfterFunc(scrollEndDelay, func() {
+		fyne.Do(func() {
+			s.scrolling = false
+			s.refreshBars()
+		})
+	})
 }
 
 func (s *Scroll) refreshBars() {
