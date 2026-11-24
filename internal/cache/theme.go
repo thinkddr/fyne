@@ -12,20 +12,42 @@ var (
 	overrideCount atomic.Uint32
 )
 
-type overrideScope struct {
+// OverrideScope is a theme applied to a tree of objects. Its cache ID keys the theme
+// caches of the objects it covers, so a scope can be applied again (to new or refreshed
+// content) without invalidating anything rendered under it before.
+type OverrideScope struct {
 	th      fyne.Theme
 	cacheID string
+}
+
+// NewOverrideScope creates a scope for th with a cache ID of its own.
+//
+// The theme caches are reset here, once per new scope, and not for each object it
+// covers: applying a scope does not touch the caches, so walking a tree with many
+// widgets, or walking it again on every refresh, keeps what the app has already
+// rendered.
+func NewOverrideScope(th fyne.Theme) *OverrideScope {
+	id := overrideCount.Add(1)
+	ResetThemeCaches()
+	return &OverrideScope{th: th, cacheID: strconv.Itoa(int(id))}
+}
+
+// Apply makes o, and anything it contains, use the theme of this scope.
+// Objects that already belong to this scope are left as they are.
+func (s *OverrideScope) Apply(o fyne.CanvasObject) {
+	overrideTheme(o, s)
 }
 
 // OverrideTheme allows an app to specify that a single object should use a different theme to the app.
 // This should be used sparingly to avoid a jarring user experience.
 // If the object is a container it will theme the children, if it is a canvas primitive it will do nothing.
 //
+// Each call creates a new scope; to theme the same tree again with the same theme,
+// keep the scope from NewOverrideScope and Apply it instead.
+//
 // Since: 2.5
 func OverrideTheme(o fyne.CanvasObject, th fyne.Theme) {
-	id := overrideCount.Add(1)
-	s := &overrideScope{th: th, cacheID: strconv.Itoa(int(id))}
-	overrideTheme(o, s)
+	NewOverrideScope(th).Apply(o)
 }
 
 func OverrideThemeMatchingScope(o, parent fyne.CanvasObject) bool {
@@ -56,13 +78,13 @@ func WidgetTheme(o fyne.CanvasObject) fyne.Theme {
 	return scope.th
 }
 
-func overrideContainer(c *fyne.Container, s *overrideScope) {
+func overrideContainer(c *fyne.Container, s *OverrideScope) {
 	for _, o := range c.Objects {
 		overrideTheme(o, s)
 	}
 }
 
-func overrideTheme(o fyne.CanvasObject, s *overrideScope) {
+func overrideTheme(o fyne.CanvasObject, s *OverrideScope) {
 	if _, ok := o.(interface{ SetDeviceIsMobile(bool) }); ok { // ThemeOverride without the import loop
 		return // do not apply this theme over a new scope
 	}
@@ -73,13 +95,12 @@ func overrideTheme(o fyne.CanvasObject, s *overrideScope) {
 	case *fyne.Container:
 		overrideContainer(c, s)
 	default:
-		overrides.Store(c, s)
+		overrides.StoreIfChanged(c, s)
 	}
 }
 
-func overrideWidget(w fyne.Widget, s *overrideScope) {
-	ResetThemeCaches()
-	overrides.Store(w, s)
+func overrideWidget(w fyne.Widget, s *OverrideScope) {
+	overrides.StoreIfChanged(w, s)
 
 	r := Renderer(w)
 	if r == nil {

@@ -1,6 +1,8 @@
 package container
 
 import (
+	"reflect"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
 	intTheme "fyne.io/fyne/v2/internal/theme"
@@ -21,6 +23,13 @@ type ThemeOverride struct {
 	holder *fyne.Container
 
 	features *themeFeatures
+
+	// scope is what this container applies to its content, created for scopeTheme.
+	// It is kept while Theme does not change, so a Refresh walks the content again
+	// for new objects without giving them a new cache ID: a new one would mean
+	// rendering every themed icon again and resetting the theme caches of the app.
+	scope      *cache.OverrideScope
+	scopeTheme fyne.Theme
 }
 
 // NewThemeOverride provides a container where the child widgets are themed by the specified theme.
@@ -35,13 +44,13 @@ func NewThemeOverride(obj fyne.CanvasObject, th fyne.Theme) *ThemeOverride {
 	t := &ThemeOverride{Content: obj, Theme: th, holder: NewStack(obj), features: &themeFeatures{}}
 	t.ExtendBaseWidget(t)
 
-	cache.OverrideTheme(obj, addFeatures(th, t))
+	t.themeScope().Apply(obj)
 	obj.Refresh() // required as the widgets passed in could have been initially rendered with default theme
 	return t
 }
 
 func (t *ThemeOverride) CreateRenderer() fyne.WidgetRenderer {
-	cache.OverrideTheme(t.Content, addFeatures(t.Theme, t))
+	t.themeScope().Apply(t.Content)
 
 	return &overrideRenderer{parent: t, objs: []fyne.CanvasObject{t.holder}}
 }
@@ -52,7 +61,7 @@ func (t *ThemeOverride) Refresh() {
 		t.holder.Refresh()
 	}
 
-	cache.OverrideTheme(t.Content, addFeatures(t.Theme, t))
+	t.themeScope().Apply(t.Content)
 	t.Content.Refresh()
 	t.BaseWidget.Refresh()
 }
@@ -65,6 +74,31 @@ func (t *ThemeOverride) Refresh() {
 func (t *ThemeOverride) SetDeviceIsMobile(on bool) {
 	t.features.mobile = on
 	t.Refresh()
+}
+
+// themeScope returns the scope for the current Theme, creating a new one (and so a new
+// cache ID) only when Theme is not the value the current scope was created for.
+// A theme that is changed in place keeps its scope: assign a new value to Theme
+// for its icons to be rendered again.
+func (t *ThemeOverride) themeScope() *cache.OverrideScope {
+	if t.scope == nil || !sameTheme(t.scopeTheme, t.Theme) {
+		t.scope = cache.NewOverrideScope(addFeatures(t.Theme, t))
+		t.scopeTheme = t.Theme
+	}
+	return t.scope
+}
+
+// sameTheme reports whether a and b are the same theme value. Values of a type that
+// cannot be compared (a struct holding a map, say) never are, rather than panicking.
+func sameTheme(a, b fyne.Theme) bool {
+	ta := reflect.TypeOf(a)
+	if ta != reflect.TypeOf(b) {
+		return false
+	}
+	if ta != nil && !ta.Comparable() {
+		return false
+	}
+	return a == b
 }
 
 // themeFeatures is what a ThemeOverride tells the themed objects about itself. The
