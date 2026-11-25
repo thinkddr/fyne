@@ -47,6 +47,9 @@ func ReleaseTree(o fyne.CanvasObject, kept Kept) {
 	if tinfo, ok := objectTextures.Load(o); ok && tinfo != nil {
 		tinfo.expires.Store(0)
 	}
+	// Every object placed under a ThemeOverride has an entry for its scope, primitives
+	// and containers too, and only a widget's was deleted (with its renderer).
+	overrides.Delete(o)
 	switch x := o.(type) {
 	case *fyne.Container:
 		for _, c := range x.Objects {

@@ -61,3 +61,16 @@ func (m *overrideMap) Delete(o fyne.CanvasObject) {
 		m.m.Delete(k)
 	}
 }
+
+// dropDead deletes the entries of objects that have been collected. Their weak keys no
+// longer match anything, but the entries stayed: canvas primitives are never deleted
+// (only widgets are, when their renderer is destroyed), so a ThemeOverride whose content
+// is rebuilt grew this map by one entry per primitive, for good.
+func (m *overrideMap) dropDead() {
+	m.m.Range(func(k, _ any) bool {
+		if k.(weak.Pointer[byte]).Value() == nil {
+			m.m.Delete(k)
+		}
+		return true
+	})
+}
