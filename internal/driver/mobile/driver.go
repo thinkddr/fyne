@@ -684,6 +684,11 @@ func (d *driver) typeDownCanvas(canvas *canvas, r rune, code key.Code, mod key.M
 		}
 	}
 
+	if s := keyShortcut(keyName, r, mod); s != nil {
+		d.typeShortcut(canvas, s)
+		return
+	}
+
 	r = runeToPrintable(r)
 	keyEvent := &fyne.KeyEvent{Name: keyName}
 

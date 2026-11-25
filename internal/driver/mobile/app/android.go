@@ -649,10 +649,10 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) bool {
 		return false
 	}
 	k.Direction = keyDirection(int32(C.AKeyEvent_getAction(e)))
-	// TODO(crawshaw): set Modifiers.
+	k.Modifiers = keyModifiers(int32(C.AKeyEvent_getMetaState(e)))
 	theApp.events.In() <- k
 
-	return keyEditsText(k)
+	return keyIsShortcut(k) || keyEditsText(k)
 }
 
 // keyEditsText reports whether Android would also apply this key to the hidden
