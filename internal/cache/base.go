@@ -70,6 +70,7 @@ func Clean(canvasRefreshed bool) {
 	if canvasRefreshed {
 		// Destroy renderers on canvas refresh to avoid flickering screen.
 		destroyExpiredRenderers(then)
+		overrides.dropDead()
 		// canvases cache should be invalidated only on canvas refresh, otherwise there wouldn't
 		// be a way to recover them later
 		destroyExpiredCanvases(then)

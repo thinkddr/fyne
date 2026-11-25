@@ -19,3 +19,6 @@ func (m *overrideMap) StoreIfChanged(o fyne.CanvasObject, s *OverrideScope) {
 	}
 	m.Store(o, s)
 }
+
+// dropDead does nothing: without weak keys no entry outlives its object.
+func (m *overrideMap) dropDead() {}
